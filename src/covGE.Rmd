@@ -1,0 +1,38 @@
+TO DO ADD MARKDOWN HEADER
+
+# Co-gradient
+G <- c(-1, 1) # N1, N2
+E <- c(1, -1) # N1, N2
+(covGE <- cov(G, E))
+GxE = c(0, 0, 0, 0) #N1E1, N1E2, N2E1, N2E2
+
+# countergradient
+#G <- c(1, -1)
+#E <- c(-1, 1)
+#cov(G,E)
+
+
+covGE <- 0
+n <- 100
+
+P1_E1 <- G[1] + E[1] + GxE[1] + rnorm(n,0, 1)
+P1_E2 <- G[1] + E[2] + GxE[2] + rnorm(n,0, 1)
+P2_E1 <- G[2] + E[1] + GxE[3] + rnorm(n,0, 1)
+P2_E2 <- G[2] + E[2] + GxE[4] + rnorm(n,0, 1)
+
+phen <- c(P1_E1, P1_E2, P2_E1, P2_E2)
+gen <- rep(c("G1","G2"), each=n*2)
+env <- rep(c("E1", "E2", "E1", "E2"), each=n)
+
+boxplot(phen~genenv)
+
+var(phen)
+
+cov(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
+    c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
+    )
+
+# jacknife loop through all datapoints
+# remove one datapoint 
+# calculate the estimate
+# can prodcue 95% CI on the parameter (in this case is cov)
