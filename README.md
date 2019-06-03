@@ -2,4 +2,3 @@
 
 Add a link to the google doc for the manuscript outline
 
-hi
