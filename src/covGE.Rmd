@@ -4,10 +4,10 @@ author: "Katie Lotterhos"
 date: "5/30/2019"
 output: html_document
 ---
-
+```{r}
 # Co-gradient
-G <- c(-1, 1) # N1, N2
-E <- c(1, -1) # N1, N2
+G <- c(-1, 1) # When collecting real data, G will be vector of y-values
+E <- c(1, -1) # E is vector of x-values
 (covGE <- cov(G, E))
 GxE = c(0, 0, 0, 0) #N1E1, N1E2, N2E1, N2E2
 
@@ -15,7 +15,9 @@ GxE = c(0, 0, 0, 0) #N1E1, N1E2, N2E1, N2E2
 #G <- c(1, -1)
 #E <- c(-1, 1)
 #cov(G,E)
+```
 
+```{r}
 ### This function creates reciprocal transplant data ###
 ### returns the data, true cov(G,E), obs cov(G,E) ###
 
@@ -27,7 +29,7 @@ simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
   (G <- c(-G_diff_N1_N2/2, G_diff_N1_N2/2))
   (E <- c(-E_diff_N1_N2/2, E_diff_N1_N2/2))
   (covGE_true <- cov(G, E))
-  (corGE_true <- cor(G, E))
+  #(corGE_true <- cor(G, E))
 
   P1_E1 <- G[1] + E[1] + GxE[1] + rnorm(n,0, 1)
   P1_E2 <- G[1] + E[2] + GxE[2] + rnorm(n,0, 1)
@@ -43,18 +45,18 @@ simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
   (covGE_data <- cov(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
     c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
     ))
-  (corGE_data <- cor(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
-    c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
-    ))
+  #(corGE_data <- cor(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
+  #  c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
+  #  ))
     
 
   return(list(data_GE=data_GE, 
-              covGE_true=covGE_true, covGE_data=covGE_data, 
-              corGE_true = corGE_true, corGE_data=corGE_data))
+              covGE_true=covGE_true, covGE_data=covGE_data)) 
+              #corGE_true = corGE_true, corGE_data=corGE_data))
 }
+```
 
-
-
+```{r}
 bootstrapGV <- function(data_GE){
 
   ## ADD CODE TO STANDARDIZE PHENOTYPE DATA
@@ -69,42 +71,68 @@ bootstrapGV <- function(data_GE){
     E_means[j] <- mean(sample(data_GE$phen[cond_E], size=sum(cond_E), replace=TRUE))
   }
   covGE_boot <- cov(G_means, E_means)
-  corGE_boot <- cor(G_means, E_means)
-  return(list(covGE_boot, corGE_boot))
+  #corGE_boot <- cor(G_means, E_means)
+  return(list(covGE_boot))#, corGE_boot))
 }
+```
 
-
+```{r}
 ## Loop through different effect sizes
-## Loop through different sample sizes ()
+## Loop through different sample sizes
 ## 100 replicates of each loop
 ## Power would be the proportion of replicates whose 95% CI are not including 0
 
-simout <- simulateGV(0.5, 0.5, 10)
-simout$covGE_true
-simout$corGE_true
-sampling_dist_cov <- replicate(1000, bootstrapGV(simout$data_GE), simplify=TRUE)
+replicate = c(1:100)
+samplesize = seq(from = 1, to = 20, by = 1)
+diff_effect = seq(from = 1, to = 30, by = 1)
+simout <- data.frame()
+
+for(j in 1:length(replicate)){ 
+  replicate = replicate[j]
+  for(k in 1:length(samplesize)){
+  val = samplesize[k] 
+  for(l in 1:length(diff_effect)){
+    cat(j,k,l, "\n")  
+    effect_val = diff_effect[l]
+  simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data
+  sampling_dist_cov <- replicate(1000, bootstrapGV(simout_temp$data_GE)[1], simplify=TRUE) #Bootstrap
+  CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
 
 #rownames(sampling_dist_cov) <- c("covGE_boot", "corGE_boot")
 #sampling_dist_cov <- data.frame(as.matrix(unlist(t(sampling_dist_cov))))
 
-#cov
-quantile(unlist(sampling_dist_cov[1,]), probs=c(0.025, 0.975), type=1)
+## Data output  
+  simoutk = data.frame("replicate" = replicate,
+                       "samplesize" = val,
+                       "GE_Diff" = effect_val,
+                       "covGE_true" = simout_temp$covGE_true,
+                       "covGE_data" = simout_temp$covGE_data, 
+                       "lwrCI" = CI[1],
+                       "uprCI" = CI[2])
+simout = rbind(simout,simoutk)
+}
+}
+}
 
+```
+
+
+
+```{r}
 # cor
 quantile(unlist(sampling_dist_cov[2,]), probs=c(0.025, 0.975), type=1)
 # this is always 1 or -1 because we only have 2 data points
 
 ### Things to think about
-# Do we standardize phenotype data before we put it in here?
+# Do we standardize phenotype data before we put it in here? Yes, mean = 0, stdev = 1
 # If no to the last question, do we standardize the covariance as a correlation?
 
-boxplot(phen~genenv)
+boxplot(phen~gen)
 
 var(phen)
-
-
 
 # jacknife loop through all datapoints
 # remove one datapoint 
 # calculate the estimate
 # can prodcue 95% CI on the parameter (in this case is cov)
+```
