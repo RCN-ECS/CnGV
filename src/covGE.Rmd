@@ -80,45 +80,107 @@ bootstrapGV <- function(data_GE){
 ## Loop through different effect sizes
 ## Loop through different sample sizes
 ## 100 replicates of each loop
-## Power would be the proportion of replicates whose 95% CI are not including 0
+setwd("~/Documents/GitHub/CnGV/src/")
 
-replicate = c(1:100)
-samplesize = seq(from = 1, to = 20, by = 1)
-diff_effect = seq(from = 1, to = 30, by = 1)
-simout <- data.frame()
+cores=detectCores()
+cl <- makeCluster(cores[1]-1) #not to overload your computer
+registerDoParallel(cl)
 
-for(j in 1:length(replicate)){ 
-  replicate = replicate[j]
-  for(k in 1:length(samplesize)){
-  val = samplesize[k] 
-  for(l in 1:length(diff_effect)){
-    cat(j,k,l, "\n")  
-    effect_val = diff_effect[l]
-  simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data
-  sampling_dist_cov <- replicate(1000, bootstrapGV(simout_temp$data_GE)[1], simplify=TRUE) #Bootstrap
-  CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
+#rep = c(1:2)
+nsims = 100
+samplesize = seq(from = 1, to = 30, by = 1)
+diff_effect = seq(from = 1, to = 10, by = 0.25)
+simout <- data.frame(data.frame(#"replicate" = 0,
+                       "samplesize" = 0,
+                       "GE_Diff" = 0,
+                       "covGE_true" = 0,
+                       "covGE_data" = 0, 
+                       "lwrCI" = 0,
+                       "uprCI" = 0))
+row = 0 # for indexing
 
-#rownames(sampling_dist_cov) <- c("covGE_boot", "corGE_boot")
-#sampling_dist_cov <- data.frame(as.matrix(unlist(t(sampling_dist_cov))))
+foreach(s = 1:nsims, .combine = rbind) %dopar% { 
+
+  for(k in 1:length(samplesize)) {
+     for(l in 1:length(diff_effect)) {
+       
+       row=row+1 #index for the for mini-data file
+       
+       # Setting parameters for this run
+       val = samplesize[k] 
+       effect_val = diff_effect[l]
+       #cat(j,k,l, "\n")  
+       
+       simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data
+       sampling_dist_cov <- replicate(1000, bootstrapGV(simout_temp$data_GE)[1], simplify=TRUE) #Bootstrap
+       CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
 
 ## Data output  
-  simoutk = data.frame("replicate" = replicate,
+  simout[row,] = data.frame(#"replicate" = rep,
                        "samplesize" = val,
                        "GE_Diff" = effect_val,
                        "covGE_true" = simout_temp$covGE_true,
                        "covGE_data" = simout_temp$covGE_data, 
                        "lwrCI" = CI[1],
                        "uprCI" = CI[2])
-simout = rbind(simout,simoutk)
+        #}
+     }
 }
+ write.csv(simout,paste("SimResults_06042019",s,".csv",sep="_"),row.names=FALSE)
 }
+
+
+```
+*Power Heatmap*
+
+Power is the proportion of replicates whose 95% CI are not including 0
+
+```{r}
+## Load data from simulations
+simdat = read.csv("~/Desktop/Work/RCN-ECS/CNGV_Meta_analysis/Simulations/Simulation_06032019.csv")
+str(simdat)
+simdat = simdat[,-1]
+
+## Synthesize sims to get proportion of replicates that have CIs that cross zero
+simdat$overunder = 0
+for(i in 1:nrow(simdat)){
+ if (simdat$lwrCI[i] <= 0){simdat$overunder[i] = 1}
+  else if (simdat$uprCI[i] <= 0){simdat$overunder[i] = 1}
+  else  simdat$overunder[i] = 0
 }
+
+simdat2 = simdat %>% #To calculate the proportion individuals that have CIs that cross zero
+  group_by(samplesize,GE_Diff) %>%
+  summarise(ct = length(overunder),
+            cat = sum(overunder),
+            prop = (cat/ct))
+
+simplot = ggplot(data = simdat2, aes(x = GE_Diff, y = prop), group = factor(samplesize), colour = factor(samplesize)) +
+  geom_line(aes(x = GE_Diff, y = prop, group = factor(samplesize),colour = factor(samplesize)))+
+  theme_bw()+ xlim(1,20)+
+  ylab("Proportion sims crossing zero") + xlab("Difference in G and E")+
+  theme_bw(base_size = 30, base_family = "Helvetica")+ 
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'black')) +
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
+  theme(axis.ticks = element_line(colour = "black"))+
+  theme(axis.text= element_text(colour = "black"))+
+  labs(colour = "Sample Size")+
+  theme(legend.position="bottom")+
+  theme(legend.title = element_text(size = 14),
+          legend.text = element_text(size = 14))
+  #theme(legend.position="none")
+simplot
 
 ```
 
-
-
+*Extra code*
+May want to use in the future. We had correlation, but I (MA) removed it from current code since we are only using 2 estimates for G and E and therefore cannot estimate a correlation. 
 ```{r}
+## Was a part of code used in for-loop above, but presently unused. 
+rownames(sampling_dist_cov) <- c("covGE_boot", "corGE_boot")
+sampling_dist_cov <- data.frame(as.matrix(unlist(t(sampling_dist_cov))))
+
 # cor
 quantile(unlist(sampling_dist_cov[2,]), probs=c(0.025, 0.975), type=1)
 # this is always 1 or -1 because we only have 2 data points
