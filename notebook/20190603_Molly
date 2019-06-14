@@ -1,0 +1,12 @@
+Last week I spent some time familiarizing myself with simulations. 
+Realized where my understanding hiccup originated, though it seems obvious in hind sight. 
+I was thinking about it from the perspective of data -> estimate covariance, while the simulations go from knowing covariance -> data.
+I also conducted a few hand-written exercises to solidify my own understanding of the math behind covariance. 
+Upon solidifying my foundations finally, I was able to finally piece the complete simulation together and generate a for-loop 
+that can generate multiple replicates of different sample sizes and different effect sizes. Currently running. 
+
+I also uploaded the extracted data from the Falconer 1981 book so it is available to use as a proof of concept when we reach that point. 
+
+Still to do: 
+- Standardize effect sizes (mean 0, stdev = 1)
+- Create heatmap showing power

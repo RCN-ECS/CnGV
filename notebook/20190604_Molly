@@ -1,0 +1,13 @@
+Plotted results of first sim: As suspected, I focused on a wider range of effect sizes than are perhaps applicable/relevant. 
+Plot = Results/InitialPower_SimPlot_06.04.2019.pdf
+
+It is clear that power is sufficiently high after the effect size reaches 10 across all sample sizes (except 1). 
+
+I will follow this simulation up with another that focuses more on that range of values that power is changing a lot. 
+
+Next sim will run:
+replicate = c(1:100)
+samplesize = seq(from = 1, to = 10, by = 0.25)
+diff_effect = seq(from = 1, to = 40, by = 1)
+
+That should produce sufficient resolution to make a more classic heatmap rather than line plot. May be able to interpolate lines? We'll see. 

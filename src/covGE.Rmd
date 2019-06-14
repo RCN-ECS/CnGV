@@ -4,10 +4,16 @@ author: "Katie Lotterhos"
 date: "5/30/2019"
 output: html_document
 ---
+```{r}
+library("parallel")
+library("doParallel")
+library("tidyverse")
+```
 
+```{r}
 # Co-gradient
-G <- c(-1, 1) # N1, N2
-E <- c(1, -1) # N1, N2
+G <- c(-1, 1) # When collecting real data, G will be vector of y-values
+E <- c(1, -1) # E is vector of x-values
 (covGE <- cov(G, E))
 GxE = c(0, 0, 0, 0) #N1E1, N1E2, N2E1, N2E2
 
@@ -15,7 +21,9 @@ GxE = c(0, 0, 0, 0) #N1E1, N1E2, N2E1, N2E2
 #G <- c(1, -1)
 #E <- c(-1, 1)
 #cov(G,E)
+```
 
+```{r}
 ### This function creates reciprocal transplant data ###
 ### returns the data, true cov(G,E), obs cov(G,E) ###
 
@@ -27,7 +35,7 @@ simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
   (G <- c(-G_diff_N1_N2/2, G_diff_N1_N2/2))
   (E <- c(-E_diff_N1_N2/2, E_diff_N1_N2/2))
   (covGE_true <- cov(G, E))
-  (corGE_true <- cor(G, E))
+  #(corGE_true <- cor(G, E))
 
   P1_E1 <- G[1] + E[1] + GxE[1] + rnorm(n,0, 1)
   P1_E2 <- G[1] + E[2] + GxE[2] + rnorm(n,0, 1)
@@ -43,21 +51,22 @@ simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
   (covGE_data <- cov(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
     c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
     ))
-  (corGE_data <- cor(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
-    c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
-    ))
+  #(corGE_data <- cor(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
+  #  c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
+  #  ))
     
 
   return(list(data_GE=data_GE, 
-              covGE_true=covGE_true, covGE_data=covGE_data, 
-              corGE_true = corGE_true, corGE_data=corGE_data))
+              covGE_true=covGE_true, covGE_data=covGE_data)) 
+              #corGE_true = corGE_true, corGE_data=corGE_data))
 }
+```
 
-
-
+```{r}
 bootstrapGV <- function(data_GE){
 
   ## ADD CODE TO STANDARDIZE PHENOTYPE DATA
+  ## Subtract mean and divide by standard deviation
 
   G_means <- NULL
   E_means <- NULL
@@ -69,42 +78,163 @@ bootstrapGV <- function(data_GE){
     E_means[j] <- mean(sample(data_GE$phen[cond_E], size=sum(cond_E), replace=TRUE))
   }
   covGE_boot <- cov(G_means, E_means)
-  corGE_boot <- cor(G_means, E_means)
-  return(list(covGE_boot, corGE_boot))
+  #corGE_boot <- cor(G_means, E_means)
+  return(list(covGE_boot))#, corGE_boot))
+}
+```
+
+```{r}
+setwd("~/Documents/GitHub/CnGV/src/")
+
+cores=detectCores()
+cl <- makeCluster(cores[1]-1) #not to overload your computer
+registerDoParallel(cl)
+
+#nrep = 3
+nsims = 5 # Multiply against rep for total number sims
+samplesize = seq(from = 1, to = 10, by = 1) # Must be Integer
+diff_effect = seq(from = 1, to = 5, by = 1) 
+simout <- data.frame(data.frame("samplesize" = 0,
+                       "GE_Diff" = 0,
+                       "covGE_true" = 0,
+                       "covGE_data" = 0, 
+                       "lwrCI" = 0,
+                       "uprCI" = 0))
+row = 0 # for indexing
+
+foreach(s = 1:nsims, .combine = rbind) %dopar% { 
+  
+  #for(j in 1:nrep){
+    for(k in 1:length(samplesize)) {
+      for(l in 1:length(diff_effect)) {
+       
+       row=row+1 #index for the for mini-data file
+       
+       # Setting parameters for this run
+       #rep = nrep[j]
+       val = samplesize[k] 
+       effect_val = diff_effect[l]
+       #cat(j,k,l, "\n")  # Counter 
+       
+       simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data 
+       sampling_dist_cov <- replicate(1000, bootstrapGV(simout_temp$data_GE)[1], simplify=TRUE) #Bootstrap
+       CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
+
+## Data output  
+  simout[row,] = data.frame(#"replicate" = rep,
+                       "samplesize" = val,
+                       "GE_Diff" = effect_val,
+                       "covGE_true" = simout_temp$covGE_true,
+                       "covGE_data" = simout_temp$covGE_data, 
+                       "lwrCI" = CI[1],
+                       "uprCI" = CI[2])
+        #}
+     }
+    }
+  write.csv(simout,paste("SimResults_06122019",s,".csv",sep="_"),row.names=FALSE)
 }
 
+## To stop:
+stopCluster(cl)
+```
+*Colate Data from Sims*
+```{r}
+# List all the files
+temp <- list.files(pattern= "*06102019")
 
-## Loop through different effect sizes
-## Loop through different sample sizes ()
-## 100 replicates of each loop
-## Power would be the proportion of replicates whose 95% CI are not including 0
+temp1 = do.call(rbind, lapply(temp, function(x) read.csv(x, stringsAsFactors = FALSE)))
 
-simout <- simulateGV(0.5, 0.5, 10)
-simout$covGE_true
-simout$corGE_true
-sampling_dist_cov <- replicate(1000, bootstrapGV(simout$data_GE), simplify=TRUE)
+# Add column for replicate
+nrep = (length(diff_effect)*length(samplesize))
+totsim = (nsims*length(rep))
+temp1$replicate = rep(1:totsim, each = nrep)  
 
-#rownames(sampling_dist_cov) <- c("covGE_boot", "corGE_boot")
-#sampling_dist_cov <- data.frame(as.matrix(unlist(t(sampling_dist_cov))))
+```
 
-#cov
-quantile(unlist(sampling_dist_cov[1,]), probs=c(0.025, 0.975), type=1)
+*Power Heatmap*
+
+Power is the proportion of replicates whose 95% CI are not including 0
+
+```{r}
+## Load data from simulations
+simdat = temp1
+
+## Synthesize sims to get proportion of replicates that have CIs that cross zero
+simdat$overunder = 0
+for(i in 1:nrow(simdat)){
+ if (simdat$lwrCI[i] <= 0){simdat$overunder[i] = 1}
+  else if (simdat$uprCI[i] <= 0){simdat$overunder[i] = 1}
+  else  simdat$overunder[i] = 0
+}
+
+## Calculate the proportion of replicates that have CIs that cross zero
+simdat2 = simdat %>% 
+  group_by(samplesize,GE_Diff) %>%
+  summarise(ct = length(overunder),
+            cat = sum(overunder),
+            prop = (cat/ct))
+
+## Plot Heatmap
+simplot = ggplot(data = simdat2, aes(x = samplesize, y = GE_Diff))+
+  geom_tile(aes(fill = 1-prop), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue")+
+  theme_bw()+ 
+  ylab("Difference in G and E") + xlab("Sample Size")+
+  theme_bw(base_size = 30, base_family = "Helvetica")+ 
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'black')) +
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
+  theme(axis.ticks = element_line(colour = "black"))+
+  theme(axis.text= element_text(colour = "black"))+
+  labs(colour = "Sample Size")+
+  theme(legend.position="bottom")+
+  theme(legend.title = element_text(size = 14),
+          legend.text = element_text(size = 14))
+  #theme(legend.position="none")
+simplot
+
+```
+
+Try using real data: 
+```{r}
+falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Data_p137_Falconer1981.csv")
+# Sample size is 32 individual measurements, 8 responses across 4 genotypes  
+# At sample size of 8, have decent power to detect (power fades if difference between G and E is ~ 1-2)
+
+# To standardize
+dat_avg = mean(falc_dat$height) 
+dat_std = sd(falc_dat$height)
+falc_dat$height_correct = ((falc_dat$height-dat_avg)/dat_std)
+
+# Calculate Covariance
+G <- c(falc_dat$height_correct) #G is vector of y-values
+E <- c(falc_dat$environment) # E is vector of x-values
+(covGE <- cov(G, E)) # Ignores different genotypes? 
+
+# Unstandardized Covariance is 78.11
+# Standardized Covariance is 4.3
+```
+
+*Extra code*
+May want to use in the future. We had correlation, but I (MA) removed it from current code since we are only using 2 estimates for G and E and therefore cannot estimate a correlation. 
+```{r}
+## Was a part of code used in for-loop above, but presently unused. 
+rownames(sampling_dist_cov) <- c("covGE_boot", "corGE_boot")
+sampling_dist_cov <- data.frame(as.matrix(unlist(t(sampling_dist_cov))))
 
 # cor
 quantile(unlist(sampling_dist_cov[2,]), probs=c(0.025, 0.975), type=1)
 # this is always 1 or -1 because we only have 2 data points
 
 ### Things to think about
-# Do we standardize phenotype data before we put it in here?
+# Do we standardize phenotype data before we put it in here? Yes, mean = 0, stdev = 1
 # If no to the last question, do we standardize the covariance as a correlation?
 
-boxplot(phen~genenv)
+boxplot(phen~gen)
 
 var(phen)
-
-
 
 # jacknife loop through all datapoints
 # remove one datapoint 
 # calculate the estimate
 # can prodcue 95% CI on the parameter (in this case is cov)
+```
