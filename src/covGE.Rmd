@@ -5,6 +5,12 @@ date: "5/30/2019"
 output: html_document
 ---
 ```{r}
+library("parallel")
+library("doParallel")
+library("tidyverse")
+```
+
+```{r}
 # Co-gradient
 G <- c(-1, 1) # When collecting real data, G will be vector of y-values
 E <- c(1, -1) # E is vector of x-values
@@ -60,6 +66,7 @@ simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
 bootstrapGV <- function(data_GE){
 
   ## ADD CODE TO STANDARDIZE PHENOTYPE DATA
+  ## Subtract mean and divide by standard deviation
 
   G_means <- NULL
   E_means <- NULL
@@ -77,21 +84,17 @@ bootstrapGV <- function(data_GE){
 ```
 
 ```{r}
-## Loop through different effect sizes
-## Loop through different sample sizes
-## 100 replicates of each loop
 setwd("~/Documents/GitHub/CnGV/src/")
 
 cores=detectCores()
 cl <- makeCluster(cores[1]-1) #not to overload your computer
 registerDoParallel(cl)
 
-#rep = c(1:2)
-nsims = 100
-samplesize = seq(from = 1, to = 30, by = 1)
-diff_effect = seq(from = 1, to = 10, by = 0.25)
-simout <- data.frame(data.frame(#"replicate" = 0,
-                       "samplesize" = 0,
+#nrep = 3
+nsims = 5 # Multiply against rep for total number sims
+samplesize = seq(from = 1, to = 10, by = 1) # Must be Integer
+diff_effect = seq(from = 1, to = 5, by = 1) 
+simout <- data.frame(data.frame("samplesize" = 0,
                        "GE_Diff" = 0,
                        "covGE_true" = 0,
                        "covGE_data" = 0, 
@@ -100,18 +103,20 @@ simout <- data.frame(data.frame(#"replicate" = 0,
 row = 0 # for indexing
 
 foreach(s = 1:nsims, .combine = rbind) %dopar% { 
-
-  for(k in 1:length(samplesize)) {
-     for(l in 1:length(diff_effect)) {
+  
+  #for(j in 1:nrep){
+    for(k in 1:length(samplesize)) {
+      for(l in 1:length(diff_effect)) {
        
        row=row+1 #index for the for mini-data file
        
        # Setting parameters for this run
+       #rep = nrep[j]
        val = samplesize[k] 
        effect_val = diff_effect[l]
-       #cat(j,k,l, "\n")  
+       #cat(j,k,l, "\n")  # Counter 
        
-       simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data
+       simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data 
        sampling_dist_cov <- replicate(1000, bootstrapGV(simout_temp$data_GE)[1], simplify=TRUE) #Bootstrap
        CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
 
@@ -125,21 +130,34 @@ foreach(s = 1:nsims, .combine = rbind) %dopar% {
                        "uprCI" = CI[2])
         #}
      }
-}
- write.csv(simout,paste("SimResults_06042019",s,".csv",sep="_"),row.names=FALSE)
+    }
+  write.csv(simout,paste("SimResults_06122019",s,".csv",sep="_"),row.names=FALSE)
 }
 
+## To stop:
+stopCluster(cl)
+```
+*Colate Data from Sims*
+```{r}
+# List all the files
+temp <- list.files(pattern= "*06102019")
+
+temp1 = do.call(rbind, lapply(temp, function(x) read.csv(x, stringsAsFactors = FALSE)))
+
+# Add column for replicate
+nrep = (length(diff_effect)*length(samplesize))
+totsim = (nsims*length(rep))
+temp1$replicate = rep(1:totsim, each = nrep)  
 
 ```
+
 *Power Heatmap*
 
 Power is the proportion of replicates whose 95% CI are not including 0
 
 ```{r}
 ## Load data from simulations
-simdat = read.csv("~/Desktop/Work/RCN-ECS/CNGV_Meta_analysis/Simulations/Simulation_06032019.csv")
-str(simdat)
-simdat = simdat[,-1]
+simdat = temp1
 
 ## Synthesize sims to get proportion of replicates that have CIs that cross zero
 simdat$overunder = 0
@@ -149,16 +167,18 @@ for(i in 1:nrow(simdat)){
   else  simdat$overunder[i] = 0
 }
 
-simdat2 = simdat %>% #To calculate the proportion individuals that have CIs that cross zero
+## Calculate the proportion of replicates that have CIs that cross zero
+simdat2 = simdat %>% 
   group_by(samplesize,GE_Diff) %>%
   summarise(ct = length(overunder),
             cat = sum(overunder),
             prop = (cat/ct))
 
-simplot = ggplot(data = simdat2, aes(x = GE_Diff, y = prop), group = factor(samplesize), colour = factor(samplesize)) +
-  geom_line(aes(x = GE_Diff, y = prop, group = factor(samplesize),colour = factor(samplesize)))+
-  theme_bw()+ xlim(1,20)+
-  ylab("Proportion sims crossing zero") + xlab("Difference in G and E")+
+## Plot Heatmap
+simplot = ggplot(data = simdat2, aes(x = samplesize, y = GE_Diff))+
+  geom_tile(aes(fill = 1-prop), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue")+
+  theme_bw()+ 
+  ylab("Difference in G and E") + xlab("Sample Size")+
   theme_bw(base_size = 30, base_family = "Helvetica")+ 
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'black')) +
@@ -172,6 +192,26 @@ simplot = ggplot(data = simdat2, aes(x = GE_Diff, y = prop), group = factor(samp
   #theme(legend.position="none")
 simplot
 
+```
+
+Try using real data: 
+```{r}
+falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Data_p137_Falconer1981.csv")
+# Sample size is 32 individual measurements, 8 responses across 4 genotypes  
+# At sample size of 8, have decent power to detect (power fades if difference between G and E is ~ 1-2)
+
+# To standardize
+dat_avg = mean(falc_dat$height) 
+dat_std = sd(falc_dat$height)
+falc_dat$height_correct = ((falc_dat$height-dat_avg)/dat_std)
+
+# Calculate Covariance
+G <- c(falc_dat$height_correct) #G is vector of y-values
+E <- c(falc_dat$environment) # E is vector of x-values
+(covGE <- cov(G, E)) # Ignores different genotypes? 
+
+# Unstandardized Covariance is 78.11
+# Standardized Covariance is 4.3
 ```
 
 *Extra code*
