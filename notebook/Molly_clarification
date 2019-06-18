@@ -1,0 +1,31 @@
+To overcome difficulty in understanding gradient level analysis, I worked through a couple situations and met with Katie. 
+
+Issue: Uncertainty over whether we would know what environment each genotype originates in, which then obfuscates ability to calculate E_means.
+
+Resolved: Studies may not explicitly state environmental values for each genotype's origin. 
+However, in order to include them in this analysis, we must always know the environment (or range of environments) that genotypes originate within.
+
+It may not be totally clear within each paper, so we can collect yes/no data on whether or not this information was included which will be informative for the paper. 
+There may be few studies with sufficient information to include in these analyses. 
+
+For Analyses, when environmental data for each genotype is included:
+
+Key for terms: 
+E_hat = average environmental value across range of environments included in experiment (mean of x-axis)
+E_mean = mean/median environmental value at each genotype's origin. 
+G_mean = mean/median phenotypic value presented by each genotype at E_hat
+
+Each genotype will generate range of phenotypes across a range of native environments. (See below) 
+
+Thus, E_mean for each genotype will be the average environmental state for each genotype.
+
+Similarly, we can calculate G_means by estimating average phenotype for each genotype at the average environmental value (E_hat)
+
+               G1_mean                    G2_mean                          G3_mean
+                  |                           |                               |
+ ------------(==========)-------------(==============)------------------(==========)-----------------
+                  |                           |                               |
+               E1_mean                    E2_mean                          E3_mean
+               
+               
+               
