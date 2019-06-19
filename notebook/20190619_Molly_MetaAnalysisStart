@@ -1,0 +1,32 @@
+This morning I conducted the preliminary meta-analysis literature search. 
+
+Search parameters were: 
+("phenotypic" & plast*) OR 
+(gradient* & "variation") OR (phen* & "clines" OR "covariance") OR ("GxE") OR (plast* & "local adaptation")
+
+Total Yield: 13,845 hits. 
+I further refined the search to include studies that could be categorized as biological science, life science, or environmental science.
+
+Refined Yield: 6,307. 
+
+The records were exported in 13 csvs containing 500 literature records each, compiled in R using Metagear, and uploaded into a google drive folder for screening. 
+Link for screening folder: https://drive.google.com/open?id=1zPm_VVISNh5kUy5KAn2oy0sHzpNz4Zhr
+
+Screening criteria: 
+1. Must be empirical/experimental study
+2. Must include one or more of the following terms or concepts in the abstract: 
+~ phenotypic plasticity (adaptive phenotypic plasticity, nonadaptive plasticity, maladaptive plasticity)
+~ cogradient variation or countergradient variation
+~ GxE relationship or interaction
+~ phenotypic covariance, clines, variation
+~ plasticity with local adaptation
+
+Estimated Completion for Screening: 
+~ Screening 100/day will take 63 days
+~ Screening 250/day will take 25 days
+~ Screening 300/day will take 21 days
+We'll see what I rates can manage without going brain dead.
+
+* Reminders for later: 
+~ Ensure that all spelling variations are represented in data (e.g., co-gradient vs. cogradient; counter-gradient vs. countergradient)
+
