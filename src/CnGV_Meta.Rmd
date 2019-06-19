@@ -1,0 +1,60 @@
+---
+title: "MetaAnalysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("EBImage")
+install.packages("metagear")
+library(metagear)
+library(tidyverse)
+```
+
+```{r PreScreen}
+
+# CGV Search Parameters on June 19, 2019
+# ("phenotypic" & plast*) OR (gradient* & "variation") OR (phen* & "clines" OR "covariance") OR ("GxE") OR (plast* & "local adaptation")
+# Results: 13,845. Refined search results to include only papers relating to life sciences, biological statistics, or environmental sciences.
+# Results after refining: 6,307
+# Output from Web of Science downloaded in folder: CGV_Search_6-19-2019
+
+# List and compile the files
+
+temp <- list.files(pattern= "*savedrecs")
+Lit_search = do.call(rbind, lapply(temp, function(x) read.csv(x, stringsAsFactors = FALSE)))
+
+# prime the study-reference dataset
+
+theRefs <- effort_initialize(Lit_search)
+head(theRefs.)
+
+# Reduce dataset for just important variables
+theRefs. = data.frame(theRefs[,c(1:3)],"authors" = theRefs$AU, "title" = theRefs$TI, 
+                              "journal" = theRefs$SO, "type" = theRefs$DT, "year" = theRefs$PY, 
+                              "volume" = theRefs$VL, "issue" = theRefs$IS, "page_start" = theRefs$BP, 
+                              "page_end" = theRefs$EP, "doi" = theRefs$DI, "category" = theRefs$WC)
+
+## Splitting Papers into 17 subsamples
+theTeam <- c("Sub1","Sub2","Sub3","Sub4","Sub5","Sub6","Sub7","Sub8","Sub9","Sub10",
+             "Sub11","Sub12","Sub13","Sub14","Sub15","Sub16","Sub17")
+theRefs_unscreened <- effort_distribute(theRefs., reviewers = theTeam, effort = c(371,371,371,371,371,371,371,371,371,
+                                                                                 371,371,371,371,371,371,371,371),save_split = TRUE)
+
+#Google Drive folder for screening: https://drive.google.com/open?id=1zPm_VVISNh5kUy5KAn2oy0sHzpNz4Zhr
+```
+
+```{r PostScreen}
+
+## Screening criteria:  mortality due to multiple predators, at least a classic 2 x 2 design
+
+sub1 <- read.csv("effort_Sub1.csv")
+sub1_include <- subset(sub1,INCLUDE!="NO")
+write.csv(sub1_include,"Include_Sub1.csv",row.names=FALSE)
+nrow(sub1_include)
+
+collectionOutcomes <- PDFs_collect(sub1_include, DOIcolumn = "DOI", FileNamecolumn = "STUDY_ID", quiet=TRUE)
+collectionOutcomes
+
+## Data entry:  establish google sheet, post link here
+```

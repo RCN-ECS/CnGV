@@ -90,28 +90,30 @@ cores=detectCores()
 cl <- makeCluster(cores[1]-1) #not to overload your computer
 registerDoParallel(cl)
 
-#nrep = 3
-nsims = 5 # Multiply against rep for total number sims
-samplesize = seq(from = 1, to = 10, by = 1) # Must be Integer
+nrep = 2
+nsims = 7 # Multiply against rep for total number sims
+samplesize = seq(from = 1, to = 5, by = 1) # Must be Integer
 diff_effect = seq(from = 1, to = 5, by = 1) 
-simout <- data.frame(data.frame("samplesize" = 0,
+row = 0 # for indexing
+
+foreach(s = 1:nsims, .combine = rbind) %dopar% { 
+  
+  # Establish dataset for output  
+  simout = data.frame(data.frame("samplesize" = 0,
                        "GE_Diff" = 0,
                        "covGE_true" = 0,
                        "covGE_data" = 0, 
                        "lwrCI" = 0,
                        "uprCI" = 0))
-row = 0 # for indexing
-
-foreach(s = 1:nsims, .combine = rbind) %dopar% { 
   
-  #for(j in 1:nrep){
+  for(j in 1:nrep){
     for(k in 1:length(samplesize)) {
       for(l in 1:length(diff_effect)) {
-       
+        
        row=row+1 #index for the for mini-data file
        
        # Setting parameters for this run
-       #rep = nrep[j]
+       rep = nrep[j]
        val = samplesize[k] 
        effect_val = diff_effect[l]
        #cat(j,k,l, "\n")  # Counter 
@@ -121,6 +123,7 @@ foreach(s = 1:nsims, .combine = rbind) %dopar% {
        CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
 
 ## Data output  
+  
   simout[row,] = data.frame(#"replicate" = rep,
                        "samplesize" = val,
                        "GE_Diff" = effect_val,
@@ -128,7 +131,7 @@ foreach(s = 1:nsims, .combine = rbind) %dopar% {
                        "covGE_data" = simout_temp$covGE_data, 
                        "lwrCI" = CI[1],
                        "uprCI" = CI[2])
-        #}
+        }
      }
     }
   write.csv(simout,paste("SimResults_06122019",s,".csv",sep="_"),row.names=FALSE)
@@ -136,6 +139,71 @@ foreach(s = 1:nsims, .combine = rbind) %dopar% {
 
 ## To stop:
 stopCluster(cl)
+```
+New for loop to try to calculate power in one fell-swoop, rather than generating a bunch of different data files
+```{r}
+setwd("~/Documents/GitHub/CnGV/src/")
+
+cores=detectCores()
+cl <- makeCluster(cores[1]-1) #not to overload your computer
+registerDoParallel(cl)
+
+nrep = 2
+nsims = 7 # Multiply against rep for total number sims
+samplesize = seq(from = 1, to = 5, by = 1) # Must be Integer
+diff_effect = seq(from = 1, to = 5, by = 1) 
+row = 0 # for indexing
+
+
+# Establish dataset for output  
+simout = data.frame(data.frame("samplesize" = 0,
+                       "GE_Diff" = 0,
+                       "covGE_true" = 0,
+                       "covGE_data" = 0, 
+                       "lwrCI" = 0,
+                       "uprCI" = 0))
+
+foreach(s = 1:nsims, .combine = rbind) %dopar% { 
+  
+  #for(j in 1:nrep){
+    for(k in 1:length(samplesize)) {
+      for(l in 1:length(diff_effect)) {
+        
+       #row=row+1 #index for the for mini-data file
+       
+       # Setting parameters for this run
+       #rep = nrep[j]
+       val = samplesize[k] 
+       effect_val = diff_effect[l]
+       #cat(j,k,l, "\n")  # Counter 
+       
+       simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data 
+       
+       # I want to repeat this function 100 times. collect 1's if CI goes below zero, 0 if not. 
+       # Then i'll need to summarize all 100 to get proportion of instances CI crossed zero. 
+       sampling_dist_cov <- replicate(1000, bootstrapGV(simout_temp$data_GE)[1], simplify=TRUE) #Bootstrap
+       CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
+
+       
+## Data output  
+  
+  tempdat[row,] = data.frame(#"replicate" = rep,
+                       "samplesize" = val,
+                       "GE_Diff" = effect_val,
+                       "covGE_true" = simout_temp$covGE_true,
+                       "covGE_data" = simout_temp$covGE_data, 
+                       "lwrCI" = CI[1],
+                       "uprCI" = CI[2])
+        }
+     }
+  }
+  #put in summarizing code
+  write.csv(simout,paste("SimResults_06122019",s,".csv",sep="_"),row.names=FALSE)
+}
+
+## To stop:
+stopCluster(cl)
+
 ```
 *Colate Data from Sims*
 ```{r}
