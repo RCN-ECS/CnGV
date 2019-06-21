@@ -1,0 +1,13 @@
+Pretty excited I got the function written for the Gradient-level analyses.
+
+I also added a function to estimate power from the simulations, but that's old news. 
+
+The Gradient-level function needs to be checked to make sure I did it right. 
+
+This function is fairly specific to the falconer data, which I did knowing I'd have to change it later to generalize. 
+I just wanted to get it working before making it fit broader set of data. 
+
+Still need to create a function for the population-level analyses, but that should be much more straight forward. 
+I also still need to add in the phenotype standardization a bit earlier. Its in there, but not a part of a function yet. 
+
+Fingers crossed I did everything correctly! 
