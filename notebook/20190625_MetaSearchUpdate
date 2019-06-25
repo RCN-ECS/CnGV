@@ -1,0 +1,24 @@
+I discovered that my search terms were insufficient, thankfully before I got too far along in the screening process.
+Not only had my search somehow left out all years prior to 2015, but also did not include papers that should have been included.
+
+I ended up running through several different combinations of terms. Some search combinations resulted in over 2 million hits, 
+while others were far too exclusive. 
+
+I think my current search terms are sufficiently broad yet exclusive. I yielded just over 5k results, and refined that down 
+to 4,458 studies which is a more reasonable number to screen. 
+
+In addition, the studies and terms that "should" have been included in that search (e.g., Berven, Skelly, Ghalambor, etc.) 
+were included. I have now downloaded these studies and processed them through metagear. 
+
+They are in the google doc folder ready for screening. 
+https://drive.google.com/open?id=1zPm_VVISNh5kUy5KAn2oy0sHzpNz4Zhr
+
+Updated (and hopefully final) search criteria: 
+
+("cogradient variation" OR "countergradient variation" OR "cogradient selection" OR "countergradient selection" 
+OR "co-gradient variation" OR "counter-gradient variation" OR "co-gradient selection" OR "counter-gradient selection") 
+OR ("GxE" OR "genotype by environment" OR "gene by environment") 
+OR ("nonadaptive plast*" OR "non-adaptive plast*" OR "maladaptive plast*" OR "adaptive plast*") 
+OR ("phenotypic plasticity" AND "adapt*") 
+AND ("common garden" OR "reciprocal transplant")
+
