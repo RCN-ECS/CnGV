@@ -10,6 +10,7 @@ library("doParallel")
 library("tidyverse")
 ```
 
+### Simulations ###
 ```{r}
 ## Co-gradient
 
@@ -24,7 +25,7 @@ GxE = c(0, 0, 0, 0) #N1E1, N1E2, N2E1, N2E2
 #cov(G,E)
 ```
 
-```{r}
+```{r Function to create simulated data}
 ### This function creates reciprocal transplant data ###
 ### returns the data, true cov(G,E), obs cov(G,E) ###
 
@@ -62,14 +63,11 @@ simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
 }
 ```
 
-```{r}
+```{r Bootstrap Function for simulated data}
 
 ## Bootstrap to estimate error
 
 bootstrapGV <- function(data_GE){
-
-  ## ADD CODE TO STANDARDIZE PHENOTYPE DATA
-  ## Subtract mean and divide by standard deviation
 
   G_means <- NULL
   E_means <- NULL
@@ -84,6 +82,7 @@ bootstrapGV <- function(data_GE){
   #corGE_boot <- cor(G_means, E_means)
   return(list(covGE_boot))#, corGE_boot))
 }
+
 
 ```
 
@@ -103,15 +102,15 @@ GetPower <- function(x){
 }
 
 ```
-
-```{r}
+### Power Analysis Simulations ###
+```{r Simulation}
 setwd("~/Documents/GitHub/CnGV/src/")
 
 #cores=detectCores()
 #cl <- makeCluster(cores[1]-1) #not to overload your computer
 #registerDoParallel(cl)
 
-nrep = seq(from = 1, to = 10, by = 1)
+nrep = seq(from = 1, to = 5, by = 1)
 samplesize = seq(from = 1, to = 10, by = 1) # Must be Integer
 diff_effect = seq(from = 1, to = 5, by = 1) 
 #row = 0 # for indexing
@@ -122,9 +121,9 @@ diff_effect = seq(from = 1, to = 5, by = 1)
 #foreach(s = 1:nsims, .combine = rbind) %dopar% { 
   
 ## Establish datasets for output  
+
 simout = data.frame()
 power_data = data.frame()
-
 
 ## Simulation 
 
@@ -132,14 +131,14 @@ for(j in 1:length(nrep)){
   for(k in 1:length(samplesize)) {
     for(l in 1:length(diff_effect)) {
       
-
-       # Setting parameters for this run
+       # Set parameters 
        rep = nrep[j]
        val = samplesize[k] 
        effect_val = diff_effect[l]
       
        cat(j,k,l, "\n")  # Counter 
        
+       # Run functions
        simout_temp <- simulateGV(effect_val, effect_val, val) #Run function to generate data 
        sampling_dist_cov <- replicate(1000, bootstrapGV(simout_temp$data_GE)[1], simplify=TRUE) #Bootstrap
        CI = quantile(unlist(sampling_dist_cov), probs=c(0.025, 0.975), type=1) #Get confidence intervals
@@ -149,7 +148,7 @@ for(j in 1:length(nrep)){
          if (CI[2] <= 0) {overunder = 0} else 
            overunder = 1
 
-       ## Data output  
+       # Data output  
        simoutk = data.frame("replicate" = rep,
                        "samplesize" = val,
                        "GE_Diff" = effect_val,
@@ -213,7 +212,7 @@ simplot = ggplot(data = power_data, aes(x = samplesize, y = GE_Diff))+
 simplot
 
 ```
-
+### Meta-Analysis Data Analysis ###
 Code for Real Data: 
 
 For population level, need function to establish G_means and E_means. 
@@ -259,69 +258,76 @@ D originates in env [90-99]
 ## Gradient level analyses
 Gradient_level_fun  <- function(z){
   
+  ## Standardize data
+  dat_avg = mean(z$phen) 
+  dat_std = sd(z$phen)
+  z$phen_corrected = ((z$phen-dat_avg)/dat_std)
+
   Cov_matrix = data.frame() # Covariance matrix
-  predicted_data = data.frame() # Model output - use if CIs needed
-  
-  for(i in 1:length(unique(z$gen))){
+  predicted_data = data.frame() # Model output 
     
   # Environmental parameters
-  E1 = z[z$env > 90 & z$env < 99.99, ]
-  E1_mean = as.integer(mean(E1$env))
-  E2 = z[z$env > 100 & z$env < 109.99, ]
-  E2_mean = as.integer(mean(E2$env))
-  E3 = z[z$env > 110 & z$env < 119.99, ]
-  E3_mean = as.integer(mean(E3$env))
-  E4 = z[z$env > 120 & z$env < 129.99, ]
-  E4_mean = as.integer(mean(E4$env))
-  E_means = c(E1_mean,E2_mean,E3_mean,E4_mean)
-  
-  # Genotypic parameters
-  genotype = levels(z$gen)[i]
-  gendat = filter(z, gen == genotype)
+  E_means = c(E1_mean,E2_mean,E3_mean,E4_mean) # Needs to be generalized.
+  E_hat = as.integer(mean(z$env))
   
   # Model
-  temp_slope = lm(phen_corrected ~ env, data = gendat)
-  
-  # Predict phenotypic value for each genotype across <all> environments
-  temp_dat <- expand.grid(gen = unique(gendat$gen),
-                          env = seq(from = as.integer(min(z$env)), 
-                                to = as.integer(max(z$env)),
-                                by=1),
-                          phen_corrected=0)
-  mm = model.matrix(terms(temp_slope),temp_dat)
-  temp_dat$phen_corrected = mm %*% coef(temp_slope) # Predicted phenotypes
-  pvar1 <- diag(mm %*% tcrossprod(vcov(temp_slope),mm)) # Confidence intervals
-  
-  # Data output from model
-  temp_dat <- data.frame(
-  temp_dat
-  , plo = temp_dat$phen_corrected-1.96*sqrt(pvar1)
-  , phi = temp_dat$phen_corrected+1.96*sqrt(pvar1))
-  
-  # Data output for Covariance matrix
-  predicted_data = rbind(predicted_data,temp_dat)
-}  
+  grand_mod = lm(phen_corrected ~ env + gen, data = z) 
 
-  #G_means
+  # Predict phenotypic value for each genotype across <all> environments
+  temp_dat <- expand.grid(gen = unique(z$gen),
+                                env = seq(from = as.integer(min(z$env)),to = as.integer(max(z$env)),by=1),
+                                phen_corrected=0)
+  mm = model.matrix(terms(grand_mod),temp_dat)
+  temp_dat$phen_corrected = mm %*% coef(grand_mod) # Predicted phenotypes
+
+  # Add Error
+  se <- sqrt(diag(vcov(grand_mod)))
+  se <- data.frame(se)
+  setDT(se, keep.rownames = TRUE)
+  se <- filter(se, rn != "env")
+  se$gen = levels(z$gen)
+  
+  predicted_data = left_join(temp_dat, se, by = "gen")
+  predicted_data$G_upr = predicted_data$phen_corrected + predicted_data$se
+  predicted_data$G_lwr = predicted_data$phen_corrected - predicted_data$se
+
+  # G_means
   G_means = filter(predicted_data, env == E_hat)
   
-  #E_means
-  E_means1 = c()
-  for(j in 1:E_means){
+  # E_means
+  E_means1 = data.frame()
+  for(j in 1:length(E_means)){
     env_dat = E_means[j]
     E_dat = filter(predicted_data, env == env_dat)
-    E_means2 = mean(E_dat$phen_corrected)
-    E_means1[j] = E_means2
+    E_temp_mean = mean(E_dat$phen_corrected)
+    E_upr = E_temp_mean + (sigma(grand_mod))
+    E_lwr = E_temp_mean - (sigma(grand_mod))
+    E_tempdat = data.frame()
+    E_tempdat = data.frame("E_means" = E_temp_mean,
+                           "E_upr" = E_upr,
+                           "E_lwr" = E_lwr)
+    E_means1 = rbind(E_means1, E_tempdat)
   }
   
+  # Data output
   Cov_matrix = data.frame("gen" = unique(z$gen),
                           "env" = E_means,
                           "G_means" = G_means$phen_corrected,
-                          "E_means" = E_means1[1:4])
+                          "G_upr" = G_means$G_upr,
+                          "G_lwr" = G_means$G_lwr,
+                          "E_means" = E_means1$E_means,
+                          "E_upr" = E_means1$E_upr,
+                          "E_lwr" = E_means1$E_lwr,
+                          "g_se" = se$se,
+                          "e_se" = rep((sigma(grand_mod)),nrow(E_means1)),
+                          "e_sampsize" = rep(nrow(z),nrow(E_means1)),
+                          "g_sampsize" = rep(nrow(z)/length(unique(z$gen)),nrow(E_means1)))
+  
   return(as.data.frame(Cov_matrix))
 }
 
 ```
+
 
 ```{r}
 
@@ -331,19 +337,78 @@ falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Data_p137_Falconer1981.csv")
 colnames(falc_dat) = c("env", "phen", "gen")
 falc_dat$gen = as.factor(falc_dat$gen)
 
-## Standardize data
+## Specific to falconer data...
 
-dat_avg = mean(falc_dat$phen) 
-dat_std = sd(falc_dat$phen)
-falc_dat$phen_corrected = ((falc_dat$phen-dat_avg)/dat_std)
-
+  E1 = falc_dat[falc_dat$env > 90 & falc_dat$env < 99.99, ]
+  E1_mean = as.integer(mean(E1$env))
+  E2 = falc_dat[falc_dat$env > 100 & falc_dat$env < 109.99, ]
+  E2_mean = as.integer(mean(E2$env))
+  E3 = falc_dat[falc_dat$env > 110 & falc_dat$env < 119.99, ]
+  E3_mean = as.integer(mean(E3$env))
+  E4 = falc_dat[falc_dat$env > 120 & falc_dat$env < 129.99, ]
+  E4_mean = as.integer(mean(E4$env))
+  
 ## Generate predicted phenotypes for each G and E
 covariance_data = Gradient_level_fun(falc_dat)
 
-# Calculate Covariance
+
+## Covariance from data
 G <- c(covariance_data$G_means) 
 E <- c(covariance_data$E_means) 
-(covGE <- cov(G, E)) # For Falconer data, Covariance = 0.187
+(covGE <- cov(G, E)) # For Falconer data, actual covariance = 0.51
+
+```
+
+```{r}
+m = covariance_data
+
+data_generation <- function(m){ # Insert covariance data generated above
+  
+  temp_dat = data.frame()
+  
+  for(i in 1:nrow(m)){
+    
+    # Generate G's and E's based on means and standard error from model fits
+    G <- rnorm(100,m$G_means[i],(m$g_se[i]*sqrt(m$g_sampsize[i])))
+    E <- rnorm(100,m$E_means[i],(m$e_se[i]*sqrt(m$e_sampsize[i])))
+    
+    temp_dat1 = data.frame("G" = G,
+                           "E" = E, 
+                           "gen" = rep(m$gen[i],100),
+                           "env" = rep(m$env[i],100))
+    temp_dat = rbind(temp_dat,temp_dat1)
+  }
+    return(temp_dat)
+}
+```
+
+```{r}
+
+data_distribution <- data_generation(m = covariance_data)
+    
+cov_mat_fun <- function(temp_dat){ 
+  
+  temp_dat2 = split(temp_dat,temp_dat$gen)
+  
+  temp_covmat = data.frame()
+  
+  for(j in 1:length(temp_dat2)){
+        G_temp = sample(temp_dat2[[j]][,1], size = 1, replace=TRUE)
+        E_temp = sample(temp_dat2[[j]][,2], size = 1, replace=TRUE)
+        temp_covmat. = data.frame("G_temp" = G_temp,
+                                  "E_temp" = E_temp,
+                                  "gen_ID" = temp_dat2[[j]][1,3],
+                                  "env_ID" = temp_dat2[[j]][1,4])
+        temp_covmat = rbind(temp_covmat,temp_covmat.)
+      }
+      
+  cov_est = cov(temp_covmat$G_temp,temp_covmat$E_temp)
+  return(cov_est)
+} 
+
+cov_dat <-  replicate(1000, cov_mat_fun(data_distribution), simplify=TRUE) # Dataset with 1000 predicted covariances
+cov_avg = mean(cov_dat)  # should be similar to original average 
+cov_CI = quantile(unlist(cov_dat), probs=c(0.025, 0.975), type=1) # Get confidence intervals around covariance
 
 ```
 
@@ -358,16 +423,8 @@ sampling_dist_cov <- data.frame(as.matrix(unlist(t(sampling_dist_cov))))
 quantile(unlist(sampling_dist_cov[2,]), probs=c(0.025, 0.975), type=1)
 # this is always 1 or -1 because we only have 2 data points
 
-### Things to think about
-# Do we standardize phenotype data before we put it in here? Yes, mean = 0, stdev = 1
-# If no to the last question, do we standardize the covariance as a correlation?
-
 boxplot(phen~gen)
 
 var(phen)
 
-# jacknife loop through all datapoints
-# remove one datapoint 
-# calculate the estimate
-# can prodcue 95% CI on the parameter (in this case is cov)
 ```
