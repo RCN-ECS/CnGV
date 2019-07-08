@@ -252,16 +252,43 @@ B originates in env [110-119]
 C originates in env [100-109]
 D originates in env [90-99]
 
-
+Still to do: (7/2/2019)
+ - Incorporate GxE?
+ - Ensure fits other datasets
+ - Match to simulation code?
 ```{r}
+## Load Data 
+
+falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Data_p137_Falconer1981.csv")
+colnames(falc_dat) = c("env", "phen", "gen")
+falc_dat$gen = as.factor(falc_dat$gen)
+
+## Specific to falconer data...
+  E1 = falc_dat[falc_dat$env > 90 & falc_dat$env < 99.99, ]
+  E1_mean = as.integer(mean(E1$env))
+  E2 = falc_dat[falc_dat$env > 100 & falc_dat$env < 109.99, ]
+  E2_mean = as.integer(mean(E2$env))
+  E3 = falc_dat[falc_dat$env > 110 & falc_dat$env < 119.99, ]
+  E3_mean = as.integer(mean(E3$env))
+  E4 = falc_dat[falc_dat$env > 120 & falc_dat$env < 129.99, ]
+  E4_mean = as.integer(mean(E4$env))
+
+dat_avg = mean(falc_dat$phen) 
+dat_std = sd(falc_dat$phen)
+falc_dat$phen_corrected = ((falc_dat$phen-dat_avg)/dat_std)
+
+```
+ 
+```{r}
+
 
 ## Gradient level analyses
 Gradient_level_fun  <- function(z){
   
   ## Standardize data
-  dat_avg = mean(z$phen) 
-  dat_std = sd(z$phen)
-  z$phen_corrected = ((z$phen-dat_avg)/dat_std)
+  #dat_avg = mean(z$phen) 
+  #dat_std = sd(z$phen)
+  #z$phen_corrected = ((z$phen-dat_avg)/dat_std)
 
   Cov_matrix = data.frame() # Covariance matrix
   predicted_data = data.frame() # Model output 
@@ -276,36 +303,36 @@ Gradient_level_fun  <- function(z){
   # Predict phenotypic value for each genotype across <all> environments
   temp_dat <- expand.grid(gen = unique(z$gen),
                                 env = seq(from = as.integer(min(z$env)),to = as.integer(max(z$env)),by=1),
-                                phen_corrected=0)
+                                phen_corrected = 0)
   mm = model.matrix(terms(grand_mod),temp_dat)
   temp_dat$phen_corrected = mm %*% coef(grand_mod) # Predicted phenotypes
 
-  # Add Error
-  se <- sqrt(diag(vcov(grand_mod)))
-  se <- data.frame(se)
-  setDT(se, keep.rownames = TRUE)
-  se <- filter(se, rn != "env")
-  se$gen = levels(z$gen)
+  # Add Error (if necessary)
+  #se <- sqrt(diag(vcov(grand_mod)))
+  #se <- data.frame(se)
+  #setDT(se, keep.rownames = TRUE)
+  #se <- filter(se, rn != "env")
+  #se$gen = levels(z$gen)
   
-  predicted_data = left_join(temp_dat, se, by = "gen")
-  predicted_data$G_upr = predicted_data$phen_corrected + predicted_data$se
-  predicted_data$G_lwr = predicted_data$phen_corrected - predicted_data$se
+  #predicted_data = left_join(temp_dat, se, by = "gen")
+  #predicted_data$G_upr = predicted_data$phen_corrected + predicted_data$se
+  #predicted_data$G_lwr = predicted_data$phen_corrected - predicted_data$se
 
   # G_means
-  G_means = filter(predicted_data, env == E_hat)
+  G_means = filter(temp_dat, env == E_hat)
   
   # E_means
   E_means1 = data.frame()
   for(j in 1:length(E_means)){
     env_dat = E_means[j]
-    E_dat = filter(predicted_data, env == env_dat)
+    E_dat = filter(temp_dat, env == env_dat)
     E_temp_mean = mean(E_dat$phen_corrected)
-    E_upr = E_temp_mean + (sigma(grand_mod))
-    E_lwr = E_temp_mean - (sigma(grand_mod))
+    #E_upr = E_temp_mean + (sigma(grand_mod))
+    #E_lwr = E_temp_mean - (sigma(grand_mod))
     E_tempdat = data.frame()
-    E_tempdat = data.frame("E_means" = E_temp_mean,
-                           "E_upr" = E_upr,
-                           "E_lwr" = E_lwr)
+    E_tempdat = data.frame("E_means" = E_temp_mean)
+                           #"E_upr" = E_upr,
+                           #"E_lwr" = E_lwr)
     E_means1 = rbind(E_means1, E_tempdat)
   }
   
@@ -313,15 +340,15 @@ Gradient_level_fun  <- function(z){
   Cov_matrix = data.frame("gen" = unique(z$gen),
                           "env" = E_means,
                           "G_means" = G_means$phen_corrected,
-                          "G_upr" = G_means$G_upr,
-                          "G_lwr" = G_means$G_lwr,
-                          "E_means" = E_means1$E_means,
-                          "E_upr" = E_means1$E_upr,
-                          "E_lwr" = E_means1$E_lwr,
-                          "g_se" = se$se,
-                          "e_se" = rep((sigma(grand_mod)),nrow(E_means1)),
-                          "e_sampsize" = rep(nrow(z),nrow(E_means1)),
-                          "g_sampsize" = rep(nrow(z)/length(unique(z$gen)),nrow(E_means1)))
+                          #"G_upr" = G_means$G_upr,
+                          #"G_lwr" = G_means$G_lwr,
+                          "E_means" = E_means1$E_means)
+                          #"E_upr" = E_means1$E_upr,
+                          #"E_lwr" = E_means1$E_lwr,
+                          #"g_se" = se$se,
+                          #"e_se" = rep((sigma(grand_mod)),nrow(E_means1)),
+                          #"e_sampsize" = rep(nrow(z),nrow(E_means1)),
+                          #"g_sampsize" = rep(nrow(z)/length(unique(z$gen)),nrow(E_means1)))
   
   return(as.data.frame(Cov_matrix))
 }
@@ -331,26 +358,8 @@ Gradient_level_fun  <- function(z){
 
 ```{r}
 
-## Load data
-
-falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Data_p137_Falconer1981.csv")
-colnames(falc_dat) = c("env", "phen", "gen")
-falc_dat$gen = as.factor(falc_dat$gen)
-
-## Specific to falconer data...
-
-  E1 = falc_dat[falc_dat$env > 90 & falc_dat$env < 99.99, ]
-  E1_mean = as.integer(mean(E1$env))
-  E2 = falc_dat[falc_dat$env > 100 & falc_dat$env < 109.99, ]
-  E2_mean = as.integer(mean(E2$env))
-  E3 = falc_dat[falc_dat$env > 110 & falc_dat$env < 119.99, ]
-  E3_mean = as.integer(mean(E3$env))
-  E4 = falc_dat[falc_dat$env > 120 & falc_dat$env < 129.99, ]
-  E4_mean = as.integer(mean(E4$env))
-  
 ## Generate predicted phenotypes for each G and E
 covariance_data = Gradient_level_fun(falc_dat)
-
 
 ## Covariance from data
 G <- c(covariance_data$G_means) 
@@ -360,56 +369,49 @@ E <- c(covariance_data$E_means)
 ```
 
 ```{r}
-m = covariance_data
 
-data_generation <- function(m){ # Insert covariance data generated above
-  
-  temp_dat = data.frame()
-  
-  for(i in 1:nrow(m)){
-    
-    # Generate G's and E's based on means and standard error from model fits
-    G <- rnorm(100,m$G_means[i],(m$g_se[i]*sqrt(m$g_sampsize[i])))
-    E <- rnorm(100,m$E_means[i],(m$e_se[i]*sqrt(m$e_sampsize[i])))
-    
-    temp_dat1 = data.frame("G" = G,
-                           "E" = E, 
-                           "gen" = rep(m$gen[i],100),
-                           "env" = rep(m$env[i],100))
-    temp_dat = rbind(temp_dat,temp_dat1)
-  }
-    return(temp_dat)
-}
-```
+## Shuffle data for bootstrapping
 
-```{r}
-
-data_distribution <- data_generation(m = covariance_data)
+shuffle_fun <- function(raw_dat){ 
     
-cov_mat_fun <- function(temp_dat){ 
-  
-  temp_dat2 = split(temp_dat,temp_dat$gen)
-  
+  raw_dat2 = split(raw_dat,raw_dat$gen)
   temp_covmat = data.frame()
   
-  for(j in 1:length(temp_dat2)){
-        G_temp = sample(temp_dat2[[j]][,1], size = 1, replace=TRUE)
-        E_temp = sample(temp_dat2[[j]][,2], size = 1, replace=TRUE)
-        temp_covmat. = data.frame("G_temp" = G_temp,
-                                  "E_temp" = E_temp,
-                                  "gen_ID" = temp_dat2[[j]][1,3],
-                                  "env_ID" = temp_dat2[[j]][1,4])
-        temp_covmat = rbind(temp_covmat,temp_covmat.)
-      }
-      
-  cov_est = cov(temp_covmat$G_temp,temp_covmat$E_temp)
-  return(cov_est)
+  for(n in 1:length(raw_dat2)){
+      phen_temp = sample(raw_dat2[[n]][,"phen_corrected"], size = nrow(raw_dat2[[n]]), replace=TRUE)
+      temp_covmat. = data.frame("env" = raw_dat2[[n]][,"env"],
+                                "phen_corrected" = c(phen_temp),
+                                "gen" = raw_dat2[[n]][,"gen"])
+      temp_covmat = rbind(temp_covmat,temp_covmat.)
+    }
+  return(temp_covmat)
 } 
 
-cov_dat <-  replicate(1000, cov_mat_fun(data_distribution), simplify=TRUE) # Dataset with 1000 predicted covariances
-cov_avg = mean(cov_dat)  # should be similar to original average 
-cov_CI = quantile(unlist(cov_dat), probs=c(0.025, 0.975), type=1) # Get confidence intervals around covariance
+```
 
+
+```{r}
+# Combine functions
+
+gen_cov_fun <- function(dat){
+  
+  shuffle_dat = shuffle_fun(dat) #Shuffle
+  mean_dat = Gradient_level_fun(shuffle_dat) #Get G and E means
+  cov_est_temp = cov(mean_dat$G_means,mean_dat$E_means) #Estimate covariance
+  
+  return(cov_est_temp)
+}
+
+# Bootstrapped mean and confidence intervals
+new_dat <- replicate(100, gen_cov_fun(falc_dat), simplify=TRUE)
+(cov_avg = mean(new_dat))  # should be similar to actual average 
+(cov_CI = quantile(unlist(new_dat), probs=c(0.025, 0.975), type=1)) # Get confidence intervals around covariance
+
+# Actual mean 
+real_dat = Gradient_level_fun(falc_dat)
+(cov_est_temp = cov(real_dat$G_means,real_dat$E_means))
+
+## THESE DONT MATCH.... UGHHHHHHH WHAT IN THE WORLDDDDD
 ```
 
 *Extra code*
