@@ -1,6 +1,6 @@
 ---
 title: "co-counter gradient variation"
-author: "Katie Lotterhos"
+author: "Katie Lotterhos, Molly Albecker"
 date: "5/30/2019"
 output: html_document
 ---
@@ -11,38 +11,260 @@ library("tidyverse")
 ```
 
 ### Simulations ###
+
 ```{r}
-## Co-gradient
+base_intercept = 1.0 
+int_eff = seq(from = 0, to = 10.0, by = .1) # Intercept increase
+b1 = 0.5 # Slope
+env = c(1:5) # environmental gradient
+sd = seq(from = 0, to = 1, by = 0.1)
+reps = seq(from = 1, to = 10, by = 1)
 
-G <- c(-1, 1) # G is vector of y-values
-E <- c(1, -1) # E is vector of x-values
-(covGE <- cov(G, E))
-GxE = c(0, 0, 0, 0) #N1E1, N1E2, N2E1, N2E2
 
-# countergradient
-#G <- c(1, -1)
-#E <- c(-1, 1)
-#cov(G,E)
+data_generation_noGxE <- function(base_intercept, int_eff, b1, env, sd, replicates){
+    
+  lmdat = data.frame()
+  
+  for(p in 1:length(reps)){
+    for(i in 1:length(int_eff)){
+      for(j in 1:length(sd)){
+      
+      # Counter
+      cat(p,i,j, "\n") 
+
+      # Establish parameters for models
+      eff_increase = int_eff[i]
+      sd_temp = sd[j]
+      rp = reps[p]
+      
+      # Generate data
+      phen_base = c(replicate(rp, (base_intercept + b1 * env + (rnorm(length(env), 0, sd_temp)))))
+      base_temp = data.frame("phen" = phen_base,
+                             "gen" = rep("G1", length(env*rp)),
+                             "env" = rep(env, length(rp)),
+                             "rep" = rep(rp, length(env*rp)))
+                      
+      phen2 = c(replicate(rp, ((base_intercept+eff_increase) + b1 * env + (rnorm(length(env), 0, sd_temp)))))
+      change_temp = data.frame("phen" = phen2,
+                             "gen" = rep("G2", length(env*rp)),
+                             "env" = rep(env, length(rp)),
+                             "rep" = rep(rp, length(env*rp)))
+      dat_temp = rbind(base_temp, change_temp)
+      
+      # Model
+      test_temp = lm(phen ~ env + gen, data = dat_temp)
+      pval = summary(test_temp)$coefficients[,4][3]
+      lwr_ci = confint(test_temp)[3]
+      upr_ci = confint(test_temp)[6]
+
+      lmdat. = data.frame("std.dev" = sd_temp,
+                          "reps" = rp,
+                          "effect.size" = eff_increase,
+                          "p.val" = pval,
+                          "lwr.ci" = lwr_ci,
+                          "upr.ci" = upr_ci)
+      lmdat = rbind(lmdat,lmdat.)
+      }
+    }
+  }
+  return(data.frame(lmdat))
+}
 ```
 
-```{r Function to create simulated data}
+```{r}
+simnum = c(1:5)
+simdat <- replicate(length(simnum), data_generation_noGxE(base_intercept, int_eff, b1, env, sd, reps), simplify=TRUE) 
+
+# Convert array into dataframe
+dat_combined = data.frame()
+
+for(i in 1:length(simnum)){
+  val = simnum[i]
+  tempdat = as.data.frame(simdat[,i])
+  tempdat = data.frame("iteration" = rep(val,nrow(tempdat)),
+                       tempdat[,c(1:6)])
+  dat_combined = rbind(dat_combined,tempdat)
+  }
+  
+dat_combined$overunder = 0
+for(j in 1:nrow(dat_combined)){
+  if (dat_combined$lwr.ci[j] < 0) {dat_combined$overunder[j] = 0} else {dat_combined$overunder[j] = 1}
+  }
+newdat = dat_combined
+```
+
+```{r GetPower Function}
+
+## Function to calculate power based on output 
+detach(package:plyr)
+
+powerdat = data.frame()
+  for(i in 1:length(unique(newdat$reps))){
+    rep = unique(newdat$reps)[i]
+    repdat = filter(newdat, reps == rep)
+    for(j in 1:length(unique(repdat$std.dev))){
+      sdev = unique(newdat$std.dev)[j]
+      repdat2 = filter(repdat, std.dev == sdev)
+      for(k in 1:length(unique(repdat2$effect.size))){
+        effsize = unique(repdat2$effect.size)[k]
+        repdat3 = filter(repdat2, effect.size == effsize)
+        
+        powerdat. = data.frame("reps" = unique(repdat3$reps),
+                                "std.dev" = unique(repdat3$std.dev),
+                                "effect.size" = unique(repdat3$effect.size),
+                                "numer" = sum(repdat3$overunder),
+                                "denom" = nrow(repdat3))
+        powerdat = rbind(powerdat,powerdat.)
+      }
+    }
+  }
+
+powerdat$power = (powerdat$numer/powerdat$denom) 
+```
+*Power Heatmap*
+
+Power is the proportion of replicates whose 95% CI do not include 0
+
+```{r}
+
+## Plot Heatmap
+
+simplot = ggplot(data = powerdat, aes(x = reps, y = effect.size))+ #reorder(std.dev,-std.dev)
+  geom_tile(aes(fill = power), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue")+
+  theme_classic()+ 
+  #ylab("Difference in G and E") + xlab("Sample Size")+
+  theme_bw(base_size = 30, base_family = "Helvetica")+ 
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'black')) +
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
+  theme(axis.ticks = element_line(colour = "black"))+
+  theme(axis.text= element_text(colour = "black"))+
+  labs(colour = "Sample Size")+
+  theme(legend.position="bottom")+
+  theme(legend.title = element_text(size = 14),
+          legend.text = element_text(size = 14))
+  #theme(legend.position="none")
+simplot
+
+require("scatterplot3d")
+require("rgl")
+
+scatterplot3d(x = powerdat$reps, y= powerdat$power, z = powerdat$effect.size)
+plot3d(powerdat$std.dev,powerdat$power,powerdat$effect.size)
+wireframe(powerdat$power~newdat0$effect.size*powerdat$std.dev,colorkey=TRUE,drape=TRUE,
+          scales=list(arrows=FALSE), zlim=c(0,1))
+```
+
+Plots for heuristics
+
+```{r}
+
+# Cogradient, No GxE
+
+b0_1 = 1 #Intercept Group 1
+b0_2 = 3 #Intercept Group 2
+b1_1 = 0.1 #Slope Group 1
+b1_2 = 0.1 #Slope Group 2
+
+phen1 = b0_1 + b1_1 * env + err
+phen2 = b0_2 + b1_2 * env + err
+
+scenario1 = data.frame("env" = rep(env,2),
+                       "gen" = rep(c("G1","G2"),each = 5),
+                       "phen" = c(phen1,phen2))
+plot1 = ggplot(data = scenario1, aes(x = env, y = phen, group = gen, colour = gen)) + 
+  geom_line() + theme_classic() + ggtitle("Cogradient Variation, No GxE") +
+  geom_segment(aes(x = 0, y = 1.0, xend = 20, yend = 5.0), colour = "black", linetype = "dashed")
+
+
+# Cogradient, GxE
+
+b0_1 = 1 #Intercept Group 1
+b0_2 = 3 #Intercept Group 2
+b1_1 = 0.1 #Slope Group 1
+b1_2 = 0.2 #Slope Group 2
+
+phen1 = b0_1 + b1_1 * env + err
+phen2 = b0_2 + b1_2 * env + err
+
+scenario2 = data.frame("env" = rep(env,2),
+                       "gen" = rep(c("G1","G2"),each = 5),
+                       "phen" = c(phen1,phen2))
+plot2 = ggplot(data = scenario2, aes(x = env, y = phen, group = gen, colour = gen)) + 
+  geom_line() + theme_classic() + ggtitle("Cogradient Variation, with GxE") +
+    geom_segment(aes(x = 0, y = 1.0, xend = 20, yend = 7.0), colour = "black", linetype = "dashed")
+
+
+# Countergradient, No GxE
+b0_1 = 1 #Intercept Group 1
+b0_2 = 3 #Intercept Group 2
+b1_1 = 0.1 #Slope Group 1
+b1_2 = 0.1 #Slope Group 2
+
+phen1 = b0_1 + b1_1 * env + err
+phen2 = b0_2 + b1_2 * env + err
+
+scenario3 = data.frame("env" = rep(env,2),
+                       "gen" = rep(c("G1","G2"),each = 5),
+                       "phen" = c(phen1,phen2))
+plot3 = ggplot(data = scenario3, aes(x = env, y = phen, group = gen, colour = gen)) + 
+  geom_line() + theme_classic() + ggtitle("Countergradient Variation, No GxE")+
+  geom_segment(aes(x = 0, y = 3.0, xend = 20, yend = 3.0), colour = "black", linetype = "dashed")
+
+# Countergradient, GxE
+
+b0_1 = 1 #Intercept Group 1
+b0_2 = 3 #Intercept Group 2
+b1_1 = 0.1 #Slope Group 1
+b1_2 = 0.2 #Slope Group 2
+
+phen1 = b0_1 + b1_1 * env + err
+phen2 = b0_2 + b1_2 * env + err
+
+scenario4 = data.frame("env" = rep(env,2),
+                       "gen" = rep(c("G1","G2"),each = 5),
+                       "phen" = c(phen1,phen2))
+plot4 = ggplot(data = scenario4, aes(x = env, y = phen, group = gen, colour = gen)) + 
+  geom_line() + theme_classic() + ggtitle("Countergradient Variation, with GxE")+
+  geom_segment(aes(x = 0, y = 3.0, xend = 20, yend = 3.0), colour = "black", linetype = "dashed")
+
+# No Gradient, Just GxE
+b0_1 = 1 #Intercept Group 1
+b0_2 = 5 #Intercept Group 2
+b1_1 = 0.2 #Slope Group 1
+b1_2 = -0.2 #Slope Group 2
+
+phen1 = b0_1 + b1_1 * env + err
+phen2 = b0_2 + b1_2 * env + err
+
+scenario5 = data.frame("env" = rep(env,2),
+                       "gen" = rep(c("G1","G2"),each = 5),
+                       "phen" = c(phen1,phen2))
+plot5 = ggplot(data = scenario5, aes(x = env, y = phen, group = gen, colour = gen)) + 
+  geom_line() + theme_classic() + ggtitle("No Gradient, just GxE")
+
+grid.arrange(plot1,plot3,plot2,plot4,plot5,nrow = 3)
+
+```
+
+```{r Original Function to create simulated data}
+
 ### This function creates reciprocal transplant data ###
 ### returns the data, true cov(G,E), obs cov(G,E) ###
 
-simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
+simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){ 
   ## G_diff_N1_N2 genetic difference in phenotype from population N1 to N2
   ## E_diff_N1_N2 environment difference in phenotype from population N1 to N2
   ## n is the sample size per population-environment combo
-
-  (G <- c(-G_diff_N1_N2/2, G_diff_N1_N2/2))
+  
+  (G <- c(-G_diff_N1_N2/2, G_diff_N1_N2/2)) 
   (E <- c(-E_diff_N1_N2/2, E_diff_N1_N2/2))
   (covGE_true <- cov(G, E))
-  #(corGE_true <- cor(G, E))
 
-  P1_E1 <- G[1] + E[1] + GxE[1] + rnorm(n,0, 1)
-  P1_E2 <- G[1] + E[2] + GxE[2] + rnorm(n,0, 1)
-  P2_E1 <- G[2] + E[1] + GxE[3] + rnorm(n,0, 1)
-  P2_E2 <- G[2] + E[2] + GxE[4] + rnorm(n,0, 1)
+  P1_E1 <- G[1] + E[1] + GxE[1] + rnorm(n,0,1)
+  P1_E2 <- G[1] + E[2] + GxE[2] + rnorm(n,0,1)
+  P2_E1 <- G[2] + E[1] + GxE[3] + rnorm(n,0,1)
+  P2_E2 <- G[2] + E[2] + GxE[4] + rnorm(n,0,1)
 
   phen <- c(P1_E1, P1_E2, P2_E1, P2_E2)
   gen <- rep(c("G1","G2"), each=n*2)
@@ -50,20 +272,23 @@ simulateGV <- function(G_diff_N1_N2, E_diff_N1_N2, n, GxE=c(0,0,0,0)){
 
   data_GE <- data.frame(phen, gen, env)
 
-  (covGE_data <- cov(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
-    c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
+  (covGE_data <- cov(c(mean(phen[gen=="G1"]),
+                       mean(phen[gen=="G2"])), 
+                     c(mean(phen[env=="E1"]), 
+                       mean(phen[env=="E2"]))
     ))
-  #(corGE_data <- cor(c(mean(phen[gen=="G1"]),mean(phen[gen=="G2"])), 
-  #  c(mean(phen[env=="E1"]), mean(phen[env=="E2"]))
-  #  ))
     
   return(list(data_GE=data_GE, 
-              covGE_true=covGE_true, covGE_data=covGE_data)) 
+              covGE_true=covGE_true, 
+              covGE_data=covGE_data)) 
               #corGE_true = corGE_true, corGE_data=corGE_data))
 }
+
+test = simulateGV(0.5,0.5,10,GxE=c(0,0,0,0))
+
 ```
 
-```{r Bootstrap Function for simulated data}
+```{r Bootstrap Function for original simulated data}
 
 ## Bootstrap to estimate error
 
@@ -83,27 +308,16 @@ bootstrapGV <- function(data_GE){
   return(list(covGE_boot))#, corGE_boot))
 }
 
+# Bootstrapped mean and confidence intervals
+new_dat <- replicate(1000, bootstrapGV(data_GE), simplify=TRUE) #Repeat this same function to get permutation null dist.
+(cov_avg = mean(as.numeric(unlist(new_dat))))  # should be similar to actual average 
+(cov_CI = quantile(unlist(new_dat), probs=c(0.025, 0.975), type=1)) # Get confidence intervals around covariance
 
 ```
 
-```{r GetPower Function}
 
-## Function to calculate power based on output from below for-loop
 
-GetPower <- function(x){
-
-  powerdat = x %>%
-  group_by(samplesize,GE_Diff) %>%
-  summarise(ct = length(overunder),
-            cat = sum(overunder))
-  powerdat$power = (powerdat$cat/powerdat$ct)
-
-  return(as.data.frame(powerdat))
-}
-
-```
-### Power Analysis Simulations ###
-```{r Simulation}
+```{r Old Simulation}
 setwd("~/Documents/GitHub/CnGV/src/")
 
 #cores=detectCores()
@@ -168,7 +382,8 @@ for(j in 1:length(nrep)){
 ## To stop:
 #stopCluster(cl)
 ```
-*Colate Data from Sims*
+
+*Colate Data from Power analysis simulations*
 
 ```{r}
 # Use below only running in parallel. 
@@ -186,71 +401,17 @@ temp1$replicate = rep(1:totsim, each = nrep)
 
 ```
 
-*Power Heatmap*
 
-Power is the proportion of replicates whose 95% CI do not include 0
-
-```{r}
-
-## Plot Heatmap
-
-simplot = ggplot(data = power_data, aes(x = samplesize, y = GE_Diff))+
-  geom_tile(aes(fill = power), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue")+
-  theme_bw()+ 
-  ylab("Difference in G and E") + xlab("Sample Size")+
-  theme_bw(base_size = 30, base_family = "Helvetica")+ 
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'black')) +
-  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.ticks = element_line(colour = "black"))+
-  theme(axis.text= element_text(colour = "black"))+
-  labs(colour = "Sample Size")+
-  theme(legend.position="bottom")+
-  theme(legend.title = element_text(size = 14),
-          legend.text = element_text(size = 14))
-  #theme(legend.position="none")
-simplot
-
-```
 ### Meta-Analysis Data Analysis ###
+
 Code for Real Data: 
 
 For population level, need function to establish G_means and E_means. 
 1. This info should be in factor form. 
 2. May need to translate it into quantitative form?
 
-For gradient level, need a bit more: 
-1. Estimate G_means
-To calculate G_means, generate slope of lines for each G across all E's (lm(phen~env)). G_means = avg phenotype for each genotype at E_hat.
-
-2. Estimate E_means
-To calculate E_means, use same slope of lines as G_means. E_means = average phenotype across genotypes at each genotype's environment.
-
 In all cases, need to standardize phenotype before estimation.
 Standardize = (Data - avg(data))/std dev(data)
-
-For the falc_dat, we don't know which genotype comes from which environment. 
-I'm going to arbitrarily assign genotypes to continuous environments just to get the code working.
-
-NOTE: if studies do not provide data about the environmental conditions that genotypes originated in, we cannot use for analyses.
-
-Population Assignments = (this the order presented in the data, may seem confusing)
-pop B = gen 0.5
-pop A = gen 0.8
-pop D = gen 1.1
-pop C = gen 1.4
-
-Co-Gradient Scenario: 
-A originates in env [90-99]
-B originates in env [100-109]
-C originates in env [110-119]
-D originates in env [120-129]
-
-Counter-Gradient Scenario: 
-A originates in env [120-129]
-B originates in env [110-119]
-C originates in env [100-109]
-D originates in env [90-99]
 
 Still to do: (7/2/2019)
  - Incorporate GxE?
@@ -259,96 +420,61 @@ Still to do: (7/2/2019)
 ```{r}
 ## Load Data 
 
-falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Data_p137_Falconer1981.csv")
-colnames(falc_dat) = c("env", "phen", "gen")
-falc_dat$gen = as.factor(falc_dat$gen)
+falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Falconer_template.csv")
 
-## Specific to falconer data...
-  E1 = falc_dat[falc_dat$env > 90 & falc_dat$env < 99.99, ]
-  E1_mean = as.integer(mean(E1$env))
-  E2 = falc_dat[falc_dat$env > 100 & falc_dat$env < 109.99, ]
-  E2_mean = as.integer(mean(E2$env))
-  E3 = falc_dat[falc_dat$env > 110 & falc_dat$env < 119.99, ]
-  E3_mean = as.integer(mean(E3$env))
-  E4 = falc_dat[falc_dat$env > 120 & falc_dat$env < 129.99, ]
-  E4_mean = as.integer(mean(E4$env))
 
-dat_avg = mean(falc_dat$phen) 
-dat_std = sd(falc_dat$phen)
-falc_dat$phen_corrected = ((falc_dat$phen-dat_avg)/dat_std)
+## Standardize and format data
+standardize_fun <- function(rawdat){
+  dat_avg = mean(rawdat$phen) 
+  dat_std = sd(rawdat$phen)
+  rawdat$phen_corrected = ((rawdat$phen-dat_avg)/dat_std)
+  rawdat$env = as.factor(rawdat$env)
+return(rawdat)
+}
 
+simdata = standardize_fun(simlin)
+falcdata = standardize_fun()
 ```
  
 ```{r}
-
-
 ## Gradient level analyses
+
 Gradient_level_fun  <- function(z){
   
-  ## Standardize data
-  #dat_avg = mean(z$phen) 
-  #dat_std = sd(z$phen)
-  #z$phen_corrected = ((z$phen-dat_avg)/dat_std)
-
   Cov_matrix = data.frame() # Covariance matrix
-  predicted_data = data.frame() # Model output 
-    
+
   # Environmental parameters
-  E_means = c(E1_mean,E2_mean,E3_mean,E4_mean) # Needs to be generalized.
-  E_hat = as.integer(mean(z$env))
+  E_hat = mean(z$exp_env) # Deal with integer problem later
   
   # Model
-  grand_mod = lm(phen_corrected ~ env + gen, data = z) 
+  grand_mod = lm(phen_corrected ~ exp_env + gen_factor, data = z) #additive vs. interaction
 
   # Predict phenotypic value for each genotype across <all> environments
-  temp_dat <- expand.grid(gen = unique(z$gen),
-                                env = seq(from = as.integer(min(z$env)),to = as.integer(max(z$env)),by=1),
-                                phen_corrected = 0)
+  temp_dat <- expand.grid(gen_factor = unique(z$gen_factor),
+                          exp_env = seq(from = as.integer(min(z$exp_env)), to = as.integer(max(z$exp_env),by=1)),
+                          phen_corrected = 0)
   mm = model.matrix(terms(grand_mod),temp_dat)
   temp_dat$phen_corrected = mm %*% coef(grand_mod) # Predicted phenotypes
 
-  # Add Error (if necessary)
-  #se <- sqrt(diag(vcov(grand_mod)))
-  #se <- data.frame(se)
-  #setDT(se, keep.rownames = TRUE)
-  #se <- filter(se, rn != "env")
-  #se$gen = levels(z$gen)
-  
-  #predicted_data = left_join(temp_dat, se, by = "gen")
-  #predicted_data$G_upr = predicted_data$phen_corrected + predicted_data$se
-  #predicted_data$G_lwr = predicted_data$phen_corrected - predicted_data$se
-
   # G_means
-  G_means = filter(temp_dat, env == E_hat)
+  G_means = filter(temp_dat, exp_env == as.integer(E_hat))
   
   # E_means
-  E_means1 = data.frame()
-  for(j in 1:length(E_means)){
-    env_dat = E_means[j]
-    E_dat = filter(temp_dat, env == env_dat)
-    E_temp_mean = mean(E_dat$phen_corrected)
-    #E_upr = E_temp_mean + (sigma(grand_mod))
-    #E_lwr = E_temp_mean - (sigma(grand_mod))
-    E_tempdat = data.frame()
-    E_tempdat = data.frame("E_means" = E_temp_mean)
-                           #"E_upr" = E_upr,
-                           #"E_lwr" = E_lwr)
-    E_means1 = rbind(E_means1, E_tempdat)
+  E_mean_temp = data.frame()
+  for(j in 1:length(unique(z$nat_env_mean))){
+    E = as.integer(unique(z$nat_env_mean)[j])
+    E_temp = temp_dat[which(temp_dat$exp_env == E),]
+    E_mean = mean(E_temp$phen_corrected)
+    E_mean_temp1 = data.frame("E_means" = E_mean,
+                              "exp_env" = unique(E_temp$exp_env))
+    E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
   }
   
   # Data output
   Cov_matrix = data.frame("gen" = unique(z$gen),
-                          "env" = E_means,
+                          "env" = unique(z$nat_env_mean),
                           "G_means" = G_means$phen_corrected,
-                          #"G_upr" = G_means$G_upr,
-                          #"G_lwr" = G_means$G_lwr,
-                          "E_means" = E_means1$E_means)
-                          #"E_upr" = E_means1$E_upr,
-                          #"E_lwr" = E_means1$E_lwr,
-                          #"g_se" = se$se,
-                          #"e_se" = rep((sigma(grand_mod)),nrow(E_means1)),
-                          #"e_sampsize" = rep(nrow(z),nrow(E_means1)),
-                          #"g_sampsize" = rep(nrow(z)/length(unique(z$gen)),nrow(E_means1)))
+                          "E_means" = E_mean_temp[,1])
   
   return(as.data.frame(Cov_matrix))
 }
@@ -359,7 +485,7 @@ Gradient_level_fun  <- function(z){
 ```{r}
 
 ## Generate predicted phenotypes for each G and E
-covariance_data = Gradient_level_fun(falc_dat)
+covariance_data = Gradient_level_fun(sim_dat)
 
 ## Covariance from data
 G <- c(covariance_data$G_means) 
@@ -369,25 +495,22 @@ E <- c(covariance_data$E_means)
 ```
 
 ```{r}
-
 ## Shuffle data for bootstrapping
-
+raw_dat = falc_dat
 shuffle_fun <- function(raw_dat){ 
     
   raw_dat2 = split(raw_dat,raw_dat$gen)
   temp_covmat = data.frame()
-  
+
   for(n in 1:length(raw_dat2)){
-      phen_temp = sample(raw_dat2[[n]][,"phen_corrected"], size = nrow(raw_dat2[[n]]), replace=TRUE)
-      temp_covmat. = data.frame("env" = raw_dat2[[n]][,"env"],
-                                "phen_corrected" = c(phen_temp),
-                                "gen" = raw_dat2[[n]][,"gen"])
-      temp_covmat = rbind(temp_covmat,temp_covmat.)
+      phen_temp = raw_dat2[[n]][sample(nrow(raw_dat2[[n]]), size = nrow(raw_dat2[[n]]),replace = TRUE),]
+      temp_covmat = rbind(temp_covmat,phen_temp)
     }
   return(temp_covmat)
 } 
 
 ```
+
 
 
 ```{r}
@@ -403,20 +526,63 @@ gen_cov_fun <- function(dat){
 }
 
 # Bootstrapped mean and confidence intervals
-new_dat <- replicate(100, gen_cov_fun(falc_dat), simplify=TRUE)
+new_dat <- replicate(100, gen_cov_fun(falc_dat), simplify=TRUE) #Repeat this same function to get permutation null dist.
 (cov_avg = mean(new_dat))  # should be similar to actual average 
 (cov_CI = quantile(unlist(new_dat), probs=c(0.025, 0.975), type=1)) # Get confidence intervals around covariance
 
 # Actual mean 
 real_dat = Gradient_level_fun(falc_dat)
-(cov_est_temp = cov(real_dat$G_means,real_dat$E_means))
-
-## THESE DONT MATCH.... UGHHHHHHH WHAT IN THE WORLDDDDD
+obs = (cov_est_temp = cov(real_dat$G_means,real_dat$E_means))
 ```
 
-*Extra code*
-May want to use in the future. We had correlation, but I (MA) removed it from current code since we are only using 2 estimates for G and E and therefore cannot estimate a correlation. 
-```{r Extra Code}
+```{r}
+## Permutation Function
+nulldat = falc_dat
+
+Perm_fun <- function(nulldat){
+  
+  nulldat2 = split(nulldat,nulldat$gen)
+  temp_nullmat = data.frame()
+  
+  for(i in 1:length(nulldat2)){
+
+  null_temp = sample(nulldat2[[i]][,"phen_corrected"], size = nrow(nulldat2[[i]]), replace=FALSE) 
+  temp_nullmat. <- data.frame("gen_factor" = nulldat2[[i]][,"gen_factor"],
+                              "env" = nulldat2[[i]][,"env"],
+                              "phen_corrected" = null_temp)
+  temp_nullmat = rbind(temp_nullmat, temp_nullmat.)
+  }
+  return(as.data.frame(temp_nullmat))
+}
+```
+
+```{r}
+null_cov_fun <- function(dat){
+  
+  shuffle_dat = Perm_fun(dat) #Shuffle
+  mean_dat = Gradient_level_fun(shuffle_dat) #Get G and E means
+  cov_null_temp = cov(mean_dat$G_means,mean_dat$E_means) #Estimate covariance
+  
+  return(cov_null_temp)
+}
+
+Perm_fun(falc_dat)
+
+null_dist <- replicate(100, Perm_fun(falc_dat), simplify=TRUE) 
+null_dist <- as.data.frame(unlist(null_dist))
+hist(null_dist$)
+# Permutation Hypothesis testing
+(rank(c(obs,new_dat))[1])/(length(new_dat)+1) # outside distribution (p = 0.0). Greater than 0.5, 1-value. Less than, keep. Probability of observing by chance
+
+#Plotting will add C.I.s from bootstrap
+
+```
+
+### Extra code ###
+
+Keeping in case code is useful in future. 
+
+```{r Extra Code, eval = FALSE}
 ## Was a part of code used in for-loop above, but presently unused. 
 rownames(sampling_dist_cov) <- c("covGE_boot", "corGE_boot")
 sampling_dist_cov <- data.frame(as.matrix(unlist(t(sampling_dist_cov))))
@@ -429,4 +595,58 @@ boxplot(phen~gen)
 
 var(phen)
 
+```
+
+Below is Molly's initial attempt at sims - ended up not taking this approach in favor of the above linear model approach.
+
+```{r ExtraCode2, eval = FALSE}
+G = scenario2$G
+E = scenario2$E
+n = scenario2$n
+GxE = scenario2$GxE
+
+simulateGV <- function(G, E, n, GxE){ 
+  ## G are genetic differences in phenotype 
+  ## E is environment difference in phenotype between populations
+  ## n is the sample size per population-environment combo
+  
+  # Calculate true covariance
+  (covGE_true <- cov(G, E))
+
+  new_data = data.frame()
+  # Simulate new data
+  for(i in 1:length(G)){
+    for(j in 1:length(E)){
+      for(k in 1:length(GxE)){
+        
+    simdat <- G[i] + E[j] + GxE[k] + rnorm(n,0,1) #Is this correct - sd of 1?
+    new_data. <- data.frame("gen" = G[i],
+                            "gen_factor" = rep(paste("G",order(G)[i],sep="_"), each = nrow(simdat)),
+                            "env" = E[j],
+                            "env_factor" = rep(paste("E",order(E)[j],sep="_"), each = nrow(simdat)),
+                            "GxE" = GxE[k],
+                            "phen" = simdat)
+    new_data = rbind(new_data, new_data.)
+      }
+    }
+  }
+
+  data_GE <- data.frame("phen" = new_data$phen, 
+                        "gen" = new_data$gen_factor, 
+                        "env" = new_data$env_factor)
+#generalize
+  for(l in 1: )
+  (covGE_data <- cov(c(mean(phen[gen=="G_1"]),
+                       mean(phen[gen=="G_2"])), 
+                     c(mean(phen[env=="E_1"]), 
+                       mean(phen[env=="E2"]))
+    ))
+    
+  return(list(data_GE=data_GE, 
+              covGE_true=covGE_true, 
+              covGE_data=covGE_data)) 
+              #corGE_true = corGE_true, corGE_data=corGE_data))
+}
+
+ggplot(data = data_GE, aes(y=phen,x=env,group = gen)) + geom_smooth() + theme_classic()
 ```
