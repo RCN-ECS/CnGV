@@ -14,11 +14,43 @@ library("tidyverse")
 
 ```{r}
 base_intercept = 1.0 
-int_eff = seq(from = 0, to = 10.0, by = .1) # Intercept increase
+int_eff = seq(from = 0, to = 5.0, by = .1) # Intercept increase
 b1 = 0.5 # Slope
 env = c(1:5) # environmental gradient
 sd = seq(from = 0, to = 1, by = 0.1)
-reps = seq(from = 1, to = 10, by = 1)
+reps = seq(from = 5, to = 10, by = 1)
+
+input_df <- list(
+  "intercept_G2" = seq(from = -5, to = 5, by = 2),
+  "slope_G2" = seq(from = -1, to = 1, by = 1),
+  "intercept_G1" = 0,
+  "slope_G1" = seq(from = -1, to = 1, by = 1),
+  "sd" = seq(from = 0, to = 1, by = 0.1),
+  "reps" = seq(from = 5, to = 10, by = 1),
+  "G1_env" = 0, 
+  "G2_env" = 1, 
+  "env_num" = c(2,5,10), 
+  "env" = 0, # environmental gradient
+  "true_covGE" = 0, #estimate
+  "is.GxE" = 0, #logical binary
+  "slope_diff" = 0) #estimate
+
+output_df <- list(
+  "lm_type" = 0,
+  "est_covGE_lm" = 0,
+  "lowCI_covGE_lm" = 0,
+  "highCI_covGE_lm" = 0,
+  "lowCI_GxE_lm" = 0,
+  "highCI_GxE_lm" = 0,
+  "GxE_R2" = 0,
+  "slope_G1_lm" = 0,
+  "slope_G2_lm" = 0,
+  "intercept_G1_lm" = 0,
+  
+  
+  
+  
+)
 
 
 data_generation_noGxE <- function(base_intercept, int_eff, b1, env, sd, replicates){
@@ -52,7 +84,7 @@ data_generation_noGxE <- function(base_intercept, int_eff, b1, env, sd, replicat
       dat_temp = rbind(base_temp, change_temp)
       
       # Model
-      test_temp = lm(phen ~ env + gen, data = dat_temp)
+      test_temp = lm(phen ~ env * gen, data = dat_temp)
       pval = summary(test_temp)$coefficients[,4][3]
       lwr_ci = confint(test_temp)[3]
       upr_ci = confint(test_temp)[6]
