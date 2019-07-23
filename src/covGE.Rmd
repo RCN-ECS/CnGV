@@ -24,12 +24,12 @@ input <- list(
   "sd" = seq(from = 0, to = 1, by = 0.5),
   "reps" = seq(from = 5, to = 10, by = 2),
   "env_num" = c(2,5,10), 
-  "env" = 0,
-  "G1_env" = 0,
-  "G2_env" = 0,
-  "true_covGE" = 0, 
-  "is.GxE" = 0, 
-  "slope_diff" = 0) 
+  "env" = NA,
+  "G1_env" = NA,
+  "G2_env" = NA,
+  "true_covGE" = NA, 
+  "is.GxE" = NA, 
+  "slope_diff" = NA) 
 
 output_df = data.frame()
 ```
@@ -107,8 +107,8 @@ the_ring <- function(input_df){
                   
                   # Model and outputs
                   
-                  if(is.GxE == "no")
-                    {test_temp = lm(phen_corrected ~ env + gen, data = dat_temp)
+                  if(is.GxE == "no"){
+                    test_temp = lm(phen_corrected ~ env + gen, data = dat_temp)
                     lm_type = "No_GxE"
                     slope_G1_lm = summary(test_temp)[[4]][2,1]
                     slope_G2_lm = summary(test_temp)[[4]][2,1]
@@ -123,9 +123,11 @@ the_ring <- function(input_df){
                     highCI_G1_slope_lm = confint(test_temp)[5]
                     lowCI_G2_slope_lm = confint(test_temp)[2]
                     highCI_G2_slope_lm = confint(test_temp)[5]
-                    GxE_R2 = 0} else 
-    
-                    {test_temp = lm(phen_corrected ~ env * gen, data = dat_temp)
+                    E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+                    G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+                    GxE_R2 = 0
+                    }else{
+                    test_temp = lm(phen_corrected ~ env * gen, data = dat_temp)
                     lm_type = "GxE"
                     slope_G1_lm = summary(test_temp)[[4]][2,1]
                     slope_G2_lm = (summary(test_temp)[[4]][2,1]+summary(test_temp)[[4]][4,1])
@@ -140,14 +142,15 @@ the_ring <- function(input_df){
                     highCI_G1_slope_lm = confint(test_temp)[6]
                     lowCI_G2_slope_lm = confint(test_temp)[4]
                     highCI_G2_slope_lm = confint(test_temp)[8]
-                    GxE_R2 = (summary.aov(test_temp)[[1]][3,2]/(summary.aov(test_temp)[[1]][1,2]+
-                                                summary.aov(test_temp)[[1]][2,2]+
-                                                summary.aov(test_temp)[[1]][4,2]))}
+                    E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+                    G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+                    GxE_R2 = summary.aov(test_temp)[[1]][3,2]/sum(summary.aov(test_temp)[[1]][,2])
+                    }
                   
                   # To Estimate Covariance
                   cov_temp <- expand.grid(gen = unique(dat_temp$gen),
                                           env = seq(from = as.integer(min(dat_temp$env)), to = as.integer(max(dat_temp$env),by=1)),
-                                          phen_corrected = 0)
+                                          phen_corrected = NA)
                   mm = model.matrix(terms(test_temp),cov_temp)
                   cov_temp$phen_corrected = mm %*% coef(test_temp) # Predicted phenotypes
                   pvar1 <- diag(mm %*% tcrossprod(vcov(test_temp),mm))
@@ -175,6 +178,11 @@ the_ring <- function(input_df){
                     }
                   
                   # Data output
+                  RECODE TO USE ORIGINAL DATA - DONT FUDGE IT
+                  CONF INT SHOULD COME FROM BOOTSTRAP - USE SAME FUNCTION ON THIS DATASET FOR EACH LOOP
+                  AS WE USE ON REAL DATASET
+                  TAKE DATASET YOU CREATE FROM THE TOP AND USE BOOTSTRAP
+                  PVALUE FOR COV WILL COME FROM PERMUTATION
                   Cov_matrix = data.frame("gen" = unique(dat_temp$gen),
                                           "env" = as.factor(unique(dat_temp$E_mean)),
                                           "G_means" = G_means$phen_corrected,
@@ -185,8 +193,10 @@ the_ring <- function(input_df){
                                           "E_mean_highCI" = E_mean_temp[,3])
                   
                   if(type_temp == "cogv"){
-                  est_covGE_lm = cov(Cov_matrix$G_means,Cov_matrix$E_means)}else{
-                  est_covGE_lm = cov(Cov_matrix$G_means,-(Cov_matrix$E_means))}
+                  est_covGE_lm = cov(Cov_matrix$G_means,Cov_matrix$E_means)
+                  }else{
+                  est_covGE_lm = cov(Cov_matrix$G_means,-(Cov_matrix$E_means))
+                  }
                   
                   output_df. <- data.frame("lm_type" = lm_type,
                                            "type" = type_temp,
@@ -213,6 +223,9 @@ the_ring <- function(input_df){
                                            "highCI_G1_slope_lm" = highCI_G1_slope_lm,
                                            "lowCI_G2_slope_lm" = lowCI_G2_slope_lm,
                                            "highCI_G2_slope_lm" = highCI_G2_slope_lm)
+                  LOW_CI_COVGE
+                  HIGH_CI_COVGE
+                  P_COVGE (check if right tail p = 1-p)
                   output_df = rbind(output_df,output_df.)
               }
             }
