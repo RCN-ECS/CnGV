@@ -13,46 +13,229 @@ library("tidyverse")
 ### Simulations ###
 
 ```{r}
-base_intercept = 1.0 
-int_eff = seq(from = 0, to = 5.0, by = .1) # Intercept increase
-b1 = 0.5 # Slope
-env = c(1:5) # environmental gradient
-sd = seq(from = 0, to = 1, by = 0.1)
-reps = seq(from = 5, to = 10, by = 1)
 
-input_df <- list(
-  "intercept_G2" = seq(from = -5, to = 5, by = 2),
-  "slope_G2" = seq(from = -1, to = 1, by = 1),
+## Establish dataframes
+input <- list(
+  "type" = c("cogv","cngv"),
   "intercept_G1" = 0,
-  "slope_G1" = seq(from = -1, to = 1, by = 1),
-  "sd" = seq(from = 0, to = 1, by = 0.1),
-  "reps" = seq(from = 5, to = 10, by = 1),
-  "G1_env" = 0, 
-  "G2_env" = 1, 
+  "slope_G1" = seq(from = -1, to = 1, by = 0.1),
+  "intercept_G2" = seq(from = -5, to = 5, by = 2),
+  "slope_G2" = seq(from = -1, to = 1, by = 0.1),
+  "sd" = seq(from = 0, to = 1, by = 0.5),
+  "reps" = seq(from = 5, to = 10, by = 2),
   "env_num" = c(2,5,10), 
-  "env" = 0, # environmental gradient
-  "true_covGE" = 0, #estimate
-  "is.GxE" = 0, #logical binary
-  "slope_diff" = 0) #estimate
+  "env" = 0,
+  "G1_env" = 0,
+  "G2_env" = 0,
+  "true_covGE" = 0, 
+  "is.GxE" = 0, 
+  "slope_diff" = 0) 
 
-output_df <- list(
-  "lm_type" = 0,
-  "est_covGE_lm" = 0,
-  "lowCI_covGE_lm" = 0,
-  "highCI_covGE_lm" = 0,
-  "lowCI_GxE_lm" = 0,
-  "highCI_GxE_lm" = 0,
-  "GxE_R2" = 0,
-  "slope_G1_lm" = 0,
-  "slope_G2_lm" = 0,
-  "intercept_G1_lm" = 0,
-  
-  
-  
-  
-)
+output_df = data.frame()
+```
+
+```{r Lord of the Function}
 
 
+## One function to rule them all
+the_ring <- function(input_df){
+  
+  # Starting Parameters
+  type = input_df$type
+  intercept_G1 = input_df$intercept_G1
+  slope_G1 = input_df$slope_G1
+  intercept_G2 = input_df$intercept_G2
+  slope_G2 = input_df$slope_G2
+  sd = input_df$sd
+  reps = input_df$reps
+  G1_env = input_df$G1_env
+  G2_env = input_df$G2_env
+  env_num = input_df$env_num
+  env = input_df$env
+  true_covGE = input_df$true_covGE
+  is.GxE = input_df$is.GxE
+  slope_diff = input_df$slope_diff
+  
+  for(a in 1:env_num){
+    for(b in 1:length(unique(input_df$type))){
+    
+    env_num_temp = env_num[a]
+    type_temp = type[b]
+  
+    # Set environmental parameters
+    if(env_num_temp == 2){env = c(1,5)}else if (env_num_temp == 5){env = c(1,2,3,4,5)}else{env = seq(from = 0.5, to = 5, by = 0.5)}
+    
+    # Match genotypes to phenotypes
+    if(type_temp == "cogv"){((G1_env= 1) & (G2_env = 5)) }else{ ((G1_env= 5) & (G2_env = 1))}
+  
+  
+    for(c in 1:length(env)){
+      for(d in 1:length(slope_G1)){
+        for(e in 1:length(intercept_G2)){
+          for(f in 1:length(slope_G2)){
+            for(g in 1:length(sd)){
+              for(h in 1:length(reps)){
+                  
+                  # GxE logical
+                  if(slope_G1[d] == slope_G2[f]){is.GxE = "no"} else {is.GxE = "yes"}
+                  
+                  # Difference in slope
+                  slope_diff = (slope_G2[f] - slope_G1[d])
+                  
+                  dat_temp = data.frame()
+                  
+                  # Generate data 
+                  phen1 = c(replicate(reps[h], (intercept_G1 + slope_G1[d] * env + (rnorm(env_num_temp, 0, sd[g])))))
+                  temp1 = data.frame("phen" = phen1,
+                                     "gen" = rep("G1", length(env_num_temp*reps[h])),
+                                     "env" = rep(env, reps[h]),
+                                     "E_mean" = rep(G1_env,length(env_num_temp*reps[h])),
+                                     "sample_size" = rep(reps[h], length(env_num_temp)*reps[h]))
+                    
+                  phen2 = c(replicate(reps[h], (intercept_G2[e] + slope_G2[f] * env + (rnorm(env_num_temp, 0, sd[g])))))
+                  temp2 = data.frame("phen" = phen2,
+                                     "gen" = rep("G2", length(env_num_temp*reps[h])),
+                                     "env" = rep(env, reps[h]),
+                                     "E_mean" = rep(G2_env,length(env_num_temp*reps[h])),
+                                     "sample_size" = rep(reps[h], length(env_num_temp*reps[h])))
+                  dat_temp = rbind(temp1, temp2)
+                  
+                  # Standardize generated data
+                  dat_avg = mean(dat_temp$phen) 
+                  dat_std = sd(dat_temp$phen)
+                  dat_temp$phen_corrected = ((dat_temp$phen-dat_avg)/dat_std)
+                  
+                  # Model and outputs
+                  
+                  if(is.GxE == "no")
+                    {test_temp = lm(phen_corrected ~ env + gen, data = dat_temp)
+                    lm_type = "No_GxE"
+                    slope_G1_lm = summary(test_temp)[[4]][2,1]
+                    slope_G2_lm = summary(test_temp)[[4]][2,1]
+                    intercept_G1_lm = summary(test_temp)[[4]][1,1]
+                    intercept_G2_lm = (summary(test_temp)[[4]][1,1]+summary(test_temp)[[4]][3,1])
+                    slope_GxE_lm = 0
+                    lowCI_G1_int_lm = confint(test_temp)[1]
+                    highCI_G1_int_lm = confint(test_temp)[4]
+                    lowCI_G2_int_lm = confint(test_temp)[3]
+                    highCI_G2_int_lm = confint(test_temp)[6]
+                    lowCI_G1_slope_lm = confint(test_temp)[2]
+                    highCI_G1_slope_lm = confint(test_temp)[5]
+                    lowCI_G2_slope_lm = confint(test_temp)[2]
+                    highCI_G2_slope_lm = confint(test_temp)[5]
+                    GxE_R2 = 0} else 
+    
+                    {test_temp = lm(phen_corrected ~ env * gen, data = dat_temp)
+                    lm_type = "GxE"
+                    slope_G1_lm = summary(test_temp)[[4]][2,1]
+                    slope_G2_lm = (summary(test_temp)[[4]][2,1]+summary(test_temp)[[4]][4,1])
+                    intercept_G1_lm = summary(test_temp)[[4]][1,1]
+                    intercept_G2_lm = (summary(test_temp)[[4]][1,1]+summary(test_temp)[[4]][3,1])
+                    slope_GxE_lm = summary(test_temp)[[4]][4,1]
+                    lowCI_G1_int_lm = confint(test_temp)[1]
+                    highCI_G1_int_lm = confint(test_temp)[5]
+                    lowCI_G2_int_lm = confint(test_temp)[3]
+                    highCI_G2_int_lm = confint(test_temp)[7]
+                    lowCI_G1_slope_lm = confint(test_temp)[2]
+                    highCI_G1_slope_lm = confint(test_temp)[6]
+                    lowCI_G2_slope_lm = confint(test_temp)[4]
+                    highCI_G2_slope_lm = confint(test_temp)[8]
+                    GxE_R2 = (summary.aov(test_temp)[[1]][3,2]/(summary.aov(test_temp)[[1]][1,2]+
+                                                summary.aov(test_temp)[[1]][2,2]+
+                                                summary.aov(test_temp)[[1]][4,2]))}
+                  
+                  # To Estimate Covariance
+                  cov_temp <- expand.grid(gen = unique(dat_temp$gen),
+                                          env = seq(from = as.integer(min(dat_temp$env)), to = as.integer(max(dat_temp$env),by=1)),
+                                          phen_corrected = 0)
+                  mm = model.matrix(terms(test_temp),cov_temp)
+                  cov_temp$phen_corrected = mm %*% coef(test_temp) # Predicted phenotypes
+                  pvar1 <- diag(mm %*% tcrossprod(vcov(test_temp),mm))
+                  cov_temp <- data.frame(cov_temp,
+                                         plo = cov_temp$phen_corrected-1.96*sqrt(pvar1),
+                                         phi = cov_temp$phen_corrected+1.96*sqrt(pvar1))
+                  
+                  # G_means
+                  E_hat = mean(env)
+                  G_means = filter(cov_temp, env == E_hat)
+                  
+                  # E_means
+                  E_mean_temp = data.frame()
+                  for(j in 1:length(unique(dat_temp$E_mean))){
+                    E = unique(dat_temp$E_mean)[j]
+                    E_temp = cov_temp[which(cov_temp$env == E),]
+                    E_mean = mean(E_temp$phen_corrected)
+                    E_mean_lowCI = mean(E_temp$plo)
+                    E_mean_highCI = mean(E_temp$phi)
+                    E_mean_temp1 = data.frame("E_mean" = E_mean,
+                                              "E_mean_lowCI" = E_mean_lowCI,
+                                              "E_mean_highCI" = E_mean_highCI,
+                                              "env" = unique(E_temp$env))
+                    E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
+                    }
+                  
+                  # Data output
+                  Cov_matrix = data.frame("gen" = unique(dat_temp$gen),
+                                          "env" = as.factor(unique(dat_temp$E_mean)),
+                                          "G_means" = G_means$phen_corrected,
+                                          "G_means_lowCI" = G_means$plo,
+                                          "G_means_highCI" = G_means$phi,
+                                          "E_means" = E_mean_temp[,1],
+                                          "E_mean_lowCI" = E_mean_temp[,2],
+                                          "E_mean_highCI" = E_mean_temp[,3])
+                  
+                  if(type_temp == "cogv"){
+                  est_covGE_lm = cov(Cov_matrix$G_means,Cov_matrix$E_means)}else{
+                  est_covGE_lm = cov(Cov_matrix$G_means,-(Cov_matrix$E_means))}
+                  
+                  output_df. <- data.frame("lm_type" = lm_type,
+                                           "type" = type_temp,
+                                           "sd" = sd[g],
+                                           "slope_G1" = slope_G1[e],
+                                           "slope_G2" = slope_G2[f],
+                                           "intercept_G1" = intercept_G1,
+                                           "intercept_G2" = intercept_G2[e],
+                                           "env_num" = env_num_temp,
+                                           "sample_size" = reps[h],
+                                           "est_covGE_lm" = est_covGE_lm,
+                                           "GxE_R2" = GxE_R2,
+                                           "slope_G1_lm" = slope_G1_lm,
+                                           "slope_G2_lm" = slope_G2_lm,
+                                           "intercept_G1_actual" = intercept_G1,
+                                           "intercept_G1_lm" = intercept_G1_lm,
+                                           "intercept_G2_actual" = intercept_G2[e],
+                                           "intercept_G2_lm" = intercept_G2_lm, 
+                                           "slope_GxE_lm" = slope_GxE_lm,
+                                           "lowCI_G1_int_lm" = lowCI_G1_int_lm,
+                                           "highCI_G1_int_lm" = highCI_G1_int_lm,
+                                           "highCI_G2_int_lm" = highCI_G2_int_lm,
+                                           "lowCI_G1_slope_lm" = lowCI_G1_slope_lm,
+                                           "highCI_G1_slope_lm" = highCI_G1_slope_lm,
+                                           "lowCI_G2_slope_lm" = lowCI_G2_slope_lm,
+                                           "highCI_G2_slope_lm" = highCI_G2_slope_lm)
+                  output_df = rbind(output_df,output_df.)
+              }
+            }
+          }
+        }
+      }
+    }
+    }
+  }
+   return(output_df)
+  }
+
+test_dat = the_ring(input)
+ggplot(data = dat_temp, aes(x = env, y = phen_corrected, group = gen)) + 
+  geom_smooth() + theme_classic() + geom_hline(yintercept = 0.7,lty = 2) + 
+  geom_hline(yintercept = 0.92,col = 2) + geom_hline(yintercept = -0.92,col = 2) +
+  geom_hline(yintercept = -0.7,lty = 2) + geom_vline(xintercept = 3,lty=2)+
+  geom_vline(xintercept = 1,col=2)+geom_vline(xintercept = 5,col=2)
+
+test_dat[2000:2050,]
+```
+
+```{r Simple linear model}
 data_generation_noGxE <- function(base_intercept, int_eff, b1, env, sd, replicates){
     
   lmdat = data.frame()
