@@ -16,14 +16,14 @@ library("tidyverse")
 
 ## Establish dataframes
 input <- list(
-  "type" = c("cogv","cngv"),
+  "type" = "cogv",#c("cogv","cngv"),
   "intercept_G1" = 0,
-  "slope_G1" = seq(from = -1, to = 1, by = 0.1),
-  "intercept_G2" = seq(from = -5, to = 5, by = 2),
-  "slope_G2" = seq(from = -1, to = 1, by = 0.1),
-  "sd" = seq(from = 0, to = 1, by = 0.5),
-  "reps" = seq(from = 5, to = 10, by = 2),
-  "env_num" = c(2,5,10), 
+  "slope_G1" = 0.5,#seq(from = -1, to = 1, by = 0.1),
+  "intercept_G2" = 1.5,#seq(from = -5, to = 5, by = 2),
+  "slope_G2" = 0.75,#seq(from = -1, to = 1, by = 0.1),
+  "sd" = 1,#seq(from = 0, to = 1, by = 0.5),
+  "reps" = 3,#seq(from = 5, to = 10, by = 2),
+  "env_num" = 5,#c(2,5,10), 
   "env" = 0,
   "G1_env" = 0,
   "G2_env" = 0,
