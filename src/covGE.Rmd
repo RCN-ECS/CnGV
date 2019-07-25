@@ -16,27 +16,30 @@ library("tidyverse")
 
 ## Establish dataframes
 input <- list(
-  "type" = "cogv",#c("cogv","cngv"),
+  "type" = "cngv",#c("cogv","cngv"),
   "intercept_G1" = 0,
   "slope_G1" = 0.5,#seq(from = -1, to = 1, by = 0.1),
   "intercept_G2" = 1.5,#seq(from = -5, to = 5, by = 2),
-  "slope_G2" = 0.5,#seq(from = -1, to = 1, by = 0.1),
+  "slope_G2" = 0.75,#seq(from = -1, to = 1, by = 0.1),
   "sd" = 1,#seq(from = 0, to = 1, by = 0.5),
   "sample_size" = 3,#seq(from = 5, to = 10, by = 2),
   "env_num" = 5,#c(2,5,10), 
-  "env" = NA,
+  "env" = c(1:5),#NA,
   "G1_env" = NA,
   "G2_env" = NA,
   "true_covGE" = NA, 
   "is.GxE" = NA, 
   "slope_diff" = NA) 
 
-
-output_df = data.frame()
+# Output Data frames
+covariance_output_df = data.frame()
+model_output_df = data.frame()
+power_output_df = data.frame()
 ```
 
 ```{r Lord of the Function}
-
+input_df = input
+a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=r=s=t=z=1
 
 ## One function to rule them all
 the_ring <- function(input_df){
@@ -57,23 +60,24 @@ the_ring <- function(input_df){
   is.GxE = input_df$is.GxE
   slope_diff = input_df$slope_diff
   
-  for(a in 1:env_num){
+  for(a in 1:env_num){ # Rethink this... unecessarily replicating data.
     for(b in 1:length(unique(input_df$type))){
     
-    env_num_temp = env_num[a]
+    #env_num_temp = env_num[a] # Change back to this when I run more than one
+    env_num_temp = env_num
     type_temp = type[b]
   
     # Set environmental parameters
-    if(env_num_temp == 2){env = c(1,5)
-    }else if (env_num_temp == 5){env = c(1,2,3,4,5)
-    }else{env = seq(from = 0.5, to = 5, by = 0.5)}
+    #if(env_num_temp == 2){env = c(1,5) # Change back when I run more than one
+    #}else if (env_num_temp == 5){env = c(1,2,3,4,5)
+    #}else{env = seq(from = 0.5, to = 5, by = 0.5)}
     
     # Match genotypes to phenotypes
     if(type_temp == "cogv"){((G1_env= 1) & (G2_env = 5)) 
       }else{ ((G1_env= 5) & (G2_env = 1))}
   
   
-    for(c in 1:length(env)){
+    #for(c in 1:length(env)){ # may not need this? 
       for(d in 1:length(slope_G1)){
         for(e in 1:length(intercept_G2)){
           for(f in 1:length(slope_G2)){
@@ -89,7 +93,7 @@ the_ring <- function(input_df){
                   dat_temp = data.frame()
                   
                   # Generate data 
-                  for(i in 1:10){
+                  for(i in 1:100){
                     iteration = i
                     phen1 = c(replicate(sample_size[h], (intercept_G1 + slope_G1[d] * env + (rnorm(env_num_temp, 0, sd[g])))))
                     temp1 = data.frame("iteration" = iteration,
@@ -108,7 +112,9 @@ the_ring <- function(input_df){
                                        "sample_size" = rep(reps[h], length(env_num_temp*reps[h])))
                     dat_temp. = rbind(temp1, temp2)
                     dat_temp = rbind(dat_temp, dat_temp.)
-                    }
+                  }
+                  
+ ## Check - whole dataset or each iteration separately?
                   
                   # Standardize generated data
                   dat_avg = mean(dat_temp$phen) 
@@ -163,7 +169,7 @@ the_ring <- function(input_df){
                     GxE_R2 = anova(test_temp)[3,2]/sum(anova(test_temp)[2])
                     }
                   
-                  # Generate Covariance Matrices
+                  # Generate Matrices for Covariance and Permutations
                   if(result[[2,8]] > 0.05){
                     
                     cov_temp = data.frame()
@@ -196,6 +202,13 @@ the_ring <- function(input_df){
                     }
                     }
                   
+                  # Assign native environments
+                  cov_temp$G_env = NA
+                  for(z in 1:nrow(cov_temp)){
+                    if(cov_temp$gen[z] == "G1"){cov_temp$G_env[z] = G1_env}else{{cov_temp$G_env[z] = G2_env}}
+                  }
+                  
+                  # Covariance Emeans and Gmeans
                   Cov_matrix = data.frame()
                   for(l in 1:length(unique(cov_temp$iteration))){
                     iter = unique(cov_temp$iteration)[l]
@@ -208,12 +221,12 @@ the_ring <- function(input_df){
                     # E_means
                     E_mean_temp = data.frame()
                     
-                    for(m in 1:length(unique(iter_dat2$gen))){
-                      E = unique(iter_dat2$gen)[m]
-                      E_temp = iter_dat2[which(iter_dat2$gen == E),]
+                    for(m in 1:length(unique(iter_dat2$G_env))){
+                      E = unique(iter_dat2$G_env)[m]
+                      E_temp = iter_dat2[which(iter_dat2$env == E),]
                       E_mean = mean(E_temp$phen_predicted)
                       E_mean_temp1 = data.frame("E_mean" = E_mean,
-                                                "gen" = unique(E_temp$gen),
+                                                #"gen" = unique(E_temp$gen),
                                                 "iteration" = unique(E_temp$iteration))
                       E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
                     }
@@ -226,40 +239,89 @@ the_ring <- function(input_df){
                     Cov_matrix = rbind(Cov_matrix,Cov_matrix.)
                   }
                   
+                  # Covariance matrix
                   cov_dat = data.frame()
                   for(n in 1:length(unique(Cov_matrix$iteration))){
                     iter = unique(Cov_matrix$iteration)[n]
                     iter_dat3 = filter(Cov_matrix, iteration == iter)
                   
-                    cov_dat. = data.frame("cov_est" = cov(iter_dat3$G_means,iter_dat3$E_means))
+                    cov_dat. = data.frame("cov_est" = cov(iter_dat3$G_means,iter_dat3$E_means)) 
                     cov_dat = rbind(cov_dat, cov_dat.)
                     
                   }
                   
-                  # Estimate covariance
+                  # Average Covariance and CI's
                   cov_avg = mean(cov_dat[,1])  
                   cov_CI = quantile(cov_dat[,1], probs=c(0.025, 0.975), type=1) 
                   
-                  ## Next, come up with way to do permutation 
-                  # Not sure where to sample from? definitely from dat_temp, but each iteration or full? 
-  temp_nullmat = data.frame()
-  
-  for(i in 1:length(nulldat2)){
-
-  null_temp = sample(nulldat2[[i]][,"phen_corrected"], size = nrow(nulldat2[[i]]), replace=FALSE) 
-  temp_nullmat. <- data.frame("gen_factor" = nulldat2[[i]][,"gen_factor"],
-                              "env" = nulldat2[[i]][,"env"],
-                              "phen_corrected" = null_temp)
-  temp_nullmat = rbind(temp_nullmat, temp_nullmat.)
-  }
-  return(as.data.frame(temp_nullmat))
-}
-
-# Permutation Hypothesis testing
-(rank(c(obs,new_dat))[1])/(length(new_dat)+1) # outside distribution (p = 0.0). Greater than 0.5, 1-value. Less than, keep. Probability of observing by chance
-
+                  # Shuffle matrices for Permutation
+                  temp_nullmat = data.frame()
+                  for(o in 1:length(unique(cov_temp$iteration))){
+                    iter = unique(cov_temp$iteration)[o]
+                    temp_null = filter(cov_temp, iteration == iter)
+                    
+                    null_temp = sample(temp_null[,"phen_predicted"], size = nrow(temp_null), replace=FALSE) 
+                    
+                    temp_nullmat. <- data.frame("gen" = temp_null[,"gen"],
+                                                "env" = temp_null[,"env"],
+                                                "phen_predicted" = null_temp,
+                                                "iteration" = temp_null[,"iteration"],
+                                                "G_env" = temp_null[,"G_env"])
+                    temp_nullmat = rbind(temp_nullmat, temp_nullmat.)
+                  }
                   
+                  # Re-estimate G and E means on reshuffled data
+                  Perm_matrix = data.frame()
+                  for(p in 1:length(unique(temp_nullmat$iteration))){
+                    iter = unique(temp_nullmat$iteration)[p]
+                    iter_dat3 = filter(temp_nullmat, iteration == iter)
                   
+                    # G_means
+                    E_hat = mean(env)
+                    G_means = filter(iter_dat3, env == E_hat)
+                  
+                    # E_means
+                    E_mean_temp = data.frame()
+                    
+                    for(q in 1:length(unique(iter_dat3$G_env))){
+                      E = unique(iter_dat3$G_env)[q]
+                      E_temp = iter_dat3[which(iter_dat3$env == E),]
+                      E_mean = mean(E_temp$phen_predicted)
+                      E_mean_temp1 = data.frame("E_mean" = E_mean,
+                                                #"gen" = unique(E_temp$gen),
+                                                "iteration" = unique(E_temp$iteration))
+                      E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
+                    }
+                    
+                    Perm_matrix. = data.frame("gen" = unique(temp_nullmat$gen),
+                                              "G_means" = G_means$phen_predicted,
+                                              "E_means" = E_mean_temp[,1],
+                                              "iteration" = rep(iter,2))
+                    Perm_matrix = rbind(Perm_matrix,Perm_matrix.)
+                  }
+                  
+                  # Calculate permutation covariance estimates
+                  perm_dat = data.frame()
+                  for(r in 1:length(unique(Perm_matrix$iteration))){
+                    iter = unique(Perm_matrix$iteration)[r]
+                    iter_dat4 = filter(Perm_matrix, iteration == iter)
+                  
+                    perm_dat. = data.frame("cov_est" = cov(iter_dat4$G_means,iter_dat4$E_means))
+                    perm_dat = rbind(perm_dat, perm_dat.)
+                    
+                  }
+                  
+                  # Estimate p-values
+                  alpha = 0.05
+                  nulldist_lwrCI = quantile(perm_dat[,1], alpha/2)
+                  nulldist_uprCI = quantile(perm_dat[,1], 1-alpha/2)
+                  
+                  is.sig = NA
+                  if( (cov_avg < nulldist_lwrCI[[1]]) | (cov_avg > nulldist_uprCI[[1]]) ) {is.sig = "yes"}else{is.sig = "no"}
+
+                                    
+                  perm_val = (rank(c(cov_avg,perm_dat[,1]))[1])/(length(perm_dat[,1])+1) #Check this
+                  (pvalue <- perm_val/(length(unique(Perm_matrix$iteration)) + 1))
                   
                   covariance_output_df. <- data.frame("lm_type" = lm_type,
                                            "type" = type_temp,
@@ -273,7 +335,11 @@ the_ring <- function(input_df){
                                            "cov_avg" = cov_avg,
                                            "cov_lwrCI" = cov_CI[[1]],
                                            "cov_uprCI" = cov_CI[[2]],
-                                           "pval" = PVALUE) 
+                                           "nulldist_lwrCI" = nulldist_lwrCI[[1]],
+                                           "nulldist_uprCI" = nulldist_uprCI[[1]],
+                                           "is.sig" = is.sig,
+                                           "cov_pval" = pvalue) 
+                  covariance_output_df = rbind(covariance_output_df, covariance_output_df.)
                   
                   model_output_df. <- data.frame("lm_type" = lm_type,
                                            "type" = type_temp,
@@ -301,11 +367,9 @@ the_ring <- function(input_df){
                                            "highCI_G1_slope_lm" = highCI_G1_slope_lm,
                                            "lowCI_G2_slope_lm" = lowCI_G2_slope_lm,
                                            "highCI_G2_slope_lm" = highCI_G2_slope_lm)
-                  #LOW_CI_COVGE
-                 # HIGH_CI_COVGE
-                  #P_COVGE (check if right tail p = 1-p)
-                  output_df = rbind(output_df,output_df.)
-              }
+                  
+                  model_output_df = rbind(model_output_df,model_output_df.)
+             # }
             }
           }
         }
@@ -313,10 +377,15 @@ the_ring <- function(input_df){
     }
     }
   }
-   return(output_df)
+   return(list(model_output_df,covariance_output_df))
   }
 
-test_dat = the_ring(input)
+test = the_ring(input)
+model_output_df = test[[1]]
+covariance_output_df = test[[2]]
+
+
+
 ggplot(data = dat_temp, aes(x = env, y = phen_corrected, group = gen)) + 
   geom_smooth() + theme_classic() + geom_hline(yintercept = 0.7,lty = 2) + 
   geom_hline(yintercept = 0.92,col = 2) + geom_hline(yintercept = -0.92,col = 2) +
