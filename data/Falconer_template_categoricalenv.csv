@@ -1,0 +1,33 @@
+﻿Study_ID_phenotype,First_Author,gen_factor,exp_env,Native_env_cont,Native_env_cat,nat_env_mean,nat_env_sd,nat_env_factor,phen
+,falconer,G_0.8,one ,99.33,0.3,,,one,90.93
+,falconer,G_0.8,three,99.33,0.3,,,one,87.904
+,falconer,G_0.8,three,99.33,0.3,,,one,95.121
+,falconer,G_0.8,two ,99.33,0.3,,,one,102.337
+,falconer,G_0.8,three,99.33,0.3,,,one,107.667
+,falconer,G_0.8,four,99.33,0.3,,,one,100.927
+,falconer,G_0.8,four,99.33,0.3,,,one,113.338
+,falconer,G_0.8,four,99.33,0.3,,,one,119.788
+,falconer,G_0.5,one ,107.4177,0.21,,,two,116.059
+,falconer,G_0.5,two ,107.4177,0.21,,,two,119.565
+,falconer,G_0.5,three,107.4177,0.21,,,two,120.429
+,falconer,G_0.5,three,107.4177,0.21,,,two,124.909
+,falconer,G_0.5,three,107.4177,0.21,,,two,130.955
+,falconer,G_0.5,four,107.4177,0.21,,,two,124.746
+,falconer,G_0.5,four,107.4177,0.21,,,two,130.213
+,falconer,G_0.5,four,107.4177,0.21,,,two,131.234
+,falconer,G_1.4,one ,114.58,3.13,,,three,102.693
+,falconer,G_1.4,two ,114.58,3.13,,,three,114.128
+,falconer,G_1.4,three,114.58,3.13,,,three,122.666
+,falconer,G_1.4,three,114.58,3.13,,,three,133.203
+,falconer,G_1.4,three,114.58,3.13,,,three,132.512
+,falconer,G_1.4,four,114.58,3.13,,,three,145.055
+,falconer,G_1.4,four,114.58,3.13,,,three,141.337
+,falconer,G_1.4,four,114.58,3.13,,,three,138.42
+,falconer,G_1.1,one ,126.65,1.03,,,four,120.82
+,falconer,G_1.1,two ,126.65,1.03,,,four,136.485
+,falconer,G_1.1,three,126.65,1.03,,,four,137.822
+,falconer,G_1.1,three,126.65,1.03,,,four,148.052
+,falconer,G_1.1,three,126.65,1.03,,,four,147.165
+,falconer,G_1.1,four,126.65,1.03,,,four,145.444
+,falconer,G_1.1,four,126.65,1.03,,,four,151.667
+,falconer,G_1.1,four,126.65,1.03,,,four,155.659

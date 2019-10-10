@@ -1,0 +1,1159 @@
+---
+title: "Cov_Functions"
+output: html_document
+---
+
+To provide a quantitative framework for the analysis of cogradient and countergradient variation in nature, Katie Lotterhos, Molly Albecker, and Geoff Trussell use the below functions to simulate data, conduct power analyses, and analyze data extracted from published empirical work. The following functions are sourced into the actual analyses in the "covGE.Rmd" file. 
+
+```{r}
+# Read in necessary packages for functions
+
+packages_needed <- c("tidyverse","lme4","gridExtra","ggplot2")
+
+for (i in 1:length(packages_needed)){
+  if(!(packages_needed[i] %in% installed.packages())){install.packages(packages_needed[i])}
+}
+
+for (i in 1:length(packages_needed)){
+  library( packages_needed[i], character.only = TRUE)
+}
+
+```
+
+### Data Generation ###
+For simulations, we will need to create data that mimics real data. To do so, we will generate new data using this function. 
+
+```{r}
+
+## Define starting parameters
+
+input <- list(
+  "type" = c("cogv","cngv"),
+  "intercept_G1" = 0,
+  "slope_G1" = 1,#seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = 1,#seq(from = -5, to = 5, by = 2),
+  "slope_G2" = 1.5,#seq(from = -1, to = 1, by = 0.1),
+  "sd" = 1,#seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = 5,#seq(from = 5, to = 10, by = 2),
+  "env_num" = c(2,5,10), 
+  "env" = NA,
+  "G1_env" = NA, #(-2, 2)
+  "G2_env" = NA,# (2, -2)
+  "true_covGE" = NA, 
+  "is.GxE" = NA, 
+  "slope_diff" = NA) 
+
+```
+
+```{r}
+input_df = input
+a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=1
+
+data_generation <- function(input_df){
+  
+  dat_temp = data.frame()
+  
+  # Starting Parameters
+  type = input_df$type
+  intercept_G1 = input_df$intercept_G1
+  slope_G1 = input_df$slope_G1
+  intercept_G2 = input_df$intercept_G2
+  slope_G2 = input_df$slope_G2
+  sd = input_df$sd
+  sample_size = input_df$sample_size
+  G1_env = input_df$G1_env
+  G2_env = input_df$G2_env
+  env_num = input_df$env_num
+  env = input_df$env
+  true_covGE = input_df$true_covGE
+  is.GxE = input_df$is.GxE
+  slope_diff = input_df$slope_diff
+  
+  
+  for(a in 1:env_num){ # May not need?
+    for(b in 1:length(unique(input_df$type))){
+    
+    env_num_temp = env_num[a]
+    type_temp = type[b]
+  
+    # Set environmental parameters
+    if(env_num_temp == 2){env = c(-2,2)
+    }else if (env_num_temp == 5){env = c(-2,-1,0,1,2)
+    }else{env = seq(from = -2.5, to = 2, by = 0.5)}
+    
+    # Match genotypes to phenotypes
+    if(type_temp == "cogv"){((G1_env= -2) & (G2_env = 2)) 
+      }else{ ((G1_env= 2) & (G2_env = -2))}
+  
+  
+    for(c in 1:length(env)){
+      for(d in 1:length(slope_G1)){
+        for(e in 1:length(intercept_G2)){
+          for(f in 1:length(slope_G2)){
+            for(g in 1:length(sd)){
+              for(h in 1:length(sample_size)){
+                  
+                  # GxE logical
+                  if(slope_G1[d] == slope_G2[f]){is.GxE = "No_GxE"} else {is.GxE = "Yes_GxE"}
+                  
+                  # Difference in slope
+                  slope_diff = (slope_G2[f] - slope_G1[d])
+                  
+                  # Generate data 
+                    phen1 = c(replicate(sample_size[h], (intercept_G1 + slope_G1[d] * env + (rnorm(env_num_temp, 0, sd[g])))))
+                    temp1 = data.frame("phen" = phen1,
+                                       "gen" = rep("G1", length(env_num_temp*sample_size[h])),
+                                       "env" = rep(env, sample_size[h]),
+                                       "native_env" = rep(G1_env,length(env_num_temp*sample_size[h])),
+                                       "sample_size" = rep(sample_size[h], length(env_num_temp)*sample_size[h]))
+                    
+                    phen2 = c(replicate(sample_size[h], (intercept_G2[e] + slope_G2[f] * env + (rnorm(env_num_temp, 0, sd[g])))))
+                    temp2 = data.frame("phen" = phen2,
+                                       "gen" = rep("G2", length(env_num_temp*sample_size[h])),
+                                       "env" = rep(env, sample_size[h]),
+                                       "native_env" = rep(G2_env,length(env_num_temp*sample_size[h])),
+                                       "sample_size" = rep(sample_size[h], length(env_num_temp*sample_size[h])))
+                    dat_temp. = rbind(temp1, temp2)
+                    dat_temp = rbind(dat_temp, dat_temp.)
+                  
+                  # Will need to add identifyers for when I run the full loop with different parameters
+                
+              }
+            }
+          }
+        }
+      }
+    }
+    }
+  }
+  return(dat_temp)
+  }
+
+new_data <- data_generation(input)
+
+# Sanity check
+ggplot(new_data,aes(x = env, y = phen, group = gen, fill = gen, colour = gen)) + 
+  geom_smooth(method = "gam") + theme_classic()
+```
+
+### Covariance Matrices ###
+
+The purpose of the covariance matrix is to take raw data (either simulated or empirically-derived) and generate covariance estimates from those data. 
+
+To generate covariance estimates, we use linear models to estimate lines and extract genotype and environmental means
+
+May need to create different covariance matrices to deal with 3 kinds of data - simulated data, meta-analysis--raw-regression data, meta-analysis--raw-categorical data, meta-analysis--means data.
+
+** Simulated Data Covariance Matrix **
+```{r}
+## Covariance Matrix Function for simulated data: 
+genphenenv_df = new_data
+
+Cov_matrix_sim <- function(genphenenv_df){
+   
+  # Standardize data
+  dat_avg = mean(genphenenv_df$phen) 
+  dat_std = sd(genphenenv_df$phen)
+  env_avg = mean(genphenenv_df$env) 
+  env_std = sd(genphenenv_df$env)
+  genphenenv_df$phen_corrected = ((genphenenv_df$phen-dat_avg)/dat_std)
+  genphenenv_df$env_corrected = ((genphenenv_df$env-env_avg)/env_std)
+
+  # Model Comparison
+  test_temp_a = lm(phen_corrected ~ env_corrected + gen, data = genphenenv_df)
+  test_temp_b = lm(phen_corrected ~ env_corrected * gen, data = genphenenv_df)
+  result = anova(test_temp_a,test_temp_b)
+  
+  # Model Outputs
+  if(result[[2,6]] > 0.05){
+    
+  test_temp = lm(phen_corrected ~ env_corrected + gen, data = genphenenv_df)
+  
+  # Extract model outputs
+  lm_result = "No_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = NA
+  
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- data.frame(gen = rep(unique(genphenenv_df$gen),
+                                   each = length(seq(from = min(genphenenv_df$env_corrected), 
+                                                     to = (max(genphenenv_df$env_corrected)+0.1),by=0.1))),
+                         env_corrected = seq(from = min(genphenenv_df$env_corrected), to = (max(genphenenv_df$env_corrected)+0.1),by=0.1))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }else{
+    
+  test_temp = lm(phen_corrected ~ env_corrected * gen, data = genphenenv_df)
+  
+  # Extract model outputs                
+  lm_result = "Yes_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
+   
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- data.frame(gen = rep(unique(genphenenv_df$gen),
+                                   each = length(seq(from = min(genphenenv_df$env_corrected), 
+                                                     to = (max(genphenenv_df$env_corrected)+0.1),by=0.1))),
+                         env_corrected = seq(from = min(genphenenv_df$env_corrected), to = (max(genphenenv_df$env_corrected)+0.1),by=0.1))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }                 
+
+  # Re-assign environmental variables
+  cov_temp$env_corrected <- round(cov_temp$env_corrected,digits = 1) 
+  cov_temp$native_env <- genphenenv_df$native_env[match(cov_temp$gen,genphenenv_df$gen)]
+  genphenenv_df$env_corrected <- round(genphenenv_df$env_corrected, digits = 1)
+  cov_temp$env <- genphenenv_df$env[match(cov_temp$env_corrected, genphenenv_df$env_corrected)]
+  
+  # Covariance Emeans and Gmeans
+  Cov_matrix = data.frame()
+  
+  # G_means
+  E_hat = mean(genphenenv_df$env) # may not work with even # environments
+  G_means = filter(cov_temp, env_corrected == E_hat)
+                  
+  # E_means
+  E_mean_temp = data.frame()
+                    
+  for(m in 1:length(unique(cov_temp$native_env))){
+    E = unique(cov_temp$native_env)[m]
+    E_temp = cov_temp[which(cov_temp$env == E),]
+    E_mean = mean(E_temp$phen_predicted)
+    E_mean_temp1 = data.frame("E_mean" = E_mean,
+                              "env" = unique(E_temp$env))
+    E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
+    }
+                    
+    Cov_matrix = data.frame("gen" = unique(cov_temp$gen),
+                            "native_env" = as.factor(E_mean_temp[,2]),
+                            "G_means" = unique(G_means$phen_predicted),
+                            "E_means" = E_mean_temp[,1])
+    cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
+    
+    return(list(cov_est,mod_dat,Cov_matrix))
+}
+
+#Need to create 100 new datasets, then put it through this each time to get a new covariance function. 
+test_dat <- Cov_matrix_sim(new_data)
+df <- ldply(test_dat, data.frame) ##?? Why do i have this here
+cov_CI = quantile(unlist(test_dat)[1], probs=c(0.025, 0.975), type=1) 
+
+# Average Covariance and CI's
+cov_avg = mean(cov_dat[,1])  
+cov_CI = quantile(cov_dat[,1], probs=c(0.025, 0.975), type=1) 
+```
+
+** Continuous Environments Covariance Matrix **
+```{r}
+## Covariance Matrix Function for meta-analysis data with continuous environments: 
+falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Falconer_template.csv") # data for testing
+lampei = read.csv("~/Desktop/4DataCollection_Template_studyID_743a.csv")
+genphenenv_df = lampei
+str(genphenenv_df)
+
+Cov_matrix_continuous <- function(genphenenv_df){
+
+  # Standardize data
+  phen_mean = mean(genphenenv_df$phen_data) 
+  phen_sd = sd(genphenenv_df$phen_data) 
+  nat_env_mean = mean(genphenenv_df$nat_env_mean) 
+  nat_env_sd = sd(genphenenv_df$nat_env_mean)
+  env_avg = mean(genphenenv_df$exp_env_cont) 
+  env_std = sd(genphenenv_df$exp_env_cont)
+  genphenenv_df$phen_corrected = ((genphenenv_df$phen_data-phen_mean)/phen_sd)
+  genphenenv_df$env_corrected = ((genphenenv_df$exp_env_cont-env_avg)/env_std) 
+  genphenenv_df$native_env_corrected = ((genphenenv_df$nat_env_mean-env_avg)/env_std) 
+  
+  # Model Comparison
+  test_temp_a = lm(phen_corrected ~ env_corrected + gen_factor, data = genphenenv_df)
+  test_temp_b = lm(phen_corrected ~ env_corrected * gen_factor, data = genphenenv_df)
+  result = anova(test_temp_a,test_temp_b)
+  
+  # Model Outputs
+  if(result[[2,6]] > 0.05){
+    
+  test_temp = lm(phen_corrected ~ env_corrected + gen_factor, data = genphenenv_df)
+  
+  # Extract model outputs
+  lm_result = "No_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = NA
+  
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- data.frame(gen_factor = rep(genphenenv_df$gen_factor,
+                                          each = length(seq(from = min(genphenenv_df$env_corrected), 
+                                                            to = max(genphenenv_df$env_corrected),  by = 0.1))),
+                         env_corrected = seq(from = min(genphenenv_df$env_corrected), 
+                                             to = max(genphenenv_df$env_corrected), by = 0.1))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }else{
+    
+  test_temp = lm(phen_corrected ~ env_corrected * gen_factor, data = genphenenv_df)
+  
+  # Extract model outputs                
+  lm_result = "Yes_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
+   
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- data.frame(gen_factor = rep(genphenenv_df$gen_factor,
+                                          each = length(seq(from = min(genphenenv_df$env_corrected), 
+                                                            to = max(genphenenv_df$env_corrected),  by = 0.1))),
+                         env_corrected = seq(from = min(genphenenv_df$env_corrected), 
+                                             to = max(genphenenv_df$env_corrected), by = 0.1))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }                 
+
+  # Re-assign environmental variables to model predicted data 
+  cov_temp$native_env_corrected <- genphenenv_df$native_env_corrected[match(cov_temp$gen_factor,genphenenv_df$gen_factor)]
+  cov_temp$env_corrected <- round(cov_temp$env_corrected, digits = 1)
+  cov_temp$native_env_corrected <- round(genphenenv_df$native_env_corrected[match(cov_temp$gen_factor,genphenenv_df$gen_factor)],digits =1)
+  
+  # Covariance Emeans and Gmeans
+  Cov_matrix = data.frame()
+  
+  # G_means
+  E_hat = round(mean(cov_temp$env_corrected),digits = 1)
+  G_means = filter(cov_temp, env_corrected == E_hat)
+                  
+  # E_means
+  E_mean_temp = data.frame()
+                    
+  for(m in 1:length(unique(cov_temp$native_env_corrected))){
+    E = unique(cov_temp$native_env_corrected)[m]
+    E_temp = cov_temp[which(cov_temp$env_corrected == E),]
+    E_mean = mean(unique(E_temp$phen_predicted))
+    E_mean_temp1 = data.frame("E_mean" = E_mean,
+                              "env_corrected" = unique(E_temp$env_corrected))
+    E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
+    }
+                    
+    Cov_matrix = data.frame("gen_factor" = unique(cov_temp$gen_factor),
+                            "native_env" = as.factor(E_mean_temp[,2]),
+                            "G_means" = unique(G_means$phen_predicted),
+                            "E_means" = E_mean_temp[,1])
+    cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
+    
+    return(list(cov_est,mod_dat,Cov_matrix))
+}
+
+test_dat <- Cov_matrix_continuous(lampei)
+test_dat[1] # Lampei = -0.19 : CNGV/Winner take all?
+test_dat[2]
+test_dat[3]
+
+## Sanity check
+
+# Raw data
+ggplot(lampei,aes(x = exp_env_cont, y = phen_data, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# Raw Data after standardizing
+ggplot(genphenenv_df,aes(x = env_corrected, y = phen_corrected, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# Model predicted data from function
+ggplot(cov_temp,aes(x = env_corrected, y = phen_predicted, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+```
+** Categorical Environments Covariance Matrix **
+```{r}
+## Covariance Matrix Function for meta-analysis data with categorical environments: 
+falc_dat_cat = read.csv("~/Documents/GitHub/CnGV/data/Falconer_template_categoricalenv.csv") # with  categorical environental data for testing
+gordon = read.csv("~/Downloads/4DataCollection_Template_studyID_654.csv") # with  categorical environental data for testing
+genphenenv_df = gordon
+
+Cov_matrix_categorical <- function(genphenenv_df){
+
+  # Standardize data
+  phen_mean = mean(genphenenv_df$phen_data) 
+  phen_sd = sd(genphenenv_df$phen_data)
+  genphenenv_df$phen_corrected = ((genphenenv_df$phen_data-phen_mean)/phen_sd)
+
+  # Model Comparison
+  test_temp_a = lm(phen_corrected ~ exp_env_factor + gen_factor, data = genphenenv_df)
+  test_temp_b = lm(phen_corrected ~ exp_env_factor * gen_factor, data = genphenenv_df)
+  result = anova(test_temp_a,test_temp_b)
+  
+  # Model Outputs
+  if(result[[2,6]] > 0.05 ){
+    
+  test_temp = lm(phen_corrected ~ exp_env_factor + gen_factor, data = genphenenv_df)
+  
+  # Extract model outputs
+  lm_result = "No_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = NA
+  
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- data.frame(gen_factor = genphenenv_df$gen_factor,
+                         exp_env_factor = genphenenv_df$exp_env_factor)
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }else{
+    
+  test_temp = lm(phen_corrected ~ exp_env_factor * gen_factor, data = genphenenv_df)
+  
+  # Extract model outputs                
+  lm_result = "Yes_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
+   
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  } 
+    # Generate Matrices for Covariance and Permutations
+  cov_temp <- data.frame(gen_factor = genphenenv_df$gen_factor,
+                         exp_env_factor = genphenenv_df$exp_env_factor)
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }
+  
+  # Re-assign environmental variables
+  cov_temp$nat_env_factor <- genphenenv_df$nat_env_factor[match(cov_temp$gen_factor,genphenenv_df$gen_factor)]
+
+  # Covariance Emeans and Gmeans
+  Cov_matrix = data.frame()
+  
+  # G_means
+  G_mean_temp = data.frame()
+  for(l in 1:length(unique(cov_temp$gen_factor))){
+    G = unique(cov_temp$gen_factor)[l]
+    G_temp = cov_temp[which(cov_temp$gen_factor == G),]
+    G_mean = mean(unique(G_temp$phen_predicted))
+    G_mean_temp1 = data.frame("G_mean" = G_mean,
+                              "gen_factor" = G)
+    G_mean_temp = rbind(G_mean_temp, G_mean_temp1)
+}
+                  
+  # E_means
+  E_mean_temp = data.frame()
+                    
+  for(m in 1:length(unique(cov_temp$nat_env_factor))){
+    E = unique(cov_temp$nat_env_factor)[m]
+    E_temp = cov_temp[which(cov_temp$nat_env_factor == E),]
+    E_mean = mean(E_temp$phen_predicted)
+    E_mean_temp1 = data.frame("E_mean" = E_mean,
+                              "native_env" = E)
+    E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
+    }
+                    
+    Cov_matrix = data.frame("gen" = G_mean_temp[,2],
+                            "native_env" = as.factor(E_mean_temp[,2]),
+                            "G_means" = G_mean_temp[,1],
+                            "E_means" = E_mean_temp[,1])
+    cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means) 
+    
+    return(list(cov_est,mod_dat,Cov_matrix))
+}
+
+test_dat <- Cov_matrix_categorical(gordon)
+
+## Sanity check
+
+# Raw data
+ggplot(gordon,aes(x = exp_env_factor, y = phen, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# Raw Data after standardizing
+ggplot(genphenenv_df,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# Model predicted data from function
+ggplot(cov_temp,aes(x = exp_env_factor, y = phen_predicted, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+```
+** Covariance Matrices from Means/SE with Categorical data **
+```{r}
+faske = read.csv("~/Downloads/4DataCollection_Template_studyID_59g.csv") 
+genphenenv_df = faske
+
+## Covariance Matrix Function for data with only means and SE reported/categorical envs: 
+Cov_matrix_meanSE_categorical <- function(genphenenv_df){
+
+  # Generate data based on normal distribution of data with MEAN/STDEV/STDERROR
+  newdat = data.frame()
+  for(i in 1:nrow(genphenenv_df)){
+    n = genphenenv_df$phen_n[i]
+    u = genphenenv_df$phen_data
+    sd1 = genphenenv_df$phen_SD[i]
+    sd2 = (genphenenv_df$phen_mean_SE[i])*(sqrt(genphenenv_df$phen_n[i])) # If SE is provided but no SD
+    sdev = NA
+    if(is.na(sd1)){sdev = sd2}else{sdev = sd1}
+    dat = rnorm(n,u,sdev)
+    newdat_temp = data.frame(gen_factor = rep(genphenenv_df$gen_factor[i],n),
+                             Native_env_cat = rep(genphenenv_df$Native_env_cat[i],n),
+                             nat_env_factor = rep(genphenenv_df$nat_env_factor[i],n),
+                             exp_env_cont = rep(genphenenv_df$exp_env_cont[i],n),
+                             exp_env_cat = rep(genphenenv_df$exp_env_cat[i],n),
+                             exp_env_factor = rep(genphenenv_df$exp_env_factor[i],n),
+                             phen_n = rep(n,n),
+                             phen_data = dat)
+    newdat = rbind(newdat_temp,newdat)
+  }
+  
+  # Standardize data
+    phen_mean = mean(newdat$phen_data) 
+    phen_sd = sd(newdat$phen_data) 
+    newdat$phen_corrected = ((newdat$phen_data-phen_mean)/phen_sd)
+    
+  # Model Comparison
+  test_temp_a = lm(phen_corrected ~ exp_env_factor + gen_factor, data = newdat)
+  test_temp_b = lm(phen_corrected ~ exp_env_factor * gen_factor, data = newdat)
+  result = anova(test_temp_a,test_temp_b)
+  
+  # Model Outputs
+  if(result[[2,6]] > 0.05){
+    
+  test_temp = lm(phen_corrected ~ exp_env_factor + gen_factor, data = newdat)
+  
+  # Extract model outputs
+  lm_result = "No_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = NA
+  
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- expand.grid(gen_factor = unique(newdat$gen_factor),
+                          exp_env_factor = unique(newdat$exp_env_factor))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }else{
+    
+  test_temp = lm(phen_corrected ~ exp_env_factor * gen_factor, data = newdat)
+  
+  # Extract model outputs                
+  lm_result = "Yes_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
+   
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- data.frame(gen_factor = rep(newdat$gen_factor,
+                                          each = length(seq(from = min(newdat$env_corrected), 
+                                                            to = max(newdat$env_corrected),  by = 0.1))),
+                         env_corrected = seq(from = min(newdat$env_corrected), to = max(newdat$env_corrected), by = 0.1))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }                 
+
+ # Re-assign environmental variables
+  cov_temp$nat_env_factor <- newdat$nat_env_factor[match(cov_temp$gen_factor,newdat$gen_factor)]
+
+  # Covariance Emeans and Gmeans
+  Cov_matrix = data.frame()
+  
+  # G_means
+  G_mean_temp = data.frame()
+  for(l in 1:length(unique(cov_temp$gen_factor))){
+    G = unique(cov_temp$gen_factor)[l]
+    G_temp = cov_temp[which(cov_temp$gen_factor == G),]
+    G_mean = mean(unique(G_temp$phen_predicted))
+    G_mean_temp1 = data.frame("G_mean" = G_mean,
+                              "gen_factor" = G)
+    G_mean_temp = rbind(G_mean_temp, G_mean_temp1)
+}
+                  
+  # E_means
+  E_mean_temp = data.frame()
+                    
+  for(m in 1:length(unique(cov_temp$nat_env_factor))){
+    E = unique(cov_temp$nat_env_factor)[m]
+    E_temp = cov_temp[which(cov_temp$nat_env_factor == E),]
+    E_mean = mean(E_temp$phen_predicted)
+    E_mean_temp1 = data.frame("E_mean" = E_mean,
+                              "native_env" = E)
+    E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
+    }
+                    
+    Cov_matrix = data.frame("gen" = G_mean_temp[,2],
+                            "native_env" = as.factor(E_mean_temp[,2]),
+                            "G_means" = G_mean_temp[,1],
+                            "E_means" = E_mean_temp[,1])
+    cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means) 
+    
+    return(list(cov_est,mod_dat,Cov_matrix))
+}
+
+## Sanity check
+
+# Raw data
+ggplot(faske,aes(x = exp_env_factor, y = phen_data, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# new data after standardizing
+ggplot(newdat,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# Model predicted data from function
+ggplot(cov_temp,aes(x = exp_env_factor, y = phen_predicted, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+```
+** Covariance Matrices from Means/SE with Continuous data **
+```{r}
+faske = read.csv("~/Downloads/4DataCollection_Template_studyID_59g.csv") 
+genphenenv_df = faske # Slightly altered to make this work 
+
+## Covariance Matrix Function for data with only means and SE reported/continuous envs: 
+Cov_matrix_meanSE_continuous <- function(genphenenv_df){
+
+  # Generate data based on normal distribution of data with MEAN/STDEV/STDERROR
+  newdat = data.frame()
+  for(i in 1:nrow(genphenenv_df)){
+    n = genphenenv_df$phen_n[i]
+    u = genphenenv_df$phen_data
+    sd1 = genphenenv_df$phen_SD[i]
+    sd2 = (genphenenv_df$phen_mean_SE[i])*(sqrt(genphenenv_df$phen_n[i])) # If SE is provided but no SD
+    sdev = NA
+    if(is.na(sd1)){sdev = sd2}else{sdev = sd1}
+    dat = rnorm(n,u,sdev)
+    newdat_temp = data.frame(gen_factor = rep(genphenenv_df$gen_factor[i],n),
+                             Native_env_cont = rep(genphenenv_df$Native_env_cont[i],n),
+                             nat_env_mean = rep(genphenenv_df$nat_env_mean[i],n),
+                             exp_env_cont = rep(genphenenv_df$exp_env_cont[i],n),
+                             exp_env_factor = rep(genphenenv_df$exp_env_factor[i],n),
+                             phen_n = rep(n,n),
+                             phen_data = dat)
+    newdat = rbind(newdat_temp,newdat)
+  }
+  
+  # Standardize data
+  phen_mean = mean(newdat$phen_data) 
+  phen_sd = sd(newdat$phen_data) 
+  nat_env_mean = mean(newdat$nat_env_mean) 
+  nat_env_sd = sd(newdat$nat_env_mean)
+  env_avg = mean(newdat$exp_env_cont) 
+  env_std = sd(newdat$exp_env_cont)
+  newdat$phen_corrected = ((newdat$phen_data-phen_mean)/phen_sd)
+  newdat$env_corrected = ((newdat$exp_env_cont-env_avg)/env_std) 
+  newdat$native_env_corrected = ((newdat$nat_env_mean-env_avg)/env_std) 
+  
+  # Model Comparison
+  test_temp_a = lm(phen_corrected ~ env_corrected + gen_factor, data = newdat)
+  test_temp_b = lm(phen_corrected ~ env_corrected * gen_factor, data = newdat)
+  result = anova(test_temp_a,test_temp_b)
+  
+  # Model Outputs
+  if(result[[2,6]] > 0.05){
+    
+  test_temp = lm(phen_corrected ~ env_corrected + gen_factor, data = newdat)
+  
+  # Extract model outputs
+  lm_result = "No_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = NA
+  
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- expand.grid(gen_factor = unique(newdat$gen_factor),
+                         env_corrected = unique(newdat$env_corrected))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }else{
+    
+  test_temp = lm(phen_corrected ~ env_corrected * gen_factor, data = newdat)
+  
+  # Extract model outputs                
+  lm_result = "Yes_GxE"
+  E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
+  G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
+  GxE_R2 = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
+   
+  mod_dat = data.frame()
+  for(i in 1:length(test_temp[[1]])){
+    id = names(test_temp[[1]][i]) 
+    coef = test_temp[[1]][[i]]
+    lwr_CI = confint(test_temp)[i,1]
+    upr_CI = confint(test_temp)[i,2]
+    pval = summary(test_temp)[[4]][i,4]
+    mod_dat. = data.frame("id" = id,
+                          "coef" = coef,
+                          "lwr_CI" = lwr_CI,
+                          "upr_CI" = upr_CI,
+                          "pval" = pval)
+    mod_dat = rbind(mod_dat,mod_dat.)
+  }
+  
+  # Generate Matrices for Covariance and Permutations
+  cov_temp <- cov_temp <- expand.grid(gen_factor = unique(newdat$gen_factor),
+                         env_corrected = unique(newdat$env_corrected))
+  cov_temp$phen_predicted = predict(test_temp,cov_temp)
+  }                 
+
+  # Re-assign environmental variables to model predicted data 
+  cov_temp$native_env_corrected <- newdat$native_env_corrected[match(cov_temp$gen_factor,newdat$gen_factor)]
+  cov_temp$env_corrected <- round(cov_temp$env_corrected, digits = 1)
+  cov_temp$native_env_corrected <- round(newdat$native_env_corrected[match(cov_temp$gen_factor,newdat$gen_factor)],digits =1)
+  
+  # Covariance Emeans and Gmeans
+  Cov_matrix = data.frame()
+  
+  # G_means
+  E_hat = round(mean(cov_temp$env_corrected),digits = 1)
+  G_means = filter(cov_temp, env_corrected == E_hat)
+                  
+  # E_means
+  E_mean_temp = data.frame()
+                    
+  for(m in 1:length(unique(cov_temp$native_env_corrected))){
+    E = unique(cov_temp$native_env_corrected)[m]
+    E_temp = cov_temp[which(cov_temp$env_corrected == E),]
+    E_mean = mean(unique(E_temp$phen_predicted))
+    E_mean_temp1 = data.frame("E_mean" = E_mean,
+                              "env" = unique(E_temp$env))
+    E_mean_temp = rbind(E_mean_temp, E_mean_temp1)
+    }
+                    
+    Cov_matrix = data.frame("gen" = unique(cov_temp$gen),
+                            "native_env" = as.factor(E_mean_temp[,2]),
+                            "G_means" = unique(G_means$phen_predicted),
+                            "E_means" = E_mean_temp[,1])
+    cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
+    
+    return(list(cov_est,mod_dat,Cov_matrix))
+}
+
+## Sanity check
+
+# Raw data
+ggplot(faske,aes(x = exp_env_cont, y = phen_data, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# new data after standardizing
+ggplot(newdat,aes(x = env_corrected, y = phen_corrected, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+# Model predicted data from function
+ggplot(cov_temp,aes(x = env_corrected, y = phen_predicted, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_smooth(method = "gam") + theme_classic()
+
+```
+
+### Bootstrap Functions ###
+
+```{r}
+
+bootstap_categorical <- function(genphenenv_df){
+    new_phen <- NULL
+    shuffle_dat <- data.frame()
+    
+    for (j in 1:nlevels(genphenenv_df$gen_factor)){
+      for (k in 1:nlevels(genphenenv_df$exp_env_factor)){
+        G = unique(genphenenv_df$gen_factor)[j]
+        E = unique(genphenenv_df$exp_env_factor)[k]
+        cond_G <- filter(genphenenv_df, gen_factor == G)
+        cond_E <- filter(cond_G, exp_env_factor == E)
+
+      new_phen <- sample(cond_E$phen_data, size=nrow(cond_E), replace=TRUE)
+      
+      shuffle_dat_temp <- data.frame(gen_factor = cond_E$gen_factor,
+                                     exp_env_factor = cond_E$exp_env_factor,
+                                     Native_env_cat = cond_E$Native_env_cat,
+                                     nat_env_factor = cond_E$nat_env_factor,
+                                     phen_data = new_phen)
+      shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
+      }
+    }
+    shuffle_cov_temp = Cov_matrix_categorical(shuffle_dat)
+    return(list(shuffle_cov_temp[[1]]))
+}
+
+bootstap_continuous <- function(genphenenv_df){
+    new_phen <- NULL
+    shuffle_dat <- data.frame()
+    
+    for (j in 1:nlevels(genphenenv_df$gen_factor)){
+      for (k in 1:nlevels(genphenenv_df$exp_env_factor)){
+        G = unique(genphenenv_df$gen_factor)[j]
+        E = unique(genphenenv_df$exp_env_factor)[k]
+        cond_G <- filter(genphenenv_df, gen_factor == G)
+        cond_E <- filter(cond_G, exp_env_factor == E)
+
+      new_phen <- sample(cond_E$phen_data, size=nrow(cond_E), replace=TRUE)
+      
+      shuffle_dat_temp <- data.frame(gen_factor = cond_E$gen_factor,
+                                     Native_env_cont = cond_E$Native_env_cont,
+                                     nat_env_mean = cond_E$nat_env_mean,
+                                     nat_env_factor = cond_E$nat_env_factor,
+                                     exp_env_factor = cond_E$exp_env_factor,
+                                     exp_env_cont = cond_E$exp_env_cont,
+                                     phen_data = new_phen)
+      shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
+    }
+    }
+    
+    shuffle_cov_temp = Cov_matrix_continuous(shuffle_dat)
+    return(list(shuffle_cov_temp[[1]]))
+}
+
+bootstap_categorical(genphenenv_df)
+
+```
+
+### Permutation Functions ###
+```{r}
+
+permutation_categorical <- function(genphenenv_df){
+  
+  null_temp <- NULL
+  perm_dat = data.frame()
+  
+   for (j in 1:nlevels(genphenenv_df$gen_factor)){
+      for (k in 1:nlevels(genphenenv_df$exp_env_factor)){
+        G = unique(genphenenv_df$gen_factor)[j]
+        E = unique(genphenenv_df$exp_env_factor)[k]
+        cond_G <- filter(genphenenv_df, gen_factor == G)
+        cond_E <- filter(cond_G, exp_env_factor == E)
+
+      null_temp <- sample(cond_E$phen_data, size=nrow(cond_E), replace=FALSE)
+      
+      perm_dat_temp <- data.frame("gen_factor" = cond_E$gen_factor,
+                                  "exp_env_factor" = cond_E$exp_env_factor,
+                                  "Native_env_cat" = cond_E$Native_env_cat,
+                                  "nat_env_factor" = cond_E$nat_env_factor,
+                                  "phen_data" = null_temp)
+      perm_dat = rbind(perm_dat, perm_dat_temp)
+      }
+   }
+  perm_cov_temp = Cov_matrix_categorical(perm_dat)
+  return(list(perm_cov_temp[[1]]))
+}
+
+permutation_continuous <- function(genphenenv_df){
+  
+  null_temp <- NULL
+  perm_dat = data.frame()
+  
+   for (j in 1:nlevels(genphenenv_df$gen_factor)){
+      for (k in 1:nlevels(genphenenv_df$exp_env_factor)){
+        G = unique(genphenenv_df$gen_factor)[j]
+        E = unique(genphenenv_df$exp_env_factor)[k]
+        cond_G <- filter(genphenenv_df, gen_factor == G)
+        cond_E <- filter(cond_G, exp_env_factor == E)
+
+      null_temp <- sample(cond_E$phen_data, size=nrow(cond_E), replace=FALSE)
+      
+      perm_dat_temp <- data.frame("gen_factor" = cond_E$gen_factor,
+                              "nat_env_mean" = cond_E$nat_env_mean,
+                              "exp_env_factor" = cond_E$exp_env_factor,
+                              "exp_env_cont" = cond_E$exp_env_cont,
+                              "phen_data" = null_temp)
+      perm_dat = rbind(perm_dat, perm_dat_temp)
+
+      }
+   }
+  perm_cov_temp = Cov_matrix_continuous(perm_dat)
+  return(list(perm_cov_temp[[1]]))
+}
+
+permutation_categorical(genphenenv_df)
+```
+
+```{r}
+Categorical_data <- function(genphenenv_df){
+  
+  ## Covariance estimate based on real data
+  truecov = Cov_matrix_categorical(genphenenv_df)
+  results = data.frame()
+  iterations = 50
+  
+  ## Bootstrapped means and confidence intervals
+  bootdat = replicate(iterations, bootstap_categorical(genphenenv_df), simplify=TRUE) 
+  cov_CI = quantile(unlist(bootdat), probs=c(0.025, 0.975), type=1) # Confidence intervals around bootstrap covariance
+  cov_avg = mean(as.numeric(unlist(bootdat))) # Mean should be similar to truecov
+  
+  ## Permutation Hypothesis Testing
+  permdat <- replicate(iterations, permutation_categorical(genphenenv_df), simplify=TRUE) 
+  
+  ## Is covariance outside null distribution? 
+  alpha = 0.05
+  nulldist_lwrCI = quantile(unlist(permdat), alpha/2)
+  nulldist_uprCI = quantile(unlist(permdat), 1-alpha/2)
+                    
+  is.sig = NA
+  if( (truecov[[1]][1] < nulldist_lwrCI[[1]]) | (truecov[1] > nulldist_uprCI[[1]]) ) {is.sig = "yes"}else{is.sig = "no"}
+  
+  ## Generate P-value
+  obs = unlist(truecov[[1]])
+  new_dat = unlist(permdat)
+  
+  # P-value = outside distribution (p = 0.0). Greater than 0.5, 1-value. Less than, keep. Probability of observing by chance
+  p_value = (rank(c(obs,new_dat))[1])/(iterations+1) #If incorrect, see OLD CODE
+  
+  return(results = data.frame("StudyID" = unique(genphenenv_df$Study_ID_phenotype),
+                              "true cov" = truecov[[1]], 
+                              "Low_CI" = cov_CI[1], 
+                              "Hi_CI" = cov_CI[2], 
+                              "Bootstrapped_Mean_cov" = cov_avg,
+                              "NullDist_Low_CI" = nulldist_lwrCI,
+                              "NullDist_Upr_CI" = nulldist_uprCI,
+                              "p_value" = p_value,
+                              "is.sig" = is.sig)) 
+}
+
+results = Categorical_data(gordon)
+
+```
+
+```{r}
+str(genphenenv_df)
+
+Continuous_data <- function(genphenenv_df){
+  
+  ## Covariance estimate based on real data
+  truecov = Cov_matrix_continuous(genphenenv_df)
+  results = data.frame()
+  iterations = 50
+  
+  ## Bootstrapped means and confidence intervals
+  bootdat = replicate(iterations, bootstap_continuous(genphenenv_df), simplify=TRUE) 
+  cov_CI = quantile(unlist(bootdat), probs=c(0.025, 0.975), type=1) # Confidence intervals around bootstrap covariance
+  cov_avg = mean(as.numeric(unlist(bootdat))) # Mean should be similar to truecov
+  
+  ## Permutation Hypothesis Testing
+  permdat <- replicate(iterations, permutation_continuous(genphenenv_df), simplify=TRUE) 
+  
+  ## Is covariance outside null distribution? 
+  alpha = 0.05
+  nulldist_lwrCI = quantile(unlist(permdat), alpha/2)
+  nulldist_uprCI = quantile(unlist(permdat), 1-alpha/2)
+                    
+  is.sig = NA
+  if( (truecov[[1]][1] < nulldist_lwrCI[[1]]) | (truecov[1] > nulldist_uprCI[[1]]) ) {is.sig = "yes"}else{is.sig = "no"}
+  
+  ## Generate P-value
+  obs = unlist(truecov[[1]])
+  new_dat = unlist(permdat)
+  
+  # P-value = outside distribution (p = 0.0). Greater than 0.5, 1-value. Less than, keep. Probability of observing by chance
+  p_value = (rank(c(obs,new_dat))[1])/(iterations+1) #If incorrect, see OLD CODE
+  
+  return(results = data.frame("StudyID" = unique(genphenenv_df$Study_ID_phenotype),
+                              "true cov" = truecov[[1]], 
+                              "Low_CI" = cov_CI[1], 
+                              "Hi_CI" = cov_CI[2], 
+                              "Bootstrapped_Mean_cov" = cov_avg,
+                              "NullDist_Low_CI" = nulldist_lwrCI,
+                              "NullDist_Upr_CI" = nulldist_uprCI,
+                              "p_value" = p_value,
+                              "is.sig" = is.sig)) 
+}
+
+results = Continuous_data(lampei)
+
+```
+### Power Function ###
+
+To estimate power, we will use the simulated data to determine what effect sizes and replication is needed to have sufficient power to gain reliable results. 
+```{r}
+
+Power_function <- function(simdat){
+ 
+   powerdat = data.frame()
+  for(i in 1:length(unique(simdat$reps))){
+    rep = unique(simdat$reps)[i]
+    repdat = filter(simdat, reps == rep)
+    for(j in 1:length(unique(repdat$std.dev))){
+      sdev = unique(simdat$std.dev)[j]
+      repdat2 = filter(repdat, std.dev == sdev)
+      for(k in 1:length(unique(repdat2$effect.size))){
+        effsize = unique(repdat2$effect.size)[k]
+        repdat3 = filter(repdat2, effect.size == effsize)
+        
+        powerdat. = data.frame("reps" = unique(repdat3$reps),
+                              "std.dev" = unique(repdat3$std.dev),
+                                "effect.size" = unique(repdat3$effect.size),
+                                "numer" = sum(repdat3$overunder),
+                                "denom" = nrow(repdat3))
+        powerdat = rbind(powerdat,powerdat.)
+      }
+    }
+  }
+
+powerdat$power = (powerdat$numer/powerdat$denom) 
+  
+}
+
+```
+
+
+
+** Old Code **
+```{r}
+
+# Resampling from each : dat_temp is data file with G, E, and phen 
+  
+bootshuffle_sim <- function(dat_temp){ 
+    raw_dat2 = split(dat_temp,dat_temp$gen)
+    boot_df = data.frame()
+    
+    for(n in 1:length(raw_dat2)){
+      boot_temp = raw_dat2[[n]][sample(nrow(raw_dat2[[n]]), size = nrow(raw_dat2[[n]]),replace = TRUE),]
+      boot_df = rbind(boot_df,boot_temp)
+    }
+    return(boot_df)
+    }
+
+
+permshuffle <- function(dat_temp){ 
+    raw_dat3 = split(dat_temp,dat_temp$gen)
+    perm_df = data.frame()
+    
+  for(m in 1:length(raw_dat2)){
+      perm_temp = raw_dat3[[m]][sample(nrow(raw_dat3[[m]]), size = nrow(raw_dat3[[m]]),replace = FALSE),]
+      perm_df = rbind(perm_df,phen_temp)
+  }
+  return(perm_df)
+  }
+  
+permdat = permshuffle(dat_temp)
+bootdat = bootshuffle(dat_temp)
+  
+
+test <- Cov_matrix(bootdat)
+    
+                  
+
+# Permutation Hypothesis testing
+(rank(c(obs,new_dat))[1])/(length(new_dat)+1) # outside distribution (p = 0.0). Greater than 0.5, 1-value. Less than, keep. Probability of observing by chance
+}
+
+
+ perm_val = (rank(c(unlist(cov_avg),(unlist(permdat[])))))/(length(permdat)+1) #Check this
+  (pvalue <- perm_val/(iterations + 1))
+   (pvalue <- sum(abs(results) >= abs(cor.obs))/(nperms + 1))
+```
+

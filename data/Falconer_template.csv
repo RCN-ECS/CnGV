@@ -1,33 +1,33 @@
-﻿Study_ID_phenotype,First_Author,gen_factor,exp_env,nat_env_mean,nat_env_sd,nat_env_factor,phen
-,falconer,G_0.8,99.597,99.33,0.3,one,90.93
-,falconer,G_0.8,114.546,99.33,0.3,one,87.904
-,falconer,G_0.8,111.618,99.33,0.3,one,95.121
-,falconer,G_0.8,107.475,99.33,0.3,one,102.337
-,falconer,G_0.8,119.168,99.33,0.3,one,107.667
-,falconer,G_0.8,126.577,99.33,0.3,one,100.927
-,falconer,G_0.8,127.96,99.33,0.3,one,113.338
-,falconer,G_0.8,127.493,99.33,0.3,one,119.788
-,falconer,G_0.5,99.232,107.4177,0.21,two,116.059
-,falconer,G_0.5,107.425,107.4177,0.21,two,119.565
-,falconer,G_0.5,111.242,107.4177,0.21,two,120.429
-,falconer,G_0.5,113.855,107.4177,0.21,two,124.909
-,falconer,G_0.5,118.571,107.4177,0.21,two,130.955
-,falconer,G_0.5,127.652,107.4177,0.21,two,124.746
-,falconer,G_0.5,127.424,107.4177,0.21,two,130.213
-,falconer,G_0.5,125.593,107.4177,0.21,two,131.234
-,falconer,G_1.4,99.547,114.58,3.13,three,102.693
-,falconer,G_1.4,107.642,114.58,3.13,three,114.128
-,falconer,G_1.4,111.376,114.58,3.13,three,122.666
-,falconer,G_1.4,113.635,114.58,3.13,three,133.203
-,falconer,G_1.4,118.461,114.58,3.13,three,132.512
-,falconer,G_1.4,125.03,114.58,3.13,three,145.055
-,falconer,G_1.4,126.903,114.58,3.13,three,141.337
-,falconer,G_1.4,127.068,114.58,3.13,three,138.42
-,falconer,G_1.1,98.946,126.65,1.03,four,120.82
-,falconer,G_1.1,107.129,126.65,1.03,four,136.485
-,falconer,G_1.1,111.175,126.65,1.03,four,137.822
-,falconer,G_1.1,117.931,126.65,1.03,four,148.052
-,falconer,G_1.1,113.386,126.65,1.03,four,147.165
-,falconer,G_1.1,126.795,126.65,1.03,four,145.444
-,falconer,G_1.1,126.591,126.65,1.03,four,151.667
-,falconer,G_1.1,124.717,126.65,1.03,four,155.659
+﻿Study_ID_phenotype,First_Author,gen_factor,exp_env,Native_env_cont,Native_env_cat,nat_env_mean,nat_env_sd,environment_cat,nat_env_factor,phen
+,falconer,G_0.8,99.597,99.33,0.3,,,one ,one,90.93
+,falconer,G_0.8,114.546,99.33,0.3,,,three,one,87.904
+,falconer,G_0.8,111.618,99.33,0.3,,,three,one,95.121
+,falconer,G_0.8,107.475,99.33,0.3,,,two ,one,102.337
+,falconer,G_0.8,119.168,99.33,0.3,,,three,one,107.667
+,falconer,G_0.8,126.577,99.33,0.3,,,four,one,100.927
+,falconer,G_0.8,127.96,99.33,0.3,,,four,one,113.338
+,falconer,G_0.8,127.493,99.33,0.3,,,four,one,119.788
+,falconer,G_0.5,99.232,107.4177,0.21,,,one ,two,116.059
+,falconer,G_0.5,107.425,107.4177,0.21,,,two ,two,119.565
+,falconer,G_0.5,111.242,107.4177,0.21,,,three,two,120.429
+,falconer,G_0.5,113.855,107.4177,0.21,,,three,two,124.909
+,falconer,G_0.5,118.571,107.4177,0.21,,,three,two,130.955
+,falconer,G_0.5,127.652,107.4177,0.21,,,four,two,124.746
+,falconer,G_0.5,127.424,107.4177,0.21,,,four,two,130.213
+,falconer,G_0.5,125.593,107.4177,0.21,,,four,two,131.234
+,falconer,G_1.4,99.547,114.58,3.13,,,one ,three,102.693
+,falconer,G_1.4,107.642,114.58,3.13,,,two ,three,114.128
+,falconer,G_1.4,111.376,114.58,3.13,,,three,three,122.666
+,falconer,G_1.4,113.635,114.58,3.13,,,three,three,133.203
+,falconer,G_1.4,118.461,114.58,3.13,,,three,three,132.512
+,falconer,G_1.4,125.03,114.58,3.13,,,four,three,145.055
+,falconer,G_1.4,126.903,114.58,3.13,,,four,three,141.337
+,falconer,G_1.4,127.068,114.58,3.13,,,four,three,138.42
+,falconer,G_1.1,98.946,126.65,1.03,,,one ,four,120.82
+,falconer,G_1.1,107.129,126.65,1.03,,,two ,four,136.485
+,falconer,G_1.1,111.175,126.65,1.03,,,three,four,137.822
+,falconer,G_1.1,117.931,126.65,1.03,,,three,four,148.052
+,falconer,G_1.1,113.386,126.65,1.03,,,three,four,147.165
+,falconer,G_1.1,126.795,126.65,1.03,,,four,four,145.444
+,falconer,G_1.1,126.591,126.65,1.03,,,four,four,151.667
+,falconer,G_1.1,124.717,126.65,1.03,,,four,four,155.659
