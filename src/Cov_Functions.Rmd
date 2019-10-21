@@ -348,13 +348,12 @@ for(i in 1:length(unique(new_data$index))){
 test_dat_temp <- Cov_matrix_sim(filter_dat)
 test_dat <- rbind(test_dat,test_dat_temp[[3]])
 }
+
 print(ggplot(test_dat, aes(x = slopeset, y = as.numeric(GxE_R2), group=error,fill = error)) + 
     geom_bar(stat = "identity",position="dodge")+theme_classic())+
     labs(x = "G1 and G2 Slopes")
 
-# Average Covariance and CI's
-cov_avg = mean(cov_dat[,1])  
-cov_CI = quantile(cov_dat[,1], probs=c(0.025, 0.975), type=1) 
+
 ```
 
 ** Continuous Environments Covariance Matrix **
