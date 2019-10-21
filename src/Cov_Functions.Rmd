@@ -8,7 +8,7 @@ To provide a quantitative framework for the analysis of cogradient and countergr
 ```{r}
 # Read in necessary packages for functions
 
-packages_needed <- c("tidyverse","lme4","gridExtra","ggplot2")
+packages_needed <- c("plyr","tidyverse","lme4","gridExtra","ggplot2")
 
 for (i in 1:length(packages_needed)){
   if(!(packages_needed[i] %in% installed.packages())){install.packages(packages_needed[i])}
@@ -50,12 +50,12 @@ For simulations, we will need to create data that mimics real data. To do so, we
 Diff_GxE <- list(
   "type" = c("pure_GxE"), #("cogv","cngv","pure_GxE"),
   "intercept_G1" = 0,
-  "slope_G1" = c(2,1), #seq(from = -1, to = 1, by = 0.5),
-  "intercept_G2" = 4, #seq(from = -5, to = 5, by = 2),
-  "slope_G2" = c(-2,-1), #seq(from = -1, to = 1, by = 0.1),
-  "sd" = c(0.5,1), #seq(from = 0, to = 1, by = 0.5),
+  "slope_G1" = c(-2,-1,-0.25), #seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = c(0), #seq(from = -5, to = 5, by = 2),
+  "slope_G2" = c(2,1,0.25), #seq(from = -1, to = 1, by = 0.1),
+  "sd" = c(0.5,1,1.5), #seq(from = 0, to = 1, by = 0.5),
   "sample_size" = 5, #seq(from = 5, to = 10, by = 2),
-  "env_num" = 2, #c(2,5,10), 
+  "env_num" = 5, #c(2,5,10), 
   "env" = NA,
   "G1_env" = NA, 
   "G2_env" = NA,
@@ -68,7 +68,7 @@ Diff_means <- list(
   "intercept_G1" = 0,
   "slope_G1" = c(2,1),#seq(from = -1, to = 1, by = 0.5),
   "intercept_G2" = c(4,2),#seq(from = -5, to = 5, by = 2),
-  "slope_G2" = c(-1,1),#seq(from = -1, to = 1, by = 0.1),
+  "slope_G2" = c(-2,1),#seq(from = -1, to = 1, by = 0.1),
   "sd" = c(0.5,1),#seq(from = 0, to = 1, by = 0.5),
   "sample_size" = c(5,7,9),#seq(from = 5, to = 10, by = 2),
   "env_num" = 2,#c(2,5,10), 
@@ -89,7 +89,7 @@ input_df = Diff_GxE # For simulation tests
 data_generation <- function(input_df){
   
   dat_temp = data.frame()
-  row=0 # for indexing
+  row=0 #for indexing
   
   # Starting Parameters
   type = input_df$type
@@ -111,7 +111,7 @@ data_generation <- function(input_df){
   for(a in 1:length(unique(env_num))){ 
     for(b in 1:length(unique(type))){
     
-    env_num_temp = unique(env_num[a])
+    env_num_temp = unique(env_num)[a]
     type_temp = type[b]
   
     # Set environmental parameters (x-axis)
@@ -120,8 +120,8 @@ data_generation <- function(input_df){
     }else{env = seq(from = -2.5, to = 2, by = 0.5)}
     
     # Match genotypes to phenotypes
-    if(type_temp == "cogv"){((G1_env= -2) & (G2_env = 2)) 
-      }else{ ((G1_env= 2) & (G2_env = -2))}
+    if(type_temp == "cngv"){((G1_env= 2) & (G2_env = -2)) 
+      }else{ ((G1_env= -2) & (G2_env = 2))}
     
     for(d in 1:length(slope_G1)){
       for(e in 1:length(intercept_G2)){
@@ -142,21 +142,27 @@ data_generation <- function(input_df){
                     phen1 = c(replicate(sample_size[h],(intercept_G1 + slope_G1[d] * env + (rnorm(env_num_temp, 0, sd[g])))))
                     temp1 = data.frame("index" = row,
                                        "type" = rep(type_temp, length(env_num_temp*sample_size[h])),
+                                       "is.GxE" = rep(is.GxE, length(env_num_temp*sample_size[h])),
                                        "env_num" = rep(env_num_temp, length(env_num_temp*sample_size[h])),
+                                       "slope" = rep(slope_G1[d], length(env_num_temp*sample_size[h])),
                                        "slope_diff" = rep(slope_diff, length(env_num_temp*sample_size[h])),
+                                       "intercept" = rep(intercept_G1, length(env_num_temp*sample_size[h])),
                                        "intercept_diff" = rep(intercept_diff, length(env_num_temp*sample_size[h])),
                                        "sample_size" = rep(sample_size[h], length(env_num_temp*sample_size[h])),
                                        "stdev" = rep(sd[g], length(env_num_temp*sample_size[h])),
                                        "native_env" = rep(G1_env,length(env_num_temp*sample_size[h])),
                                        "gen" = rep("G1", length(env_num_temp*sample_size[h])),
                                        "env" = rep(env, length(env_num_temp*sample_size[h])),
-                                       "phen" = phen2)
+                                       "phen" = phen1)
                     
                     phen2 = c(replicate(sample_size[h], (intercept_G2[e] + slope_G2[f] * env + (rnorm(env_num_temp, 0, sd[g])))))
                     temp2 = data.frame("index" = row,
                                        "type" = rep(type_temp, length(env_num_temp*sample_size[h])),
+                                       "is.GxE" = rep(is.GxE, length(env_num_temp*sample_size[h])),
                                        "env_num" = rep(env_num_temp, length(env_num_temp*sample_size[h])),
+                                       "slope" = rep(slope_G2[f], length(env_num_temp*sample_size[h])),
                                        "slope_diff" = rep(slope_diff, length(env_num_temp*sample_size[h])),
+                                       "intercept" = rep(intercept_G2[e], length(env_num_temp*sample_size[h])),
                                        "intercept_diff" = rep(intercept_diff, length(env_num_temp*sample_size[h])),
                                        "sample_size" = rep(sample_size[h], length(env_num_temp*sample_size[h])),
                                        "stdev" = rep(sd[g], length(env_num_temp*sample_size[h])),
@@ -166,26 +172,25 @@ data_generation <- function(input_df){
                                        "phen" = phen2)
                     dat_temp. = rbind(temp1, temp2)
                     dat_temp = rbind(dat_temp, dat_temp.)
-                  
-              }
             }
           }
         }
       }
     }
-  }
+    }
+    }
   return(dat_temp)
   }
 
 new_data <- data_generation(Diff_GxE)
 
 # Sanity check
-for(i in 1:length(unique(new_data$index))){
-  index = unique(new_data$index)[i]
-  plotdat = new_data[new_data$index== index,]
+for(i in 1:length(unique(new_data1$index))){
+  ind = unique(new_data1$index)[i]
+  plotdat = filter(new_data1, index == ind)
   plot_temp = ggplot(plotdat, aes(x = env, y = phen, group = gen, fill = gen, colour = gen)) + 
   geom_smooth(method = "gam") + theme_classic()
-  print(plot_temp)##Why do some of these have the same intercept? They shouldn't. 
+  print(plot_temp) 
 }
 
 ```
@@ -205,7 +210,7 @@ May need to create different covariance matrices to deal with 3 kinds of data - 
 ## Covariance Matrix Function for simulated data: 
 
 Cov_matrix_sim <- function(genphenenv_df){
-   
+  
   # Standardize data
   dat_avg = mean(genphenenv_df$phen) 
   dat_std = sd(genphenenv_df$phen)
@@ -226,6 +231,7 @@ Cov_matrix_sim <- function(genphenenv_df){
   
   # Extract model outputs
   lm_result = "No_GxE"
+  GxE_pval = result[[2,6]]
   E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
   G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
   GxE_R2 = NA
@@ -244,13 +250,7 @@ Cov_matrix_sim <- function(genphenenv_df){
                           "pval" = pval)
     mod_dat = rbind(mod_dat,mod_dat.)
   }
-  
-  model_specs = data.frame("lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
+
   # Generate Matrices for Covariance and Permutations
   cov_temp <- data.frame(gen = rep(unique(genphenenv_df$gen),
                                    each = length(seq(from = min(genphenenv_df$env_corrected), 
@@ -264,6 +264,7 @@ Cov_matrix_sim <- function(genphenenv_df){
   
   # Extract model outputs                
   lm_result = "Yes_GxE"
+  GxE_pval = result[[2,6]]
   E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
   G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
   GxE_R2 = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
@@ -321,15 +322,35 @@ Cov_matrix_sim <- function(genphenenv_df){
                             "native_env" = as.factor(E_mean_temp[,2]),
                             "G_means" = unique(G_means$phen_predicted),
                             "E_means" = E_mean_temp[,1])
+    
     cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
     
-    return(list(cov_est,mod_dat,Cov_matrix))
+    model_specs = data.frame("Index" = unique(genphenenv_df$index),
+                             "G1_slope" = unique(genphenenv_df$slope[genphenenv_df$gen == "G1"]),
+                             "G2_slope" = unique(genphenenv_df$slope[genphenenv_df$gen == "G2"]),
+                             "slope_diff" = unique(genphenenv_df$slope_diff),
+                             "error" = unique(genphenenv_df$stdev),
+                             "lm_result" = lm_result,
+                             "GxE_pval" = GxE_pval,
+                             "Covariance_est" = cov_est,
+                             "E_R2" = E_R2,
+                             "G_R2" = G_R2,
+                             "GxE_R2" = GxE_R2)
+
+    return(list(mod_dat,Cov_matrix,model_specs))
 }
 
-#Need to create 100 new datasets, then put it through this each time to get a new covariance function. 
-test_dat <- Cov_matrix_sim(new_data)
-df <- ldply(test_dat, data.frame) ##?? Why do i have this here
-cov_CI = quantile(unlist(test_dat)[1], probs=c(0.025, 0.975), type=1) 
+## To see how magnitude of GxE affects R^2
+test_dat = data.frame()
+for(i in 1:length(unique(new_data$index))){
+  ind = unique(new_data$index)[i]
+  filter_dat = filter(new_data, index == ind)
+test_dat_temp <- Cov_matrix_sim(filter_dat)
+test_dat <- rbind(test_dat,test_dat_temp[[3]])
+}
+print(ggplot(test_dat, aes(x = slopeset, y = as.numeric(GxE_R2), group=error,fill = error)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "G1 and G2 Slopes")
 
 # Average Covariance and CI's
 cov_avg = mean(cov_dat[,1])  
