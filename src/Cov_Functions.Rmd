@@ -392,6 +392,8 @@ Cov_matrix_continuous <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$env_corrected))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -421,14 +423,6 @@ Cov_matrix_continuous <- function(genphenenv_df){
     mod_dat = rbind(mod_dat,mod_dat.)
   }
   
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
   # Generate Matrices for Covariance and Permutations
   cov_temp <- data.frame(gen_factor = rep(genphenenv_df$gen_factor,
                                           each = length(seq(from = min(genphenenv_df$env_corrected), 
@@ -443,6 +437,8 @@ Cov_matrix_continuous <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$env_corrected))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -471,15 +467,7 @@ Cov_matrix_continuous <- function(genphenenv_df){
                           "pval" = pval)
     mod_dat = rbind(mod_dat,mod_dat.)
   }
-  
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
+ 
   # Generate Matrices for Covariance and Permutations
   cov_temp <- data.frame(gen_factor = rep(genphenenv_df$gen_factor,
                                           each = length(seq(from = min(genphenenv_df$env_corrected), 
@@ -520,14 +508,24 @@ Cov_matrix_continuous <- function(genphenenv_df){
                             "E_means" = E_mean_temp[,1])
     cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
     
-    return(list(cov_est,mod_dat,Cov_matrix,model_specs))
+    model_specs = data.frame("Covariance_est" = cov_est,
+                             "is.normal" = is.normal,
+                             "is.linear" = is.linear,
+                             "lm_result" = lm_result,
+                             "GxE_pval" = GxE_pval,
+                             "E_R2" = E_R2,
+                             "G_R2" = G_R2,
+                             "GxE_R2" = GxE_R2)
+
+    return(list(mod_dat,Cov_matrix,model_specs))
+    
 }
 
 test_dat <- Cov_matrix_continuous(lampei)
 test_dat[1] # Lampei = -0.19 : CNGV/Winner take all?
 test_dat[2]
 test_dat[3]
-test_dat[4]
+
 
 ## Sanity check
 
@@ -535,7 +533,7 @@ test_dat[4]
 ggplot(lampei,aes(x = exp_env_cont, y = phen_data, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
   geom_smooth(method = "gam") + theme_classic()
 
-# Raw Data after standardizing
+# Raw Data after standardizing (have to run through function manually)
 ggplot(genphenenv_df,aes(x = env_corrected, y = phen_corrected, group = gen_factor, fill = gen_factor, colour = gen_factor)) + 
   geom_smooth(method = "gam") + theme_classic()
 
@@ -568,6 +566,8 @@ Cov_matrix_categorical <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$exp_env_factor))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -597,14 +597,6 @@ Cov_matrix_categorical <- function(genphenenv_df){
     mod_dat = rbind(mod_dat,mod_dat.)
   }
   
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
   # Generate Matrices for Covariance and Permutations
   cov_temp <- data.frame(gen_factor = genphenenv_df$gen_factor,
                          exp_env_factor = genphenenv_df$exp_env_factor)
@@ -616,6 +608,8 @@ Cov_matrix_categorical <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$exp_env_factor))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -644,14 +638,6 @@ Cov_matrix_categorical <- function(genphenenv_df){
                           "pval" = pval)
     mod_dat = rbind(mod_dat,mod_dat.)
   } 
-  
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
   
   # Generate Matrices for Covariance and Permutations
   cov_temp <- data.frame(gen_factor = genphenenv_df$gen_factor,
@@ -695,8 +681,16 @@ Cov_matrix_categorical <- function(genphenenv_df){
     ## Estimate covariance
     cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means) 
     
-    ## Output
-    return(list(cov_est,mod_dat,Cov_matrix,model_specs))
+    model_specs = data.frame("Covariance_est" = cov_est,
+                             "is.normal" = is.normal,
+                             "is.linear" = is.linear,
+                             "lm_result" = lm_result,
+                             "GxE_pval" = GxE_pval,
+                             "E_R2" = E_R2,
+                             "G_R2" = G_R2,
+                             "GxE_R2" = GxE_R2)
+
+    return(list(mod_dat,Cov_matrix,model_specs))
 }
 
 test_dat <- Cov_matrix_categorical(gordon)
@@ -718,21 +712,21 @@ ggplot(cov_temp,aes(x = exp_env_factor, y = phen_predicted, group = gen_factor, 
 
 ```
 ** Covariance Matrices from Means/SE with Categorical data **
+
+Issue here: artificially inflating power to detect patterns that may not be real... how to deal?
 ```{r}
 
 ## Covariance Matrix Function for data with only means and SE reported/categorical envs: 
+a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=r=s=t=u=v=w=x=y=z=1
 
 Cov_matrix_meanSE_categorical <- function(genphenenv_df){
 
-  # Generate data based on normal distribution of data with MEAN/STDEV/STDERROR
+  # Generate data based on normal distribution of data with MEAN/STDERROR
   newdat = data.frame()
   for(i in 1:nrow(genphenenv_df)){
     n = genphenenv_df$phen_n[i]
     u = genphenenv_df$phen_data[i]
-    sd1 = genphenenv_df$phen_SD[i]
-    sd2 = (genphenenv_df$phen_mean_SE[i])*(sqrt(genphenenv_df$phen_n[i])) # If SE is provided but no SD
-    sdev = NA
-    if(is.na(sd1)){sdev = sd2}else{sdev = sd1}
+    SE = genphenenv_df$phen_mean_SE[i]
     dat = rnorm(n,u,SE)
     newdat_temp = data.frame(gen_factor = rep(genphenenv_df$gen_factor[i],n),
                              Native_env_cat = rep(genphenenv_df$Native_env_cat[i],n),
@@ -763,6 +757,8 @@ Cov_matrix_meanSE_categorical <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$exp_env_factor))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -792,14 +788,6 @@ Cov_matrix_meanSE_categorical <- function(genphenenv_df){
     mod_dat = rbind(mod_dat,mod_dat.)
   }
   
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
   # Generate Matrices for Covariance and Permutations
   cov_temp <- expand.grid(gen_factor = unique(newdat$gen_factor),
                           exp_env_factor = unique(newdat$exp_env_factor))
@@ -811,7 +799,8 @@ Cov_matrix_meanSE_categorical <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
-  
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$exp_env_factor))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -841,19 +830,9 @@ Cov_matrix_meanSE_categorical <- function(genphenenv_df){
     mod_dat = rbind(mod_dat,mod_dat.)
   }
   
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
   # Generate Matrices for Covariance and Permutations
-  cov_temp <- data.frame(gen_factor = rep(newdat$gen_factor,
-                                          each = length(seq(from = min(newdat$env_corrected), 
-                                                            to = max(newdat$env_corrected),  by = 0.1))),
-                         env_corrected = seq(from = min(newdat$env_corrected), to = max(newdat$env_corrected), by = 0.1))
+  cov_temp <- expand.grid(gen_factor = unique(newdat$gen_factor),
+                          exp_env_factor = unique(newdat$exp_env_factor))
   cov_temp$phen_predicted = predict(test_temp,cov_temp)
   }                 
 
@@ -892,7 +871,16 @@ Cov_matrix_meanSE_categorical <- function(genphenenv_df){
                             "E_means" = E_mean_temp[,1])
     cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means) 
     
-    return(list(cov_est,mod_dat,Cov_matrix,model_specs))
+    model_specs = data.frame("Covariance_est" = cov_est,
+                             "is.normal" = is.normal,
+                             "is.linear" = is.linear,
+                             "lm_result" = lm_result,
+                             "GxE_pval" = GxE_pval,
+                             "E_R2" = E_R2,
+                             "G_R2" = G_R2,
+                             "GxE_R2" = GxE_R2)
+
+    return(list(mod_dat,Cov_matrix,model_specs))
 }
 
 testy = Cov_matrix_meanSE_categorical(faske)
@@ -922,18 +910,17 @@ Cov_matrix_meanSE_continuous <- function(genphenenv_df){
 
   # Generate data based on normal distribution of data with MEAN/STDEV/STDERROR
   newdat = data.frame()
-  for(i in 1:nrow(genphenenv_df)){
+for(i in 1:nrow(genphenenv_df)){
     n = genphenenv_df$phen_n[i]
-    u = genphenenv_df$phen_data
-    sd1 = genphenenv_df$phen_SD[i]
-    sd2 = (genphenenv_df$phen_mean_SE[i])*(sqrt(genphenenv_df$phen_n[i])) # If SE is provided but no SD
-    sdev = NA
-    if(is.na(sd1)){sdev = sd2}else{sdev = sd1}
-    dat = rnorm(n,u,sdev)
+    u = genphenenv_df$phen_data[i]
+    SE = genphenenv_df$phen_mean_SE[i]
+    dat = rnorm(n,u,SE)
     newdat_temp = data.frame(gen_factor = rep(genphenenv_df$gen_factor[i],n),
-                             Native_env_cont = rep(genphenenv_df$Native_env_cont[i],n),
                              nat_env_mean = rep(genphenenv_df$nat_env_mean[i],n),
+                             Native_env_cat = rep(genphenenv_df$Native_env_cat[i],n),
+                             nat_env_factor = rep(genphenenv_df$nat_env_factor[i],n),
                              exp_env_cont = rep(genphenenv_df$exp_env_cont[i],n),
+                             exp_env_cat = rep(genphenenv_df$exp_env_cat[i],n),
                              exp_env_factor = rep(genphenenv_df$exp_env_factor[i],n),
                              phen_n = rep(n,n),
                              phen_data = dat)
@@ -964,6 +951,8 @@ Cov_matrix_meanSE_continuous <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$env_corrected))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -993,17 +982,12 @@ Cov_matrix_meanSE_continuous <- function(genphenenv_df){
     mod_dat = rbind(mod_dat,mod_dat.)
   }
   
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
   # Generate Matrices for Covariance and Permutations
-  cov_temp <- expand.grid(gen_factor = unique(newdat$gen_factor),
-                         env_corrected = unique(newdat$env_corrected))
+  cov_temp <- data.frame(gen_factor = rep(genphenenv_df$gen_factor,
+                                          each = length(seq(from = min(genphenenv_df$env_corrected), 
+                                                            to = max(genphenenv_df$env_corrected),  by = 0.1))),
+                         env_corrected = seq(from = min(genphenenv_df$env_corrected), 
+                                             to = max(genphenenv_df$env_corrected), by = 0.1))
   cov_temp$phen_predicted = predict(test_temp,cov_temp)
   }else{
     
@@ -1012,6 +996,8 @@ Cov_matrix_meanSE_continuous <- function(genphenenv_df){
   # Model diagnostics
   res = residuals(test_temp)
   shap_wilkes = shapiro.test(res)
+  is.normal <- NULL
+  if(shap_wilkes[[2]] > 0.05){is.normal = "Yes"}else{is.normal = "No"}
   if(length(unique(genphenenv_df$env_corrected))>2){ # Wont work if only 2 environments
     test_nonlinear = lm(phen_corrected ~ (exp_env_factor^2) + gen_factor, data = genphenenv_df) #Polynomial 
   lin_test = lrtest(test_temp,test_nonlinear) # If p > 0.05, then data likely non-linear
@@ -1041,26 +1027,19 @@ Cov_matrix_meanSE_continuous <- function(genphenenv_df){
     mod_dat = rbind(mod_dat,mod_dat.)
   }
   
-  model_specs = data.frame("NormalityTest" = shap_wilkes[[2]],
-                           "is.linear" = is.linear,
-                           "lm_result" = lm_result,
-                           "GxE_pval" = GxE_pval,
-                           "E_R2" = E_R2,
-                           "G_R2" = G_R2,
-                           "GxE_R2" = GxE_R2)
-  
   # Generate Matrices for Covariance and Permutations
-  cov_temp <- cov_temp <- expand.grid(gen_factor = unique(newdat$gen_factor),
-                         env_corrected = unique(newdat$env_corrected))
+  cov_temp <- data.frame(gen_factor = rep(newdat$gen_factor,
+                                          each = length(seq(from = min(newdat$env_corrected), 
+                                                            to = max(newdat$env_corrected),  by = 0.1))),
+                         env_corrected = seq(from = min(newdat$env_corrected), 
+                                             to = max(newdat$env_corrected), by = 0.1))
   cov_temp$phen_predicted = predict(test_temp,cov_temp)
   }                 
 
   # Re-assign environmental variables to model predicted data 
-  cov_temp$native_env_corrected <- newdat$native_env_corrected[
-    match(cov_temp$gen_factor,newdat$gen_factor)]
+  cov_temp$native_env_corrected <- newdat$native_env_corrected[match(cov_temp$gen_factor,newdat$gen_factor)]
   cov_temp$env_corrected <- round(cov_temp$env_corrected, digits = 1)
-  cov_temp$native_env_corrected <- round(newdat$native_env_corrected[
-    match(cov_temp$gen_factor,newdat$gen_factor)],digits =1)
+  cov_temp$native_env_corrected <- round(newdat$native_env_corrected[match(cov_temp$gen_factor,newdat$gen_factor)],digits =1)
   
   # Covariance Emeans and Gmeans
   Cov_matrix = data.frame()
@@ -1087,7 +1066,16 @@ Cov_matrix_meanSE_continuous <- function(genphenenv_df){
                             "E_means" = E_mean_temp[,1])
     cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
     
-    return(list(cov_est,mod_dat,Cov_matrix,model_specs))
+    model_specs = data.frame("Covariance_est" = cov_est,
+                             "is.normal" = is.normal,
+                             "is.linear" = is.linear,
+                             "lm_result" = lm_result,
+                             "GxE_pval" = GxE_pval,
+                             "E_R2" = E_R2,
+                             "G_R2" = G_R2,
+                             "GxE_R2" = GxE_R2)
+
+    return(list(mod_dat,Cov_matrix,model_specs))
 }
 
 testy <- Cov_matrix_meanSE_continuous(faske)
@@ -1137,7 +1125,7 @@ bootstap_categorical <- function(genphenenv_df){
       }
     }
     shuffle_cov_temp = Cov_matrix_categorical(shuffle_dat)
-    return(list(shuffle_cov_temp[[1]]))
+    return(list(shuffle_cov_temp[[3]][[1]]))
 }
 
 bootstap_continuous <- function(genphenenv_df){
@@ -1165,7 +1153,7 @@ bootstap_continuous <- function(genphenenv_df){
     }
     
     shuffle_cov_temp = Cov_matrix_continuous(shuffle_dat)
-    return(list(shuffle_cov_temp[[1]]))
+    return(list(shuffle_cov_temp[[3]][[1]]))
 }
 
 bootstap_continuous(lampei)
@@ -1191,7 +1179,7 @@ permutation_categorical <- function(genphenenv_df){
                          "phen_data" = null_temp)
 
   perm_cov_temp = Cov_matrix_categorical(perm_dat)
-  return(list(perm_cov_temp[[1]]))
+  return(list(perm_cov_temp[[3]][[1]]))
 }
 
 permutation_continuous <- function(genphenenv_df){
@@ -1208,7 +1196,7 @@ permutation_continuous <- function(genphenenv_df){
                          "phen_data" = null_temp)
 
   perm_cov_temp = Cov_matrix_continuous(perm_dat)
-  return(list(perm_cov_temp[[1]]))
+  return(list(perm_cov_temp[[3]][[1]]))
 }
 
 permutation_categorical(gordon)
@@ -1225,9 +1213,9 @@ Categorical_data <- function(genphenenv_df){
   truecov = Cov_matrix_categorical(genphenenv_df)
   
   ## Magnitude of GxE
-  GxE_R2 = truecov[[4]]["GxE_R2"][[1]]
-  is.GxE = truecov[[4]]["lm_result"][[1]]
-  GxE_pval = truecov[[4]]["GxE_pval"][[1]]
+  GxE_R2 = truecov[[3]]["GxE_R2"][[1]]
+  is.GxE = truecov[[3]]["lm_result"][[1]]
+  GxE_pval = truecov[[3]]["GxE_pval"][[1]]
 
   ## Bootstrapped means and confidence intervals
   bootdat = replicate(iterations, bootstap_categorical(genphenenv_df), simplify=TRUE) 
@@ -1243,10 +1231,10 @@ Categorical_data <- function(genphenenv_df){
   nulldist_uprCI = quantile(unlist(permdat), 1-alpha/2)
                     
   is.sig = NA
-  if( (truecov[[1]][1] < nulldist_lwrCI[[1]]) | (truecov[1] > nulldist_uprCI[[1]]) ) {is.sig = "yes"}else{is.sig = "no"}
+  if( (truecov[[3]][[1]] < nulldist_lwrCI[[1]]) | (truecov[[3]][[1]] > nulldist_uprCI[[1]]) ) {is.sig = "yes"}else{is.sig = "no"}
   
   ## Generate P-value
-  obs = unlist(truecov[[1]])
+  obs = unlist(truecov[[3]][[1]])
   new_dat = unlist(permdat)
   
   ptemp = (rank(c(obs,new_dat))[1])/(iterations+1) 
@@ -1256,7 +1244,7 @@ Categorical_data <- function(genphenenv_df){
   ## Output
   results = data.frame()
   return(results = data.frame("StudyID" = unique(genphenenv_df$Study_ID_phenotype),
-                              "true cov" = truecov[[1]], 
+                              "true cov" = truecov[[3]][[1]], 
                               "Low_CI" = cov_CI[1], 
                               "Hi_CI" = cov_CI[2], 
                               "Bootstrapped_Mean_cov" = cov_avg,
@@ -1269,7 +1257,7 @@ Categorical_data <- function(genphenenv_df){
                               "GxE_pval" = GxE_pval)) 
 }
 
-results = Categorical_data(faske)
+results = Categorical_data(gordon)
 
 ```
 
@@ -1284,9 +1272,9 @@ Continuous_data <- function(genphenenv_df){
   truecov = Cov_matrix_continuous(genphenenv_df)
   
   ## Magnitude of GxE
-  GxE_R2 = truecov[[4]]["GxE_R2"][[1]]
-  is.GxE = truecov[[4]]["lm_result"][[1]]
-  GxE_pval = truecov[[4]]["GxE_pval"][[1]]
+  GxE_R2 = truecov[[3]]["GxE_R2"][[1]]
+  is.GxE = truecov[[3]]["lm_result"][[1]]
+  GxE_pval = truecov[[3]]["GxE_pval"][[1]]
 
   ## Bootstrapped means and confidence intervals
   bootdat = replicate(iterations, bootstap_continuous(genphenenv_df), simplify=TRUE) 
@@ -1302,10 +1290,10 @@ Continuous_data <- function(genphenenv_df){
   nulldist_uprCI = quantile(unlist(permdat), 1-alpha/2)
                     
   is.sig = NA # May want to correct for multiple testing
-  if( (truecov[[1]][1] < nulldist_lwrCI[[1]]) | (truecov[1] > nulldist_uprCI[[1]]) ) {is.sig = "yes"}else{is.sig = "no"}
+  if( (truecov[[3]][[1]] < nulldist_lwrCI[[1]]) | (truecov[[3]][[1]] > nulldist_uprCI[[1]]) ) {is.sig = "yes"}else{is.sig = "no"}
   
   ## Generate P-value
-  obs = unlist(truecov[[1]])
+  obs = unlist(truecov[[3]][[1]])
   new_dat = unlist(permdat)
   
   ptemp = (rank(c(obs,new_dat))[1])/(iterations+1) 
@@ -1315,7 +1303,7 @@ Continuous_data <- function(genphenenv_df){
   ## Output
   results = data.frame()
   return(results = data.frame("StudyID" = unique(genphenenv_df$Study_ID_phenotype),
-                              "true cov" = truecov[[1]], 
+                              "true cov" = truecov[[3]][[1]], 
                               "Low_CI" = cov_CI[1], 
                               "Hi_CI" = cov_CI[2], 
                               "Bootstrapped_Mean_cov" = cov_avg,
