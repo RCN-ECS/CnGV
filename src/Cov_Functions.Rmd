@@ -25,7 +25,7 @@ for (i in 1:length(packages_needed)){
 ## For checking functions (temporary)
 
 input_df = input # For simulation tests
-a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=1
+a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=z=1
 
 #Continous environments
 falc_dat = read.csv("~/Documents/GitHub/CnGV/data/Falconer_template.csv") # data for testing
@@ -50,10 +50,10 @@ For simulations, we will need to create data that mimics real data. To do so, we
 Diff_GxE <- list(
   "type" = c("pure_GxE"), #("cogv","cngv","pure_GxE"),
   "intercept_G1" = 0,
-  "slope_G1" = c(-2), #seq(from = -1, to = 1, by = 0.5),
+  "slope_G1" = c(-2,-1,-0.25), #seq(from = -1, to = 1, by = 0.5),
   "intercept_G2" = c(0), #seq(from = -5, to = 5, by = 2),
-  "slope_G2" = c(2), #seq(from = -1, to = 1, by = 0.1),
-  "sd" = c(1), #seq(from = 0, to = 1, by = 0.5),
+  "slope_G2" = c(2,1,0.25), #seq(from = -1, to = 1, by = 0.1),
+  "sd" = c(0), #seq(from = 0, to = 1, by = 0.5),
   "sample_size" = 5, #seq(from = 5, to = 10, by = 2),
   "env_num" = 2, #c(2,5,10), 
   "env" = NA,
@@ -64,13 +64,13 @@ Diff_GxE <- list(
   "slope_diff" = NA) 
 
 Diff_means <- list(
-  "type" = c("cogv","cngv","pure_GxE"),
+  "type" = c("cogv"), #c("cogv","cngv","pure_GxE"),
   "intercept_G1" = 0,
-  "slope_G1" = c(2,1),#seq(from = -1, to = 1, by = 0.5),
-  "intercept_G2" = c(4,2),#seq(from = -5, to = 5, by = 2),
-  "slope_G2" = c(-2,1),#seq(from = -1, to = 1, by = 0.1),
-  "sd" = c(0.5,1),#seq(from = 0, to = 1, by = 0.5),
-  "sample_size" = c(5,7,9),#seq(from = 5, to = 10, by = 2),
+  "slope_G1" = c(2),#seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = c(2),#seq(from = -5, to = 5, by = 2),
+  "slope_G2" = c(-2),#seq(from = -1, to = 1, by = 0.1),
+  "sd" = c(1),#seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = c(5),#seq(from = 5, to = 10, by = 2),
   "env_num" = 2,#c(2,5,10), 
   "env" = NA,
   "G1_env" = NA, 
@@ -129,13 +129,13 @@ data_generation <- function(input_df){
           for(g in 1:length(sd)){
             for(h in 1:length(sample_size)){
                 
-                row=row+1 #index for the for mini-data file
+                row=row+1 #index 
                   
                   # GxE logical
                   if(slope_G1[d] == slope_G2[f]){is.GxE = "No_GxE"} else {is.GxE = "Yes_GxE"}
                   
                   # Difference in slope and intercept
-                  slope_diff = (slope_G2[f] - slope_G1[d])
+                  slope_diff = (slope_G2[f] + slope_G1[d])
                   intercept_diff = (intercept_G2[e]-intercept_G1)
                   
                   # Generate data 
@@ -182,8 +182,10 @@ data_generation <- function(input_df){
   return(dat_temp)
   }
 
-mean_data <- replicate(5,data_generation(Diff_means))
+mean_data <- as.data.frame(unlist(replicate(5,data_generation(Diff_means))))
 new_data <- data_generation(Diff_GxE)
+
+mean_data[,1]
 
 # Sanity check
 for(i in 1:length(unique(new_data$index))){
@@ -354,10 +356,13 @@ test_dat_temp <- Cov_matrix_sim(filter_dat)
 test_dat <- rbind(test_dat,test_dat_temp[[3]])
 }
 
-print(ggplot(test_dat, aes(x = slopeset, y = as.numeric(GxE_R2), group=error,fill = error)) + 
+test_dat$slopeset = paste(test_dat$G1_slope,test_dat$G2_slope,sep="_")
+print(ggplot(test_dat, aes(x= reorder(slopeset,test_dat$G1_slope), y = GxE_R2)) + 
     geom_bar(stat = "identity",position="dodge")+theme_classic())+
-    labs(x = "G1 and G2 Slopes")
-
+    labs(x = "G1 - G2 Slope")
+print(ggplot(test_dat, aes(x= slope_diff, y = GxE_R2)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "Slope Difference")
 
 ```
 
