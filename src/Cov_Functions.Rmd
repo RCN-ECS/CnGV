@@ -182,11 +182,6 @@ data_generation <- function(input_df){
   return(dat_temp)
   }
 
-mean_data <- as.data.frame(unlist(replicate(5,data_generation(Diff_means))))
-new_data <- data_generation(Diff_GxE)
-
-mean_data[,1]
-
 # Sanity check
 for(i in 1:length(unique(new_data$index))){
   ind = unique(new_data$index)[i]
@@ -196,6 +191,46 @@ for(i in 1:length(unique(new_data$index))){
   print(plot_temp) 
 }
 
+
+# Generate data for the GxE comparisons
+new_data <- data_generation(Diff_GxE)
+```
+To test whether means and SE can be reliably back calculated:
+```{r}
+mean_data1 <- data_generation(Diff_means)
+
+mean_data1 = as.data.frame(mean_data)
+
+bigdat = mean_data1
+bigsumdat = data.frame()
+#for(i in 1:length(unique(bigdat$rep))){
+  for(j in 1:length(unique(bigdat$gen))){
+    for (k in 1:length(unique(bigdat$env))){
+  #reptemp = unique(bigdat$rep)[i]
+  gentemp = unique(bigdat$gen)[j]
+  envtemp = unique(bigdat$env)[k]
+  #dat.. = filter(bigdat, rep == reptemp)
+  dat. = filter(bigdat, gen==gentemp)
+  dat = filter(dat., env == envtemp)
+  average = mean(dat$phen)
+  stddev = sd(dat$phen)
+  bigsumdat. = data.frame("average" = average,
+                          "std_dev" = stddev,
+                          #"rep" = reptemp,
+                          "gen" = gentemp,
+                          "env" = envtemp,
+                          "sample_size" = length(dat$phen))
+  bigsumdat = rbind(bigsumdat, bigsumdat.)
+    }
+  }
+bigsumdat$std_err = bigsumdat$std_dev/sqrt(bigsumdat$sample_size)
+
+ # Go down to cont. function to obtain this new data.
+olddat = lm(phen ~ env + gen, data = mean_data1)
+newdata = lm(phen_data ~ exp_env_cat + gen_factor, data = newdat)
+
+summary(olddat)
+summary(newdata)
 ```
 
 ### Covariance Matrices ###
@@ -720,6 +755,12 @@ ggplot(cov_temp,aes(x = exp_env_factor, y = phen_predicted, group = gen_factor, 
 
 Issue here: artificially inflating power to detect patterns that may not be real... how to deal?
 ```{r}
+colnames(bigsumdat)[colnames(bigsumdat)=="average"] <- "phen_data"
+colnames(bigsumdat)[colnames(bigsumdat)=="gen"] <- "gen_factor"
+colnames(bigsumdat)[colnames(bigsumdat)=="env"] <- "exp_env_cat"
+colnames(bigsumdat)[colnames(bigsumdat)=="sample_size"] <- "phen_n"
+colnames(bigsumdat)[colnames(bigsumdat)=="std_err"] <- "phen_mean_SE"
+genphenenv_df = bigsumdat
 
 ## Covariance Matrix Function for data with only means and SE reported/categorical envs: 
 a=b=c=d=e=f=g=h=i=j=k=l=m=n=o=p=q=r=s=t=u=v=w=x=y=z=1
@@ -734,11 +775,11 @@ Cov_matrix_meanSE_categorical <- function(genphenenv_df){
     SE = genphenenv_df$phen_mean_SE[i]
     dat = rnorm(n,u,SE)
     newdat_temp = data.frame(gen_factor = rep(genphenenv_df$gen_factor[i],n),
-                             Native_env_cat = rep(genphenenv_df$Native_env_cat[i],n),
-                             nat_env_factor = rep(genphenenv_df$nat_env_factor[i],n),
-                             exp_env_cont = rep(genphenenv_df$exp_env_cont[i],n),
+                             #Native_env_cat = rep(genphenenv_df$Native_env_cat[i],n),
+                             #nat_env_factor = rep(genphenenv_df$nat_env_factor[i],n),
+                             #exp_env_cont = rep(genphenenv_df$exp_env_cont[i],n),
                              exp_env_cat = rep(genphenenv_df$exp_env_cat[i],n),
-                             exp_env_factor = rep(genphenenv_df$exp_env_factor[i],n),
+                             #exp_env_factor = rep(genphenenv_df$exp_env_factor[i],n),
                              phen_n = rep(n,n),
                              phen_data = dat)
     newdat = rbind(newdat_temp,newdat)
