@@ -1,0 +1,5 @@
+﻿Study_ID_phenotype,First_Author,gen_factor,Native_env_cont,Native_env_cat,nat_env_mean,nat_env_sd,nat_env_factor,exp_env_cont,exp_env_cat,exp_env_factor,phen_n,phen_data,phen_SD,phen_mean_SE,phen_mean_lowCI_095,phen_mean_highCI_095,Comments
+59_male pupal develop time,Faske,G_1,,warm,22.1,,E_1,22.1,,E_1,55,14.9,,0.079,,,
+59_male pupal develop time,Faske,G_1,,warm,22.1,,E_1,17.8,,E_2,29,20.7,,0.21,,,
+59_male pupal develop time,Faske,G_2,,cold,17.8,,E_2,22.1,,E_1,52,14.6,,0.16,,,
+59_male pupal develop time,Faske,G_2,,cold,17.8,,E_2,17.8,,E_2,40,20.65,,0.188,,,
