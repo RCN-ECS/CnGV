@@ -180,29 +180,28 @@ data_generation <- function(input_df){
     }
     }
   return(dat_temp)
-  }
+}
+
+# Generate data for the GxE comparisons
+new_data <- data_generation(Diff_GxE)
 
 # Sanity check
 for(i in 1:length(unique(new_data$index))){
   ind = unique(new_data$index)[i]
   plotdat = filter(new_data, index == ind)
   plot_temp = ggplot(plotdat, aes(x = env, y = phen, group = gen, fill = gen, colour = gen)) + 
-    geom_point()  + theme_classic()
+    stat_smooth()  + theme_classic()
   print(plot_temp) 
 }
 
-
-# Generate data for the GxE comparisons
-new_data <- data_generation(Diff_GxE)
 ```
 To test whether means and SE can be reliably back calculated:
 ```{r}
 mean_data1 <- data_generation(Diff_means)
-
 mean_data1 = as.data.frame(mean_data)
-
 bigdat = mean_data1
 bigsumdat = data.frame()
+
 #for(i in 1:length(unique(bigdat$rep))){
   for(j in 1:length(unique(bigdat$gen))){
     for (k in 1:length(unique(bigdat$env))){
