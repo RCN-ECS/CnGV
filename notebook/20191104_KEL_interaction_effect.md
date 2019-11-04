@@ -1,5 +1,5 @@
 # Example interaction effect
-
+```
 # Means of genotypes in each environmnent
 G11 <- 0.5 #Env 1, G1
 G12 <- 1   #Env 2, G1
@@ -41,3 +41,4 @@ calc_interaction(0.5, 1, 1, 0.5)
 
 # whether it is positive or negative will depend on the constrast,
 # suggest using absolute value for the paper
+```
