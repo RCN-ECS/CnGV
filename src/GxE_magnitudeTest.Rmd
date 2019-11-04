@@ -1,0 +1,106 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Different ways to estimate magnitude of GxE: 
+
+1a: Using marginal means of genotypes in different environments.
+1b: Using estimated marginal means using simulated data
+2: Using omega^2
+3: Using eta^2
+
+
+```{r}
+# Means of genotypes in each environmnent
+G11 <- 0.5 #Env 1, G1
+G12 <- 1   #Env 2, G1
+G21 <- 0   #Env 1, G2
+G22 <- 0.5 #Env 2, G2
+
+calc_interaction <- function(G11, G12, G21, G22){
+  
+  plot(c(1,2), c(G11, G12), type="l", col="red", ylim=c(0,2))
+  points(c(1,2), c(G21, G22), type="l", col="blue", ylim=c(0,2))
+  
+  (overall_mean <- mean(c(G11,G12,G21,G22)))
+  
+  # Marginal means
+  (G1_mean <- overall_mean - mean(c(G11,G12)))
+  (G2_mean <- overall_mean - mean(c(G22,G21)))
+  (E1_mean <- overall_mean - mean(c(G11,G21)))
+  (E2_mean <- overall_mean - mean(c(G12,G22)))
+  
+  ## Interaction effect for the i_th level of factor G (G2)
+  ## and jth level of factor E (E2)
+  print(c("Interaction effect for G22:",  
+          overall_mean - G2_mean - E2_mean - G22))
+  
+  print(c("Interaction effect for G11:", 
+          overall_mean - G1_mean - E1_mean - G11))
+  
+  print(c("Interaction effect for G12:",
+          overall_mean - G1_mean - E2_mean - G12))
+  
+  print(c("Interaction effect for G21:", 
+          overall_mean - G2_mean - E1_mean - G21))
+}
+
+calc_interaction(0.5, 1, 0, 0.5)
+calc_interaction(0.5, 1, 0, 0.6)
+calc_interaction(0.5, 1, 1, 0.5)
+
+# whether it is positive or negative will depend on the constrast,
+# suggest using absolute value for the paper
+```
+```{r}
+source("~/Documents/GitHub/CnGV/src/data_generation_function.R")
+source("~/Documents/GitHub/CnGV/src/CovMatrix_sim.R")
+
+Diff_GxE <- list(
+  "type" = c("pure_GxE"), #("cogv","cngv","pure_GxE"),
+  "intercept_G1" = 0,
+  "slope_G1" = c(-2,-1,-0.25,0), #seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = c(0), #seq(from = -5, to = 5, by = 2),
+  "slope_G2" = c(2,1,0.25,0), #seq(from = -1, to = 1, by = 0.1),
+  "sd" = c(0.1), #seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = 5, #seq(from = 5, to = 10, by = 2),
+  "env_num" = 2, #c(2,5,10), 
+  "env" = NA,
+  "G1_env" = NA, 
+  "G2_env" = NA,
+  "true_covGE" = NA, 
+  "is.GxE" = NA, 
+  "slope_diff" = NA) 
+
+new_dat = data_generation(Diff_GxE)
+testy = Cov_matrix_sim(new_dat)
+```
+Plot eta^2 GxE
+```{r}
+test_dat = testy[[3]]
+test_dat$actual_slopediff = abs(test_dat$G2_slope_predicted - test_dat$G1_slope_predicted)
+print(ggplot(test_dat, aes(x= reorder(slopeset,test_dat$G1_slope), y = GxE_R2)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "G1 - G2 Slope")
+
+print(ggplot(testy[[3]], aes(x= slope_diff, y = eta_GxE)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "Slope Difference", y = "eta squared")
+
+print(ggplot(test_dat, aes(x= actual_slopediff, y = eta_GxE)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "Slope Difference", y = "eta squared")+xlim(1.0,2.1)
+
+print(ggplot(test_dat, aes(x= slope_diff, y = w2_GxE)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "Slope Difference",y = "omega squared")
+
+print(ggplot(test_dat, aes(x= actual_slopediff, y = w2_GxE)) +
+    geom_bar(stat = "identity",position="dodge")+
+      theme_classic())+
+    labs(x = "Slope Difference",y = "omega squared")+xlim(1.0,2.1)
+
+```
+
+```{r}
+
