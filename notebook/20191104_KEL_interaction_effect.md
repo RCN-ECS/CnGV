@@ -8,11 +8,17 @@ G22 <- 0.5 #Env 2, G2
 
 calc_interaction <- function(G11, G12, G21, G22){
   
-  plot(c(1,2), c(G11, G12), type="l", col="red", ylim=c(0,2))
-  points(c(1,2), c(G21, G22), type="l", col="blue", ylim=c(0,2))
+  plot(c(1,2), c(G11, G12), type="l", col="red", ylim=c(-2,2))
+  points(c(1,2), c(G21, G22), type="l", col="blue", ylim=c(-2,2))
   
   
   (overall_mean <- mean(c(G11,G12,G21,G22)))
+  G11 <- G11 - overall_mean
+  G12 <- G12 - overall_mean
+  G21 <- G21 - overall_mean
+  G22 <- G22 - overall_mean
+  (overall_mean <- mean(c(G11,G12,G21,G22)))
+  print(overall_mean)
   
   # Marginal means
   (G1_mean <- mean(c(G11,G12)))
@@ -37,7 +43,8 @@ calc_interaction <- function(G11, G12, G21, G22){
 
 calc_interaction(0.5, 1, 0, 0.5)
 calc_interaction(0.5, 1, 0, 0.6)
-calc_interaction(0.5, 1, 1, 0.5)
+calc_interaction(-1, 1, 1, -1)
+calc_interaction(-0.25, 0.25, 0.25, -0.25)
 
 # whether it is positive or negative will depend on the constrast,
 # suggest using absolute value for the paper
