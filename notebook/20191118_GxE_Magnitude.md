@@ -47,20 +47,20 @@ I'll compare the performance of each using simulated data with 4 scenarios:
 
 Intercepts of G1 and G2 = 0
 Standard Deviation = 0
-
-1: G1 slope = 1; G2 slope = -1; environment = continuous (-2, 2) 
-2: G1 slope = 1; G2 slope = -1; environment = categorical (E1, E2)
-3: G1 slope = 0.25; G2 slope = -0.25; environment = continuous (-2, 2) 
-4: G1 slope = 0.25; G2 slope = -0.25; environment = categorical (E1, E2)
+|---|
+|1: G1 slope = 1; G2 slope = -1; environment = continuous (-2, 2)| 
+|2: G1 slope = 1; G2 slope = -1; environment = categorical (E1, E2)|
+|3: G1 slope = 0.25; G2 slope = -0.25; environment = continuous (-2, 2)|
+|4: G1 slope = 0.25; G2 slope = -0.25; environment = categorical (E1, E2)|
 
 Results: 
 
 | Scenario | \eta^{2} | \omega^{2} | Emmeans Manual | Emmeans R |
 | ------------ | ------------- | ------------ | ------------- | ------------- |
-| 1,-1,continuous | 1 | 1 | 0.9746794 | 0.9746794 |
-| 1,-1,categorical | 1 | 1 | 0.9746794 | 0.9746794 |
-| 0.25,-0.25,continuous | 1 | 1 | 0.9746794 | 0.9746794 |
-| 0.25,-0.25, categorical | 1 | 1 | 0.9746794 | 0.9746794 |
+| 1 | 1 | 1 | 0.9746794 | 0.9746794 |
+| 2 | 1 | 1 | 0.9746794 | 0.9746794 |
+| 3 | 1 | 1 | 0.9746794 | 0.9746794 |
+| 4 | 1 | 1 | 0.9746794 | 0.9746794 |
 
 They are all identical. 
 
@@ -68,18 +68,13 @@ I'm going to repeat the same steps with some error (Std. dev = 0.05) and bootstr
 
 |Scenario | \eta^{2} (CI) | \omega^{2} (CI) | Emmeans Manual (CI) | Emmeans R (CI)|
 | ------------ | ------------- | ------------ | ------------- | ------------- |
-| 1,-1,continuous |  0.9994531 (0.9990557-0.9997713) | 0.9993922 (0.9989492-0.9997471) | 0.9744129 (0.9742191-0.974568) | 0.9744129 (0.9742191-0.974568)|
-|1,-1,categorical | 0.9994139 (0.9988966-0.9997277) | 0.9993491 (0.9988116-0.999695) | 0.9743938 (0.9741416-0.9745467) | 0.9743938 (0.9741416-0.9745467)|
-| 0.25,-0.25,continuous | 0.990741 (0.9845162-0.9957977) | 0.9897063 (0.9827389-0.9953629) | 0.9701556 (0.9671041-0.9726293) | 0.9701556 (0.9671041-0.9726293)|
-| 0.25,-0.25, categorical | 0.9910729 (0.985733-0.995461) | 0.9900793 (0.9840536-0.9949183) | 0.9703182 (0.9677016-0.9724649) | 0.9703182 (0.9677016-0.9724649)|
+| 1 |  0.9994531 (0.9990557-0.9997713) | 0.9993922 (0.9989492-0.9997471) | 0.9744129 (0.9742191-0.974568) | 0.9744129 (0.9742191-0.974568)|
+| 2 | 0.9994139 (0.9988966-0.9997277) | 0.9993491 (0.9988116-0.999695) | 0.9743938 (0.9741416-0.9745467) | 0.9743938 (0.9741416-0.9745467)|
+| 3 | 0.990741 (0.9845162-0.9957977) | 0.9897063 (0.9827389-0.9953629) | 0.9701556 (0.9671041-0.9726293) | 0.9701556 (0.9671041-0.9726293)|
+| 4 | 0.9910729 (0.985733-0.995461) | 0.9900793 (0.9840536-0.9949183) | 0.9703182 (0.9677016-0.9724649) | 0.9703182 (0.9677016-0.9724649)|
 
 
 # Conclusions: 
 The prediction that emmeans would better estimate effect size is not supported by these initial simulations. Each method predicts the magnitude of the interaction relative to the other factors in the model (environment and genotype alone).
 
-| name  | greek    |
-|-------|----------|
-| alpha | $\alpha$ |
-| beta  | $\beta$  |
-| gamma | $\gamma$ |
-| delta | $\delta$ |
+
