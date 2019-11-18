@@ -17,7 +17,8 @@ To calculate manually using simulated data:
 (this is based on Katie's design found [here](https://github.com/RCN-ECS/CnGV/edit/master/notebook/20191115_KEL_compareOmega2_effectsize_GxE.md): 
 Only one calculation is shown below, but all calculations should be equal regardless of comparison (G11, G12, G21, G22). 
 
-```overall_mean <- mean(ind_dat$phen_corrected) 
+```R
+overall_mean <- mean(ind_dat$phen_corrected) 
 
 G1M = abs(overall_mean -
          (mean(ind_dat$phen_corrected[ind_dat$gen == "G1"])) - # G1
