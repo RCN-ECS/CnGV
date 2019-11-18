@@ -1,7 +1,7 @@
 Genotype by environment interactions are common in nature and therefore an important component of CoGV and CnGV. 
 However, finding an effective means of measuring the magnitude of GxE is not straightforward. 
 
-One method involves the complementary metrics, \omega^{2} and \eta^{2}.
+One method involves the complementary metrics, $\omega^{2} and $\eta^{2}.
 
 `\eta^{2}` is the most simple calcuation: `SS_{effect} / SS_{total} `
 
