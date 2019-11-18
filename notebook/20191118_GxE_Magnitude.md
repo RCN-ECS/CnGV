@@ -11,7 +11,7 @@ Each of these metrics gives an estimate between zero and one. A value of one ind
 
 Another method is estimated marginal means (emm). Emms estimate effect sizes based on models. Emms may be preferable since it should incorporate effect size into the calculation rather than simply proportion variance explained. 
 
-There are two ways to calculate GxE using emms. Manual calculation vs. function `<emmeans>' in R.
+There are two ways to calculate GxE using emms. Manual calculation vs. function `<emmeans>` in R.
 
 To calculate manually using simulated data: 
 (this is based on Katie's design found [here](https://github.com/RCN-ECS/CnGV/edit/master/notebook/20191115_KEL_compareOmega2_effectsize_GxE.md): 
