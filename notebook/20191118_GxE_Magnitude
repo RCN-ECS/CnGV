@@ -3,7 +3,7 @@ However, finding an effective means of measuring the magnitude of GxE is not str
 
 One method involves the complementary metrics,  \omega^{2} and \eta^{2}.
 
-\eta^{2} is the most simple calcuation: SS_{effect} / SS_{total} 
+\eta^{2} is the most simple calcuation: `SS_{effect} / SS_{total} `
 
 \omega^{2} is less subject to bias of sample size than \eta^{2} and is calculated: SS_{effect} - (df_{effect}* MS_{error})/MS_{error} + SS_{total}
 
