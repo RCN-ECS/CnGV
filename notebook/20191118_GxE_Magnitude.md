@@ -1,11 +1,11 @@
 Genotype by environment interactions are common in nature and therefore an important component of CoGV and CnGV. 
 However, finding an effective means of measuring the magnitude of GxE is not straightforward. 
 
-One method involves the complementary metrics,  \omega^{2} and \eta^{2}.
+One method involves the complementary metrics,  `\omega^{2}` and `\eta^{2}`.
 
-\eta^{2} is the most simple calcuation: `SS_{effect} / SS_{total} `
+`\eta^{2}` is the most simple calcuation: `SS_{effect} / SS_{total} `
 
-\omega^{2} is less subject to bias of sample size than \eta^{2} and is calculated: SS_{effect} - (df_{effect}* MS_{error})/MS_{error} + SS_{total}
+`\omega^{2}` is less subject to bias of sample size than \eta^{2} and is calculated: SS_{effect} - (df_{effect}* MS_{error})/MS_{error} + SS_{total}
 
 Each of these metrics gives an estimate between zero and one. A value of one indicates the GxE interaction explains 100% the variance in the model.
 
@@ -41,7 +41,7 @@ G1E1_emm = abs(overall_mean -
                        (emm_GxE[1,3])) # G1E1
 ```
 
-# Test of Emmeans vs. \eta^{2} and \omega^{2}
+# Test of Emmeans vs. `\eta^{2}` and `\omega^{2}`
 
 I'll compare the performance of each using simulated data with 4 scenarios:
 
@@ -54,7 +54,8 @@ Standard Deviation = 0
 4: G1 slope = 0.25; G2 slope = -0.25; environment = categorical (E1, E2)
 
 Results: 
-| Scenario | \eta^{2} | \omega^{2} | Emmeans Manual | Emmeans R |
+
+| Scenario | `\eta^{2}` | `\omega^{2}` | Emmeans Manual | Emmeans R |
 | ------------ | ------------- | ------------ | ------------- |
 | 1,-1,continuous | 1 | 1 | 0.9746794 | 0.9746794 |
 | 1,-1,categorical | 1 | 1 | 0.9746794 | 0.9746794 |
