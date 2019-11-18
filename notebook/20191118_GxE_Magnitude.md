@@ -76,3 +76,10 @@ I'm going to repeat the same steps with some error (Std. dev = 0.05) and bootstr
 
 # Conclusions: 
 The prediction that emmeans would better estimate effect size is not supported by these initial simulations. Each method predicts the magnitude of the interaction relative to the other factors in the model (environment and genotype alone).
+
+| name  | greek    |
+|-------|----------|
+| alpha | $\alpha$ |
+| beta  | $\beta$  |
+| gamma | $\gamma$ |
+| delta | $\delta$ |
