@@ -16,6 +16,7 @@ There are two ways to calculate GxE using emms. Manual calculation vs. function 
 To calculate manually using simulated data: 
 (this is based on Katie's design found [here](https://github.com/RCN-ECS/CnGV/edit/master/notebook/20191115_KEL_compareOmega2_effectsize_GxE.md): 
 Only one calculation is shown below, but all calculations should be equal regardless of comparison (G11, G12, G21, G22). 
+
 ```
 overall_mean <- mean(ind_dat$phen_corrected) 
 
@@ -71,3 +72,6 @@ Scenario | \eta^{2} (CI) | \omega^{2} (CI) | Emmeans Manual (CI) | Emmeans R (CI
 0.25,-0.25,continuous | 0.990741 (0.9845162-0.9957977) | 0.9897063 (0.9827389-0.9953629) | 0.9701556 (0.9671041-0.9726293) | 0.9701556 (0.9671041-0.9726293)
 0.25,-0.25, categorical | 0.9910729 (0.985733-0.995461) | 0.9900793 (0.9840536-0.9949183) | 0.9703182 (0.9677016-0.9724649) | 0.9703182 (0.9677016-0.9724649)
 
+
+# Conclusions: 
+The prediction that emmeans would better estimate effect size is not supported by these initial simulations. Each method predicts the magnitude of the interaction relative to the other factors in the model (environment and genotype alone).
