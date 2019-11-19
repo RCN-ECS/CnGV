@@ -33,6 +33,8 @@ G1M = abs(overall_mean -
 
 To calculate using the `emmeans` function in R: 
 
+**Important Note on `emmeans` function:** All predictors in model must be factors to be treated properly. If the predictor is a numeric, the function will take the average value. 
+
 Again, only one is shown, but should be same for all comparisons
 
 ```
@@ -46,7 +48,7 @@ G1E1_emm = abs(overall_mean -
                        (emm_GxE[1,3])) # G1E1
 ```
 
-# Test of Emmeans vs. `eta^2` and `omega^2`
+## Test of Emmeans vs. `eta^2` and `omega^2`
 
 I'll compare the performance of each using simulated data with 4 scenarios:
 
@@ -72,7 +74,27 @@ I'm going to repeat the same steps with some error (Std. dev = 0.05) and bootstr
 | 4 | 0.99 (0.985-0.995) | 0.99 (0.9840-0.9949) | 0.97 (0.9677-0.9724) | 0.97 (0.9677-0.9724)|
 
 
-# Conclusions: 
+####Conclusions:
 The prediction that emms would incorporate effect size more than `omega^2` and `eta^2` is not supported by these initial simulations. All methods seems to perform similarly because the data are all standardized ((data - mean)/std. dev). 
 
 Moving forward we will use `emmeans` function in R to estimate the magnitude of GxE.
+
+## Simulating Emmeans with Covariance 
+
+Cogradient variation (CoGV) gives positive covariance, while countergradient variation (CnGV) gives negative covariance. As the magnitude of GxE goes up, the covariance among genotypes should decrease. 
+
+### Proof of Concept: 
+```# Categorical Starting parameters
+Diff_means_cat <- list(
+  "data_type" = c("categorical"), 
+  "intercept_G1" = seq(from = -5, to = 5, by = 2),
+  "slope_G1" = seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = seq(from = -5, to = 5, by = 2),
+  "slope_G2" = seq(from = -1, to = 1, by = 0.5), 
+  "sd" = 0.5, #seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = c(5)) 
+```
+Data are simulated (`data_generation`) and processed through the appropriate covariance generating function (`Cov_matrix_sim_cat`). 
+
+Plotting the results gives the following: 
+![image](https://github.com/RCN-ECS/CnGV/results/GxEEmmeans_Covariance.png>)
