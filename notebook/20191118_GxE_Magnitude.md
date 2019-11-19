@@ -83,7 +83,9 @@ Moving forward we will use `emmeans` function in R to estimate the magnitude of 
 
 Cogradient variation (CoGV) gives positive covariance, while countergradient variation (CnGV) gives negative covariance. As the magnitude of GxE goes up, the covariance among genotypes should decrease. 
 
-### Proof of Concept: 
+### Proof of Concept
+
+Starting parameters: 
 ```# Categorical Starting parameters
 Diff_means_cat <- list(
   "data_type" = c("categorical"), 
