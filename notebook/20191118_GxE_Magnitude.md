@@ -5,9 +5,11 @@ However, finding an effective means of measuring the magnitude of GxE is not str
 
 One method involves the complementary metrics, `omega^2` and `eta^2`
 
-`eta^2` is the most simple calcuation: `SS_{effect} / SS_{total} `
+`eta^2` is the most simple calculation: 
+`SS_{effect} / SS_{total} `
 
-`omega^2` is less subject to bias of sample size than \eta^{2} and is calculated: `SS_{effect} - (df_{effect}* MS_{error})/MS_{error} + SS_{total}`
+`omega^2` is less subject to bias of sample size than `eta^2` and is calculated: 
+`SS_{effect} - (df_{effect}* MS_{error})/MS_{error} + SS_{total}`
 
 Each of these metrics gives an estimate between zero and one. A value of one indicates the GxE interaction explains 100% the variance in the model.
 
@@ -16,7 +18,6 @@ Another method is estimated marginal means (emm). Emms estimate effect sizes bas
 There are two ways to calculate GxE using emms, manually vs. function `<emmeans>` in R.
 
 To calculate manually using simulated data: 
-
 (this is based on Katie's design found [here](https://github.com/RCN-ECS/CnGV/edit/master/notebook/20191115_KEL_compareOmega2_effectsize_GxE.md): 
 
 Only one calculation is shown below, but all calculations should be equal regardless of comparison (G11, G12, G21, G22). 
