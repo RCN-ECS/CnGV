@@ -47,11 +47,13 @@ I'll compare the performance of each using simulated data with 4 scenarios:
 
 Intercepts of G1 and G2 = 0
 Standard Deviation = 0
-|---|
-|1: G1 slope = 1; G2 slope = -1; environment = continuous (-2, 2)| 
-|2: G1 slope = 1; G2 slope = -1; environment = categorical (E1, E2)|
-|3: G1 slope = 0.25; G2 slope = -0.25; environment = continuous (-2, 2)|
-|4: G1 slope = 0.25; G2 slope = -0.25; environment = categorical (E1, E2)|
+
+|Scenario| G1 | G2 | data type |
+|----------|----------|----------|----------|
+|1 | 1 | -1 | continuous (-2, 2)| 
+|2 | 1 | -1 | categorical (E1, E2)|
+|3 | 0.25 | -0.25 | continuous (-2, 2)|
+|4 | 0.25 | -0.25 | categorical (E1, E2)|
 
 Results: 
 
