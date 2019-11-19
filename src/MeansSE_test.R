@@ -37,7 +37,7 @@ print(ggplot(cont_raw, aes(x = env, y = phen, group = gen,colour = gen))) + geom
 
 # Continous covariance and slope estimation
 cont_raw_test <- Cov_matrix_sim_cont(cont_raw)
-(cont_raw_test[[3]]) #STILL DOESNT WORK
+(cont_raw_test[[3]]) 
 cont_mean_test <- meansSE_boot_cont(cont_mean, 100) # not set up for multiple indexes
 (cont_mean_test[[3]]) 
 
@@ -45,11 +45,10 @@ cont_mean_test <- meansSE_boot_cont(cont_mean, 100) # not set up for multiple in
 # Categorical Starting parameters
 Diff_means_cat <- list(
   "data_type" = c("categorical"), #continuous or categorical
-  #"type" = NULL, #c("cogv","cngv","pure_GxE"),
-  "intercept_G1" = c(4,5,6),
-  "slope_G1" = 1, #seq(from = -1, to = 1, by = 0.5),
-  "intercept_G2" = c(1,2,3),#c(0), #seq(from = -5, to = 5, by = 2),
-  "slope_G2" = 1, #seq(from = -1, to = 1, by = 0.1),
+  "intercept_G1" = seq(from = -5, to = 5, by = 2),
+  "slope_G1" = seq(from = -1, to = 1, by = 0.5), #seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = seq(from = -5, to = 5, by = 2),#c(0), #seq(from = -5, to = 5, by = 2),
+  "slope_G2" = seq(from = -1, to = 1, by = 0.5), #seq(from = -1, to = 1, by = 0.1),
   "sd" = 0.5, #seq(from = 0, to = 1, by = 0.5),
   "sample_size" = c(5)) #seq(from = 5, to = 10, by = 2),
 
@@ -97,7 +96,7 @@ cat_plot <- plot_dat[[1]]
 
 #Continuous Plots: 
 
-# EMM  (still doesn't do well - need to check this)
+# EMM  
 print(ggplot(cont_plot,aes(x = Covariance_est, y = GxE_emm))) + geom_jitter() + theme_classic()
 
 # Lotterhos method 
@@ -106,15 +105,16 @@ print(ggplot(cont_plot,aes(x = Covariance_est, y = GxE_lot))) + geom_jitter() + 
 # Omega 
 print(ggplot(cont_plot,aes(x = Covariance_est, y = GxE_omega))) + geom_jitter() + theme_classic()
 
-# Categorical Plots: (Something is wrong here... why are none of my covariances negative?)
-
-# EMM (Why does this one look close, but the others dont? opposite from continuous)
-print(ggplot(cat_plot,aes(x = Covariance_est, y = GxE_emm))) + geom_jitter() + theme_classic()
+# Categorical Plots: 
+colorscheme = c( "check"="grey","cngv"="blue","cogv"= "red","pure_GxE"="black")
+# EMM 
+print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_emm))) + 
+  geom_jitter() + theme_classic() + ylab("GxE magnitude - Emmeans") + xlab("Covariance Estimate") #+ scale_color_manual(values = colorscheme)
 
 # Lotterhos method
-print(ggplot(cat_plot,aes(x = Covariance_est, y = GxE_lot))) + geom_jitter() + theme_classic()
+print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_lot))) + geom_jitter() + theme_classic() + ylab("GxE magnitude - Emmeans-Lotterhos") + xlab("Covariance Estimate")
 
 # Omega
-print(ggplot(cat_plot,aes(x = Covariance_est, y = GxE_omega))) + geom_jitter() + theme_classic()
+print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_omega))) + geom_jitter() + theme_classic()+ ylab("GxE magnitude - Omega^2") + xlab("Covariance Estimate")
 
 

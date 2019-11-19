@@ -181,6 +181,7 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
     }
     
     model_specs. = data.frame("Index" = unique(ind_dat$index),
+                              "cov_type" = unique(ind_dat$type),
                               "G1_slope" = unique(ind_dat$slope[ind_dat$gen == "G1"]),
                               "G1_slope_predicted" = G1_slope_predicted,
                               "G2_slope" = unique(ind_dat$slope[ind_dat$gen == "G2"]),
