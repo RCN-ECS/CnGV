@@ -96,5 +96,5 @@ Diff_means_cat <- list(
 ```
 Data are simulated (`data_generation`) and processed through the appropriate covariance generating function (`Cov_matrix_sim_cat`). 
 
-Plotting the results gives the following: 
+Plotting the results gives the following:
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/GxE_Emeans_Covariance.png)
