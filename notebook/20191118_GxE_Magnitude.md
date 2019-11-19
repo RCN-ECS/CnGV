@@ -53,7 +53,7 @@ I'll compare the performance of each using simulated data with 4 scenarios:
 Intercepts of G1 and G2 = 0
 Standard Deviation = 0
 
-|Scenario| G1 | G2 | environment type | `eta^2` | `omega^2` | Emmeans Manual | Emmeans R |
+|Scenario| slope G1 | slope G2 | environment type | `eta^2` | `omega^2` | Emmeans Manual | Emmeans R |
 |----------|----------|----------|----------|------------- | ------------ | ------------- | ------------- |
 |1 | 1 | -1 | continuous (-2, 2)|  1 | 1 | 0.9746794 | 0.9746794 |
 |2 | 1 | -1 | categorical (E1, E2)| 1 | 1 | 0.9746794 | 0.9746794 |
@@ -74,5 +74,3 @@ I'm going to repeat the same steps with some error (Std. dev = 0.05) and bootstr
 
 # Conclusions: 
 The prediction that emms would incorporate effect size more than `omega^2` and `eta^2` is not supported by these initial simulations. All methods seems to perform similarly. 
-
-
