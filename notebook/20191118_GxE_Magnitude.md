@@ -73,4 +73,6 @@ I'm going to repeat the same steps with some error (Std. dev = 0.05) and bootstr
 
 
 # Conclusions: 
-The prediction that emms would incorporate effect size more than `omega^2` and `eta^2` is not supported by these initial simulations. All methods seems to perform similarly. 
+The prediction that emms would incorporate effect size more than `omega^2` and `eta^2` is not supported by these initial simulations. All methods seems to perform similarly because the data are all standardized ((data - mean)/std. dev). 
+
+Moving forward we will use `emmeans` function in R to estimate the magnitude of GxE.
