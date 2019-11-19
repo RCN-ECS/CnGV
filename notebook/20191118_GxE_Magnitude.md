@@ -53,23 +53,14 @@ I'll compare the performance of each using simulated data with 4 scenarios:
 Intercepts of G1 and G2 = 0
 Standard Deviation = 0
 
-|Scenario| G1 | G2 | data type |
-|----------|----------|----------|----------|
-|1 | 1 | -1 | continuous (-2, 2)| 
-|2 | 1 | -1 | categorical (E1, E2)|
-|3 | 0.25 | -0.25 | continuous (-2, 2)|
-|4 | 0.25 | -0.25 | categorical (E1, E2)|
+|Scenario| G1 | G2 | environment type | `eta^2` | `omega^2` | Emmeans Manual | Emmeans R |
+|----------|----------|----------|----------|------------- | ------------ | ------------- | ------------- |
+|1 | 1 | -1 | continuous (-2, 2)|  1 | 1 | 0.9746794 | 0.9746794 |
+|2 | 1 | -1 | categorical (E1, E2)| 1 | 1 | 0.9746794 | 0.9746794 |
+|3 | 0.25 | -0.25 | continuous (-2, 2)| 1 | 1 | 0.9746794 | 0.9746794 |
+|4 | 0.25 | -0.25 | categorical (E1, E2)|1 | 1 | 0.9746794 | 0.9746794 |
 
-Results: 
-
-| Scenario | `eta^2` | `omega^2` | Emmeans Manual | Emmeans R |
-| ------------ | ------------- | ------------ | ------------- | ------------- |
-| 1 | 1 | 1 | 0.9746794 | 0.9746794 |
-| 2 | 1 | 1 | 0.9746794 | 0.9746794 |
-| 3 | 1 | 1 | 0.9746794 | 0.9746794 |
-| 4 | 1 | 1 | 0.9746794 | 0.9746794 |
-
-They are nearly identical. 
+The emmeans give slightly lower estimates, but there is no difference between the different slopes. 
 
 I'm going to repeat the same steps with some error (Std. dev = 0.05) and bootstrap these estimates 100x to get means and CIs: 
 
@@ -82,6 +73,6 @@ I'm going to repeat the same steps with some error (Std. dev = 0.05) and bootstr
 
 
 # Conclusions: 
-The prediction that emmns would better estimate effect size is not supported by these initial simulations. Each method predicts the magnitude of the interaction relative to the other factors in the model (environment and genotype alone).
+The prediction that emms would incorporate effect size more than `omega^2` and `eta^2` is not supported by these initial simulations. All methods seems to perform similarly. 
 
 
