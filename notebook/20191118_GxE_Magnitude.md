@@ -1,3 +1,5 @@
+# Magnitude of GxE Interactions
+
 Genotype by environment interactions are common in nature and therefore an important component of CoGV and CnGV. 
 However, finding an effective means of measuring the magnitude of GxE is not straightforward. 
 
