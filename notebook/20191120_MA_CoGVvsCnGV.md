@@ -72,4 +72,4 @@ These show that you can predict CoGV or CnGV based on the spatial relationship o
 This begs the question: 
 **When phenotypes from G1E1 and G2E2 do not perfectly match, how different must the phenotypes (G1E1 vs. G2E2) be in order to flip from negative to positive covariance?** 
 
-Answering this question may allow us to predict when significant covariance is occurring in nature. To answer this question, we can use power analysis (7 months later she gets it). <<pause while I run some power analyses>>
+Answering this question may allow us to predict when significant covariance is occurring in nature. Additionally, since the magnitude of GxE is also related to the strength of covariance (see the triangle plot above), at what point does a GxE interaction weaken the ability to detect covariance? To answer these questions, we can use simulations and power analysis (7 months later she gets it). <pause while I run some analyses>
