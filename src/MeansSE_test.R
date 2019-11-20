@@ -106,10 +106,10 @@ print(ggplot(cont_plot,aes(x = Covariance_est, y = GxE_lot))) + geom_jitter() + 
 print(ggplot(cont_plot,aes(x = Covariance_est, y = GxE_omega))) + geom_jitter() + theme_classic()
 
 # Categorical Plots: 
-colorscheme = c( "check"="grey","cngv"="blue","cogv"= "red","pure_GxE"="black")
+
 # EMM 
 print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_emm))) + 
-  geom_jitter() + theme_classic() + ylab("GxE magnitude - Emmeans") + xlab("Covariance Estimate") #+ scale_color_manual(values = colorscheme)
+  geom_jitter() + theme_classic() + ylab("GxE magnitude - Emmeans") + xlab("Covariance Estimate") 
 
 # Lotterhos method
 print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_lot))) + geom_jitter() + theme_classic() + ylab("GxE magnitude - Emmeans-Lotterhos") + xlab("Covariance Estimate")
