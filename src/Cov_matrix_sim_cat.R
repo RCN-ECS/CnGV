@@ -6,11 +6,15 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
   mod_dat = data.frame()
   Cov_matrix = data.frame()
   model_specs = data.frame()
+  genphenenv_df$genenv = paste(genphenenv_df$gen,genphenenv_df$env, sep = "_")
   
   # Splits into different dataframes
   for(x in 1:length(unique(genphenenv_df$index))){
     id = unique(genphenenv_df$index)[x]
     ind_dat = genphenenv_df[genphenenv_df$index == id,]
+    
+    # Difference in G1E1 and G2E2
+    phendiff = (ind_dat$phen[ind_dat$genenv == "G1_E1"])-(ind_dat$phen[ind_dat$genenv == "G2_E2"])
     
     # Standardize data
     dat_avg = mean(ind_dat$phen) 
@@ -181,6 +185,7 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
     }
     
     model_specs. = data.frame("Index" = unique(ind_dat$index),
+                              "phendiff" = phendiff,
                               "cov_type" = unique(ind_dat$type),
                               "G1_slope" = unique(ind_dat$slope[ind_dat$gen == "G1"]),
                               "G1_slope_predicted" = G1_slope_predicted,
