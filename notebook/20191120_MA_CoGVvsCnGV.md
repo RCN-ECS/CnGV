@@ -1,6 +1,6 @@
 # Predicting CoGV and CnGV based on G1E1 and G2E2
 
-## TL:DR- Molly discovers the point of power analyses again 
+## TL:DR- Molly goes rogue and does something either really dumb or really cool. Can't tell. Scroll to bottom for result.
 
 Cogradient variation can be defined as positive covariance, while countergradient variation can be defined as negative covariance. Defining which scenario requires knowledge of each genotype's native environment. In our simulations, G1 is always native to E1, while G2 is always native to E2. 
 
@@ -17,7 +17,7 @@ Conversely, in these next two examples of *CnGV*, if the slope is positive, then
 In pure GxE scenarios, we should expect the slopes of each genotype to be exactly opposite but have the same intercept: 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/PlotE.png)
 
-I have coded these predictions in the simulations using the following statement in the `data_generation` function: 
+I coded these predictions in the simulations using the following statement in the `data_generation` function: 
 
 ```#Code
 if((intercept_G2[e] == -intercept_G1[b]) & (slope_G1[d] == -slope_G2[f])){
@@ -40,7 +40,7 @@ This approach does a marginal job at predicting CoGV and CnGV but there are stil
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/GxE_better.png)
 
-A more general way to think about this that better includes GxE interactions is by describing the relative location of each genotype's phenotype on a plot. To allow G2's slope to vary, I leave it blank.
+A more general way to think about this that better includes GxE interactions is by describing the relative location of each genotype's phenotype on a plot. To allow for GxE, the location of G2E1 can vary and so I leave that square blank.
 H = High, L = Low
 
 **CoGradient Variation:**
@@ -67,9 +67,27 @@ G2 | - | L
 G1 | H | L
 G2 | - | H
 
-These show that you can predict CoGV or CnGV based on the spatial relationship of G1E1 to G2E2. This is not new, it is just a different way of describing the above plots that have been Molly's typical approach. Thus, if phenotypes in G1E1 equal phenotypes in G2E2, then we have CnGV. However this can become difficult when phenotypes do not perfectly match. 
+These show that you can predict CoGV or CnGV based on the spatial relationship of G1E1 to G2E2. If the phenotypes are similar, it is CnGV. If they are not similar, it is likely CoGV. This is not new, it is just a different way of describing the above plots that Molly typically uses. However this approach can become problematic when phenotypes do not perfectly match. 
 
 This begs the question: 
-**When phenotypes from G1E1 and G2E2 do not perfectly match, how different must the phenotypes (G1E1 vs. G2E2) be in order to flip from negative to positive covariance?** 
+**When phenotypes from G1E1 and G2E2 do not perfectly match, how different must the native phenotypes (G1E1 and G2E2) be in order to flip from negative to positive covariance?** 
 
-Answering this question may allow us to predict when significant covariance is occurring in nature. Additionally, since the magnitude of GxE is also related to the strength of covariance (see the triangle plot above), at what point does a GxE interaction weaken the ability to detect covariance? To answer these questions, we can use simulations and power analysis (7 months later she gets it). <pause while I run some analyses>
+Answering this question may allow us to predict when significant covariance is occurring in nature. Additionally, since the magnitude of GxE is also related to the strength of covariance (see the triangle plot above), at what point does a GxE interaction weaken the ability to detect covariance? 
+
+I used simulated data based on the following parameters: 
+```#starters
+Diff_means_cat <- list(
+  "data_type" = c("categorical"), 
+  "intercept_G1" = seq(from = -5, to = 5, by = 2),
+  "slope_G1" = seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = seq(from = -5, to = 5, by = 2),
+  "slope_G2" = seq(from = -1, to = 1, by = 0.5), 
+  "sd" = 0.05, #seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = c(5)) 
+```
+Here is an initial plot: 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/PredictCnCoGV_initial.png)
+The line indicates the point at which the covariance estimate is zero (i.e., the switchpoint between CoGV and CnGV).
+The Y-axis shows the difference after standardizing the phenotypic data ((data - average)/std.dev.) and taking the absolute value after subtracting G1E1 from G2E2. 
+
+Given these starting parameters, as the magnitude of GxE increases, the difference between G1E1 and G2E2 necessary to flip covariance from CoGV to CnGV is reduced. (I need to think about it more to make sure this result makes sense.) 
