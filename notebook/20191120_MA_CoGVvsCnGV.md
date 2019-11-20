@@ -67,8 +67,9 @@ G2 | - | L
 G1 | H | L
 G2 | - | H
 
-These show that you can predict CoGV or CnGV based on the spatial relationship of G1E1 to G2E2. This is easily predictable in scenarios no error. If phenotypes in G1E1 = G2E2, then we have CnGV. However this can become difficult when "low" or "high" phenotypes do not perfectly match. 
+These show that you can predict CoGV or CnGV based on the spatial relationship of G1E1 to G2E2. This is not new, it is just a different way of describing the above plots that have been Molly's typical approach. Thus, if phenotypes in G1E1 equal phenotypes in G2E2, then we have CnGV. However this can become difficult when phenotypes do not perfectly match. 
 
+This begs the question: 
 **When phenotypes from G1E1 and G2E2 do not perfectly match, how different must the phenotypes (G1E1 vs. G2E2) be in order to flip from negative to positive covariance?** 
 
-Answering this question may allow us to predict when significant covariance is occurring in nature. To answer this question, we can use power analysis. 
+Answering this question may allow us to predict when significant covariance is occurring in nature. To answer this question, we can use power analysis (7 months later she gets it). <<pause while I run some power analyses>>
