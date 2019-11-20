@@ -12,8 +12,8 @@ For example, each of the following are examples of *CoGV*. Native environment is
 
 Conversely, in these examples of *CnGV*, if the slope is positive, then the intercept of G1 should be greater than G2. If the slope is negative, the intercept of G2 should be greater than G1. 
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/plotB.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/PlotD.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/PlotB.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/plotD.png)
 
 In pure GxE scenarios, we should expect the slopes of each genotype to be exactly opposite but have the same intercept: 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/PlotE.png)
