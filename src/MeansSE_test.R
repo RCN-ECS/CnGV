@@ -45,17 +45,24 @@ cont_mean_test <- meansSE_boot_cont(cont_mean, 100) # not set up for multiple in
 # Categorical Starting parameters
 Diff_means_cat <- list(
   "data_type" = c("categorical"), #continuous or categorical
-  "intercept_G1" = seq(from = -5, to = 5, by = 2),
-  "slope_G1" = seq(from = -1, to = 1, by = 0.5), #seq(from = -1, to = 1, by = 0.5),
-  "intercept_G2" = seq(from = -5, to = 5, by = 2),#c(0), #seq(from = -5, to = 5, by = 2),
-  "slope_G2" = seq(from = -1, to = 1, by = 0.5), #seq(from = -1, to = 1, by = 0.1),
-  "sd" = 0.5, #seq(from = 0, to = 1, by = 0.5),
+  "intercept_G1" = 4,
+  "slope_G1" = .5, #seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = 2,#c(0), #seq(from = -5, to = 5, by = 2),
+  "slope_G2" = .5, #seq(from = -1, to = 1, by = 0.1),
+  "sd" = 0, #seq(from = 0, to = 1, by = 0.5),
   "sample_size" = c(5)) #seq(from = 5, to = 10, by = 2),
 
 # Generate categorical data
 cat_raw <- data.frame(data_generation(Diff_means_cat)) # raw
 cat_mean <- sim_means_se(cat_raw) # means (This isnt set up to handle multiple indexes yet)
 
+col1 = c("G1" = "blue", "G2"= "red")
+print(ggplot(cat_raw, aes(x = env, y = phen, group = gen, colour = gen))) + geom_line() +
+  annotate(geom="text", x="E1", y=3, label="X",color="black")+
+  annotate(geom="text", x="E2", y=3, label="X",color="black")+
+  scale_color_manual(values = col1)+
+  theme_classic()  
+  
 # Categorical - covariance and slopes
 cat_raw_test <- Cov_matrix_sim_cat(cat_raw)
 (cont_raw_test[[3]])
