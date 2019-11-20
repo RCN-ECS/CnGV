@@ -43,7 +43,8 @@ This approach does a marginal job at predicting CoGV and CnGV but there are stil
 A more general way to think about this that better includes GxE interactions is by describing the relative location of each genotype's phenotype on a plot. To allow G2's slope to vary, I leave it blank.
 H = High, L = Low
 
-CoGradient Variation: 
+**CoGradient Variation:**
+
 -- | E1 | E2
 ---|---|---
 G1 | L | H
@@ -54,7 +55,8 @@ G2 | - | H
 G1 | H | L
 G2 | - | L
 
-CounterGradient Variation: 
+**CounterGradient Variation:** 
+
 -- | E1 | E2
 ---|---|---
 G1 | L | H
