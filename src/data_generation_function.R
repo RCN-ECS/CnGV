@@ -1,5 +1,5 @@
 a=b=c=d=e=f=g=h=i=j=k=l=m=1
-
+input_df = Diff_means_cat
 
 data_generation <- function(input_df){
   
@@ -54,16 +54,14 @@ data_generation <- function(input_df){
                 # Assign covariance type
                 if((intercept_G2[e] == -intercept_G1[b]) & (slope_G1[d] == -slope_G2[f])){
                   type = "pure_GxE"
-                }else if((slope_G1[d]<0) & (intercept_G1[b]<intercept_G2[e])){
-                  type = "cngv"
-                }else if((slope_G1[d]>0) & (intercept_G1[b]<intercept_G2[e])){
+                }else if((slope_G1[d]<0) & (slope_G2[f]<=0)){
                   type = "cogv"
-                }else if((slope_G1[d]>0) & (intercept_G1[b]>intercept_G2[e])){
-                  type = "cngv"
-                }else if((slope_G1[d]<0) & (intercept_G1[b]>intercept_G2[e])){
+                }else if((slope_G1[d]>0) & (slope_G2[f]>=0)){
                   type = "cogv"
+                }else if((slope_G1[d]>0) & (slope_G2[f]<=0)){
+                  type = "cngv"
                 }else{
-                  type = "check"
+                  type = "cngv"
                 }
                 
                 # GxE logical
