@@ -40,7 +40,8 @@ This approach does a marginal job at predicting CoGV and CnGV but there are stil
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/GxE_better.png)
 
-A more general way to think about this that better includes GxE interactions is by describing the relative location of each genotype's phenotype on a plot. To allow for GxE, the location of G2E1 can vary and so I leave that square blank.
+A more general way to think about this that better includes GxE interactions is by describing the relative location of each genotype's native phenotype on a plot. To allow for GxE, the location of G2E1 can vary and so I leave that square blank.
+
 H = High, L = Low
 
 **CoGradient Variation:**
