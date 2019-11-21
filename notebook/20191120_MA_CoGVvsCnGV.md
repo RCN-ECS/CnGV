@@ -1,6 +1,6 @@
 # Predicting CoGV and CnGV based on G1E1 and G2E2
 
-## TL:DR- Molly goes rogue and does something either really dumb or really cool. Can't tell. Scroll to bottom for result.
+## TL:DR - Just use covariance estimate to define whether a scenario is CoGV or CnGV
 
 Cogradient variation can be defined as positive covariance, while countergradient variation can be defined as negative covariance. Defining which scenario requires knowledge of each genotype's native environment. In our simulations, G1 is always native to E1, while G2 is always native to E2. 
 
@@ -86,9 +86,8 @@ Diff_means_cat <- list(
   "sd" = 0.05, #seq(from = 0, to = 1, by = 0.5),
   "sample_size" = c(5)) 
 ```
-Here is an initial plot: 
+Here is the resultant plot: 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/PredictCnCoGV_initial.png)
-The line indicates the point at which the covariance estimate is zero (i.e., the switchpoint between CoGV and CnGV).
-The Y-axis shows the difference after standardizing the phenotypic data ((data - average)/std.dev.) and taking the absolute value after subtracting G1E1 from G2E2. 
 
-Given these starting parameters, as the magnitude of GxE increases, the difference between G1E1 and G2E2 necessary to flip covariance from CoGV to CnGV is reduced. (I need to think about it more to make sure this result makes sense.) 
+One small tidbit gleaned from this day's worth of wasted time (see TL:DR above) is that scenarios with a perfect GxE are the switchpoints between CoGV and CnGV. But "perfect" GxEs are probably non-existent in nature.
+Carry on.
