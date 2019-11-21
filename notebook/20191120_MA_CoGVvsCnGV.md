@@ -87,7 +87,7 @@ Diff_means_cat <- list(
   "sample_size" = c(5)) 
 ```
 Here is the resultant plot: 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/PredictCnCoGV_initial.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/cogvcngv_plot.pdf)
 
 One small tidbit gleaned from this day's worth of wasted time (see TL:DR above) is that scenarios with a perfect GxE are the switchpoints between CoGV and CnGV. But "perfect" GxEs are probably non-existent in nature.
 Carry on.
