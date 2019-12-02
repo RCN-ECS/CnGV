@@ -153,6 +153,12 @@ Cov_matrix_sim_cont <- function(genphenenv_df){
     
     cov_est = cov(Cov_matrix.$G_means,Cov_matrix.$E_means)
     
+    # Assign covariance type 
+    cov_type = NULL
+    if(cov_est < -0.01){cov_type = "CnGV"
+    }else if{cov_est > 0.01){cov_type = "CoGV"
+    }else{cov_est = "pure_GxE"}
+    
     # Estimated Marginal Means (Manual)
     overall_mean <- mean(ind_dat$phen_corrected)
     if(lm_result == "Yes_GxE"){
@@ -205,7 +211,8 @@ Cov_matrix_sim_cont <- function(genphenenv_df){
     }
     
     model_specs. = data.frame("Index" = unique(ind_dat$index),
-                              "cov_type" = unique(ind_dat$type),
+                              "cov_type" = cov_type,
+                              "Covariance_est" = cov_est,
                               "G1_slope" = unique(ind_dat$slope[ind_dat$gen == "G1"]),
                               "G1_slope_predicted" = G1_slope_predicted,
                               "G2_slope" = unique(ind_dat$slope[ind_dat$gen == "G2"]),
@@ -214,7 +221,6 @@ Cov_matrix_sim_cont <- function(genphenenv_df){
                               "error" = unique(ind_dat$stdev),
                               "lm_result" = lm_result,
                               "GxE_pval" = GxE_pval,
-                              "Covariance_est" = cov_est,
                               "G_eta" = G_R2,
                               "E_eta" = E_R2,
                               "GxE_eta" = GxE_R2,

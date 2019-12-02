@@ -11,25 +11,17 @@ source("~/Documents/GitHub/CnGV/src/CovMatrix_sim_cont.R") # Covariance estimate
 source("~/Documents/GitHub/CnGV/src/Cov_matrix_sim_cat.R") # Covariance estimates from simulated raw data - categorical
 
 # Continuous Starting parameters
-Diff_means_cont <- list(
-  "data_type" = c("continuous"), #continuous or categorical
-  #"type" = NULL, #c("cogv","cngv","pure_GxE"),
-  "intercept_G1" = c(4,5,6),
-  "slope_G1" = 1, #seq(from = -1, to = 1, by = 0.5),
-  "intercept_G2" = c(1,2,3),#c(0), #seq(from = -5, to = 5, by = 2),
-  "slope_G2" = 1, #seq(from = -1, to = 1, by = 0.1),
-  "sd" = 0.5, #seq(from = 0, to = 1, by = 0.5),
-  "sample_size" = c(5)) #seq(from = 5, to = 10, by = 2),
-  #"env_num" = 2, #c(2,5,10), 
-  #"env" = NA,
-  #"G1_env" = NA, 
-  #"G2_env" = NA,
-  #"true_covGE" = NA, 
-  #"is.GxE" = NA, 
-  #"slope_diff" = NA) 
+Contdat <- list(
+  "data_type" = c("continuous"), 
+  "intercept_G1" = 0,
+  "slope_G1" = seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = seq(from = -5, to = 5, by = 2),
+  "slope_G2" = seq(from = -1, to = 1, by = 0.1),
+  "sd" = seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = c(5))
 
 # Create continuous data
-cont_raw <- data_generation(Diff_means_cont) # raw
+cont_raw <- data_generation(Contdat) # raw
 cont_mean <- sim_means_se(cont_raw) # means (This isnt set up to handle multiple indexes yet)
 
 # Plot
@@ -43,22 +35,22 @@ cont_mean_test <- meansSE_boot_cont(cont_mean, 100) # not set up for multiple in
 
 
 # Categorical Starting parameters
-Diff_means_cat <- list(
-  "data_type" = c("categorical"), #continuous or categorical
-  "intercept_G1" = 4,
-  "slope_G1" = .5, #seq(from = -1, to = 1, by = 0.5),
-  "intercept_G2" = 2,#c(0), #seq(from = -5, to = 5, by = 2),
-  "slope_G2" = .5, #seq(from = -1, to = 1, by = 0.1),
-  "sd" = 0, #seq(from = 0, to = 1, by = 0.5),
-  "sample_size" = c(5)) #seq(from = 5, to = 10, by = 2),
+Catdat <- list(
+  "data_type" = c("categorical"), 
+  "intercept_G1" = 1,
+  "slope_G1" = -1, #seq(from = -1, to = 1, by = 0.5),
+  "intercept_G2" = 2,#seq(from = -5, to = 5, by = 2),
+  "slope_G2" = -2,#seq(from = -1, to = 1, by = 0.1),
+  "sd" = 0.5,#seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = c(5)) 
 
 # Generate categorical data
-cat_raw <- data.frame(data_generation(Diff_means_cat)) # raw
+cat_raw <- data.frame(data_generation(Catdat)) # raw
 cat_mean <- sim_means_se(cat_raw) # means (This isnt set up to handle multiple indexes yet)
 
 col1 = c("G1" = "blue", "G2"= "red")
 print(ggplot(cat_raw, aes(x = env, y = phen, group = gen, colour = gen))) + geom_line() +
-  annotate(geom="text", x="E1", y=3, label="X",color="black")+
+  #annotate(geom="text", x="E1", y=3, label="X",color="black")+
   annotate(geom="text", x="E2", y=3, label="X",color="black")+
   scale_color_manual(values = col1)+
   theme_classic()  
@@ -115,8 +107,10 @@ print(ggplot(cont_plot,aes(x = Covariance_est, y = GxE_omega))) + geom_jitter() 
 # Categorical Plots: 
 
 # EMM 
-print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_emm))) + 
-  geom_jitter() + theme_classic() + ylab("GxE magnitude - Emmeans") + xlab("Covariance Estimate") 
+col2 = c("cogv" = "green", "cngv" = "purple", "pure_GxE" = "black", "check" = "grey")
+print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_emm,colour = cov_type))) +  geom_jitter()  +
+  scale_colour_manual(values=col2)+
+ theme_classic() + ylab("GxE magnitude - Emmeans") + xlab("Covariance Estimate") 
 
 # Lotterhos method
 print(ggplot(cat_raw_test[[3]],aes(x = Covariance_est, y = GxE_lot))) + geom_jitter() + theme_classic() + ylab("GxE magnitude - Emmeans-Lotterhos") + xlab("Covariance Estimate")

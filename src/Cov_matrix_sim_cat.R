@@ -6,6 +6,8 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
   mod_dat = data.frame()
   Cov_matrix = data.frame()
   model_specs = data.frame()
+  
+  # Combine G's and E's 
   genphenenv_df$genenv = paste(genphenenv_df$gen,genphenenv_df$env, sep = "_")
   
   # Splits into different dataframes
@@ -13,13 +15,13 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
     id = unique(genphenenv_df$index)[x]
     ind_dat = genphenenv_df[genphenenv_df$index == id,]
     
-    # Difference in G1E1 and G2E2
-    phendiff = (ind_dat$phen[ind_dat$genenv == "G1_E1"])-(ind_dat$phen[ind_dat$genenv == "G2_E2"])
-    
     # Standardize data
     dat_avg = mean(ind_dat$phen) 
     dat_std = sd(ind_dat$phen)
     ind_dat$phen_corrected = ((ind_dat$phen-dat_avg)/dat_std)
+    
+    # Difference in G1E1 and G2E2
+    phendiff = (ind_dat$phen_corrected[ind_dat$genenv == "G1_E1"])-(ind_dat$phen_corrected[ind_dat$genenv == "G2_E2"])
 
     # Model Comparison 
     test_temp_a = aov(phen_corrected ~ env + gen, data = ind_dat)
@@ -133,6 +135,12 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
     # Covariance
     cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
     
+    # Assign covariance type 
+    cov_type = NULL
+    if(cov_est < -0.01){cov_type = "CnGV"
+    }else if{cov_est > 0.01){cov_type = "CoGV"
+    }else{cov_est = "pure_GxE"}
+    
     # Estimated Marginal Means (Manual)
     overall_mean <- mean(ind_dat$phen_corrected)
     if(lm_result == "Yes_GxE"){
@@ -185,8 +193,8 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
     }
     
     model_specs. = data.frame("Index" = unique(ind_dat$index),
-                              "phendiff" = phendiff,
-                              "cov_type" = unique(ind_dat$type),
+                              "cov_type" = cov_type,
+                              "Covariance_est" = cov_est,
                               "G1_slope" = unique(ind_dat$slope[ind_dat$gen == "G1"]),
                               "G1_slope_predicted" = G1_slope_predicted,
                               "G2_slope" = unique(ind_dat$slope[ind_dat$gen == "G2"]),
@@ -195,7 +203,6 @@ Cov_matrix_sim_cat <- function(genphenenv_df){
                               "error" = unique(ind_dat$stdev),
                               "lm_result" = lm_result,
                               "GxE_pval" = GxE_pval,
-                              "Covariance_est" = cov_est,
                               "G_eta" = G_R2,
                               "E_eta" = E_R2,
                               "GxE_eta" = GxE_R2,

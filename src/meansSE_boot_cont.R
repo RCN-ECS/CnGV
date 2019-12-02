@@ -10,7 +10,11 @@ meansSE_boot_cont <- function(genphenenv_df,iterations){
   temp_GE_dat <- data.frame()
   pred_dat <- data.frame()
   
-  # Bootstrap 
+  # Indexes
+  for(x in 1:length(unique(genphenenv_df))){
+    ind_dat <- filter(genphenenv_df, index == unique(genphenenv_df$index)[x])
+  
+    # Bootstrap 
   for(d in 1:iter){
     temp_slope_dat. = slope_generation_cont(genphenenv_df)
     temp_slope_dat = rbind(temp_slope_dat.[[1]],temp_slope_dat)
@@ -69,12 +73,14 @@ meansSE_boot_cont <- function(genphenenv_df,iterations){
     E1mean = (pred_dat[1,3]+pred_dat[3,3])/nrow(pred_dat[pred_dat$exp_env_cont == "-2",])
     E2mean = (pred_dat[2,3]+pred_dat[4,3])/nrow(pred_dat[pred_dat$exp_env_cont == "-2",])
     
-    Cov_matrix = data.frame("gen" = unique(pred_dat$gen_factor),
+    Cov_matrix. = data.frame("gen" = unique(pred_dat$gen_factor),
                             "native_env" = unique(pred_dat$nat_env_cont),
                             "G_means" = c(G1mean,G2mean),
                             "E_means" = c(E1mean,E2mean))
+    Cov_matrix = rbind()
     (cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means))
-
+  }
+  
     return(list(model_data,Cov_matrix,cov_est))
 }
 
