@@ -5,7 +5,7 @@ data_generation <- function(input_df){
   row = 0 #for indexing
   
   # Starting Parameters
-  data_type = input_df$data_type
+  cat_cont = input_df$cat_cont
   intercept_G1 = input_df$intercept_G1
   slope_G1 = input_df$slope_G1
   intercept_G2 = input_df$intercept_G2
@@ -22,7 +22,7 @@ data_generation <- function(input_df){
   slope_diff = NULL
   env_cont = NULL
   
-  for(a in 1:length(unique(data_type))){ 
+  for(a in 1:length(unique(cat_cont))){ 
     for(b in 1:length(intercept_G1)){
       for(d in 1:length(slope_G1)){
         for(e in 1:length(intercept_G2)){
@@ -33,7 +33,7 @@ data_generation <- function(input_df){
                 row=row+1 #index 
                 
                 env_num_temp = 2
-                data_type_temp = unique(data_type)[a]
+                data_type_temp = unique(cat_cont)[a]
 
                 # Assign genotypes to native environments
                 if(data_type_temp=="continuous"){
@@ -57,8 +57,9 @@ data_generation <- function(input_df){
                 
                 # Generate data 
                 phen1 = c(replicate(sample_size[h],(intercept_G1[b] + slope_G1[d] * env_cont + (rnorm(env_num_temp, 0, sd[g])))))
-                temp1 = data.frame("index" = rep(row, (env_num_temp*sample_size[h])),
-                                   "data_type" = rep(data_type, (env_num_temp*sample_size[h])),
+                temp1 = data.frame("source" = rep("sim", (env_num_temp*sample_size[h])),
+                                   "index" = rep(row, (env_num_temp*sample_size[h])),
+                                   "cat_cont" = rep(cat_cont, (env_num_temp*sample_size[h])),
                                    "is.GxE" = rep(is.GxE, (env_num_temp*sample_size[h])),
                                    "env_num" = rep(env_num_temp, (env_num_temp*sample_size[h])),
                                    "slope" = rep(slope_G1[d], (env_num_temp*sample_size[h])),
@@ -67,14 +68,15 @@ data_generation <- function(input_df){
                                    "intercept_diff" = rep(intercept_diff, (env_num_temp*sample_size[h])),
                                    "phen_n" = rep(sample_size[h], (env_num_temp*sample_size[h])),
                                    "stdev" = rep(sd[g], (env_num_temp*sample_size[h])),
-                                   "native_env" = rep(G1_env,(env_num_temp*sample_size[h])),
+                                   "nat_env_factor" = rep(G1_env,(env_num_temp*sample_size[h])),
                                    "gen_factor" = rep("G1", (env_num_temp*sample_size[h])),
                                    "exp_env_factor" = rep(env, (env_num_temp*sample_size[h])),
                                    "phen_data" = phen1)
                 
                 phen2 = c(replicate(sample_size[h], (intercept_G2[e] + slope_G2[f] * env_cont + (rnorm(env_num_temp, 0, sd[g])))))
-                temp2 = data.frame("index" = rep(row, (env_num_temp*sample_size[h])),
-                                   "data_type" = rep(data_type, (env_num_temp*sample_size[h])),
+                temp2 = data.frame("source" = rep("sim", (env_num_temp*sample_size[h])),
+                                   "index" = rep(row, (env_num_temp*sample_size[h])),
+                                   "cat_cont" = rep(cat_cont, (env_num_temp*sample_size[h])),
                                    "is.GxE" = rep(is.GxE, (env_num_temp*sample_size[h])),
                                    "env_num" = rep(env_num_temp, (env_num_temp*sample_size[h])),
                                    "slope" = rep(slope_G2[f], (env_num_temp*sample_size[h])),
@@ -83,7 +85,7 @@ data_generation <- function(input_df){
                                    "intercept_diff" = rep(intercept_diff, (env_num_temp*sample_size[h])),
                                    "phen_n" = rep(sample_size[h], (env_num_temp*sample_size[h])),
                                    "stdev" = rep(sd[g], (env_num_temp*sample_size[h])),
-                                   "native_env" = rep(G2_env,(env_num_temp*sample_size[h])),
+                                   "nat_env_factor" = rep(G2_env,(env_num_temp*sample_size[h])),
                                    "gen_factor" = rep("G2", (env_num_temp*sample_size[h])),
                                    "exp_env_factor" = rep(env, (env_num_temp*sample_size[h])),
                                    "phen_data" = phen2)

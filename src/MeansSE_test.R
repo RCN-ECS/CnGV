@@ -36,11 +36,11 @@ cont_mean_test <- meansSE_boot_cont(cont_mean, 100) # not set up for multiple in
 
 # Categorical Starting parameters
 Catdat <- list(
-  "data_type" = c("categorical"), 
+  "cat_cont" = c("categorical"), 
   "intercept_G1" = 1,
-  "slope_G1" = -1, #seq(from = -1, to = 1, by = 0.5),
+  "slope_G1" = c(-1,-2), #seq(from = -1, to = 1, by = 0.5),
   "intercept_G2" = 2,#seq(from = -5, to = 5, by = 2),
-  "slope_G2" = -2,#seq(from = -1, to = 1, by = 0.1),
+  "slope_G2" = c(-1,-2),#seq(from = -1, to = 1, by = 0.1),
   "sd" = 0.5,#seq(from = 0, to = 1, by = 0.5),
   "sample_size" = c(5)) 
 
