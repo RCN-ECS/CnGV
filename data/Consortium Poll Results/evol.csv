@@ -1,0 +1,56 @@
+,question,rank,counts,question_edit
+1, (i.e. if we lack good predictions of ocean climate how can we experiment under future conditions if we don‚Äôt know what those are,3,2,NA
+2,At spatial scales below the dispersal distance how do spatial patterns of selective gradients create patterns of local adaptation (microgeographic adaptation),1,3,microgeographic adaptation
+3,At spatial scales below the dispersal distance how do spatial patterns of selective gradients create patterns of local adaptation (microgeographic adaptation),2,4,microgeographic adaptation
+4,At spatial scales below the dispersal distance how do spatial patterns of selective gradients create patterns of local adaptation (microgeographic adaptation),3,3,microgeographic adaptation
+5,Can epigenetic or plastic responses to environmental stress be inherited and alter evolutionary processes,1,10,epigenetics
+6,Can epigenetic or plastic responses to environmental stress be inherited and alter evolutionary processes,2,7,epigenetics
+7,Can epigenetic or plastic responses to environmental stress be inherited and alter evolutionary processes,3,17,epigenetics
+8,Do species with large effective population size have unexpected outcomes for population genetic processes,1,2,effective population size
+9,Do species with large effective population size have unexpected outcomes for population genetic processes,2,6,effective population size
+10,Do species with large effective population size have unexpected outcomes for population genetic processes,3,6,effective population size
+11,For restoration and assisted evolution efforts can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture),1,2,restoration genomics
+12,For restoration and assisted evolution efforts can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture),2,1,restoration genomics
+13,For restoration and assisted evolution efforts can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture),3,1,restoration genomics
+14,How and which dispersal traits are evolving in response to environmental change,1,5,dispersal traits
+15,How and which dispersal traits are evolving in response to environmental change,2,4,dispersal traits
+16,How and which dispersal traits are evolving in response to environmental change,3,4,dispersal traits
+17,How can an understanding of adaptation to multiple stressors be used to predict responses to multivariate environmental change or novel environments,1,12,multiple stressors
+18,How can an understanding of adaptation to multiple stressors be used to predict responses to multivariate environmental change or novel environments,2,1,multiple stressors
+19,How can we quantify additive genetic variance (e.g. heritability) effectively in systems where pair-mated cross designs or pedigrees are not feasible,1,3,additive genetic variance
+20,How can we quantify additive genetic variance (e.g. heritability) effectively in systems where pair-mated cross designs or pedigrees are not feasible,2,13,additive genetic variance
+21,How can we quantify additive genetic variance (e.g. heritability) effectively in systems where pair-mated cross designs or pedigrees are not feasible,3,7,additive genetic variance
+22,How do microbial symbiont(s) or microbiomes affect the adaptation or acclimation of their hosts to a changing environment,1,9,microbial symbionts
+23,How do microbial symbiont(s) or microbiomes affect the adaptation or acclimation of their hosts to a changing environment,2,2,microbial symbionts
+24,How do microbial symbiont(s) or microbiomes affect the adaptation or acclimation of their hosts to a changing environment,3,6,microbial symbionts
+25,How do the genetics and geography of local adaptation interact with oceanographic processes to predict (or not) future evolvability,1,4,oceanographic processes
+26,How do the genetics and geography of local adaptation interact with oceanographic processes to predict (or not) future evolvability,2,3,oceanographic processes
+27,How does variation in selection or plasticity across different life history stages constrain or promote adaptation,1,18,life history stages
+28,How does variation in selection or plasticity across different life history stages constrain or promote adaptation,2,8,life history stages
+29,How does variation in selection or plasticity across different life history stages constrain or promote adaptation,3,13,life history stages
+30,How will environmental change interact with different reproduction strategies (e.g. broadcast spawning brooding sex determination) to alter reproductive success,1,6,reproduction strategies
+31,Under what conditions does the evolved plastic response predict the evolutionary response,1,12,plasticity predict
+32,Under what conditions does the evolved plastic response predict the evolutionary response,2,6,plasticity predict
+33,Under what conditions does the evolved plastic response predict the evolutionary response,3,4,plasticity predict
+34,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,1,4,accelerate or prevent 
+35,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,2,6,accelerate or prevent 
+36,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,3,5,accelerate or prevent 
+37,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,4,2,accelerate or prevent 
+38,What are the reasons for genetic divergence in the sea within and/or among species,1,12,genetic divergence 
+39,What are the reasons for genetic divergence in the sea within and/or among species,2,2,genetic divergence 
+40,What are the reasons for genetic divergence in the sea within and/or among species,3,8,genetic divergence 
+41,What is the relative contribution of temporal fluctuating selection to maintaining variation in populations for short vs. long generation times,1,5,fluctuating selection
+42,What is the relative contribution of temporal fluctuating selection to maintaining variation in populations for short vs. long generation times,2,8,fluctuating selection
+43,What is the relative contribution of temporal fluctuating selection to maintaining variation in populations for short vs. long generation times,3,9,fluctuating selection
+44,What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change,1,29,evolution vs acclimation
+45,What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change,2,5,evolution vs acclimation
+46,What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change,3,6,evolution vs acclimation
+47,What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats,1,9,hybridization/introgression
+48,What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats,2,14,hybridization/introgression
+49,What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats,3,4,hybridization/introgression
+50,What oceanographic and biological processes contribute to genetic load and how does the geographic distribution of load affect adaptation,2,2,genetic load
+51,What oceanographic and biological processes contribute to genetic load and how does the geographic distribution of load affect adaptation,3,1,genetic load
+52,What will nearshore climates be like in the future,2,2,nearshore climates
+53,When high genetic drift (e.g. sweepstakes reproductive success) strong selection and high gene flow all occur at the same life stage (e.g. larval dispersal) what are the relative importance of each process to evolutionary outcomes,1,10,genetic drift and gene flow
+54,When high genetic drift (e.g. sweepstakes reproductive success) strong selection and high gene flow all occur at the same life stage (e.g. larval dispersal) what are the relative importance of each process to evolutionary outcomes,2,9,genetic drift and gene flow
+55,When high genetic drift (e.g. sweepstakes reproductive success) strong selection and high gene flow all occur at the same life stage (e.g. larval dispersal) what are the relative importance of each process to evolutionary outcomes,3,3,genetic drift and gene flow
