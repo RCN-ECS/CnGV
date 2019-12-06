@@ -44,7 +44,9 @@ Finally, the highest ranked question for conservation and management was, "For r
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Consortium_Poll_Results/conservation_importance.png)
 
 
-## Questions
+## Question List
+Below are the questions asked in the poll. The question numbers and keywords in the plots above reference these questions.
+
 | Number | Question | Keywords |
 | --- | --- | --- |
 | Q18 | What are the reasons for genetic divergence in the sea within and/or among species? | genetic divergence |
