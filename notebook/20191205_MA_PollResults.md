@@ -26,6 +26,8 @@ Most questions were ranked as very or somewhat important for both fields. The qu
 
 The question that received the most "not important" rankings for evolutionary biology were Q44, "How do eco-evolutionary feedbacks alter productivity and biogeochemical cycles in the ocean?" and Q38, "What will nearshore climates be like in the future? (i.e., if we lack good predictions of ocean climate, how can we experiment under future conditions if we don’t know what those are?)" The question that received the most "not important" rankings for marince science were Q37, "Do species with large effective population size have unexpected outcomes for population genetic processes?" and Q36, "For restoration and assisted evolution efforts, can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture)?"
 
+The X-axis refers to the questions which can be found [here](https://github.com/RCN-ECS/CnGV/blob/master/data/Consortium%20Poll%20Results/RCN_Survey_10-30-19.docx)
+
 *Note that no statistical analyses have been performed, these conclusions are based on the plots alone*
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Consortium_Poll_Results/ImportanceSummary.png)
 
