@@ -1093,3 +1093,34 @@ cons_plot
 ```
 
 Final question: Rank how you determine importance of a subject (Q33)
+```{r}
+Q33_1	Q33_2	Q33_3	Q33_4	Q33_5
+
+a <- data.frame("rank" = polldata$Q33_1,
+               "criteria" = rep("Novelty", nrow(polldata)))
+b <- data.frame("rank" = polldata$Q33_2,
+               "criteria" = rep("Personal relevance", nrow(polldata)))
+c <- data.frame("rank" = polldata$Q33_3,
+               "criteria" = rep("Funding", nrow(polldata)))
+d <- data.frame("rank" = polldata$Q33_4,
+               "criteria" = rep("Publications", nrow(polldata)))
+e <- data.frame("rank" = polldata$Q33_5,
+               "criteria" = rep("Application", nrow(polldata)))
+
+import_dat = rbind(a,b,c,d,e)
+
+import1 = import_dat %>% 
+  group_by(criteria,rank) %>% 
+  summarise("counts" = n())
+import1$rank = as.character(import1$rank)
+import1[c(6,12,18,24,30),2] <- "No Response"
+
+import_plot = ggplot(import1, aes(fill = as.factor(rank), y=counts, x=reorder(criteria,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Factors in determining your perception of the importance of research questions") +
+  xlab("Decision factors") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  theme(axis.text.x = element_text(angle = 45,size=6,hjust = 1,colour = "black"))+
+  guides(fill=guide_legend(title="Rank"))
+import_plot
+```
