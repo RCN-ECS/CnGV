@@ -28,7 +28,23 @@ fun1 <- function(input_df){
   ngen <- length(unique(input_df$gen_factor))
   nenv <- length(unique(input_df$exp_env_factor))
   
-  # Gmeans and Emeans
+  # Gmeans and Emeans  #Softcode this so it can deal with multiple genotypes
+  # Emeans - just take environmental mean for each genotype, doesn't have to match i think?
+  Cov_matrix = data.frame()
+  for(i in 1:length(unique(emm_GxE$gen_factor))){
+      Gtemp = sum(emm_GxE[emm_GxE$gen_factor == unique(emm_GxE$gen_factor)[i],3])/ngen
+      Edat = filter(emm_GxE, gen_factor ==unique(emm_GxE$gen_factor)[i])
+      Etemp = sum(Edat[,3])/nenv
+      
+      Cov_matrix. = data.frame("gen_factor" = unique(emm_GxE$gen_factor)[i],
+                               "env_factor" = unique(Edat$exp_env_factor),
+                               "Gmean" = Gtemp,
+                               "Emean" = Etemp)
+      Cov_matrix = rbind(Cov_matrix, Cov_matrix.)
+    }
+  }
+  
+  
   G1mean <- sum(emm_GxE[emm_GxE$gen_factor == "G1",3])/ngen
   G2mean <- sum(emm_GxE[emm_GxE$gen_factor == "G2",3])/ngen
   E1mean <- sum(emm_GxE[emm_GxE$exp_env_factor == "E1",3])/nenv
@@ -349,6 +365,13 @@ outdat = Categorical_sim(cat_raw,50)
 
 # Test Meta-Analysis Data
 outdat2 = Categorical_meta(cat_means,Extraction_Initialize,50)
+test1a = Categorical_meta(test1,Extraction_Initialize,50)
+
+test1 = read.csv("~/Desktop/test1.csv") #Raw
+test2 = read.csv("~/Desktop/test2.csv") #Raw with small dataset
+test3 = read.csv("~/Desktop/test3.csv") #Means
+
+Extraction_Initialize[which(Extraction_Initialize$Study_ID_phenotype == "654_second_litter_size"),]
 
 ## Next Steps: 
 #3. automate for meta analysis data 
