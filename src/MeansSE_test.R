@@ -16,10 +16,10 @@ Catdat <- list(
   "cat_cont" = c("categorical"), 
   "intercept_G1" = 0,
   "slope_G1" = 0.5,
-  "intercept_G2" = seq(from = -5, to = 5, by = 0.5),
-  "slope_G2" = seq(from = -5, to = 5, by = 0.5),
-  "sd" = seq(from = 0, to = 1, by = 0.05),
-  "sample_size" = seq(from = 3, to = 12, by = 1))
+  "intercept_G2" = seq(from = -5, to = 5, by = 2),
+  "slope_G2" = seq(from = -5, to = 5, by = 2),
+  "sd" = seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = seq(from = 3, to = 12, by = 3))
 
 # Generate categorical data
 cat_raw <- data.frame(data_generation(Catdat)) # raw

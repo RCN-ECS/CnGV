@@ -42,9 +42,9 @@ data_generation <- function(input_df){
                   env = c(-2,2)
                   env_cont = c(-2,2)
                 }else{
-                  G1_env = "E1"
-                  G2_env = "E2"
-                  env = c("E1","E2")
+                  G1_env = "E_1"
+                  G2_env = "E_2"
+                  env = c("E_1","E_2")
                   env_cont = c(-2,2)
                 }
                 
@@ -69,7 +69,7 @@ data_generation <- function(input_df){
                                    "phen_n" = rep(sample_size[h], (env_num_temp*sample_size[h])),
                                    "stdev" = rep(sd[g], (env_num_temp*sample_size[h])),
                                    "nat_env_factor" = rep(G1_env,(env_num_temp*sample_size[h])),
-                                   "gen_factor" = rep("G1", (env_num_temp*sample_size[h])),
+                                   "gen_factor" = rep("G_1", (env_num_temp*sample_size[h])),
                                    "exp_env_factor" = rep(env, (env_num_temp*sample_size[h])),
                                    "phen_data" = phen1)
                 
@@ -86,7 +86,7 @@ data_generation <- function(input_df){
                                    "phen_n" = rep(sample_size[h], (env_num_temp*sample_size[h])),
                                    "stdev" = rep(sd[g], (env_num_temp*sample_size[h])),
                                    "nat_env_factor" = rep(G2_env,(env_num_temp*sample_size[h])),
-                                   "gen_factor" = rep("G2", (env_num_temp*sample_size[h])),
+                                   "gen_factor" = rep("G_2", (env_num_temp*sample_size[h])),
                                    "exp_env_factor" = rep(env, (env_num_temp*sample_size[h])),
                                    "phen_data" = phen2)
                 dat_temp. = rbind(temp1, temp2)

@@ -16,6 +16,7 @@ sim_means_se <- function(data_generation_output){
         average = mean(dat$phen_data)
         stddev = sd(dat$phen_data)
         bigsumdat.. = data.frame("index" = unique(dat$index),
+                                 "source" = "sim_means",
                                  "phen_data" = average,
                                  "std_dev" = stddev,
                                  "gen_factor" = unique(subdat$gen_factor)[j],

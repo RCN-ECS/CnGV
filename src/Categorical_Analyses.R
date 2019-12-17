@@ -28,40 +28,34 @@ fun1 <- function(input_df){
   ngen <- length(unique(input_df$gen_factor))
   nenv <- length(unique(input_df$exp_env_factor))
   
-  # Gmeans and Emeans  #Softcode this so it can deal with multiple genotypes
-  # Emeans - just take environmental mean for each genotype, doesn't have to match i think?
-  Cov_matrix = data.frame()
-  for(i in 1:length(unique(emm_GxE$gen_factor))){
-      Gtemp = sum(emm_GxE[emm_GxE$gen_factor == unique(emm_GxE$gen_factor)[i],3])/ngen
-      Edat = filter(emm_GxE, gen_factor ==unique(emm_GxE$gen_factor)[i])
-      Etemp = sum(Edat[,3])/nenv
-      
-      Cov_matrix. = data.frame("gen_factor" = unique(emm_GxE$gen_factor)[i],
-                               "env_factor" = unique(Edat$exp_env_factor),
-                               "Gmean" = Gtemp,
-                               "Emean" = Etemp)
-      Cov_matrix = rbind(Cov_matrix, Cov_matrix.)
+  # Gmeans and Emeans  
+  if(ngen == nenv){
+    Cov_matrix = data.frame()
+    Cov_matrix. = data.frame()
+    Cov_matrix.. = data.frame()
+    for(i in 1:length(unique(input_df$gen_factor))){
+      gtemp <- sum(emm_GxE[emm_GxE$gen_factor == unique(input_df$gen_factor)[i],3])/ngen
+      tempdat = data.frame("G_means" = gtemp)
+      Cov_matrix. = rbind(Cov_matrix.,tempdat)
     }
+    for(j in 1:length(unique(input_df$gen_factor))){
+      etemp <- sum(emm_GxE[emm_GxE$exp_env_factor == unique(input_df$exp_env_factor)[j] ,3])/nenv
+      tempdat. = data.frame("E_means" = etemp)
+      Cov_matrix.. = rbind(Cov_matrix..,tempdat.)
+    }
+      Cov_matrix = cbind(Cov_matrix.,Cov_matrix..)
+  }else{
+    stop("Number of genotypes does not equal number of environments")
   }
   
-  
-  G1mean <- sum(emm_GxE[emm_GxE$gen_factor == "G1",3])/ngen
-  G2mean <- sum(emm_GxE[emm_GxE$gen_factor == "G2",3])/ngen
-  E1mean <- sum(emm_GxE[emm_GxE$exp_env_factor == "E1",3])/nenv
-  E2mean <- sum(emm_GxE[emm_GxE$exp_env_factor == "E2",3])/nenv
-  
-  Cov_matrix = data.frame("G_means" = c(G1mean,G2mean),
-                          "E_means" = c(E1mean,E2mean))
   # Covariance
   cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
 
   # Magnitude of GxE using EMMs
-  overall_mean = mean(input_df$phen_corrected)
-  GxE_emm <- abs(overall_mean -
-                (emm_G$emmean[emm_G$gen_factor=="G1"])- # G1
-                (emm_E$emmean[emm_E$exp_env_factor=="E1"])+ # E1
+  GxE_emm <- abs(mean(input_df$phen_corrected) - # Overall mean
+                (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G1
+                (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E1
                 (emm_GxE[1,3])) # G1E1
-
   
   output <- data.frame("GxE_magnitude" = GxE_emm, 
                        "Covariance" = cov_est)
@@ -103,17 +97,11 @@ fun2 <- function(input_df){
     G_vec <- rbind(G_vec,G_vec.)
     }
 
-  # Arrange matrix
-  input_df$nat_env_factor_corrected <- gsub("N_", "E_",as.character(input_df$nat_env_factor))
-  G_vec$native <- input_df$nat_env_factor_corrected[match(G_vec$gen_factor,input_df$gen_factor)]
-  G_vec$emean <- E_vec$emean[match(E_vec$exp_env_factor,G_vec$native)]
-  
   # Covariance
-  cov_est = cov(G_vec$gmean,G_vec$emean)
+  cov_est = cov(G_vec$gmean,E_vec$emean)
   
   # Magnitude of GxE 
-  overall_mean = mean(input_df$phen_corrected)
-  GxE_emm = abs(overall_mean -
+  GxE_emm = abs(mean(input_df$phen_corrected) - # Overall mean
               (mean(input_df$phen_corrected[input_df$gen_factor == "G_1"]))- # G1
               (mean(input_df$phen_corrected[input_df$exp_env_factor=="E_1"]))+  # E1
               (mean(input_df$phen_corrected[input_df$exp_env_factor=="E_1" & input_df$gen_factor == "G_1"]))) #G1E1
@@ -172,7 +160,7 @@ bootstrap_mean <- function(input_df){
       
       shuffle_dat_temp <- data.frame(gen_factor = cond_E$gen_factor,
                                      exp_env_factor = cond_E$exp_env_factor,
-                                     nat_env_factor = cond_E$nat_env_factor,
+                                     #nat_env_factor = cond_E$nat_env_factor,
                                      phen_data = new_phen)
       shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
     }
@@ -210,7 +198,7 @@ permutation_mean <- function(input_df){
   
   perm_dat <- data.frame("gen_factor" = input_df$gen_factor,
                          "exp_env_factor" = input_df$exp_env_factor,
-                         "nat_env_factor" = input_df$nat_env_factor,
+                         #"nat_env_factor" = input_df$nat_env_factor,
                          "phen_data" = null_temp)
   
   new_data = fun2(perm_dat)
@@ -229,22 +217,25 @@ Categorical_sim <- function(input_df,iterations){
   for(i in 1:length(unique(input_df$index))){
   df_temp <- filter(input_df, index == unique(index)[i])
                       
-  # Estimate GxE and Covariance
+  if(input_df$source == "sim"){
+    new_data <- fun1(df_temp) # Estimate GxE and Covariance
+    bootdat <- replicate(iterations, bootstrap_categorical(df_temp), simplify=TRUE) # Bootstrap
+    permdat <- replicate(iterations, permutation_categorical(df_temp), simplify=TRUE)   # Permutation 
+  }else{
+    new_data <- fun2(df_temp) # Estimate GxE and Covariance
+    bootdat <- replicate(iterations, bootstrap_mean(df_temp), simplify=TRUE) # Bootstrap
+    permdat <- replicate(iterations, permutation_mean(df_temp), simplify=TRUE)   # Permutation 
+  }
+  
   new_data <- fun1(df_temp)
   true_covariance <- new_data["Covariance"]
   GxE_magnitude <- new_data["GxE_magnitude"]
-  
-  # Bootstrap
-  bootdat <- replicate(iterations, bootstrap_categorical(df_temp), simplify=TRUE)
   
   # Confidence Intervals
   GxE_CI = quantile(unlist(lapply(bootdat, `[`, 1)), probs=c(0.025, 0.975), type=1) 
   GxE_avg = mean(as.numeric(unlist(lapply(bootdat, `[`, 1)))) 
   cov_CI = quantile(unlist(lapply(bootdat, `[`, 2)), probs=c(0.025, 0.975), type=1) 
   cov_avg = mean(as.numeric(unlist(lapply(bootdat, `[`, 2)))) 
-  
-  # Permutation 
-  permdat <- replicate(iterations, permutation_categorical(df_temp), simplify=TRUE) 
   
   # Null distributions
   alpha = 0.05
@@ -297,6 +288,11 @@ Categorical_meta <- function(input_df,meta_data,iterations){
     
     # Establish data type (means or raw)
     input_df$data_type <- unique(meta_data$Raw_data_available[match(input_df$Study_ID_phenotype,meta_data$Study_ID_phenotype)])
+    
+    # Arrange native environments #Make sure this works 
+    input_df$nat_env_factor_corrected <- gsub("N_", "E_",as.character(input_df$nat_env_factor))
+    G_vec$native <- input_df$nat_env_factor_corrected[match(G_vec$gen_factor,input_df$gen_factor)]
+    G_vec$emean <- E_vec$emean[match(E_vec$exp_env_factor,G_vec$native)]
     
     # Run Appropriate Function  
     new_data <- NULL
@@ -361,7 +357,17 @@ Categorical_meta <- function(input_df,meta_data,iterations){
 }
 
 # Test Simulated Data
-outdat = Categorical_sim(cat_raw,50)
+outdat <- Categorical_sim(cat_raw,20) # Raw data
+cat_mean <- sim_means_se(cat_raw) # means 
+outdat2 <- Categorical_sim(cat_mean,20)
+
+outdat2$orig = rep("means",nrow(outdat2))
+outdat$orig = rep("raw",nrow(outdat))
+big_data = rbind(outdat,outdat2)
+ggplot(big_data,aes(x=Index,y=true_covariance,group = Index,colour=orig))+geom_point()+theme_classic()+geom_errorbar(ymin=big_data$Cov_lowCI,ymax=big_data$Cov_highCI)
+ggplot(big_data,aes(x=Index,y=GxE_magnitude,group = Index,colour=orig))+geom_point()+theme_classic()+geom_errorbar(ymin=big_data$GxE_lowCI,ymax=big_data$GxE_highCI)
+
+#write.csv(outdat,"~/Desktop/raw_data_sim.csv")
 
 # Test Meta-Analysis Data
 outdat2 = Categorical_meta(cat_means,Extraction_Initialize,50)
@@ -376,3 +382,6 @@ Extraction_Initialize[which(Extraction_Initialize$Study_ID_phenotype == "654_sec
 ## Next Steps: 
 #3. automate for meta analysis data 
 #4. plot significant results
+
+ggplot(outdat,aes(x=true_covariance,y=GxE_magnitude,colour=covariance_p_value))+ geom_point() +geom_errorbar(ymin=outdat$GxE_lowCI,ymax=outdat$GxE_highCI) +theme_classic()
+
