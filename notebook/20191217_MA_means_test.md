@@ -22,6 +22,6 @@ Below are the plots showing how the different approaches compare for Covariance 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/img/GxE_test.png)
 
 As is plainly observable, the means data are underestimating covariance and GxE magnitude, with CIs that do not overlap in many cases. 
-I need to revisit this and see what is causing these discrepancies. Stay tuned.
+HOWEVER -- the CIs estimated by both data types nicely match (to the naked eye anyway). This is good. 
 
-I think the differences are because the GxE and Covariances for the raw data are based on model fits... while the means/SE are taken as is. I try a couple different approaches to see if any of them more reliably match raw data.
+I think the low-ball estimates are because the GxE and Covariances for the raw data are based on model fits... while the means/SE are used as/is (no model fit). I will try a couple different approaches to see if any of them more reliably match raw data.
