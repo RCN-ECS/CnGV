@@ -3,7 +3,7 @@
 As noted [here](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20191204_Categorical_Analyses.md), I recently re-made code into a more manageable unit.
 
 In doing so, I modified the bootstrapping code for data means. (Bootstrapping approach for the raw data is the same as it was before).
-In the new approach, I resampled means using the function below and assuming Central Limit Theorum.
+In the new approach, I resampled means using the command below and assuming Central Limit Theorum.
 
 ```#Bootstrap means
 # Shuffle data 
