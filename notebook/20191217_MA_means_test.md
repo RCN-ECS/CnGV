@@ -25,3 +25,11 @@ As is plainly observable, the means data are underestimating covariance and GxE 
 HOWEVER -- the CIs estimated by both data types nicely match (to the naked eye anyway). This is good. 
 
 I think the low-ball estimates are because the GxE and Covariances for the raw data are based on model fits... while the means/SE are used as/is (no model fit). I will try a couple different approaches to see if any of them more reliably match raw data.
+
+## Update Dec. 18,2019
+
+To see if its because of the model fits, I ran the means through some code that would generate raw data based on the means and standard error. I then ran that raw data through the same `categorical_sim`. I overlaid those points (called new_from_means) below.  The new raw data does a better job matching the predicted covariance and GxE, as it should. **However, the confidence intervals do not match the raw data**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/img/Cov2.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/img/GxE2.png)
+
+This calls into question whether using means/SE is a good method. I'll continue to think.
