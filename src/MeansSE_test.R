@@ -16,10 +16,10 @@ Catdat <- list(
   "cat_cont" = c("categorical"), 
   "intercept_G1" = 0,
   "slope_G1" = 0.5,
-  "intercept_G2" = seq(from = -5, to = 5, by = 2),
-  "slope_G2" = seq(from = -5, to = 5, by = 2),
+  "intercept_G2" = seq(from = -5, to = 5, by = 3),
+  "slope_G2" = seq(from = -5, to = 5, by = 3),
   "sd" = seq(from = 0, to = 1, by = 0.5),
-  "sample_size" = seq(from = 3, to = 12, by = 3))
+  "sample_size" = seq(from = 3, to = 12, by = 4))
 
 # Generate categorical data
 cat_raw <- data.frame(data_generation(Catdat)) # raw
@@ -38,6 +38,7 @@ cat_raw_test <- Cov_matrix_sim_cat(cat_raw)
 
 cat_mean_test <- meansSE_boot_cat(cat_mean,100) # not set up for multiple indexes
 (cat_mean_test[[3]])
+
 
 #Big Poppa Test:
 

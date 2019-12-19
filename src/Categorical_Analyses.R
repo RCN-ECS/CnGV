@@ -131,7 +131,7 @@ bootstrap_categorical <- function(input_df){
           
       shuffle_dat_temp <- data.frame(gen_factor = cond_E$gen_factor,
                                     exp_env_factor = cond_E$exp_env_factor,
-                                    nat_env_factor = cond_E$nat_env_factor,
+                                    #nat_env_factor = cond_E$nat_env_factor,
                                     phen_data = new_phen)
       shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
     }
@@ -180,7 +180,7 @@ permutation_categorical <- function(input_df){
   
   perm_dat <- data.frame("gen_factor" = input_df$gen_factor,
                          "exp_env_factor" = input_df$exp_env_factor,
-                         "nat_env_factor" = input_df$nat_env_factor,
+                         #"nat_env_factor" = input_df$nat_env_factor,
                          "phen_data" = null_temp)
   
   new_data = fun1(perm_dat)
@@ -359,13 +359,19 @@ Categorical_meta <- function(input_df,meta_data,iterations){
 # Test Simulated Data
 outdat <- Categorical_sim(cat_raw,20) # Raw data
 cat_mean <- sim_means_se(cat_raw) # means 
-outdat2 <- Categorical_sim(cat_mean,20)
+outdat2 <- Categorical_sim(cat_mean,20) # means 
+cat_new <- mean_generation_cat(cat_mean)
+cat_new$source <- rep("sim",nrow(cat_new))
+outdat3 <- Categorical_sim(cat_new,20)
 
-outdat2$orig = rep("means",nrow(outdat2))
-outdat$orig = rep("raw",nrow(outdat))
-big_data = rbind(outdat,outdat2)
-ggplot(big_data,aes(x=Index,y=true_covariance,group = Index,colour=orig))+geom_point()+theme_classic()+geom_errorbar(ymin=big_data$Cov_lowCI,ymax=big_data$Cov_highCI)
-ggplot(big_data,aes(x=Index,y=GxE_magnitude,group = Index,colour=orig))+geom_point()+theme_classic()+geom_errorbar(ymin=big_data$GxE_lowCI,ymax=big_data$GxE_highCI)
+outdat2$orig = rep("means",nrow(outdat2)) # identifier
+outdat$orig = rep("raw",nrow(outdat)) # identifier
+outdat3$orig = rep("new_from_means",nrow(outdat3))
+big_data = rbind(outdat,outdat2,outdat3)
+ggplot(big_data,aes(x=Index,y=true_covariance,group = Index,colour=orig))+geom_point()+
+  theme_classic()+geom_errorbar(ymin=big_data$Cov_lowCI,ymax=big_data$Cov_highCI)
+ggplot(big_data,aes(x=Index,y=GxE_magnitude,group = Index,colour=orig))+geom_point()+
+  theme_classic()+geom_errorbar(ymin=big_data$GxE_lowCI,ymax=big_data$GxE_highCI)
 
 #write.csv(outdat,"~/Desktop/raw_data_sim.csv")
 
