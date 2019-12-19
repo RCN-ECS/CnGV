@@ -25,24 +25,29 @@ calc_interaction <- function(G11, G12, G21, G22){
   (overall_mean <- mean(c(G11,G12,G21,G22)))
   
   # Marginal means
-  (G1_mean <- overall_mean - mean(c(G11,G12)))
-  (G2_mean <- overall_mean - mean(c(G22,G21)))
-  (E1_mean <- overall_mean - mean(c(G11,G21)))
-  (E2_mean <- overall_mean - mean(c(G12,G22)))
+  (G1_mean <-  mean(c(G11,G12)))
+  (G2_mean <- mean(c(G22,G21)))
+  (E1_mean <- mean(c(G11,G21)))
+  (E2_mean <- mean(c(G12,G22)))
+  
+  G22_marg <- G22
+  G11_marg <- G11
+  G12_marg <- G12
+  G21_marg <- G21
   
   ## Interaction effect for the i_th level of factor G (G2)
   ## and jth level of factor E (E2)
   print(c("Interaction effect for G22:",  
-          overall_mean - G2_mean - E2_mean - G22))
+          overall_mean - G2_mean - E2_mean + G22_marg))
   
   print(c("Interaction effect for G11:", 
-          overall_mean - G1_mean - E1_mean - G11))
+          overall_mean - G1_mean - E1_mean + G11_marg))
   
   print(c("Interaction effect for G12:",
-          overall_mean - G1_mean - E2_mean - G12))
+          overall_mean - G1_mean - E2_mean + G12_marg))
   
   print(c("Interaction effect for G21:", 
-          overall_mean - G2_mean - E1_mean - G21))
+          overall_mean - G2_mean - E1_mean + G21_marg))
 }
 
 calc_interaction(0.5, 1, 0, 0.5)
@@ -72,33 +77,49 @@ Diff_GxE <- list(
   "is.GxE" = NA, 
   "slope_diff" = NA) 
 
+# Generate data
 new_dat = data_generation(Diff_GxE)
+
+# Covariance et cetera
 testy = Cov_matrix_sim(new_dat)
 ```
 Plot eta^2 GxE
 ```{r}
 test_dat = testy[[3]]
 test_dat$actual_slopediff = abs(test_dat$G2_slope_predicted - test_dat$G1_slope_predicted)
-print(ggplot(test_dat, aes(x= reorder(slopeset,test_dat$G1_slope), y = GxE_R2)) + 
-    geom_bar(stat = "identity",position="dodge")+theme_classic())+
-    labs(x = "G1 - G2 Slope")
 
+# Original Slopes
 print(ggplot(testy[[3]], aes(x= slope_diff, y = eta_GxE)) + 
     geom_bar(stat = "identity",position="dodge")+theme_classic())+
     labs(x = "Slope Difference", y = "eta squared")
-
-print(ggplot(test_dat, aes(x= actual_slopediff, y = eta_GxE)) + 
-    geom_bar(stat = "identity",position="dodge")+theme_classic())+
-    labs(x = "Slope Difference", y = "eta squared")+xlim(1.0,2.1)
 
 print(ggplot(test_dat, aes(x= slope_diff, y = w2_GxE)) + 
     geom_bar(stat = "identity",position="dodge")+theme_classic())+
     labs(x = "Slope Difference",y = "omega squared")
 
+print(ggplot(test_dat, aes(x= slope_diff, y = w2_GxE)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "Slope Difference",y = "omega squared")
+
+# Predicted Slopes
+print(ggplot(test_dat, aes(x= actual_slopediff, y = eta_GxE)) + 
+    geom_bar(stat = "identity",position="dodge")+theme_classic())+
+    labs(x = "Slope Difference", y = "eta squared")+xlim(1.0,2.1)
+
 print(ggplot(test_dat, aes(x= actual_slopediff, y = w2_GxE)) +
     geom_bar(stat = "identity",position="dodge")+
       theme_classic())+
     labs(x = "Slope Difference",y = "omega squared")+xlim(1.0,2.1)
+
+print(ggplot(test_dat, aes(x= actual_slopediff, y = G11_emm)) +
+    geom_bar(stat = "identity",position="dodge")+
+      theme_classic())+
+    labs(x = "Slope Difference",y = "Emmeans")+xlim(1.0,2.1)
+
+print(ggplot(test_dat, aes(x= actual_slopediff, y = G11_lot)) +
+    geom_bar(stat = "identity",position="dodge")+
+      theme_classic())+
+    labs(x = "Slope Difference",y = "Lotterhos Formulation of Means")+xlim(1.0,2.1)
 
 ```
 

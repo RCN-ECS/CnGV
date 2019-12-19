@@ -1,5 +1,7 @@
 
-Cov_matrix_sim <- function(genphenenv_df){
+Cov_matrix_sim_cont <- function(genphenenv_df){
+  # Input:  raw, continuous, simulated data (NOT means/SE)
+  # Output: lm model summaries, covariance estimates, and magnitude of GxE 
   
   # Output Dataframes
   mod_dat = data.frame()
@@ -27,24 +29,24 @@ Cov_matrix_sim <- function(genphenenv_df){
     # Model Outputs
     if(result[[2,6]] > 0.05){
       
-      test_temp = lm(phen_corrected ~ env_corrected + gen, data = ind_dat)
+      test_temp = lm(phen_corrected ~ factor(env_corrected) + gen, data = ind_dat)
       
       # Extract model outputs
       lm_result = "No_GxE"
       GxE_pval = result[[2,6]]
-      emm_E = emmeans(test_temp, ~ env_corrected)
-      emm_G = emmeans(test_temp, ~ gen)
-      emm_GxE = NA
+      emm_E = as.data.frame(emmeans(test_temp, ~ env_corrected))
+      emm_G = as.data.frame(emmeans(test_temp, ~ gen))
+      emm_GxE = 0
       G1_slope_predicted = test_temp[[1]][2]
       G2_slope_predicted = (test_temp[[1]][[2]]+test_temp[[1]][[3]])
       E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
       G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
-      GxE_R2 = NA
+      GxE_R2 = 0
       w2_env <- (summary(aov(test_temp))[[1]][1,2]-(summary(aov(test_temp))[[1]][1,1]*summary(aov(test_temp))[[1]][3,3]))/
         (sum(summary(aov(test_temp))[[1]][,2])+summary(aov(test_temp))[[1]][3,3])
       w2_gen <- (summary(aov(test_temp))[[1]][2,2]-summary(aov(test_temp))[[1]][2,1]*summary(aov(test_temp))[[1]][3,3])/
         (sum(summary(aov(test_temp))[[1]][,2])+summary(aov(test_temp))[[1]][3,3])
-      w2_GxE <- NA
+      w2_GxE <- 0
       
       mod_dat. <- data.frame() 
       for(i in 1:length(test_temp[[1]])){
@@ -69,19 +71,19 @@ Cov_matrix_sim <- function(genphenenv_df){
                                                          to = (max(ind_dat$env_corrected)+0.1),by=0.1))),
                              env_corrected = seq(from = min(ind_dat$env_corrected), 
                                                  to = (max(ind_dat$env_corrected)+0.1),by=0.1))
-      cov_temp$phen_predicted = predict(test_temp,cov_temp)
+      cov_temp$phen_predicted = predict(test_temp_a ,cov_temp)
     }else{
       
-      test_temp = lm(phen_corrected ~ env_corrected * gen, data = ind_dat)
+      test_temp = lm(phen_corrected ~ factor(env_corrected) * gen, data = ind_dat)
       
       # Extract model outputs                
       lm_result = "Yes_GxE"
       GxE_pval = result[[2,6]]
-      slope_predicted = simple_slopes(test_temp)
+      slope_predicted = simple_slopes(test_temp_b)
       G1_slope_predicted = slope_predicted[4,3]
       G2_slope_predicted = slope_predicted[5,3]
-      emm_E = emmeans(test_temp, ~ env_corrected)
-      emm_G = emmeans(test_temp, ~ gen)
+      emm_E = as.data.frame(emmeans(test_temp, ~ env_corrected))
+      emm_G = as.data.frame(emmeans(test_temp, ~ gen))
       emm_GxE = as.data.frame(emmeans(test_temp, ~ env_corrected*gen))
       E_R2 = summary(aov(test_temp))[[1]][1,2]/sum(summary(aov(test_temp))[[1]][,2])
       G_R2 = summary(aov(test_temp))[[1]][2,2]/sum(summary(aov(test_temp))[[1]][,2])
@@ -116,7 +118,7 @@ Cov_matrix_sim <- function(genphenenv_df){
                                                          to = (max(ind_dat$env_corrected)+0.1),by=0.1))),
                              env_corrected = seq(from = min(ind_dat$env_corrected), 
                                                  to = (max(ind_dat$env_corrected)+0.1),by=0.1))
-      cov_temp$phen_predicted = predict(test_temp,cov_temp)
+      cov_temp$phen_predicted = predict(test_temp_b,cov_temp)
     }                 
     
     # Re-assign environmental variables
@@ -151,58 +153,66 @@ Cov_matrix_sim <- function(genphenenv_df){
     
     cov_est = cov(Cov_matrix.$G_means,Cov_matrix.$E_means)
     
+    # Assign covariance type 
+    cov_type = NULL
+    if(cov_est < -0.01){cov_type = "CnGV"
+    }else if{cov_est > 0.01){cov_type = "CoGV"
+    }else{cov_est = "pure_GxE"}
+    
     # Estimated Marginal Means (Manual)
     overall_mean <- mean(ind_dat$phen_corrected)
     if(lm_result == "Yes_GxE"){
     G1M = abs(overall_mean -
       (mean(ind_dat$phen_corrected[ind_dat$gen=="G1"]))- # G1
       (mean(ind_dat$phen_corrected[ind_dat$env=="-2"]))+  # E1
-      (mean(ind_dat$phen_corrected[ind_dat$env=="-2" & ind_dat$gen=="G1"])))
+      (mean(ind_dat$phen_corrected[ind_dat$env=="-2" & ind_dat$gen=="G1"]))) #G1E1
     G2M = abs(overall_mean - 
       (mean(ind_dat$phen_corrected[ind_dat$gen=="G2"]))- # G2
       (mean(ind_dat$phen_corrected[ind_dat$env=="-2"]))+ # E1
-      (mean(ind_dat$phen_corrected[ind_dat$env=="-2" & ind_dat$gen=="G2"])))
+      (mean(ind_dat$phen_corrected[ind_dat$env=="-2" & ind_dat$gen=="G2"]))) #G2E1
     E1M = abs(overall_mean - 
       (mean(ind_dat$phen_corrected[ind_dat$gen=="G1"]))- # G1
       (mean(ind_dat$phen_corrected[ind_dat$env=="2"]))+ # E2
-      (mean(ind_dat$phen_corrected[ind_dat$env=="2" & ind_dat$gen=="G1"])))
+      (mean(ind_dat$phen_corrected[ind_dat$env=="2" & ind_dat$gen=="G1"]))) #G1E2
     E2M = abs(overall_mean - 
       (mean(ind_dat$phen_corrected[ind_dat$gen=="G2"]))- # G2
       (mean(ind_dat$phen_corrected[ind_dat$env=="2"]))+ # E2
-      (mean(ind_dat$phen_corrected[ind_dat$env=="2" & ind_dat$gen=="G2"])))
+      (mean(ind_dat$phen_corrected[ind_dat$env=="2" & ind_dat$gen=="G2"]))) #G2E2
     }else{
-      G1M <- NA
-      G2M <- NA
-      E1M <- NA
-      E2M <- NA
+      G1M <- 0
+      G2M <- 0
+      E1M <- 0
+      E2M <- 0
     }
     
     # Estimated Marginal Means (Emmeans)
     if(lm_result == "Yes_GxE"){
-    G1E1_emm = abs(overall_mean -
-                (emm_GxE$emmean[emm_GxE$gen=="G1"])- # G1
-                (emm_GxE$env_corrected[1])+ # E1
-                (mean(emm_GxE$env_corrected[1] & emm_GxE$emmean[emm_GxE$gen=="G1"])))
-    G2E1_emm = abs(overall_mean -
-                    (emm_GxE$emmean[emm_GxE$gen=="G2"])- # G2
-                    (emm_GxE$env_corrected[1])+ # E1
-                    (mean(emm_GxE$env_corrected[1] & emm_GxE$emmean[emm_GxE$gen=="G2"])))
-    G1E2_emm = abs(overall_mean -
-                    (emm_GxE$emmean[emm_GxE$gen=="G1"])- # G1
-                    (emm_GxE$env_corrected[2])+ # E2
-                    (mean(emm_GxE$env_corrected[2] & emm_GxE$emmean[emm_GxE$gen=="G1"])))
-    G2E2_emm = abs(overall_mean -
-                    (emm_GxE$emmean[emm_GxE$gen=="G2"])- # G2
-                    (emm_GxE$env_corrected[2])+ # E2
-                    (mean(emm_GxE$env_corrected[2] & emm_GxE$emmean[emm_GxE$gen=="G2"])))
+      G1E1_emm = abs(overall_mean -
+                       (emm_G$emmean[emm_G$gen=="G1"])- # G1
+                       (emm_E[1,2])+ # E1
+                       (emm_GxE[1,3])) # G1E1
+      G2E1_emm = abs(overall_mean -
+                       (emm_G$emmean[emm_G$gen=="G2"])- # G2
+                       (emm_E[1,2])+ # E1
+                       (emm_GxE[3,3])) # G2E1
+      G1E2_emm = abs(overall_mean -
+                       (emm_G$emmean[emm_G$gen=="G1"])- # G1
+                       (emm_E[2,2])+ # E2
+                       (emm_GxE[2,3])) # G1E2
+      G2E2_emm = abs(overall_mean -
+                       (emm_G$emmean[emm_G$gen=="G2"])- # G2
+                       (emm_E[2,2])+ # E2
+                       (emm_GxE[4,3])) # G2E2
     }else{
-      G1E1_emm <- NA
-      G2E1_emm <- NA
-      G1E2_emm <- NA
-      G2E2_emm <- NA
+      G1E1_emm <- 0
+      G2E1_emm <- 0
+      G1E2_emm <- 0
+      G2E2_emm <- 0
     }
     
     model_specs. = data.frame("Index" = unique(ind_dat$index),
+                              "cov_type" = cov_type,
+                              "Covariance_est" = cov_est,
                               "G1_slope" = unique(ind_dat$slope[ind_dat$gen == "G1"]),
                               "G1_slope_predicted" = G1_slope_predicted,
                               "G2_slope" = unique(ind_dat$slope[ind_dat$gen == "G2"]),
@@ -211,21 +221,14 @@ Cov_matrix_sim <- function(genphenenv_df){
                               "error" = unique(ind_dat$stdev),
                               "lm_result" = lm_result,
                               "GxE_pval" = GxE_pval,
-                              "Covariance_est" = cov_est,
-                              "eta_G" = G_R2,
-                              "eta_E" = E_R2,
-                              "eta_GxE" = GxE_R2,
-                              "G11_emm" = G1E1_emm,
-                              "G12_emm" = G2E1_emm,
-                              "G21_emm" = G2E1_emm,
-                              "G22_emm"= G2E2_emm,
-                              "G11_lot" = G1M,
-                              "G12_lot" = G2M,
-                              "G21_lot" = E1M,
-                              "G22_lot" = E2M,
-                              "w2_env" = w2_env,
-                              "w2_gen" = w2_gen,
-                              "w2_GxE" = w2_GxE)
+                              "G_eta" = G_R2,
+                              "E_eta" = E_R2,
+                              "GxE_eta" = GxE_R2,
+                              "GxE_emm"= G2E2_emm,
+                              "GxE_lot" = G1M,
+                              "E_omega" = w2_env,
+                              "G_omega" = w2_gen,
+                              "GxE_omega" = w2_GxE)
     model_specs <- rbind(model_specs,model_specs.)
     
   }

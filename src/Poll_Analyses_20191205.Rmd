@@ -1,0 +1,1126 @@
+---
+title: "RCN Workshop Poll Results"
+author: "Randall Hughes, Katie Lotterhos, Molly Albecker"
+date: "12/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+polldata <- read.csv("~/Documents/GitHub/CnGV/data/RCN_Survey.csv")
+
+library("ggplot2")
+library("tidyverse")
+library("data.table")
+library("rworldmap")
+```
+
+In November 2019, a survey was sent to RCN members that attended the workshop at Shoals Marine Lab. Below are plots depicting poll results. 
+
+```{r, echo = FALSE}
+# Duration 
+median_duration <- median(polldata$Duration..in.seconds.)
+avg_duration <-  mean(polldata$Duration..in.seconds.)
+(median_duration/60)
+
+# Any duplicated pollsters?
+which(duplicated(polldata$IPAddress))
+
+```
+118 unique IP addresses (people) completed the survey. 
+Median completion time was ~14 minutes.
+
+```{r}
+# Data Wrangling for profiles: 
+user_profiles = polldata %>% 
+  group_by(Q7,Q9,Q11) %>%
+  summarise(educ = n())
+
+# User profile plot
+user_profiles = ggplot(user_profiles[-1,], aes(fill=Q11, y=educ, x=Q7)) + 
+  theme_bw()+ 
+  geom_bar(stat="identity") + 
+  ggtitle("User Profiles") +
+  xlab("Education Level") + ylab("Number") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Sex"))
+  
+```
+Geographic Spread of Polls
+```{r}
+newmap <- getMap(resolution = "low")
+plot(newmap, asp = 1) +
+points(polldata$LocationLongitude, polldata$LocationLatitude, col = "red", pch = 20, cex = .6)
+```
+
+Q13. Provide a percentage (0-100%) for your research activities in the following disciplines. The total should sum to 100%.
+
+```{r}
+# Data Wrangling 
+Q13_av = polldata %>% 
+  #group_by(Q13_1,Q13_2,Q13_3,Q13_4) %>%
+  summarise("ecology" = mean(Q13_1),
+            "evolution" = mean(Q13_2),
+            "oceanography/geoscience" = mean(Q13_3),
+            "other" = mean(Q13_4))
+Q13_sd = polldata %>% 
+  #group_by(Q13_1,Q13_2,Q13_3,Q13_4) %>%
+  summarise("ecologysd" = sd(Q13_1),
+            "evolutionsd" = sd(Q13_2),
+            "oceanography/geosciencesd" = sd(Q13_3),
+            "othersd" = sd(Q13_4))
+
+Q13 = data.frame(cbind(t(Q13_av),t(Q13_sd)))
+colnames(Q13) <- c("average", "sd")
+setDT(Q13, keep.rownames = TRUE)[]
+
+
+study_topic = ggplot(Q13, aes(fill = rn, y=average, x=rn)) + 
+  theme_bw()+ 
+  geom_bar(stat="identity") + 
+  geom_errorbar(aes(x = rn, ymax = (average+sd),ymin = (average-sd)),width = 0.2)+
+  geom_text(aes(label=round(average)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q13") +
+  xlab("Study Topic") + ylab("Average Percent + SD") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Topic"))
+  
+```
+Q14. Provide a percentage (0-100%) for your research activities in the following ecosystems. The total should sum to 100%.
+
+```{r}
+# Data Wrangling 
+Q14_av = polldata %>% 
+  summarise("terrestrial" = mean(Q14_1),
+            "marine" = mean(Q14_2),
+            "freshwater" = mean(Q14_3,na.rm = TRUE),
+            "other" = mean(Q14_4))
+Q14_sd = polldata %>% 
+  summarise("terrestrial" = sd(Q14_1),
+            "marine" = sd(Q14_2),
+            "freshwater" = sd(Q14_3,na.rm = TRUE),
+            "other" = sd(Q14_4))
+
+Q14 = data.frame(cbind(t(Q14_av),t(Q14_sd)))
+colnames(Q14) <- c("average", "sd")
+setDT(Q14, keep.rownames = TRUE)[]
+
+
+study_biome = ggplot(Q14, aes(fill = rn, y=average, x=rn)) + 
+  theme_bw()+ 
+  geom_bar(stat="identity") + 
+  geom_errorbar(aes(x = rn, ymax = (average+sd),ymin = (average-sd)),width = 0.2)+
+  geom_text(aes(label=round(average)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q14") +
+  xlab("Study Biome") + ylab("Average Percent + SD") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Biome"))
+  
+```
+Q16. Provide a percentage (0-100%) for your research activities in the following taxonomic groups. The total should sum to 100%.
+
+```{r}
+# Data Wrangling 
+Q16_av = polldata %>% 
+  summarise("plant" = mean(Q16_1),
+            "animal" = mean(Q16_2),
+            "microbe" = mean(Q16_3,na.rm = TRUE),
+            "other" = mean(Q16_4))
+Q16_sd = polldata %>% 
+  summarise("terrestrial" = sd(Q16_1),
+            "marine" = sd(Q16_2),
+            "freshwater" = sd(Q16_3,na.rm = TRUE),
+            "other" = sd(Q16_4))
+
+Q16 = data.frame(cbind(t(Q16_av),t(Q16_sd)))
+colnames(Q16) <- c("average", "sd")
+setDT(Q16, keep.rownames = TRUE)[]
+
+
+organisms = ggplot(Q16, aes(fill = rn, y=average, x=rn)) + 
+  theme_bw()+ 
+  geom_bar(stat="identity") + 
+  geom_errorbar(aes(x = rn, ymax = (average+sd),ymin = (average-sd)),width = 0.2)+
+  geom_text(aes(label=round(average)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q16") +
+  xlab("Study Organism") + ylab("Average Percent + SD") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Organism"))
+  
+```
+Q17. Provide a percentage (0-100%) for your research activities in the following approaches. The total should sum to 100%.
+
+```{r}
+# Data Wrangling 
+Q17_av = polldata %>% 
+  summarise("empirical" = mean(Q17_1),
+            "theory" = mean(Q17_2,na.rm = TRUE),
+            "other" = mean(Q17_3))
+Q17_sd = polldata %>% 
+  summarise("empirical" = sd(Q17_1),
+            "theory" = sd(Q17_2,na.rm = TRUE),
+            "other" = sd(Q17_3))
+
+Q17 = data.frame(cbind(t(Q17_av),t(Q17_sd)))
+colnames(Q17) <- c("average", "sd")
+setDT(Q17, keep.rownames = TRUE)[]
+
+
+study_type = ggplot(Q17, aes(fill = rn, y=average, x=rn)) + 
+  theme_bw()+ 
+  geom_bar(stat="identity") + 
+  geom_errorbar(aes(x = rn, ymax = (average+sd),ymin = (average-sd)),width = 0.2)+
+  geom_text(aes(label=round(average)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q17") +
+  xlab("Study Type") + ylab("Average Percent + SD") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Type"))
+  
+grid.arrange(study_topic,study_biome,organisms, study_type, nrow = 2)
+```
+
+Q18. What are the reasons for genetic divergence in the sea within and/or among species? 
+```{r}
+# Data Wrangling 
+Q18_marine = polldata %>% 
+  group_by(Q18.1_1) %>%
+  summarise(counts = n())
+
+Q18_evol = polldata %>% 
+  group_by(Q18.2_1) %>%
+  summarise(counts = n())
+
+Q18_evol$field <- rep("evolutionary biology", nrow(Q18_evol))
+Q18_marine$field <- rep("marine science", nrow(Q18_marine))
+colnames(Q18_marine) <- c("Importance", "counts","field")
+colnames(Q18_evol) <- c("Importance", "counts","field")
+Q18 <- rbind(Q18_evol,Q18_marine)
+Q18$Importance <- as.character(Q18$Importance)
+Q18[c(1,6),1] <- "No Response"
+Q18[c(5,10),1] <- "Very/Somewhat"
+Q18$Importance <- factor(Q18$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat","No Response"))
+Q18$question <- rep("q18",nrow(Q18))
+
+
+Q18_plot = ggplot(Q18, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  #geom_text(aes(label=round(counts)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q18: What are the reasons for genetic divergence in the 
+          sea within and/or among species?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q18_plot
+```
+
+Q29. How will environmental change interact with different reproduction strategies (e.g. broadcast spawning, brooding, sex determination) to alter reproductive success? 
+```{r}
+# Data Wrangling 
+Q29_marine = polldata %>% 
+  group_by(Q29.1_1) %>%
+  summarise(counts = n())
+
+Q29_evol = polldata %>% 
+  group_by(Q29.2_1) %>%
+  summarise(counts = n())
+
+Q29_evol$field <- rep("evolutionary biology", nrow(Q29_evol))
+Q29_marine$field <- rep("marine science", nrow(Q29_marine))
+colnames(Q29_marine) <- c("Importance", "counts","field")
+colnames(Q29_evol) <- c("Importance", "counts","field")
+Q29 <- rbind(Q29_evol,Q29_marine)
+Q29$Importance <- as.character(Q29$Importance)
+Q29[c(1,6),1] <- "No Response"
+Q29[c(5),1] <- "Very/Somewhat"
+Q29$Importance <- factor(Q29$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat","No Response"))
+Q29$question <- rep("q29",nrow(Q29))
+
+Q29_plot = ggplot(Q29, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  #geom_text(aes(label=round(counts)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q29. How will environmental change interact with different reproduction 
+          strategies (e.g. broadcast spawning, brooding, sex determination) to 
+          alter reproductive success?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q29_plot
+```
+Q30. How can we quantify additive genetic variance (e.g., heritability) effectively in systems where pair-mated cross designs or pedigrees are not feasible? 
+```{r}
+# Data Wrangling 
+Q30marine = polldata %>% 
+  group_by(Q30.1_1) %>%
+  summarise(counts = n())
+
+Q30evol = polldata %>% 
+  group_by(Q30.2_1) %>%
+  summarise(counts = n())
+
+Q30evol$field <- rep("evolutionary biology", nrow(Q30evol))
+Q30marine$field <- rep("marine science", nrow(Q30marine))
+colnames(Q30marine) <- c("Importance", "counts","field")
+colnames(Q30evol) <- c("Importance", "counts","field")
+Q30 <- rbind(Q30evol,Q30marine)
+Q30$Importance <- as.character(Q30$Importance)
+Q30[c(1,7),1] <- "No Response"
+Q30[c(6),1] <- "Very/Somewhat"
+Q30[c(4,10),1] <- "Somewhat/Not"
+Q30$Importance <- factor(Q30$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat",
+                                                  "Somewhat/Not","No Response"))
+Q30$question <- rep("q30",nrow(Q30))
+
+
+Q30_plot = ggplot(Q30, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  #geom_text(aes(label=round(counts)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q30. How can we quantify additive genetic variance (e.g., heritability) 
+          effectively in systems where pair-mated cross designs or 
+          pedigrees are not feasible?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q30_plot
+```
+
+Q31.How can an understanding of adaptation to multiple stressors be used to predict responses to multivariate environmental change or novel environments? 
+```{r}
+# Data Wrangling 
+q31mar = polldata %>% 
+  group_by(Q31.1_1) %>%
+  summarise(counts = n())
+
+q31evol = polldata %>% 
+  group_by(Q31.2_1) %>%
+  summarise(counts = n())
+
+q31evol$field <- rep("evolutionary biology", nrow(q31evol))
+q31mar$field <- rep("marine science", nrow(q31mar))
+colnames(q31mar) <- c("Importance", "counts","field")
+colnames(q31evol) <- c("Importance", "counts","field")
+q31 <- rbind(q31evol,q31mar)
+q31$Importance <- as.character(q31$Importance)
+q31[c(1,5),1] <- "No Response"
+q31$Importance <- factor(q31$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important", "No Response"))
+q31$question <- rep("q31",nrow(q31))
+
+
+Q31_plot = ggplot(q31, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  #geom_text(aes(label=round(counts)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q31.How can an understanding of adaptation to multiple stressors 
+          be used to predict responses to multivariate environmental 
+          change or novel environments? ") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q31_plot
+```
+
+Q32.When high genetic drift (e.g. sweepstakes reproductive success), strong selection, and high gene flow all occur at the same life stage (e.g. larval dispersal), what are the relative importance of each process to evolutionary outcomes? 
+```{r}
+# Data Wrangling 
+q32mar = polldata %>% 
+  group_by(Q32.1_1) %>%
+  summarise(counts = n())
+
+q32evo = polldata %>% 
+  group_by(Q32.2_1) %>%
+  summarise(counts = n())
+
+q32evo$field <- rep("evolutionary biology", nrow(q32evo))
+q32mar$field <- rep("marine science", nrow(q32mar))
+colnames(q32mar) <- c("Importance", "counts","field")
+colnames(q32evo) <- c("Importance", "counts","field")
+q32 <- rbind(q32evo,q32mar)
+q32$Importance <- as.character(q32$Importance)
+q32[c(1,6),1] <- "No Response"
+q32[c(5),1] <- "Very/Somewhat"
+q32$Importance <- factor(q32$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat", "No Response"))
+q32$question <- rep("q32",nrow(q32))
+
+
+Q32_plot = ggplot(q32, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  #geom_text(aes(label=round(counts)), position=position_stack(vjust = 0.5) , size=4,colour = "white") +
+  ggtitle("Q32.When high genetic drift (e.g. sweepstakes reproductive success), 
+          strong selection, and high gene flow all occur at the same life stage 
+          (e.g. larval dispersal), what are the relative importance of each process
+          to evolutionary outcomes? ") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q32_plot
+```
+
+Q33. What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats?
+```{r}
+# Data Wrangling 
+q33mar = polldata %>% 
+  group_by(Q33.1_1) %>%
+  summarise(counts = n())
+
+q33evo = polldata %>% 
+  group_by(Q33.2_1) %>%
+  summarise(counts = n())
+
+q33evo$field <- rep("evolutionary biology", nrow(q33evo))
+q33mar$field <- rep("marine science", nrow(q33mar))
+colnames(q33mar) <- c("Importance", "counts","field")
+colnames(q33evo) <- c("Importance", "counts","field")
+q33 <- rbind(q33evo,q33mar)
+q33$Importance <- as.character(q33$Importance)
+q33[c(1,5),1] <- "No Response"
+q33[c(4,10),1] <- "Very/Somewhat"
+q33[c(8),1] <- "Somewhat/Not"
+q33$Importance <- factor(q33$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat","Somewhat/Not",
+                                                  "No Response"))
+q33$question <- rep("q33",nrow(q33))
+
+
+Q33_plot = ggplot(q33, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q33. What is the role of hybridization/introgression 
+          in range expansion (or lack thereof) to new habitats?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q33_plot
+```
+Q34.How and which dispersal traits are evolving in response to environmental change?
+```{r}
+# Data Wrangling 
+q34mar = polldata %>% 
+  group_by(Q34.1_1) %>%
+  summarise(counts = n())
+
+q34evo = polldata %>% 
+  group_by(Q34.2_1) %>%
+  summarise(counts = n())
+
+q34evo$field <- rep("evolutionary biology", nrow(q34evo))
+q34mar$field <- rep("marine science", nrow(q34mar))
+colnames(q34mar) <- c("Importance", "counts","field")
+colnames(q34evo) <- c("Importance", "counts","field")
+q34 <- rbind(q34evo,q34mar)
+q34$Importance <- as.character(q34$Importance)
+q34[c(1,6),1] <- "No Response"
+q34[c(5,10),1] <- "Very/Somewhat"
+#q34[c(8),1] <- "Somewhat/Not"
+q34$Importance <- factor(q34$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat",
+                                                  "No Response"))
+q34$question <- rep("q34",nrow(q34))
+
+
+Q34_plot = ggplot(q34, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q34.How and which dispersal traits are evolving in 
+          response to environmental change?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q34_plot
+```
+Q35.What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change?
+```{r}
+# Data Wrangling 
+q35mar = polldata %>% 
+  group_by(Q35.1_1) %>%
+  summarise(counts = n())
+
+q35evo = polldata %>% 
+  group_by(Q35.2_1) %>%
+  summarise(counts = n())
+
+q35evo$field <- rep("evolutionary biology", nrow(q35evo))
+q35mar$field <- rep("marine science", nrow(q35mar))
+colnames(q35mar) <- c("Importance", "counts","field")
+colnames(q35evo) <- c("Importance", "counts","field")
+q35 <- rbind(q35evo,q35mar)
+q35$Importance <- as.character(q35$Importance)
+q35[c(1,5),1] <- "No Response"
+q35[c(9),1] <- "Very/Somewhat"
+#q34[c(8),1] <- "Somewhat/Not"
+q35$Importance <- factor(q35$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat",
+                                                  "No Response"))
+q35$question <- rep("q35",nrow(q35))
+
+
+Q35_plot = ggplot(q35, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q35.What is the relative importance of rapid evolution versus 
+          acclimation via plasticity to environmental change?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q35_plot
+```
+
+Q36. For restoration and assisted evolution efforts, can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture)? 
+```{r}
+# Data Wrangling 
+q36mar = polldata %>% 
+  group_by(Q36.1_1) %>%
+  summarise(counts = n())
+
+q36evo = polldata %>% 
+  group_by(Q36.2_1) %>%
+  summarise(counts = n())
+
+q36evo$field <- rep("evolutionary biology", nrow(q36evo))
+q36mar$field <- rep("marine science", nrow(q36mar))
+colnames(q36mar) <- c("Importance", "counts","field")
+colnames(q36evo) <- c("Importance", "counts","field")
+q36 <- rbind(q36evo,q36mar)
+q36$Importance <- as.character(q36$Importance)
+q36[c(1,7),1] <- "No Response"
+q36[c(6,12),1] <- "Very/Somewhat"
+q36[c(4,10),1] <- "Somewhat/Not"
+q36$Importance <- factor(q36$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat","Somewhat/Not",
+                                                  "No Response"))
+q36$question <- rep("q36",nrow(q36))
+
+
+Q36_plot = ggplot(q36, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q36. For restoration and assisted evolution efforts, 
+          can we use genomics to predict fitness of genotypes in particular 
+          environments (with limited knowledge of the underlying 
+          genetic architecture)? ") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q36_plot
+```
+Q37. Do species with large effective population size have unexpected outcomes for population genetic processes? 
+```{r}
+# Data Wrangling 
+q37mar = polldata %>% 
+  group_by(Q37.1_1) %>%
+  summarise(counts = n())
+
+q37evo = polldata %>% 
+  group_by(Q37.2_1) %>%
+  summarise(counts = n())
+
+q37evo$field <- rep("evolutionary biology", nrow(q37evo))
+q37mar$field <- rep("marine science", nrow(q37mar))
+colnames(q37mar) <- c("Importance", "counts","field")
+colnames(q37evo) <- c("Importance", "counts","field")
+q37 <- rbind(q37evo,q37mar)
+q37$Importance <- as.character(q37$Importance)
+q37[c(1,6),1] <- "No Response"
+q37[c(5),1] <- "Very/Somewhat"
+#q37[c(4,10),1] <- "Somewhat/Not"
+q37$Importance <- factor(q37$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat",#"Somewhat/Not",
+                                                  "No Response"))
+q37$question <- rep("q37",nrow(q37))
+
+
+Q37_plot = ggplot(q37, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q37. Do species with large effective population size have 
+          unexpected outcomes for population genetic processes?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q37_plot
+```
+Q38. What will nearshore climates be like in the future? (i.e., if we lack good predictions of ocean climate, how can we experiment under future conditions if we don’t know what those are?) 
+```{r}
+# Data Wrangling 
+q38mar = polldata %>% 
+  group_by(Q38.1_1) %>%
+  summarise(counts = n())
+
+q38evo = polldata %>% 
+  group_by(Q38.2_1) %>%
+  summarise(counts = n())
+
+q38evo$field <- rep("evolutionary biology", nrow(q38evo))
+q38mar$field <- rep("marine science", nrow(q38mar))
+colnames(q38mar) <- c("Importance", "counts","field")
+colnames(q38evo) <- c("Importance", "counts","field")
+q38 <- rbind(q38evo,q38mar)
+q38$Importance <- as.character(q38$Importance)
+q38[c(1,6),1] <- "No Response"
+#q38[c(5),1] <- "Very/Somewhat"
+q38[c(4),1] <- "Somewhat/Not"
+q38$Importance <- factor(q38$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Somewhat/Not",
+                                                  "No Response"))
+q38$question <- rep("q38",nrow(q38))
+
+
+Q38_plot = ggplot(q38, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q38. What will nearshore climates be like in the future? 
+          (i.e., if we lack good predictions of ocean climate, 
+          how can we experiment under future conditions if we don’t know 
+          what those are?)") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q38_plot
+```
+Q39. What oceanographic and biological processes contribute to genetic load, and how does the geographic distribution of load affect adaptation?  
+```{r}
+# Data Wrangling 
+q39mar = polldata %>% 
+  group_by(Q39.1_1) %>%
+  summarise(counts = n())
+
+q39evo = polldata %>% 
+  group_by(Q39.2_1) %>%
+  summarise(counts = n())
+
+q39evo$field <- rep("evolutionary biology", nrow(q39evo))
+q39mar$field <- rep("marine science", nrow(q39mar))
+colnames(q39mar) <- c("Importance", "counts","field")
+colnames(q39evo) <- c("Importance", "counts","field")
+q39 <- rbind(q39evo,q39mar)
+q39$Importance <- as.character(q39$Importance)
+q39[c(1,5),1] <- "No Response"
+#q38[c(5),1] <- "Very/Somewhat"
+#q39[c(4),1] <- "Somewhat/Not"
+q39$Importance <- factor(q39$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important",#"Somewhat/Not",
+                                                  "No Response"))
+q39$question <- rep("q39",nrow(q39))
+
+
+Q39_plot = ggplot(q39, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q39. What oceanographic and biological processes contribute to 
+          genetic load, and how does the geographic distribution of 
+          load affect adaptation? ") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q39_plot
+```
+Q40. How does variation in selection or plasticity across different life history stages constrain or promote adaptation? 
+```{r}
+# Data Wrangling 
+q40mar = polldata %>% 
+  group_by(Q40.1_1) %>%
+  summarise(counts = n())
+
+q40evo = polldata %>% 
+  group_by(Q40.2_1) %>%
+  summarise(counts = n())
+
+q40evo$field <- rep("evolutionary biology", nrow(q40evo))
+q40mar$field <- rep("marine science", nrow(q40mar))
+colnames(q40mar) <- c("Importance", "counts","field")
+colnames(q40evo) <- c("Importance", "counts","field")
+q40 <- rbind(q40evo,q40mar)
+q40$Importance <- as.character(q40$Importance)
+q40[c(1,5),1] <- "No Response"
+#q38[c(5),1] <- "Very/Somewhat"
+#q39[c(4),1] <- "Somewhat/Not"
+q40$Importance <- factor(q40$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important",#"Somewhat/Not",
+                                                  "No Response"))
+q40$question <- rep("q40",nrow(q40))
+
+
+Q40_plot = ggplot(q40, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q40. How does variation in selection or plasticity 
+          across different life history stages constrain or 
+          promote adaptation?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q40_plot
+```
+Q41. What is the relative contribution of temporal fluctuating selection to maintaining variation in populations for short vs. long generation times?
+```{r}
+# Data Wrangling 
+q41mar = polldata %>% 
+  group_by(Q41.1_1) %>%
+  summarise(counts = n())
+
+q41evo = polldata %>% 
+  group_by(Q41.2_1) %>%
+  summarise(counts = n())
+
+q41evo$field <- rep("evolutionary biology", nrow(q41evo))
+q41mar$field <- rep("marine science", nrow(q41mar))
+colnames(q41mar) <- c("Importance", "counts","field")
+colnames(q41evo) <- c("Importance", "counts","field")
+q41 <- rbind(q41evo,q41mar)
+q41$Importance <- as.character(q41$Importance)
+q41[c(1,6),1] <- "No Response"
+q41[c(5),1] <- "Very/Somewhat"
+#q39[c(4),1] <- "Somewhat/Not"
+q41$Importance <- factor(q41$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat",
+                                                  "No Response"))
+q41$question <- rep("q41",nrow(q41))
+
+
+Q41_plot = ggplot(q41, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q41. What is the relative contribution of temporal fluctuating
+          selection to maintaining variation in populations 
+          for short vs. long generation times?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q41_plot
+```
+Q42. How do the genetics and geography of local adaptation interact with oceanographic processes to predict (or not) future evolvability? 
+```{r}
+# Data Wrangling 
+q42mar = polldata %>% 
+  group_by(Q42.1_1) %>%
+  summarise(counts = n())
+
+q42evo = polldata %>% 
+  group_by(Q42.2_1) %>%
+  summarise(counts = n())
+
+q42evo$field <- rep("evolutionary biology", nrow(q42evo))
+q42mar$field <- rep("marine science", nrow(q42mar))
+colnames(q42mar) <- c("Importance", "counts","field")
+colnames(q42evo) <- c("Importance", "counts","field")
+q42 <- rbind(q42evo,q42mar)
+q42$Importance <- as.character(q42$Importance)
+q42[c(1,6),1] <- "No Response"
+q42[c(5,10),1] <- "Very/Somewhat"
+#q39[c(4),1] <- "Somewhat/Not"
+q42$Importance <- factor(q42$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat",
+                                                  "No Response"))
+q42$question <- rep("q42",nrow(q42))
+
+
+Q42_plot = ggplot(q42, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q42. How do the genetics and geography of local adaptation 
+interact with oceanographic processes to predict (or not) future evolvability?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q42_plot
+```
+Q43. Can epigenetic or plastic responses to environmental stress be inherited and alter evolutionary processes?  
+```{r}
+# Data Wrangling 
+q43mar = polldata %>% 
+  group_by(Q43.1_1) %>%
+  summarise(counts = n())
+
+q43evo = polldata %>% 
+  group_by(Q43.2_1) %>%
+  summarise(counts = n())
+
+q43evo$field <- rep("evolutionary biology", nrow(q43evo))
+q43mar$field <- rep("marine science", nrow(q43mar))
+colnames(q43mar) <- c("Importance", "counts","field")
+colnames(q43evo) <- c("Importance", "counts","field")
+q43 <- rbind(q43evo,q43mar)
+q43$Importance <- as.character(q43$Importance)
+q43[c(1,5),1] <- "No Response"
+q43[c(9),1] <- "Very/Somewhat"
+#q39[c(4),1] <- "Somewhat/Not"
+q43$Importance <- factor(q43$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat",
+                                                  "No Response"))
+q43$question <- rep("q43",nrow(q43))
+
+
+Q43_plot = ggplot(q43, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q43. Can epigenetic or plastic responses to environmental 
+stress be inherited and alter evolutionary processes?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q43_plot
+```
+Q44. How do eco-evolutionary feedbacks alter productivity and biogeochemical cycles in the ocean?
+```{r}
+# Data Wrangling 
+q44mar = polldata %>% 
+  group_by(Q44.1_1) %>%
+  summarise(counts = n())
+
+q44evo = polldata %>% 
+  group_by(Q44.2_1) %>%
+  summarise(counts = n())
+
+q44evo$field <- rep("evolutionary biology", nrow(q44evo))
+q44mar$field <- rep("marine science", nrow(q44mar))
+colnames(q44mar) <- c("Importance", "counts","field")
+colnames(q44evo) <- c("Importance", "counts","field")
+q44 <- rbind(q44evo,q44mar)
+q44$Importance <- as.character(q44$Importance)
+q44[c(1,6),1] <- "No Response"
+#q44[c(9),1] <- "Very/Somewhat"
+q44[c(4),1] <- "Somewhat/Not"
+q44$Importance <- factor(q44$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Somewhat/Not",#"Very/Somewhat",
+                                                  "No Response"))
+q44$question <- rep("q44",nrow(q44))
+
+
+Q44_plot = ggplot(q44, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q44. How do eco-evolutionary feedbacks alter productivity 
+          and biogeochemical cycles in the ocean?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q44_plot
+```
+Q45. Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions? 
+```{r}
+# Data Wrangling 
+q45mar = polldata %>% 
+  group_by(Q45.1_1) %>%
+  summarise(counts = n())
+
+q45evo = polldata %>% 
+  group_by(Q45.2_1) %>%
+  summarise(counts = n())
+
+q45evo$field <- rep("evolutionary biology", nrow(q45evo))
+q45mar$field <- rep("marine science", nrow(q45mar))
+colnames(q45mar) <- c("Importance", "counts","field")
+colnames(q45evo) <- c("Importance", "counts","field")
+q45 <- rbind(q45evo,q45mar)
+q45$Importance <- as.character(q45$Importance)
+q45[c(1,5),1] <- "No Response"
+#q44[c(9),1] <- "Very/Somewhat"
+#q45[c(4),1] <- "Somewhat/Not"
+q45$Importance <- factor(q45$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important",#"Somewhat/Not",#"Very/Somewhat",
+                                                  "No Response"))
+q45$question <- rep("q45",nrow(q45))
+
+
+Q45_plot = ggplot(q45, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q45. Under what conditions will evolutionary processes accelerate 
+          (e.g.  mutational meltdowns or Allee effects) or prevent 
+          (e.g. evolutionary rescue) extinctions? ") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q45_plot
+```
+Q46. At spatial scales below the dispersal distance, how do spatial patterns of selective gradients create patterns of local adaptation (microgeographic adaptation)? 
+```{r}
+# Data Wrangling 
+q46mar = polldata %>% 
+  group_by(Q46.1_1) %>%
+  summarise(counts = n())
+
+q46evo = polldata %>% 
+  group_by(Q46.2_1) %>%
+  summarise(counts = n())
+
+q46evo$field <- rep("evolutionary biology", nrow(q46evo))
+q46mar$field <- rep("marine science", nrow(q46mar))
+colnames(q46mar) <- c("Importance", "counts","field")
+colnames(q46evo) <- c("Importance", "counts","field")
+q46 <- rbind(q46evo,q46mar)
+q46$Importance <- as.character(q46$Importance)
+q46[c(1,6),1] <- "No Response"
+q46[c(5,11),1] <- "Very/Somewhat"
+q46[c(9),1] <- "Somewhat/Not"
+q46$Importance <- factor(q46$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat","Somewhat/Not",
+                                                  "No Response"))
+q46$question <- rep("q46",nrow(q46))
+
+
+Q46_plot = ggplot(q46, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q46. At spatial scales below the dispersal distance, how do spatial patterns 
+          of selective gradients create patterns of local 
+          adaptation (microgeographic adaptation)?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q46_plot
+```
+Q47. Under what conditions does the evolved plastic response predict the evolutionary response? 
+```{r}
+# Data Wrangling 
+q47mar = polldata %>% 
+  group_by(Q47.1_1) %>%
+  summarise(counts = n())
+
+q47evo = polldata %>% 
+  group_by(Q47.2_1) %>%
+  summarise(counts = n())
+
+q47evo$field <- rep("evolutionary biology", nrow(q47evo))
+q47mar$field <- rep("marine science", nrow(q47mar))
+colnames(q47mar) <- c("Importance", "counts","field")
+colnames(q47evo) <- c("Importance", "counts","field")
+q47 <- rbind(q47evo,q47mar)
+q47$Importance <- as.character(q47$Importance)
+q47[c(1,6),1] <- "No Response"
+q47[c(5),1] <- "Very/Somewhat"
+q47[c(9),1] <- "Somewhat/Not"
+q47$Importance <- factor(q47$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat","Somewhat/Not",
+                                                  "No Response"))
+q47$question <- rep("q47",nrow(q47))
+
+
+Q47_plot = ggplot(q47, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q47. Under what conditions does the evolved plastic 
+response predict the evolutionary response?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q47_plot
+```
+Q48. How do microbial symbiont(s) or microbiomes affect the adaptation or acclimation of their hosts to a changing environment? 
+```{r}
+# Data Wrangling 
+q48mar = polldata %>% 
+  group_by(Q48.1_1) %>%
+  summarise(counts = n())
+
+q48evo = polldata %>% 
+  group_by(Q48.2_1) %>%
+  summarise(counts = n())
+
+q48evo$field <- rep("evolutionary biology", nrow(q48evo))
+q48mar$field <- rep("marine science", nrow(q48mar))
+colnames(q48mar) <- c("Importance", "counts","field")
+colnames(q48evo) <- c("Importance", "counts","field")
+q48 <- rbind(q48evo,q48mar)
+q48$Importance <- as.character(q48$Importance)
+q48[c(1,7),1] <- "No Response"
+q48[c(6),1] <- "Very/Somewhat"
+q48[c(4),1] <- "Somewhat/Not"
+q48$Importance <- factor(q48$Importance, levels=c("Very important", "Somewhat important",
+                                                  "Not important","Very/Somewhat","Somewhat/Not",
+                                                  "No Response"))
+q48$question <- rep("q48",nrow(q48))
+
+
+Q48_plot = ggplot(q48, aes(fill = field, y=counts, x=Importance)) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Q48. How do microbial symbiont(s) or microbiomes affect 
+the adaptation or acclimation of their hosts to a changing environment?") +
+  xlab("Response") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+Q48_plot
+```
+Same Questions, different plots: 
+Which of the 20 questions were ranked as "very important"?
+```{r}
+rankdat = rbind(Q18,Q29,Q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41,q42,q43,q44,q45,q46,q47,q48)
+
+very_important = filter(rankdat, Importance == "Very important")
+very_important_plot = ggplot(very_important, aes(fill = field, y=counts, x=reorder(question,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Which questions ranked as very important?") +
+  xlab("Question") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+
+
+not_important = filter(rankdat, Importance == "Not important")
+not_important_plot = ggplot(not_important, aes(fill = field, y=counts, x=reorder(question,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Which questions ranked as not important?") +
+  xlab("Question") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+
+semi_important = filter(rankdat, Importance == "Somewhat important")
+semi_important_plot = ggplot(semi_important, aes(fill = field, y=counts, x=reorder(question,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Which questions ranked as somewhat important?") +
+  xlab("Question") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  guides(fill=guide_legend(title="Field"))
+
+grid.arrange(very_important_plot,semi_important_plot,not_important_plot,nrow=3)
+```
+
+Q34. Choose up to 3 questions you think are most important for advancing each field. Questions can be important for more than one field.
+
+This one is gonna be tricky to sort out. 
+
+```{r}
+polldata$Q34_0_GROUP = as.character(polldata$Q34_0_GROUP)# Most important for marine science
+polldata$Q34_1_GROUP = as.character(polldata$Q34_1_GROUP) # Most important for evolutionary science
+polldata$Q34_2_GROUP = as.character(polldata$Q34_2_GROUP)# Most important for conservation and management
+
+marine_qs = c(polldata$Q34_0_GROUP)
+evol_qs = c(polldata$Q34_1_GROUP)
+conserve_qs = c(polldata$Q34_2_GROUP)
+
+marine_qs1 <- strsplit(marine_qs,"\\?")
+marine_qs1[[12]] <- NULL
+marine_qs1[[34]] <- NULL
+marine_qs1[[43]] <- NULL
+marine_qs1[[67]] <- NULL
+marine_qs1[[72]] <- NULL
+marine_qs1[[101]] <- NULL
+
+marine <- data.frame()
+for(i in 1:length(marine_qs1)){
+  temp_table = marine_qs1[[i]]
+  question = as.data.frame(unlist(temp_table))
+  marine. = data.frame("question" = question[,1],
+                       "rank" = 1:nrow(question),
+                       "pollster" = rep(i,nrow(question)))
+  marine = rbind(marine, marine.)
+}
+marine$question = gsub(",","",marine$question)
+
+marine1 = marine %>% 
+  group_by(question,rank) %>% 
+  summarise("counts" = n())
+write.csv(marine1, "~/Desktop/marine.csv")
+marine2 = read.csv( "~/Desktop/marine.csv")
+marine2 = na.omit(marine2)
+
+marine_plot = ggplot(marine2, aes(fill = as.factor(rank), y=counts, x=reorder(question_edit,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Which 3 questions most important for advancing marine science?") +
+  xlab("Question Keywords") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  theme(axis.text.x = element_text(angle = 45,size=6,hjust = 1,colour = "black"))+
+  guides(fill=guide_legend(title="Rank"))
+marine_plot
+
+```
+
+```{r}
+polldata$Q34_1_GROUP = as.character(polldata$Q34_1_GROUP) # Most important for evolutionary science
+polldata$Q34_2_GROUP = as.character(polldata$Q34_2_GROUP)# Most important for conservation and management
+
+evol_qs = c(polldata$Q34_1_GROUP)
+conserve_qs = c(polldata$Q34_2_GROUP)
+
+evol_qs1 <- strsplit(evol_qs,"\\?")
+evol_qs1[[12]] <- NULL
+evol_qs1[[34]] <- NULL
+evol_qs1[[43]] <- NULL
+evol_qs1[[67]] <- NULL
+evol_qs1[[72]] <- NULL
+evol_qs1[[101]] <- NULL
+
+evol <- data.frame()
+for(i in 1:length(evol_qs1)){
+  temp_table = evol_qs1[[i]]
+  question = as.data.frame(unlist(temp_table))
+  evol. = data.frame("question" = question[,1],
+                       "rank" = 1:nrow(question),
+                       "pollster" = rep(i,nrow(question)))
+  evol = rbind(evol, evol.)
+}
+evol$question = gsub(",","",evol$question)
+
+evol1 = evol %>% 
+  group_by(question,rank) %>% 
+  summarise("counts" = n())
+write.csv(evol1, "~/Desktop/evol.csv")
+evol2 = read.csv( "~/Desktop/evol.csv")
+evol2 = na.omit(evol2)
+
+evol_plot = ggplot(evol2, aes(fill = as.factor(rank), y=counts, x=reorder(question_edit,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Which 3 questions most important for advancing evolutionary biology?") +
+  xlab("Question Keywords") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  theme(axis.text.x = element_text(angle = 45,size=6,hjust = 1,colour = "black"))+
+  guides(fill=guide_legend(title="Rank"))
+evol_plot
+
+```
+Conservation 
+```{r}
+polldata$Q34_2_GROUP = as.character(polldata$Q34_2_GROUP)# Most important for conservation and management
+
+conserve_qs = c(polldata$Q34_2_GROUP)
+
+conserve_qs1 <- strsplit(conserve_qs,"\\?")
+conserve_qs1[[12]] <- NULL
+conserve_qs1[[34]] <- NULL
+conserve_qs1[[43]] <- NULL
+conserve_qs1[[67]] <- NULL
+conserve_qs1[[72]] <- NULL
+conserve_qs1[[101]] <- NULL
+
+cons <- data.frame()
+for(i in 1:length(conserve_qs1)){
+  temp_table = conserve_qs1[[i]]
+  question = as.data.frame(unlist(temp_table))
+  cons. = data.frame("question" = question[,1],
+                       "rank" = 1:nrow(question),
+                       "pollster" = rep(i,nrow(question)))
+  cons = rbind(cons, cons.)
+}
+cons$question = gsub(",","",cons$question)
+
+cons1 = cons %>% 
+  group_by(question,rank) %>% 
+  summarise("counts" = n())
+write.csv(cons1, "~/Desktop/cons.csv")
+cons2 = read.csv( "~/Desktop/cons.csv")
+cons2 = na.omit(cons2)
+
+cons_plot = ggplot(cons2, aes(fill = as.factor(rank), y=counts, x=reorder(question_edit,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Which 3 questions most important for advancing conservation and management?") +
+  xlab("Question Keywords") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  theme(axis.text.x = element_text(angle = 45,size=6,hjust = 1,colour = "black"))+
+  guides(fill=guide_legend(title="Rank"))
+cons_plot
+
+```
+
+Final question: Rank how you determine importance of a subject (Q33)
+```{r}
+Q33_1	Q33_2	Q33_3	Q33_4	Q33_5
+
+a <- data.frame("rank" = polldata$Q33_1,
+               "criteria" = rep("Novelty", nrow(polldata)))
+b <- data.frame("rank" = polldata$Q33_2,
+               "criteria" = rep("Personal relevance", nrow(polldata)))
+c <- data.frame("rank" = polldata$Q33_3,
+               "criteria" = rep("Funding", nrow(polldata)))
+d <- data.frame("rank" = polldata$Q33_4,
+               "criteria" = rep("Publications", nrow(polldata)))
+e <- data.frame("rank" = polldata$Q33_5,
+               "criteria" = rep("Application", nrow(polldata)))
+
+import_dat = rbind(a,b,c,d,e)
+
+import1 = import_dat %>% 
+  group_by(criteria,rank) %>% 
+  summarise("counts" = n())
+import1$rank = as.character(import1$rank)
+import1[c(6,12,18,24,30),2] <- "No Response"
+
+import_plot = ggplot(import1, aes(fill = as.factor(rank), y=counts, x=reorder(criteria,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity") + 
+  ggtitle("Factors in determining your perception of the importance of research questions") +
+  xlab("Decision factors") + ylab("Count") + scale_fill_brewer(palette="Set1")+
+  theme(axis.text.x = element_text(angle = 45,size=6,hjust = 1,colour = "black"))+
+  guides(fill=guide_legend(title="Rank"))
+import_plot
+```

@@ -1,0 +1,66 @@
+,question,rank,counts,question_edit
+1, (i.e. if we lack good predictions of ocean climate how can we experiment under future conditions if we don‚Äôt know what those are,2,22,NA
+2, (i.e. if we lack good predictions of ocean climate how can we experiment under future conditions if we don‚Äôt know what those are,3,11,NA
+3, (i.e. if we lack good predictions of ocean climate how can we experiment under future conditions if we don‚Äôt know what those are,4,2,NA
+4,At spatial scales below the dispersal distance how do spatial patterns of selective gradients create patterns of local adaptation (microgeographic adaptation),1,4,microgeographic adaptation
+5,At spatial scales below the dispersal distance how do spatial patterns of selective gradients create patterns of local adaptation (microgeographic adaptation),2,1,microgeographic adaptation
+6,At spatial scales below the dispersal distance how do spatial patterns of selective gradients create patterns of local adaptation (microgeographic adaptation),3,3,microgeographic adaptation
+7,Can epigenetic or plastic responses to environmental stress be inherited and alter evolutionary processes,1,2,epigenetics
+8,Can epigenetic or plastic responses to environmental stress be inherited and alter evolutionary processes,3,1,epigenetics
+9,Do species with large effective population size have unexpected outcomes for population genetic processes,1,3,effective population size
+10,Do species with large effective population size have unexpected outcomes for population genetic processes,2,1,effective population size
+11,Do species with large effective population size have unexpected outcomes for population genetic processes,4,1,effective population size
+12,For restoration and assisted evolution efforts can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture),1,24,restoration genomics
+13,For restoration and assisted evolution efforts can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture),2,12,restoration genomics
+14,For restoration and assisted evolution efforts can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture),3,14,restoration genomics
+15,For restoration and assisted evolution efforts can we use genomics to predict fitness of genotypes in particular environments (with limited knowledge of the underlying genetic architecture),4,4,restoration genomics
+16,How and which dispersal traits are evolving in response to environmental change,1,6,dispersal evolution
+17,How and which dispersal traits are evolving in response to environmental change,2,7,dispersal evolution
+18,How and which dispersal traits are evolving in response to environmental change,3,4,dispersal evolution
+19,How and which dispersal traits are evolving in response to environmental change,4,2,dispersal evolution
+20,How can an understanding of adaptation to multiple stressors be used to predict responses to multivariate environmental change or novel environments,1,10,multiple stressors
+21,How can an understanding of adaptation to multiple stressors be used to predict responses to multivariate environmental change or novel environments,2,3,multiple stressors
+22,How can an understanding of adaptation to multiple stressors be used to predict responses to multivariate environmental change or novel environments,3,7,multiple stressors
+23,How can an understanding of adaptation to multiple stressors be used to predict responses to multivariate environmental change or novel environments,4,4,multiple stressors
+24,How can we quantify additive genetic variance (e.g. heritability) effectively in systems where pair-mated cross designs or pedigrees are not feasible,1,2,additive genetic variance
+25,How can we quantify additive genetic variance (e.g. heritability) effectively in systems where pair-mated cross designs or pedigrees are not feasible,2,1,additive genetic variance
+26,How do eco-evolutionary feedbacks alter productivity and biogeochemical cycles in the ocean,1,1,biogeochemical cycles
+27,How do eco-evolutionary feedbacks alter productivity and biogeochemical cycles in the ocean,2,1,biogeochemical cycles
+28,How do eco-evolutionary feedbacks alter productivity and biogeochemical cycles in the ocean,3,3,biogeochemical cycles
+29,How do eco-evolutionary feedbacks alter productivity and biogeochemical cycles in the ocean,4,1,biogeochemical cycles
+30,How do microbial symbiont(s) or microbiomes affect the adaptation or acclimation of their hosts to a changing environment,1,2,microbial symbionts
+31,How do microbial symbiont(s) or microbiomes affect the adaptation or acclimation of their hosts to a changing environment,4,1,microbial symbionts
+32,How do the genetics and geography of local adaptation interact with oceanographic processes to predict (or not) future evolvability,1,3,oceanographic processes
+33,How do the genetics and geography of local adaptation interact with oceanographic processes to predict (or not) future evolvability,2,5,oceanographic processes
+34,How do the genetics and geography of local adaptation interact with oceanographic processes to predict (or not) future evolvability,3,3,oceanographic processes
+35,How does variation in selection or plasticity across different life history stages constrain or promote adaptation,1,1,life history stages
+36,How does variation in selection or plasticity across different life history stages constrain or promote adaptation,2,2,life history stages
+37,How does variation in selection or plasticity across different life history stages constrain or promote adaptation,3,2,life history stages
+38,How will environmental change interact with different reproduction strategies (e.g. broadcast spawning brooding sex determination) to alter reproductive success,1,5,reproduction strategies
+39,How will environmental change interact with different reproduction strategies (e.g. broadcast spawning brooding sex determination) to alter reproductive success,2,2,reproduction strategies
+40,How will environmental change interact with different reproduction strategies (e.g. broadcast spawning brooding sex determination) to alter reproductive success,3,3,reproduction strategies
+41,How will environmental change interact with different reproduction strategies (e.g. broadcast spawning brooding sex determination) to alter reproductive success,4,3,reproduction strategies
+42,Under what conditions does the evolved plastic response predict the evolutionary response,1,1,plasticity predicts
+43,Under what conditions does the evolved plastic response predict the evolutionary response,3,1,plasticity predicts
+44,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,1,9,accelerate or prevent
+45,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,2,3,accelerate or prevent
+46,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,3,2,accelerate or prevent
+47,Under what conditions will evolutionary processes accelerate (e.g.  mutational meltdowns or Allee effects) or prevent (e.g. evolutionary rescue) extinctions,4,3,accelerate or prevent
+48,What are the reasons for genetic divergence in the sea within and/or among species,1,1,genetic divergence
+49,What are the reasons for genetic divergence in the sea within and/or among species,4,1,genetic divergence
+50,What is the relative contribution of temporal fluctuating selection to maintaining variation in populations for short vs. long generation times,3,2,fluctuating selection
+51,What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change,1,11,evolution vs. acclimation
+52,What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change,2,4,evolution vs. acclimation
+53,What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change,3,4,evolution vs. acclimation
+54,What is the relative importance of rapid evolution versus acclimation via plasticity to environmental change,4,3,evolution vs. acclimation
+55,What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats,1,2,hybridization
+56,What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats,2,1,hybridization
+57,What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats,3,1,hybridization
+58,What is the role of hybridization/introgression in range expansion (or lack thereof) to new habitats,4,1,hybridization
+59,What oceanographic and biological processes contribute to genetic load and how does the geographic distribution of load affect adaptation,1,1,genetic load
+60,What oceanographic and biological processes contribute to genetic load and how does the geographic distribution of load affect adaptation,2,2,genetic load
+61,What oceanographic and biological processes contribute to genetic load and how does the geographic distribution of load affect adaptation,3,2,genetic load
+62,What will nearshore climates be like in the future,1,22,nearshore climates
+63,What will nearshore climates be like in the future,2,11,nearshore climates
+64,What will nearshore climates be like in the future,3,2,nearshore climates
+65,When high genetic drift (e.g. sweepstakes reproductive success) strong selection and high gene flow all occur at the same life stage (e.g. larval dispersal) what are the relative importance of each process to evolutionary outcomes,1,2,genetic drift and gene flow
