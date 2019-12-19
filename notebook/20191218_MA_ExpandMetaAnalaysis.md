@@ -35,14 +35,17 @@ Enter MAIN environment (one that matches to the `exp_env_cat`) in `Native_env_ca
 Then put the second qualifier in the `Native_env_cat2` column. If there is a third genotype pair, add another column called “`Native_env_cat3`”. 
 
 So the example above should look like: 
-|Native_env_cat	|Native_env_cat	|Nat_env_factor	|Exp_env_cat|
+
+| Native_env_cat	| Native_env_cat| Nat_env_factor| Exp_env_cat|
 |---|---|---|---|
-|Warm|	High|	N_1|	Warm|
-|Warm|	High|	N_1|	Cool|
-|Cool|  High| N_2|  Warm|
-|Cool|	High|	N_2|	Cool|
-|Warm|	Low|	N_3|	Warm|
-|Warm|	Low|	N_3|	Cool|
-|Cool|	Low|	N_4|	Warm|
-|Cool|	Low|	N_4|	Cool|
+|Warm|High|N_1|Warm|
+|Warm|High|N_1|Cool|
+|Cool| High|N_1|Warm|
+|Cool|High|N_1|Cool|
+|Warm|Low|N_2|Warm|
+|Warm|Low|N_2|Cool|
+|Cool|Low|N_2|Warm|
+|Cool|Low|N_2|Cool|
+
+Note that the `Nat_env_factor` only refers to the *matching* native and experimental environments
 
