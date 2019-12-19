@@ -17,7 +17,7 @@ I ran both raw and means data through the `Categorical_sim` function which is se
 
 Below are the plots showing how the different approaches compare for Covariance and GxE.
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/img/GxE_test.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/img/Covariance_test.png)
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/img/GxE_test.png)
 
