@@ -36,7 +36,7 @@ Then put the second qualifier in the `Native_env_cat2` column. If there is a thi
 
 So the example above should look like: 
 
-| Native_env_cat	| Native_env_cat| Nat_env_factor| Exp_env_cat|
+| Native_env_cat	| Native_env_cat2| Nat_env_factor| Exp_env_cat|
 |---|---|---|---|
 |Warm|High|N_1|Warm|
 |Warm|High|N_1|Cool|
@@ -47,5 +47,11 @@ So the example above should look like:
 |Cool|Low|N_2|Warm|
 |Cool|Low|N_2|Cool|
 
-Note that the `Nat_env_factor` only refers to the *matching* native and experimental environments
+Note that the `Nat_env_factor` only refers to the native and experimental environments that match (warm and cool)
 
+Studies that this applies to: (Not an exhaustive list, just a few I found)
+654
+401
+630 
+
+Using the above approach, we can now get covariance and gxe for these studies even though the number of genotypes doesn't match the number of environments.
