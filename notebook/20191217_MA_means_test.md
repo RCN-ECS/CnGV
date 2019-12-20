@@ -41,3 +41,22 @@ It does seem like the current scaling strongly affected the means output. When y
 
 ![cov wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Means_raw_covariance_nocorrection.png)
 ![gxe wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Gxe_meansandraw_nocorrection.png)
+
+### How I set up Scaling
+
+For raw data, I calculate the average and standard deviation of the full dataset. I then apply the following to each datapoint: 
+```#data
+# Standardize raw data
+  dat_avg <- mean(input_df$phen_data) 
+  dat_std <- sd(input_df$phen_data)
+  input_df$phen_corrected <- ((input_df$phen_data - dat_avg)/dat_std)
+```
+
+For means/SE data, I similarly take the average and standard deviations of the means. I then apply the following to each mean datapoint: 
+```#mean
+# Standardize means data
+  dat_avg <- mean(input_df$phen_data) 
+  dat_std <- sd(input_df$phen_data)
+  input_df$phen_corrected <- ((input_df$phen_data - dat_avg)/dat_std)
+  
+ ```
