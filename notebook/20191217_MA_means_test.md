@@ -33,3 +33,13 @@ To see if its because of the model fits, I ran the means through some code that 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/img/GxE2.png)
 
 This calls into question whether using means/SE is a good method. I'll continue to think.
+
+## Update Dec. 20, 2019
+Katie suggested that our method of scaling might be driving the weird patterns above. So I removed the scaling (phenotype-average/std.deviation) and re-ran all the code. 
+
+This revealed some interesting patterns. While the covariance and gxe estimates for mean and raw data basically overlap completely (you have to squint to see most of the little pink dots), the error is wayyyyyyy off. This suggests that the `rnorm` method of generating confidence intervals is not working as we thought. 
+
+![cov wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Cov_noscale_wrongerror.png)
+![gxe wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Gxe_noscale_wrongerror.png)
+
+Almost there - just need to figure out a better bootstrapping plan. 
