@@ -37,9 +37,26 @@ This calls into question whether using means/SE is a good method. I'll continue 
 ## Update Dec. 20, 2019
 Katie suggested that our method of scaling might be driving the weird patterns above. So I removed the scaling (phenotype-average/std.deviation) and re-ran all the code. 
 
-This revealed some interesting patterns. While the covariance and gxe estimates for mean and raw data basically overlap completely (you have to squint to see most of the little pink dots), the error is wayyyyyyy off. This suggests that the `rnorm` method of generating confidence intervals is not working as we thought. 
+It does seem like the current scaling strongly affected the means output. When you remove the scaling, the means/raw data all match nicely! If standardizing has such a large effect between data types, it defeats some of the purpose of standardizing in the first place, which was to be able to generalize across studies.
 
-![cov wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Cov_noscale_wrongerror.png)
-![gxe wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Gxe_noscale_wrongerror.png)
+![cov wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Means_raw_covariance_nocorrection.png)
+![gxe wrong error](https://github.com/RCN-ECS/CnGV/blob/master/img/Gxe_meansandraw_nocorrection.png)
 
-Almost there - just need to figure out a better bootstrapping plan. 
+### How I set up Scaling
+
+For raw data, I calculate the average and standard deviation of the full dataset. I then apply the following to each datapoint: 
+```#data
+# Standardize raw data
+  dat_avg <- mean(input_df$phen_data) 
+  dat_std <- sd(input_df$phen_data)
+  input_df$phen_corrected <- ((input_df$phen_data - dat_avg)/dat_std)
+```
+
+For means/SE data, I similarly take the average and standard deviations of the means. I then apply the following to each mean datapoint: 
+```#mean
+# Standardize means data
+  dat_avg <- mean(input_df$phen_data) 
+  dat_std <- sd(input_df$phen_data)
+  input_df$phen_corrected <- ((input_df$phen_data - dat_avg)/dat_std)
+  
+ ```
