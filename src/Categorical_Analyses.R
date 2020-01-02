@@ -7,10 +7,9 @@ fun1 <- function(input_df){
   require("emmeans","lme4","tidyverse")
    
   # Standardize data
-  #dat_avg <- mean(input_df$phen_data) 
-  #dat_std <- sd(input_df$phen_data)
-  #input_df$phen_corrected <- ((input_df$phen_data - dat_avg)/dat_std)
-  input_df$phen_corrected <-input_df$phen_data
+  dat_avg <- mean(input_df$phen_data) 
+  dat_std <- sd(input_df$phen_data)
+  input_df$phen_corrected <- ((input_df$phen_data - dat_avg)/dat_std)
   
   # Anovas
   test_temp_a <- aov(phen_corrected ~ exp_env_factor + gen_factor, data = input_df)
@@ -316,7 +315,7 @@ Categorical_sim <- function(input_df,iterations){
     permdat <- replicate(iterations, permutation_mean(df_temp), simplify=TRUE)   # Permutation 
   }
   
-  new_data <- fun1(df_temp)
+  #new_data <- fun1(df_temp)
   true_covariance <- new_data["Covariance"]
   GxE_magnitude <- new_data["GxE_magnitude"]
   
@@ -472,11 +471,14 @@ outdat2$orig = rep("means",nrow(outdat2)) # identifier
 outdat$orig = rep("raw",nrow(outdat)) # identifier
 outdat3$orig = rep("new_from_means",nrow(outdat3)) # identifier
 
-big_data = rbind(outdat,outdat2,outdat3)
+big_data = rbind(outdat,outdat2)
 ggplot(big_data,aes(x=Index,y=true_covariance,group = Index,colour=orig))+geom_point()+
   theme_classic()+geom_errorbar(ymin=big_data$Cov_lowCI,ymax=big_data$Cov_highCI)
 ggplot(big_data,aes(x=Index,y=GxE_magnitude,group = Index,colour=orig))+geom_point()+
   theme_classic()+geom_errorbar(ymin=big_data$GxE_lowCI,ymax=big_data$GxE_highCI)
+
+ggplot(big_data, aes(x = true_covariance,y = GxE_magnitude, group = Index, colour = orig))+
+  geom_point()+theme_classic() #+geom_errorbar(ymin=big_data$GxE_lowCI,ymax=big_data$GxE_highCI)+geom_errorbar(ymin=big_data$Cov_lowCI,ymax=big_data$Cov_highCI)
 
 # Test Meta-Analysis Data
 test1a = Categorical_meta(test4,Extraction_Initialize,50) # Works! #630_male_wing_length
