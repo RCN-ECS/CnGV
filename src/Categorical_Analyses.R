@@ -496,4 +496,5 @@ test5 = read.csv("~/Desktop/test5.csv") # Raw but ngen!= nenv #630_male_wing_len
 ## Next Steps: 
 #3. automate for meta analysis data 
 #4. plot significant results
-
+power_data = read.csv("~/Desktop/power_analysis_data_20200102.csv")
+power_analysis <- Categorical_sim(power_data,1) # Covariance and GxE on Raw data
