@@ -3,9 +3,6 @@
 # Categorical Covariance and GxE from raw data
 fun1 <- function(input_df){ 
   
-  # Load packages
-  require("emmeans","lme4","tidyverse")
-   
   # Standardize data
   dat_avg <- mean(input_df$phen_data) 
   dat_std <- sd(input_df$phen_data)
@@ -289,6 +286,9 @@ permutation_mean <- function(input_df){
 
 Categorical_sim <- function(input_df,iterations){
   
+  # Load packages
+  library("emmeans","lme4","tidyverse")
+  
   # Number of bootstraps
   iterations = iterations
   
@@ -451,16 +451,16 @@ Catdat <- list(
   "cat_cont" = c("categorical"), 
   "intercept_G1" = 0,
   "slope_G1" = 0.5,
-  "intercept_G2" = seq(from = -5, to = 5, by = 3),
-  "slope_G2" = seq(from = -5, to = 5, by = 3),
-  "sd" = seq(from = 0, to = 1, by = 0.5),
-  "sample_size" = seq(from = 3, to = 12, by = 4))
+  "intercept_G2" = c(1,2,4),#seq(from = -5, to = 5, by = 3),
+  "slope_G2" = 0.5,#seq(from = -5, to = 5, by = 3),
+  "sd" = 0.5,#seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = 5) #seq(from = 3, to = 12, by = 4))
 source("~/Documents/GitHub/CnGV/src/data_generation_function.R") # Generate data (either cat. or cont.)
 source("~/Documents/GitHub/CnGV/src/sim_means_se.R") # Generate means and SE from raw sim. data (either cat. or cont.)
 
 # Generate categorical data
 cat_raw <- data.frame(data_generation(Catdat)) # raw
-outdat <- Categorical_sim(cat_raw,20) # Covariance and GxE on Raw data
+outdat <- replicate(10,Categorical_sim(cat_raw,10)) # Covariance and GxE on Raw data # need to pull out values for power analysis.
 cat_mean <- sim_means_se(cat_raw) # generate means 
 outdat2 <- Categorical_sim(cat_mean,20) # Covariance and GxE on means 
 cat_new <- mean_generation_cat(cat_mean) # generate raw data from means (rnorm)

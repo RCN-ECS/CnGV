@@ -8,7 +8,7 @@ To provide a quantitative framework for the analysis of cogradient and countergr
 ```{r}
 # Read in necessary packages for functions
 
-packages_needed <- c("plyr","tidyverse","lme4","lmtest","gridExtra","ggplot2","MBESS","emmeans","reghelper")
+packages_needed <- c("dplyr","lme4","lmtest","gridExtra","ggplot2","MBESS","emmeans","reghelper","WGCNA","flashClust","nlme",)
 
 for (i in 1:length(packages_needed)){
   if(!(packages_needed[i] %in% installed.packages())){install.packages(packages_needed[i])}
