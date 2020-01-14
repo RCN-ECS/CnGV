@@ -302,8 +302,11 @@ Categorical_sim <- function(input_df,iterations){
   }
   
   # Indexing
-  for(i in 1:length(unique(input_df$index))){
-    df_temp <- filter(input_df, index == unique(index)[i])
+  for(z in 1:length(unique(input_df$index))){
+    df_temp <- filter(input_df, index == unique(index)[z])
+    
+    # Counter
+    cat(z, "\n")
                       
   if(input_df$source == "sim"){
     new_data <- fun1(df_temp) # Estimate GxE and Covariance
@@ -351,16 +354,35 @@ Categorical_sim <- function(input_df,iterations){
   GxE_pvalue = NULL
   if(ptemp1 < 0.5){GxE_pvalue = ptemp1}else{GxE_pvalue = (1-ptemp1)}
   
+  # Power  
+  cross.null<-NULL  
+  cov_dat = unlist(lapply(bootdat, `[`, 2))
+  for(i in 1:length(cov_dat)){
+    # Is CI estimate less than zero? 1 = no, 0 = yes
+    if(true_covariance[[1]] < 0 & cov_dat[[i]] < 0) {cross.null[i] = 1
+    }else if(true_covariance[[1]] > 0 & cov_dat[[i]] > 0) {cross.null[i] = 1
+    }else{cross.null[i] = 0}
+    #Power is the proportion of replicates whose 95% CI do not include 0
+  }
+  numerator <- sum(cross.null)
+  denominator <- length(cov_dat)
+  power <- numerator/denominator
+  
   # Output
   results. = data.frame("Index" = unique(df_temp$index),
-                       "true_covariance" = true_covariance[[1]], 
-                       "Cov_lowCI" = cov_CI[[1]], 
-                       "Cov_highCI" = cov_CI[[2]], 
-                       "covariance_p_value" = cov_pvalue,
-                       "GxE_magnitude" = GxE_magnitude[[1]],
-                       "GxE_lowCI" = GxE_CI[[1]],
-                       "GxE_highCI" = GxE_CI[[2]],
-                       "GxE_pvalue" = GxE_pvalue)
+                        "Sample_size" = unique(df_temp$phen_n),
+                        "std_deviation" = unique(df_temp$stdev),
+                        "Slope_difference" = unique(df_temp$slope_diff),
+                        "intercept_difference" = unique(df_temp$intercept_diff),
+                        "true_covariance" = true_covariance[[1]], 
+                        "Cov_lowCI" = cov_CI[[1]], 
+                        "Cov_highCI" = cov_CI[[2]], 
+                        "covariance_p_value" = cov_pvalue,
+                        "GxE_magnitude" = GxE_magnitude[[1]],
+                        "GxE_lowCI" = GxE_CI[[1]],
+                        "GxE_highCI" = GxE_CI[[2]],
+                        "GxE_pvalue" = GxE_pvalue,
+                        "power" = power)
   results <- rbind(results,results.)
   }
   return(results)
@@ -450,17 +472,21 @@ Categorical_meta <- function(input_df,meta_data,iterations){
 Catdat <- list(
   "cat_cont" = c("categorical"), 
   "intercept_G1" = 0,
-  "slope_G1" = 0.5,
-  "intercept_G2" = c(1,2,4),#seq(from = -5, to = 5, by = 3),
-  "slope_G2" = 0.5,#seq(from = -5, to = 5, by = 3),
+  "slope_G1" = 1,
+  "intercept_G2" = c(2),#seq(from = -5, to = 5, by = 3),
+  "slope_G2" = c(-1),#seq(from = -5, to = 5, by = 3),
   "sd" = 0.5,#seq(from = 0, to = 1, by = 0.5),
-  "sample_size" = 5) #seq(from = 3, to = 12, by = 4))
+  "sample_size" = seq(from = 3, to = 12, by = 2))
 source("~/Documents/GitHub/CnGV/src/data_generation_function.R") # Generate data (either cat. or cont.)
 source("~/Documents/GitHub/CnGV/src/sim_means_se.R") # Generate means and SE from raw sim. data (either cat. or cont.)
 
 # Generate categorical data
 cat_raw <- data.frame(data_generation(Catdat)) # raw
-outdat <- replicate(10,Categorical_sim(cat_raw,10)) # Covariance and GxE on Raw data # need to pull out values for power analysis.
+outdat <- Categorical_sim(cat_raw,50) # Covariance and GxE on Raw data 
+
+print(ggplot(outdat, aes(x=true_covariance,y=power,colour= Sample_size))) + geom_point()
+
+# Means
 cat_mean <- sim_means_se(cat_raw) # generate means 
 outdat2 <- Categorical_sim(cat_mean,20) # Covariance and GxE on means 
 cat_new <- mean_generation_cat(cat_mean) # generate raw data from means (rnorm)
@@ -498,3 +524,51 @@ test5 = read.csv("~/Desktop/test5.csv") # Raw but ngen!= nenv #630_male_wing_len
 #4. plot significant results
 power_data = read.csv("~/Desktop/power_analysis_data_20200102.csv")
 power_analysis <- Categorical_sim(power_data,1) # Covariance and GxE on Raw data
+
+###########
+## Power ##
+###########
+#Power is the proportion of replicates whose 95% CI do not include 0
+newdat = outdat
+powerdat = data.frame()
+for(i in 1:length(unique(newdat$reps))){
+  rep = unique(newdat$reps)[i]
+  repdat = filter(newdat, reps == rep)
+  for(j in 1:length(unique(repdat$std.dev))){
+    sdev = unique(newdat$std.dev)[j]
+    repdat2 = filter(repdat, std.dev == sdev)
+    for(k in 1:length(unique(repdat2$effect.size))){
+      effsize = unique(repdat2$effect.size)[k]
+      repdat3 = filter(repdat2, effect.size == effsize)
+      
+      powerdat. = data.frame("reps" = unique(repdat3$reps),
+                             "std.dev" = unique(repdat3$std.dev),
+                             "effect.size" = unique(repdat3$effect.size),
+                             "numer" = sum(repdat3$overunder),
+                             "denom" = nrow(repdat3))
+      powerdat = rbind(powerdat,powerdat.)
+    }
+  }
+}
+
+## Plot Heatmap
+
+simplot = ggplot(data = powerdat, aes(x = reps, y = effect.size))+ #reorder(std.dev,-std.dev)
+  geom_tile(aes(fill = power), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue")+
+  theme_classic()+ 
+  #ylab("Difference in G and E") + xlab("Sample Size")+
+  theme_bw(base_size = 30, base_family = "Helvetica")+ 
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'black')) +
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
+  theme(axis.ticks = element_line(colour = "black"))+
+  theme(axis.text= element_text(colour = "black"))+
+  labs(colour = "Sample Size")+
+  theme(legend.position="bottom")+
+  theme(legend.title = element_text(size = 14),
+        legend.text = element_text(size = 14))
+#theme(legend.position="none")
+simplot
+
+
+powerdat$power = (powerdat$numer/powerdat$denom) 
