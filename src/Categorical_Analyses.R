@@ -1,14 +1,8 @@
 
-cat_means = read.csv("~/Desktop/cat_means.csv")
-Extraction_Initialize = read.csv("~/Desktop/Extraction_Initialize.csv")
-
 
 # Categorical Covariance and GxE from raw data
 fun1 <- function(input_df){ 
   
-  # Load packages
-  require("emmeans","lme4","tidyverse")
-   
   # Standardize data
   dat_avg <- mean(input_df$phen_data) 
   dat_std <- sd(input_df$phen_data)
@@ -30,20 +24,65 @@ fun1 <- function(input_df){
   
   # Gmeans and Emeans  
   if(ngen == nenv){
+    
     Cov_matrix = data.frame()
     Cov_matrix. = data.frame()
     Cov_matrix.. = data.frame()
+    
     for(i in 1:length(unique(input_df$gen_factor))){
       gtemp <- sum(emm_GxE[emm_GxE$gen_factor == unique(input_df$gen_factor)[i],3])/ngen
-      tempdat = data.frame("G_means" = gtemp)
+      tempdat = data.frame("G_means" = gtemp,
+                           "gen_factor" = unique(input_df$gen_factor)[i])
       Cov_matrix. = rbind(Cov_matrix.,tempdat)
     }
-    for(j in 1:length(unique(input_df$gen_factor))){
+    
+    for(j in 1:length(unique(input_df$exp_env_factor))){
       etemp <- sum(emm_GxE[emm_GxE$exp_env_factor == unique(input_df$exp_env_factor)[j] ,3])/nenv
-      tempdat. = data.frame("E_means" = etemp)
+      tempdat. = data.frame("E_means_unmatched" = etemp,
+                            "exp_env_factor" = unique(input_df$exp_env_factor)[j])
       Cov_matrix.. = rbind(Cov_matrix..,tempdat.)
     }
-      Cov_matrix = cbind(Cov_matrix.,Cov_matrix..)
+    
+    # Match genotypes to native environments
+    Cov_matrix.$E_means = Cov_matrix..$E_means_unmatched[match(Cov_matrix..$exp_env_factor,unique(input_df$nat_env_factor_corrected))]
+    Cov_matrix.$exp_env_factor = Cov_matrix..$exp_env_factor[match(Cov_matrix.$E_means,Cov_matrix..$E_means_unmatched)]
+    
+    # Final Output
+    Cov_matrix = Cov_matrix.
+    
+  }else if(ngen == (2*nenv)){
+    
+    Cov_matrix = data.frame()
+      tempdat_g2 = data.frame()
+    tempdat_e = data.frame()
+      tempdat_e2 = data.frame()
+    
+    for(k in 1:length(unique(input_df$Native_env_cat2))){
+      tempdat_g = data.frame()
+      subdata <- filter(input_df,Native_env_cat2 == unique(input_df$Native_env_cat2)[k])
+      
+      for(i in 1:length(unique(subdata$gen_factor))){
+        gtemp <- sum(emm_GxE[emm_GxE$gen_factor == unique(subdata$gen_factor)[i],3])/(ngen/2)
+        tempdat = data.frame("G_means" = gtemp,
+                             "gen_factor" = unique(subdata$gen_factor)[i])
+        tempdat_g = rbind(tempdat_g,tempdat)
+      }
+      tempdat_g2 = rbind(tempdat_g2,tempdat_g)
+    }
+      
+      for(j in 1:length(unique(input_df$exp_env_factor))){
+        etemp <- sum(emm_GxE[emm_GxE$exp_env_factor == unique(input_df$exp_env_factor)[j] ,3])/nenv
+        tempdat. = data.frame("E_means_unmatched" = etemp,
+                              "exp_env_factor" = unique(input_df$exp_env_factor)[j])
+        tempdat_e = rbind(tempdat_e,tempdat.)
+      }
+      
+      # Match genotypes to native environments
+      tempdat_g2$E_means = tempdat_e$E_means_unmatched[match(tempdat_e$exp_env_factor,unique(input_df$nat_env_factor))]
+      tempdat_g2$exp_env_factor = tempdat_e$exp_env_factor[match(tempdat_g2$E_means,tempdat_e$E_means_unmatched)]
+      
+      # Output dataframe
+      Cov_matrix = tempdat_g2
   }else{
     stop("Number of genotypes does not equal number of environments")
   }
@@ -119,24 +158,47 @@ bootstrap_categorical <- function(input_df){
   shuffle_dat <- data.frame()
   
   # Each genotype and environment
-  for (i in 1:nlevels(input_df$gen_factor)){
-    for (j in 1:nlevels(input_df$exp_env_factor)){
-      G = unique(input_df$gen_factor)[i]
-      E = unique(input_df$exp_env_factor)[j]
-      cond_G <- filter(input_df, gen_factor == G)
-      cond_E <- filter(cond_G, exp_env_factor == E)
-      
-      # Shuffle data 
-      new_phen <- sample(cond_E$phen_data, size=nrow(cond_E), replace=TRUE)
-          
-      shuffle_dat_temp <- data.frame(gen_factor = cond_E$gen_factor,
-                                    exp_env_factor = cond_E$exp_env_factor,
-                                    #nat_env_factor = cond_E$nat_env_factor,
-                                    phen_data = new_phen)
-      shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
+  if(length(unique(input_df$gen_factor)) == length(unique(input_df$exp_env_factor))){
+    for (i in 1:nlevels(input_df$gen_factor)){
+      for (j in 1:nlevels(input_df$exp_env_factor)){
+        cond_G <- filter(input_df, gen_factor == unique(input_df$gen_factor)[i])
+        cond_E <- filter(cond_G, exp_env_factor == unique(input_df$exp_env_factor)[j])
+        
+        # Shuffle data 
+        new_phen <- sample(cond_E$phen_data, size=nrow(cond_E), replace=TRUE)
+            
+        shuffle_dat_temp <- data.frame("gen_factor" = cond_E$gen_factor,
+                                      "exp_env_factor" = cond_E$exp_env_factor,
+                                      "nat_env_factor" = cond_E$nat_env_factor,
+                                      "nat_env_factor_corrected" = cond_E$nat_env_factor_corrected,
+                                      "phen_data" = new_phen)
+        shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
+      }
     }
+  }else if(length(unique(input_df$gen_factor)) == (2*length(unique(input_df$exp_env_factor)))){
+      for (i in 1:nlevels(input_df$Native_env_cat2)){
+        for (j in 1:nlevels(input_df$exp_env_factor)){
+          for (k in 1:nlevels(input_df$gen_factor)){
+            cond_k = filter(input_df, Native_env_cat2 == unique(input_df$Native_env_cat2)[i])
+            cond_E <- filter(cond_k, exp_env_factor == unique(input_df$exp_env_factor)[j])
+            cond_G <- filter(cond_E, gen_factor == unique(input_df$gen_factor)[k])
+          
+          # Shuffle data 
+          new_phen <- sample(cond_G$phen_data, size=nrow(cond_G), replace=TRUE)
+          
+          shuffle_dat_temp <- data.frame("gen_factor" = cond_G$gen_factor,
+                                         "exp_env_factor" = cond_G$exp_env_factor,
+                                         "nat_env_factor" = cond_G$nat_env_factor,
+                                         "Native_env_cat" = cond_G$Native_env_cat,
+                                         "Native_env_cat2" = cond_G$Native_env_cat2,
+                                         "phen_data" = new_phen)
+          shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
+          }
+        }
+      }
+  }else{
+    stop("Number of genotypes does not match number of environments")
   }
-  
   new_data = fun1(shuffle_dat)
   return(list(new_data))
 }
@@ -175,14 +237,31 @@ permutation_categorical <- function(input_df){
   null_temp <- NULL
   perm_dat = data.frame()
   
-  # Shuffle data
-  null_temp <- sample(input_df$phen_data, size=nrow(input_df), replace=FALSE)
-  
-  perm_dat <- data.frame("gen_factor" = input_df$gen_factor,
-                         "exp_env_factor" = input_df$exp_env_factor,
-                         #"nat_env_factor" = input_df$nat_env_factor,
-                         "phen_data" = null_temp)
-  
+  # Each genotype and environment
+  if(length(unique(input_df$gen_factor)) == length(unique(input_df$exp_env_factor))){
+    # Shuffle data
+    null_temp <- sample(input_df$phen_data, size=nrow(input_df), replace=FALSE)
+    
+    perm_dat <- data.frame("gen_factor" = input_df$gen_factor,
+                           "exp_env_factor" = input_df$exp_env_factor,
+                           "nat_env_factor_corrected" = input_df$nat_env_factor_corrected,
+                           "nat_env_factor" = input_df$nat_env_factor,
+                           "phen_data" = null_temp)
+    
+  }else if(length(unique(input_df$gen_factor)) == (2*length(unique(input_df$exp_env_factor)))){
+    # Shuffle data
+    null_temp <- sample(input_df$phen_data, size=nrow(input_df), replace=FALSE)
+    
+    perm_dat <- data.frame("gen_factor" = input_df$gen_factor,
+                           "exp_env_factor" = input_df$exp_env_factor,
+                           "nat_env_factor_corrected" = input_df$nat_env_factor_corrected,
+                           "nat_env_factor" = input_df$nat_env_factor,
+                           "Native_env_cat" = input_df$Native_env_cat,
+                           "Native_env_cat2" = input_df$Native_env_cat2,
+                           "phen_data" = null_temp)
+  }else{
+    stop("Number of genotypes does not match number of environments")
+  }
   new_data = fun1(perm_dat)
   return(list(new_data))
 }
@@ -207,15 +286,27 @@ permutation_mean <- function(input_df){
 
 Categorical_sim <- function(input_df,iterations){
   
+  # Load packages
+  library("emmeans","lme4","tidyverse")
+  
   # Number of bootstraps
   iterations = iterations
   
   # Output dataframe
   results = data.frame()
   
+  # Add native environment information
+  input_df$nat_env_factor_corrected <- NULL
+  for(i in 1:nrow(input_df)){
+  if(input_df$gen_factor[i] == "G_1") {input_df$nat_env_factor_corrected[i] = "E_1"}else{input_df$nat_env_factor_corrected[i] = "E_2"}
+  }
+  
   # Indexing
-  for(i in 1:length(unique(input_df$index))){
-  df_temp <- filter(input_df, index == unique(index)[i])
+  for(z in 1:length(unique(input_df$index))){
+    df_temp <- filter(input_df, index == unique(index)[z])
+    
+    # Counter
+    cat(z, "\n")
                       
   if(input_df$source == "sim"){
     new_data <- fun1(df_temp) # Estimate GxE and Covariance
@@ -227,7 +318,7 @@ Categorical_sim <- function(input_df,iterations){
     permdat <- replicate(iterations, permutation_mean(df_temp), simplify=TRUE)   # Permutation 
   }
   
-  new_data <- fun1(df_temp)
+  #new_data <- fun1(df_temp)
   true_covariance <- new_data["Covariance"]
   GxE_magnitude <- new_data["GxE_magnitude"]
   
@@ -263,16 +354,35 @@ Categorical_sim <- function(input_df,iterations){
   GxE_pvalue = NULL
   if(ptemp1 < 0.5){GxE_pvalue = ptemp1}else{GxE_pvalue = (1-ptemp1)}
   
+  # Power  
+  cross.null<-NULL  
+  cov_dat = unlist(lapply(bootdat, `[`, 2))
+  for(i in 1:length(cov_dat)){
+    # Is CI estimate less than zero? 1 = no, 0 = yes
+    if(true_covariance[[1]] < 0 & cov_dat[[i]] < 0) {cross.null[i] = 1
+    }else if(true_covariance[[1]] > 0 & cov_dat[[i]] > 0) {cross.null[i] = 1
+    }else{cross.null[i] = 0}
+    #Power is the proportion of replicates whose 95% CI do not include 0
+  }
+  numerator <- sum(cross.null)
+  denominator <- length(cov_dat)
+  power <- numerator/denominator
+  
   # Output
   results. = data.frame("Index" = unique(df_temp$index),
-                       "true_covariance" = true_covariance[[1]], 
-                       "Cov_lowCI" = cov_CI[[1]], 
-                       "Cov_highCI" = cov_CI[[2]], 
-                       "covariance_p_value" = cov_pvalue,
-                       "GxE_magnitude" = GxE_magnitude[[1]],
-                       "GxE_lowCI" = GxE_CI[[1]],
-                       "GxE_highCI" = GxE_CI[[2]],
-                       "GxE_pvalue" = GxE_pvalue)
+                        "Sample_size" = unique(df_temp$phen_n),
+                        "std_deviation" = unique(df_temp$stdev),
+                        "Slope_difference" = unique(df_temp$slope_diff),
+                        "intercept_difference" = unique(df_temp$intercept_diff),
+                        "true_covariance" = true_covariance[[1]], 
+                        "Cov_lowCI" = cov_CI[[1]], 
+                        "Cov_highCI" = cov_CI[[2]], 
+                        "covariance_p_value" = cov_pvalue,
+                        "GxE_magnitude" = GxE_magnitude[[1]],
+                        "GxE_lowCI" = GxE_CI[[1]],
+                        "GxE_highCI" = GxE_CI[[2]],
+                        "GxE_pvalue" = GxE_pvalue,
+                        "power" = power)
   results <- rbind(results,results.)
   }
   return(results)
@@ -287,16 +397,14 @@ Categorical_meta <- function(input_df,meta_data,iterations){
     results = data.frame()
     
     # Establish data type (means or raw)
-    input_df$data_type <- unique(meta_data$Raw_data_available[match(input_df$Study_ID_phenotype,meta_data$Study_ID_phenotype)])
+    input_df$data_type <- unique(meta_data$Raw_data_available[match(input_df$Study_ID_phenotype,meta_data$study_ID_phenotype)])
     
-    # Arrange native environments #Make sure this works 
+    # Arrange native environments 
     input_df$nat_env_factor_corrected <- gsub("N_", "E_",as.character(input_df$nat_env_factor))
-    G_vec$native <- input_df$nat_env_factor_corrected[match(G_vec$gen_factor,input_df$gen_factor)]
-    G_vec$emean <- E_vec$emean[match(E_vec$exp_env_factor,G_vec$native)]
     
     # Run Appropriate Function  
     new_data <- NULL
-    if(input_df$data_type == "raw"){
+    if(input_df$data_type == "raw data"){
       new_data = fun1(input_df)
       bootdat = replicate(iterations, bootstrap_categorical(input_df), simplify=TRUE)
       permdat = replicate(iterations, permutation_categorical(input_df), simplify=TRUE) 
@@ -356,38 +464,111 @@ Categorical_meta <- function(input_df,meta_data,iterations){
     return(results)
 }
 
-# Test Simulated Data
-outdat <- Categorical_sim(cat_raw,20) # Raw data
-cat_mean <- sim_means_se(cat_raw) # means 
-outdat2 <- Categorical_sim(cat_mean,20) # means 
-cat_new <- mean_generation_cat(cat_mean)
-cat_new$source <- rep("sim",nrow(cat_new))
-outdat3 <- Categorical_sim(cat_new,20)
+##############
+# Test  Data #
+##############
+
+# Categorical Starting parameters
+Catdat <- list(
+  "cat_cont" = c("categorical"), 
+  "intercept_G1" = 0,
+  "slope_G1" = 1,
+  "intercept_G2" = c(2),#seq(from = -5, to = 5, by = 3),
+  "slope_G2" = c(-1),#seq(from = -5, to = 5, by = 3),
+  "sd" = 0.5,#seq(from = 0, to = 1, by = 0.5),
+  "sample_size" = seq(from = 3, to = 12, by = 2))
+source("~/Documents/GitHub/CnGV/src/data_generation_function.R") # Generate data (either cat. or cont.)
+source("~/Documents/GitHub/CnGV/src/sim_means_se.R") # Generate means and SE from raw sim. data (either cat. or cont.)
+
+# Generate categorical data
+cat_raw <- data.frame(data_generation(Catdat)) # raw
+outdat <- Categorical_sim(cat_raw,50) # Covariance and GxE on Raw data 
+
+print(ggplot(outdat, aes(x=true_covariance,y=power,colour= Sample_size))) + geom_point()
+
+# Means
+cat_mean <- sim_means_se(cat_raw) # generate means 
+outdat2 <- Categorical_sim(cat_mean,20) # Covariance and GxE on means 
+cat_new <- mean_generation_cat(cat_mean) # generate raw data from means (rnorm)
+cat_new$source <- rep("sim",nrow(cat_new)) # label data type
+outdat3 <- Categorical_sim(cat_new,20) # Covariance and GxE on raw data generated by means
 
 outdat2$orig = rep("means",nrow(outdat2)) # identifier
 outdat$orig = rep("raw",nrow(outdat)) # identifier
-outdat3$orig = rep("new_from_means",nrow(outdat3))
-big_data = rbind(outdat,outdat2,outdat3)
+outdat3$orig = rep("new_from_means",nrow(outdat3)) # identifier
+
+big_data = rbind(outdat,outdat2)
 ggplot(big_data,aes(x=Index,y=true_covariance,group = Index,colour=orig))+geom_point()+
   theme_classic()+geom_errorbar(ymin=big_data$Cov_lowCI,ymax=big_data$Cov_highCI)
 ggplot(big_data,aes(x=Index,y=GxE_magnitude,group = Index,colour=orig))+geom_point()+
   theme_classic()+geom_errorbar(ymin=big_data$GxE_lowCI,ymax=big_data$GxE_highCI)
 
-#write.csv(outdat,"~/Desktop/raw_data_sim.csv")
+ggplot(big_data, aes(x = true_covariance,y = GxE_magnitude, group = Index, colour = orig))+
+  geom_point()+theme_classic() #+geom_errorbar(ymin=big_data$GxE_lowCI,ymax=big_data$GxE_highCI)+geom_errorbar(ymin=big_data$Cov_lowCI,ymax=big_data$Cov_highCI)
 
 # Test Meta-Analysis Data
-outdat2 = Categorical_meta(cat_means,Extraction_Initialize,50)
-test1a = Categorical_meta(test1,Extraction_Initialize,50)
+test1a = Categorical_meta(test4,Extraction_Initialize,50) # Works! #630_male_wing_length
+test2a = Categorical_meta(test5,Extraction_Initialize,50) # Works! #401_growth_coefficient
+test3a = Categorical_meta(test1,Extraction_Initialize,50) # Works! #654_second_litter_size
 
-test1 = read.csv("~/Desktop/test1.csv") #Raw
-test2 = read.csv("~/Desktop/test2.csv") #Raw with small dataset
+# Test datasets
+Extraction_Initialize = read.csv("~/Desktop/Extraction_Initialize.csv")
+test1 = read.csv("~/Desktop/test1.csv") #Raw but ngen!= nenv #654_second_litter_size
+test2 = read.csv("~/Desktop/test2.csv") #Means with small dataset
 test3 = read.csv("~/Desktop/test3.csv") #Means
-
-Extraction_Initialize[which(Extraction_Initialize$Study_ID_phenotype == "654_second_litter_size"),]
+test4 = read.csv("~/Desktop/test4.csv") #Raw #401_growth_coefficient
+test5 = read.csv("~/Desktop/test5.csv") # Raw but ngen!= nenv #630_male_wing_length
 
 ## Next Steps: 
 #3. automate for meta analysis data 
 #4. plot significant results
+power_data = read.csv("~/Desktop/power_analysis_data_20200102.csv")
+power_analysis <- Categorical_sim(power_data,1) # Covariance and GxE on Raw data
 
-ggplot(outdat,aes(x=true_covariance,y=GxE_magnitude,colour=covariance_p_value))+ geom_point() +geom_errorbar(ymin=outdat$GxE_lowCI,ymax=outdat$GxE_highCI) +theme_classic()
+###########
+## Power ##
+###########
+#Power is the proportion of replicates whose 95% CI do not include 0
+newdat = outdat
+powerdat = data.frame()
+for(i in 1:length(unique(newdat$reps))){
+  rep = unique(newdat$reps)[i]
+  repdat = filter(newdat, reps == rep)
+  for(j in 1:length(unique(repdat$std.dev))){
+    sdev = unique(newdat$std.dev)[j]
+    repdat2 = filter(repdat, std.dev == sdev)
+    for(k in 1:length(unique(repdat2$effect.size))){
+      effsize = unique(repdat2$effect.size)[k]
+      repdat3 = filter(repdat2, effect.size == effsize)
+      
+      powerdat. = data.frame("reps" = unique(repdat3$reps),
+                             "std.dev" = unique(repdat3$std.dev),
+                             "effect.size" = unique(repdat3$effect.size),
+                             "numer" = sum(repdat3$overunder),
+                             "denom" = nrow(repdat3))
+      powerdat = rbind(powerdat,powerdat.)
+    }
+  }
+}
 
+## Plot Heatmap
+
+simplot = ggplot(data = powerdat, aes(x = reps, y = effect.size))+ #reorder(std.dev,-std.dev)
+  geom_tile(aes(fill = power), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue")+
+  theme_classic()+ 
+  #ylab("Difference in G and E") + xlab("Sample Size")+
+  theme_bw(base_size = 30, base_family = "Helvetica")+ 
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'black')) +
+  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
+  theme(axis.ticks = element_line(colour = "black"))+
+  theme(axis.text= element_text(colour = "black"))+
+  labs(colour = "Sample Size")+
+  theme(legend.position="bottom")+
+  theme(legend.title = element_text(size = 14),
+        legend.text = element_text(size = 14))
+#theme(legend.position="none")
+simplot
+
+
+powerdat$power = (powerdat$numer/powerdat$denom) 
