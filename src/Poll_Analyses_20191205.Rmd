@@ -13,6 +13,7 @@ library("ggplot2")
 library("tidyverse")
 library("data.table")
 library("rworldmap")
+library("gridExtra")
 ```
 
 In November 2019, a survey was sent to RCN members that attended the workshop at Shoals Marine Lab. Below are plots depicting poll results. 
@@ -24,7 +25,7 @@ avg_duration <-  mean(polldata$Duration..in.seconds.)
 (median_duration/60)
 
 # Any duplicated pollsters?
-which(duplicated(polldata$IPAddress))
+which(duplicated(polldata$IPAddress)) # No
 
 ```
 118 unique IP addresses (people) completed the survey. 
@@ -929,6 +930,9 @@ Which of the 20 questions were ranked as "very important"?
 rankdat = rbind(Q18,Q29,Q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41,q42,q43,q44,q45,q46,q47,q48)
 
 very_important = filter(rankdat, Importance == "Very important")
+very_important_marine = filter(very_important, field == "marine science")
+very_important_evol = filter(very_important, field =="evolutionary biology")
+
 very_important_plot = ggplot(very_important, aes(fill = field, y=counts, x=reorder(question,-counts))) + 
   theme_bw()+ 
   geom_bar(position="dodge", stat="identity") + 
@@ -955,6 +959,84 @@ semi_important_plot = ggplot(semi_important, aes(fill = field, y=counts, x=reord
 
 grid.arrange(very_important_plot,semi_important_plot,not_important_plot,nrow=3)
 ```
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(readr)
+
+mar<- filter(rankdat, field == "marine science")
+evo <- filter(rankdat, field == "evolutionary biology")
+
+permutation_poll <- function(input_df, replicates){
+  
+  #Outputs
+  n_permute = 0
+  test_stat = data.frame()
+  null_dist = data.frame()
+  outdat = data.frame()
+
+  # Calculate proportion ranked "Very Important"
+  for(j in 1:length(unique(input_df$question))){
+    q = unique(as.factor(input_df$question))[j]
+    sample_df <- filter(input_df, question == q[1])
+    test_stat. <- data.frame("test_stat" = sum(sample_df$counts[sample_df$Importance == "Very important"])/sum(sample_df$counts),
+                             "question" = q[1],
+                             "Importance" = "Very important")
+    test_stat <- rbind(test_stat,test_stat.)
+  }
+  
+  # Shuffle data
+  for(k in 1:replicates){
+    n_permute = n_permute + 1
+    null_temp = data.frame()
+    for(i in 1:length(unique(input_df$question))){
+      r = unique(as.factor(input_df$question))[i]
+      sample_df <- filter(input_df, question == r)
+      nulls <- sample(sample_df$counts, size=nrow(sample_df), replace = FALSE)
+      nulldat <- data.frame("counts" = nulls,
+                            "Importance" = sample_df$Importance)
+      new_stat. <- data.frame("new_stat" = sum(nulldat$counts[nulldat$Importance == "Very important"])/sum(nulldat$counts),
+                              "question" = r[1],
+                              "rep" = n_permute)
+      null_temp <- rbind(null_temp,new_stat.)
+    }
+    null_dist <- rbind(null_dist,null_temp)
+  }
+    
+    # Hypothesis test
+  for(l in 1:length(unique(null_dist$question))){
+    test_df <- filter(null_dist, question == unique(null_dist$question)[l])
+    obs <- unique(test_stat$test_stat[match(test_df$question,test_stat$question)])
+    ptemp = (rank(c(obs,test_df[,1]))[1])/(replicates+1) 
+    pvalue = NULL
+    if(ptemp < 0.5){pvalue = ptemp}else{pvalue = (1-ptemp)}
+    outdat. <- data.frame("question" = unique(null_dist$question)[l],
+                          "test_stat"= obs,
+                          "pvalue" = pvalue)
+    outdat <-rbind(outdat,outdat.)
+  }
+  return(outdat)
+}
+
+marine_results = permutation_poll(mar,999)
+length(which(marine_results$pvalue < 0.05)) # none significant
+
+evolution_results = permutation_poll(evo,999)
+length(which(evolution_results$pvalue < 0.05)) # none significant
+
+combined_results = permutation_poll(rankdat,999)
+length(which(combined_results$pvalue < 0.05)) # 12 are significant
+
+combined_results$combostat = combined_results$test_stat/combined_results$pvalue
+
+ggplot(combined_results,aes(x = question,y=combostat))+ geom_bar(stat="identity")
+ggplot(combined_results, aes(x = pvalue,y=test_stat)) + geom_point()
+ggplot(evolution_results, aes(x = pvalue,y=test_stat)) + geom_point()
+ggplot(marine_results, aes(x = pvalue,y=test_stat)) + geom_point()
+
+```
+To permute - need to go back and shuffle between all outcomes (important, not important, etc.). Then determine if 
 
 Q34. Choose up to 3 questions you think are most important for advancing each field. Questions can be important for more than one field.
 
