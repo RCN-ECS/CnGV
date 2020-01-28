@@ -1,0 +1,56 @@
+---
+title: "Multiple Populations for CnGv and GxE"
+author: "KE Lotterhos"
+date: "1/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The purpose of this code is to provide a more general framework for modeling phenotypes in a reciprocal transplant experiment with more than two locations, when there is both GxE and cov(G,E) affecting the phenotype.
+
+Basically, we model the phenotype as an additive function of:
+- an intercept that is based on the location/environment the phenotype was collected from. Intercepts increase or decrease in a linear manner across the environment.
+- a slope that determines the plastic response of the phenotype across the environment
+- an interaction term that determines how the phenotype of genotype $i$ in environment $j$ deviates from the main effects
+- random error or noise
+
+```{r cars}
+beta1 = 1 # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+
+beta2 = -1 # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+
+(cov_GE_approx = beta1 * beta2) 
+  # will be correlated with the magnitude of cov(G,E)
+
+# Generate data
+n = 15 # sample size
+n_genotypes = 10 # the number of genotypes collected from different locations
+n_environments = n_genotypes # the number of common garden environments that the genotypes are grown in. Basically, genotype[i] orginates from environment[i]. This matching between genotypes and environment is important for the the cov(G,E) calculation. Here, we only consider the case of the complete reciprocal transplant experiment.
+
+## Create levels of genotypes and environments ####
+G = rep(1:n_genotypes, each=n) # '0' n times, '1' n times
+E = rep(1:n_environments,times=n) # '0'x50, '1'x50, '0'x50, '1'x50
+set.seed(97)
+e = rnorm(n*n_genotypes, 0, sd=0.01) # Random noise, with standard deviation of 1
+
+## Create interaction effect for each level of both factors ####
+# In this case we assume the GxE interactions are a 
+# normally distributed random variable with a mean of 0
+# As the sd increases, so does the GxE among treatments
+int <- rnorm(n_genotypes * n_environments, 0, sd=1)
+  # this sd determines the amount of GxE
+int_df <- data.frame(expand.grid(G=1:n_genotypes, E=1:n_environments), 
+                     int)
+
+### Create the model dataframe ####
+model_df <- data.frame(G, E, e)
+model_df <- merge(model_df, int_df)
+
+# Generate phenotype data using the regression equation ####
+phenotype = beta1*model_df$E + beta2*model_df$G  + model_df$e + model_df$int
+plot(phenotype~model_df$E, col=model_df$G+1)
+```
+
