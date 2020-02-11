@@ -2,9 +2,9 @@
 
 The new simulation code generates data based on the anova model (as opposed to generating data based on linear model formula). The reason for the switch is to allow increased freedom in testing >2 genotypes across >2 environments.
 
-The data generation code takes in a row from the table of set parameters to create the data using the below code: (which is subsetted out from the "ring" function that simultaneously runs covariance functions/gxe functions, boot straps, and permutations.
+The data generation code takes in each row from the table of starting parameters to create the data using the below code: (which is subsetted out from the larger "ring" function that simultaneously simulates data and calculates covariance functions/gxe functions, boot straps, and permutations.
 
-The degree of interaction is set by generating an interaction number by sampling a normal distribution with a mean of 0 and standard deviation matching the degree of interaction set by the initial parameters. 
+The degree of interaction is set by generating an interaction number by sampling a normal distribution with a mean of 0 and standard deviation matching the starting interaction parameter. 
 Thus, the higher the starting interaction parameter, the greater the variation among genotypes and environments *should* be. 
 
 ```(data generation)
@@ -62,3 +62,30 @@ data_gen <- function(param_table, n_boot){
 }    
 
 ```
+To test this, I ran 5 levels of interaction, from 0 to 4. Here are my starting parameters: 
+
+```(starters)
+# Starting list of parameters
+param_list <- list(
+  reps = 100,
+  delta_env = c(1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = c(1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  sample_size = c(5), 
+  n_genotypes = c(2),
+  n_environments = NULL,
+  std_dev= c(0.0), # Random noise, with standard deviation of 1,
+  interaction= c(0,1,2,3,4)) # this sd determines the amount of GxE)
+
+```
+## Plots
+When I do that and create box plots of the phenotypic data generated for each interaction, these are the plots I get: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int0.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int1.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int2.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int3.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int4.png)
+
+## Conclusion 
+
+Yes, the variability around each genotype and environment are increasing with the interaction term, which will affect phenotypic means and in some cases generate a significant GxE. HOWEVER, the actual degree of interaction does not seem to be increasing like we would expect (in other words, there is no "x" forming). I'll test a few other interaction parameter sets to see if I'm just estimating too low. 
