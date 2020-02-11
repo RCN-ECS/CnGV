@@ -92,4 +92,5 @@ Yes, the variability around each genotype and environment are increasing with th
 
 ## Update
 No, even when I run high interaction estimates (in this case 20, the variability goes up but the overall shape of the pattern is unaffected.
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int20.png)
