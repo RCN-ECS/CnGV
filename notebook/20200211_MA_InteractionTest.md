@@ -80,8 +80,8 @@ param_list <- list(
 When I do that and create box plots of the phenotypic data generated for each interaction, these are the plots I get: 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int0.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int1.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int2.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int3.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int1.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int2.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int3.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int4.png)
 
