@@ -77,6 +77,7 @@ param_list <- list(
   interaction= c(0,1,2,3,4)) # this sd determines the amount of GxE)
 
 ```
+## Plots
 When I do that and create box plots of the phenotypic data generated for each interaction, these are the plots I get: 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int0.png)
@@ -85,3 +86,6 @@ When I do that and create box plots of the phenotypic data generated for each in
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int3.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/int4.png)
 
+## Conclusion 
+
+Yes, the variability around each genotype and environment are increasing with the interaction term, which will affect phenotypic means and in some cases generate a significant GxE. HOWEVER, the actual degree of interaction does not seem to be increasing like we would expect (in other words, there is no "x" forming). I'll test a few other interaction parameter sets to see if I'm just estimating too low. 
