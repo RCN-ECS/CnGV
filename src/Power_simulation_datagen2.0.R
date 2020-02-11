@@ -11,7 +11,7 @@ init_params <- list(
 
 # Starting list of parameters
 param_list <- list(
-  reps = 100,
+  reps = 50,
   delta_env = c(1,-1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(1,-1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
   sample_size = c(2,5), 
