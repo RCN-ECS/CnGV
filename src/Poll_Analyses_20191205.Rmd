@@ -1030,10 +1030,12 @@ length(which(combined_results$pvalue < 0.05)) # 12 are significant
 
 combined_results$combostat = combined_results$test_stat/combined_results$pvalue
 
-ggplot(combined_results,aes(x = question,y=combostat))+ geom_bar(stat="identity")
-ggplot(combined_results, aes(x = pvalue,y=test_stat)) + geom_point()
-ggplot(evolution_results, aes(x = pvalue,y=test_stat)) + geom_point()
-ggplot(marine_results, aes(x = pvalue,y=test_stat)) + geom_point()
+#ggplot(combined_results,aes(x = question,y=combostat))+ geom_bar(stat="identity")
+ggplot(combined_results, aes(x = pvalue,y=test_stat)) + ggtitle("Marine and Evolution Combined") + theme_bw() + xlab("P-value") + ylab("% that Ranked question as 'Very Important'") + geom_text(aes(y = test_stat,label = question))
+
+ggplot(evolution_results, aes(x = pvalue,y=test_stat)) + ggtitle("Evolutionary Science")+ theme_bw() + xlab("P-value") + ylab("% that Ranked question as 'Very Important'")+ geom_text(aes(y = test_stat,label = question))
+
+ggplot(marine_results, aes(x = pvalue,y=test_stat)) + ggtitle("Marine Science")+ theme_bw()+ xlab("P-value") + ylab("% that Ranked question as 'Very Important'")+ geom_text(aes(y = test_stat,label = question))
 
 ```
 To permute - need to go back and shuffle between all outcomes (important, not important, etc.). Then determine if 
