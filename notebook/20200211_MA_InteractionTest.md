@@ -89,3 +89,8 @@ When I do that and create box plots of the phenotypic data generated for each in
 ## Conclusion 
 
 Yes, the variability around each genotype and environment are increasing with the interaction term, which will affect phenotypic means and in some cases generate a significant GxE. HOWEVER, the actual degree of interaction does not seem to be increasing like we would expect (in other words, there is no "x" forming). I'll test a few other interaction parameter sets to see if I'm just estimating too low. 
+
+## Update
+No, even when I run high interaction estimates (in this case 20, the variability goes up but the overall shape of the pattern is unaffected.
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Int20.png)
