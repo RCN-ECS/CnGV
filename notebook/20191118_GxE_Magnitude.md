@@ -100,3 +100,7 @@ Data are simulated (`data_generation`) and processed through the appropriate cov
 
 Plotting the results gives the following:
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/GxE_Emeans_Covariance.png)
+
+
+## Why are GxE with Emmeans bounded at 1?
+They are bounded only because we standardize data with a mean of 0 and sd of 1. If they are not standardized, they should extend above 1.
