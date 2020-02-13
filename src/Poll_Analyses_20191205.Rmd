@@ -48,7 +48,7 @@ user_profiles = ggplot(user_profiles[-1,], aes(fill=Q11, y=educ, x=Q7)) +
 ```
 Geographic Spread of Polls
 ```{r}
-newmap <- getMap(resolution = "low")
+newmap <- getMap(resolution = "high")
 plot(newmap, asp = 1) +
 points(polldata$LocationLongitude, polldata$LocationLatitude, col = "red", pch = 20, cex = .6)
 ```
@@ -965,7 +965,7 @@ library(tidyr)
 library(dplyr)
 library(readr)
 
-mar<- filter(rankdat, field == "marine science")
+mar <- filter(rankdat, field == "marine science")
 evo <- filter(rankdat, field == "evolutionary biology")
 
 permutation_poll <- function(input_df, replicates){
@@ -1178,7 +1178,6 @@ cons_plot
 
 Final question: Rank how you determine importance of a subject (Q33)
 ```{r}
-Q33_1	Q33_2	Q33_3	Q33_4	Q33_5
 
 a <- data.frame("rank" = polldata$Q33_1,
                "criteria" = rep("Novelty", nrow(polldata)))
@@ -1208,3 +1207,73 @@ import_plot = ggplot(import1, aes(fill = as.factor(rank), y=counts, x=reorder(cr
   guides(fill=guide_legend(title="Rank"))
 import_plot
 ```
+
+# Rank Questions for statistical Analyses
+```{r likert}
+temp_df <- polldata[,c(37:78)]
+likert_df = tibble()
+for(i in 1:nrow(temp_df)){
+  for(j in 1:ncol(temp_df)){
+    if(temp_df[i,j] == "Very important"){likert_df[i,j] = 2
+    }else if(temp_df[i,j] == "Very important,Somewhat important"){likert_df[i,j] = 1.5
+    }else if(temp_df[i,j] == "Somewhat important"){likert_df[i,j] = 1
+    }else if(temp_df[i,j] == "Somewhat important,Not important"){likert_df[i,j] = 0.5
+    }else if(temp_df[i,j] == "Not important"){likert_df[i,j] = 0
+    }else{temp_df[i,j] = likert_df[i,j]}
+  }
+}
+colnames(likert_df)<- colnames(temp_df)
+
+## Which questions are highest Ranked?
+sums = data.frame(t(colSums(likert_df,na.rm=T))) #.1 = marine; .2 = evobio
+
+marine_names = grep(".1_", names(sums), value = TRUE)
+evo_names = grep(".2_", names(sums), value = TRUE)
+combo_col = c("18","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48")
+combo_total = c(394,399.5,328.5,417,357.5,333,366, 406,292,285.5, 310.5,317,386,330,357.5,354.5,296,355,335,334.5,345.5)
+likert_combo = data.frame(t(combo_total))
+colnames(likert_combo)<- combo_col
+
+likert_mar = data.frame(t(sums[ , which(names(sums) %in% marine_names)]))
+setDT(likert_mar, keep.rownames = TRUE)[]
+colnames(likert_mar) <- c("Question", "counts")
+
+likert_evo = sums[ , which(names(sums) %in% evo_names)] 
+
+likert_mar1 <- likert_mar[order(likert_mar)] # Q31 (multiple stressors)
+likert_evo1 <- likert_evo[order(likert_evo)] # Q35 (rapid evolution vs. acclimation via plasticity)
+likert_combo1 <- likert_combo[order(likert_combo)] # Q31 (multiple stressors)
+
+marine = ggplot(likert_mar, aes(y=counts, x=reorder(Question,-counts))) + 
+  theme_bw()+ 
+  geom_bar(position="dodge", stat="identity",fill = "lightblue") + 
+  ggtitle("Important Questions to advance Marine Science") +
+  xlab("Question") + ylab("Score Sum") + scale_fill_brewer(palette="Set1")+
+  theme(axis.text.x = element_text(angle = 45,size=6,hjust = 1,colour = "black"))+
+  guides(fill=guide_legend(title="Rank"))
+marine
+```
+
+```{r rank}
+
+temp_df <- polldata[,82:144]
+rank_df = tibble()
+for(i in 1:nrow(temp_df)){
+  for(j in 1:ncol(temp_df)){
+    if(is.na(temp_df[i,j])){rank_df[i,j] = 0
+    }else{rank_df[i,j] = 1}
+  }
+}
+colnames(rank_df)<- colnames(temp_df)
+mar_titles = grep("4_0_", names(rank_df), value = TRUE)
+evo_titles = grep("4_1_", names(rank_df), value = TRUE)
+con_titles = grep("4_2_", names(rank_df), value = TRUE)
+
+mar_rank = rank_df[ , which(names(rank_df) %in% mar_titles)] # Now sum each column to get the total rank
+evo_rank = rank_df[ , which(names(rank_df) %in% evo_titles)] # For the overall, may want to re-subset by question?
+con_rank = rank_df[ , which(names(rank_df) %in% con_titles)]
+
+```
+
+
+

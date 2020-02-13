@@ -11,14 +11,15 @@ init_params <- list(
 
 # Starting list of parameters
 param_list <- list(
-  reps = 50,
-  delta_env = c(1,-1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(1,-1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(2,5), 
-  n_genotypes = c(2,5),
+  reps = 10,
+  delta_env = c(0.01,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = c(-1,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  sample_size = c(5), 
+  n_genotypes = c(2),
   n_environments = NULL,
-  std_dev= c(0.5,1), # Random noise, with standard deviation of 1,
-  interaction= c(0.01,0.5)) # this sd determines the amount of GxE)
+  std_dev= c(0.0), # Random noise, with standard deviation of 1,
+  interaction= c(0,5,20)) # this sd determines the amount of GxE)
+
 
 # Table of parameters
 table_fun <- function(param_list){
@@ -31,6 +32,7 @@ table_fun <- function(param_list){
                             "n_genotypes" = param_list$n_genotypes,
                             "std_dev" = param_list$std_dev,
                             "interaction" = param_list$interaction)
+  
   # Book keeping rows
   n_combo <- length(param_list$delta_env)*
     length(param_list$delta_gen)*
@@ -50,6 +52,8 @@ table_fun <- function(param_list){
 }
 df = table_fun(param_list)
 dim(df)
+write.csv(df, file = "~/Desktop/df.csv")
+
 
 ring <- function(param_table, n_boot){
   
@@ -67,6 +71,10 @@ ring <- function(param_table, n_boot){
     # Counter
     cat(i, "\n")
     
+    # For reproducibility
+    set.seed = 999
+    
+    #For now, n_env = n_gen
     n_environments = param_table$n_genotypes[i]
     
     # Approximate Cov(G,E)
@@ -103,8 +111,7 @@ ring <- function(param_table, n_boot){
     
     # Anova
     test_temp <- aov(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
-    test_temp_noerror <- aov(no_err_phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
-    
+
     # Estimated Marginal Means
     emm_options(msg.interaction = FALSE)
     emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
@@ -365,9 +372,12 @@ ring <- function(param_table, n_boot){
   return(output)
 }
 
-test = ring(df,5) # Parameter table, then number of bootstraps/perms    
+test = ring(df,0) # Parameter table, then number of bootstraps/perms    
 #write.table(test,"Power_data.txt")
 #write.csv(test,"Power_data.csv")
+
+ggplot(test,aes(x=true_cov,y=true_GxE))+geom_point()
+
 
 ##########
 ## Plot ##

@@ -1,9 +1,9 @@
 
 # Starting list of parameters
 param_list <- list(
-  reps = 100,
-  delta_env = c(1,-1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(1,-1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  reps = 1,
+  delta_env = c(0), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = c(0), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
   sample_size = c(5), 
   n_genotypes = c(2),
   n_environments = NULL,
@@ -67,7 +67,7 @@ data_gen <- function(param_table, n_boot){
     noise <- rnorm(param_table$sample_size[i] * param_table$n_genotypes[i], 0, sd = param_table$std_dev[i]) # Random noise
     
     # Create Interactions
-    int <- rnorm(param_table$n_genotypes[i] * n_environments,param_table$interaction[i], sd =0) # sd determines the amount of GxE
+    int <- rnorm(param_table$n_genotypes[i] * n_environments,0,sd =param_table$interaction[i]) # sd determines the amount of GxE
     int_df <- data.frame(expand.grid(G = 1:param_table$n_genotypes[i], E = 1:n_environments), int)
     
     # Create the model dataframe 
@@ -104,7 +104,7 @@ for(i in 1:nlevels(factor(temp_df$row))){
   genenv = paste(plot_df$gen_factor,plot_df$exp_env_factor,sep= "_")
   
   a <- ggplot(plot_df, aes(x = exp_env_factor, y = phen, group = genenv,colour = gen_factor)) + 
-    geom_boxplot() + theme_classic() + ylim(-65,85)+ 
+    geom_boxplot() + theme_classic() + #ylim(-65,85)+ 
     ggtitle(paste0("Interaction = ", unique(plot_df$interaction)))
 print(a)
   }
