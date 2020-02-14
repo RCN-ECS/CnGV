@@ -1223,35 +1223,63 @@ for(i in 1:nrow(temp_df)){
   }
 }
 colnames(likert_df)<- colnames(temp_df)
+```
 
+```{r}
 ## Which questions are highest Ranked?
 sums = data.frame(t(colSums(likert_df,na.rm=T))) #.1 = marine; .2 = evobio
 
 marine_names = grep(".1_", names(sums), value = TRUE)
 evo_names = grep(".2_", names(sums), value = TRUE)
-combo_col = c("18","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48")
-combo_total = c(394,399.5,328.5,417,357.5,333,366, 406,292,285.5, 310.5,317,386,330,357.5,354.5,296,355,335,334.5,345.5)
+
+combo_col = c("18","29","30","31","32","33","34","35","36","37","38",
+              "39","40","41","42","43","44","45","46","47","48")
+combo_total = c(394,399.5,328.5,417,357.5,333,366, 406,292,285.5,
+                310.5,317,386,330,357.5,354.5,296,355,335,334.5,345.5)
 likert_combo = data.frame(t(combo_total))
 colnames(likert_combo)<- combo_col
 
 likert_mar = data.frame(t(sums[ , which(names(sums) %in% marine_names)]))
 setDT(likert_mar, keep.rownames = TRUE)[]
-colnames(likert_mar) <- c("Question", "counts")
+colnames(likert_mar) <- c("Question", "Counts")
+g <- as.data.frame(unlist(strsplit(likert_mar$Question, "\\.")))
+toDelete <- seq(2, nrow(g), 2)
+likert_mar$Question = g[-toDelete,]
+likert_mar$Subject = rep("Marine Science",nrow(likert_mar))
 
-likert_evo = sums[ , which(names(sums) %in% evo_names)] 
 
-likert_mar1 <- likert_mar[order(likert_mar)] # Q31 (multiple stressors)
-likert_evo1 <- likert_evo[order(likert_evo)] # Q35 (rapid evolution vs. acclimation via plasticity)
-likert_combo1 <- likert_combo[order(likert_combo)] # Q31 (multiple stressors)
+likert_evo = data.frame(t(sums[ , which(names(sums) %in% evo_names)]))
+setDT(likert_evo, keep.rownames = TRUE)[]
+colnames(likert_evo) <- c("Question", "Counts")
+d <- as.data.frame(unlist(strsplit(likert_evo$Question, "\\.")))
+toDelete <- seq(2, nrow(d), 2)
+likert_evo$Question = d[-toDelete,]
+likert_evo$Subject = rep("Evolutionary Biology",nrow(likert_evo))
 
-marine = ggplot(likert_mar, aes(y=counts, x=reorder(Question,-counts))) + 
-  theme_bw()+ 
-  geom_bar(position="dodge", stat="identity",fill = "lightblue") + 
-  ggtitle("Important Questions to advance Marine Science") +
-  xlab("Question") + ylab("Score Sum") + scale_fill_brewer(palette="Set1")+
-  theme(axis.text.x = element_text(angle = 45,size=6,hjust = 1,colour = "black"))+
-  guides(fill=guide_legend(title="Rank"))
-marine
+likert_data = rbind(likert_evo,likert_mar)
+cols = c("Evolutionary Biology"="#83c0fd","Marine Science"="#012345")
+
+likert_plot = ggplot(likert_data, aes(x = reorder(Question,-Counts), y = Counts, fill = Subject)) + 
+  geom_bar(position="stack", stat="identity")+
+  geom_text(aes(label = round(Counts), group = Subject),
+            colour = "white",
+            position = position_stack(vjust = .5),
+            angle = 90,
+            size = 6)+
+  xlab("Survey Question")+
+  scale_fill_manual(values = cols)+
+  theme_bw()+
+  scale_x_discrete(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))+
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank())+
+  theme(axis.text.y = element_text(colour = "black",size = 14),       
+        axis.text.x = element_text(colour = "black",size = 14),
+        axis.title.y = element_text(colour = "black",size = 16),
+        axis.title.x = element_text(colour = "black",size = 16))
+likert_plot
 ```
 
 ```{r rank}
@@ -1265,14 +1293,53 @@ for(i in 1:nrow(temp_df)){
   }
 }
 colnames(rank_df)<- colnames(temp_df)
-mar_titles = grep("4_0_", names(rank_df), value = TRUE)
-evo_titles = grep("4_1_", names(rank_df), value = TRUE)
-con_titles = grep("4_2_", names(rank_df), value = TRUE)
 
-mar_rank = rank_df[ , which(names(rank_df) %in% mar_titles)] # Now sum each column to get the total rank
-evo_rank = rank_df[ , which(names(rank_df) %in% evo_titles)] # For the overall, may want to re-subset by question?
-con_rank = rank_df[ , which(names(rank_df) %in% con_titles)]
+ranksums = data.frame(t(colSums(rank_df,na.rm=T))) #.1 = marine; .2 = evobio
 
+mar_titles = grep("4_0_", names(ranksums), value = TRUE)
+evo_titles = grep("4_1_", names(ranksums), value = TRUE)
+con_titles = grep("4_2_", names(ranksums), value = TRUE)
+
+rank_mar = data.frame(t(mar_rank[ , which(names(mar_rank) %in% mar_titles)])) 
+rank_mar$Question = as.factor(seq(1:nrow(rank_mar)))
+rank_mar$subject = rep("Marine Science",nrow(rank_mar))
+colnames(rank_mar) <-c("Counts","Question","Subject")
+
+rank_evo = data.frame(t(ranksums[ , which(names(ranksums) %in% evo_titles)])) 
+rank_evo$Question = as.factor(seq(1:nrow(rank_evo)))
+rank_evo$subject = rep("Evolutionary Biology",nrow(rank_evo))
+colnames(rank_evo) <-c("Counts","Question","Subject")
+
+rank_con = data.frame(t(ranksums[ , which(names(ranksums) %in% con_titles)])) 
+rank_con$Question = as.factor(seq(1:nrow(rank_con)))
+rank_con$subject = rep("Conservation and Management",nrow(rank_con))
+colnames(rank_con) <- c("Counts","Question","Subject")
+
+rank_data = rbind(rank_con,rank_mar,rank_evo)
+```
+```{r}
+# Heatmap
+rankplot = ggplot(rank_data, aes(y = Question, x = Subject, fill = Counts)) + 
+  geom_tile() + theme_bw()+
+  geom_text(aes(label = round(Counts, 1))) +
+  scale_x_discrete(expand = c(0, 0),
+                   position = "top") +
+  scale_y_discrete(limits = rev(levels(rank_data$Question)),
+                   expand = c(0, 0)) +
+  scale_fill_gradient(low = "white",
+                      high = "#012345")+
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        legend.position = "none")+
+  theme(axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y = element_text(colour = "black",size = 14),       
+        axis.text.x = element_text(colour = "black",size = 14),
+        axis.title.y = element_text(colour = "black",size = 16),
+        axis.title.x = element_text(colour = "black",size = 16),)
+rankplot
 ```
 
 
