@@ -1232,28 +1232,20 @@ sums = data.frame(t(colSums(likert_df,na.rm=T))) #.1 = marine; .2 = evobio
 marine_names = grep(".1_", names(sums), value = TRUE)
 evo_names = grep(".2_", names(sums), value = TRUE)
 
-combo_col = c("18","29","30","31","32","33","34","35","36","37","38",
-              "39","40","41","42","43","44","45","46","47","48")
-combo_total = c(394,399.5,328.5,417,357.5,333,366, 406,292,285.5,
-                310.5,317,386,330,357.5,354.5,296,355,335,334.5,345.5)
-likert_combo = data.frame(t(combo_total))
-colnames(likert_combo)<- combo_col
 
 likert_mar = data.frame(t(sums[ , which(names(sums) %in% marine_names)]))
-setDT(likert_mar, keep.rownames = TRUE)[]
-colnames(likert_mar) <- c("Question", "Counts")
-g <- as.data.frame(unlist(strsplit(likert_mar$Question, "\\.")))
-toDelete <- seq(2, nrow(g), 2)
-likert_mar$Question = g[-toDelete,]
+likert_mar$Question = seq(1:nrow(likert_mar))
+colnames(likert_mar) <- c("Counts","Question")
 likert_mar$Subject = rep("Marine Science",nrow(likert_mar))
 
 
 likert_evo = data.frame(t(sums[ , which(names(sums) %in% evo_names)]))
-setDT(likert_evo, keep.rownames = TRUE)[]
-colnames(likert_evo) <- c("Question", "Counts")
-d <- as.data.frame(unlist(strsplit(likert_evo$Question, "\\.")))
-toDelete <- seq(2, nrow(d), 2)
-likert_evo$Question = d[-toDelete,]
+likert_evo$Question = seq(1:nrow(likert_evo))
+#setDT(likert_evo, keep.rownames = TRUE)[]
+colnames(likert_evo) <- c("Counts","Question")
+#d <- as.data.frame(unlist(strsplit(likert_evo$Question, "\\.")))
+#toDelete <- seq(2, nrow(d), 2)
+#likert_evo$Question = d[-toDelete,]
 likert_evo$Subject = rep("Evolutionary Biology",nrow(likert_evo))
 
 likert_data = rbind(likert_evo,likert_mar)
@@ -1317,6 +1309,7 @@ colnames(rank_con) <- c("Counts","Question","Subject")
 
 rank_data = rbind(rank_con,rank_mar,rank_evo)
 ```
+
 ```{r}
 # Heatmap
 rankplot = ggplot(rank_data, aes(y = Question, x = Subject, fill = Counts)) + 
