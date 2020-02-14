@@ -29,8 +29,7 @@ In this set of questions, users picked three questions for each subject (Evoluti
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Rank_Heatmap.png)
 
-#### Axis Question references
-These questions for each plot are listed differently in the survey. Obviously these will have to be reconciled to match eachother for the paper.
+#### Axis Question Number Reference
 
 | Question number | Question | Keywords |
 | --- | --- | --- |
