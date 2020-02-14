@@ -10,11 +10,11 @@ These data were coded according to the below table. Some people selected 2 ranki
 
 | Response | Value Assigned |
 | --- | --- | 
-| Very Important | 3 |
-| Very Important/Somewhat Important | 2.5 |
-| Somewhat Important | 2 |
-| Somewhat Important/Not Important | 1.5 |
-| Not Important | 1 |
+| Very Important | 2 |
+| Very Important/Somewhat Important | 1.5 |
+| Somewhat Important | 1 |
+| Somewhat Important/Not Important | 0.5 |
+| Not Important | 0 |
 
 ### Likert Plot
 
