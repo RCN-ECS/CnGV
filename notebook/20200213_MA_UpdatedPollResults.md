@@ -27,7 +27,12 @@ In this set of questions, users picked three questions for each subject (Evoluti
 
 ### "Rank" plot
 
+Below: Y axis ordered from its own rank - the most cumulative tallies are at the top, the least are at the bottom
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Rank_Heatmap.png)
+
+Below: Y-axis ordered to match the order of the likert plot.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/rankmatchlikert.png)
+
 
 #### Axis Question Number Reference
 
