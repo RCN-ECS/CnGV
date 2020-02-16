@@ -1237,7 +1237,7 @@ likert_mar = data.frame(t(sums[ , which(names(sums) %in% marine_names)]))
 likert_mar$Question = seq(1:nrow(likert_mar))
 colnames(likert_mar) <- c("Counts","Question")
 likert_mar$Subject = rep("Marine Science",nrow(likert_mar))
-
+likert_mar$weighted_avg = (likert_mar$Counts/118)
 
 likert_evo = data.frame(t(sums[ , which(names(sums) %in% evo_names)]))
 likert_evo$Question = seq(1:nrow(likert_evo))
@@ -1247,18 +1247,21 @@ colnames(likert_evo) <- c("Counts","Question")
 #toDelete <- seq(2, nrow(d), 2)
 #likert_evo$Question = d[-toDelete,]
 likert_evo$Subject = rep("Evolutionary Biology",nrow(likert_evo))
+likert_evo$weighted_avg = (likert_evo$Counts/118)
+
 
 likert_data = rbind(likert_evo,likert_mar)
 cols = c("Evolutionary Biology"="#83c0fd","Marine Science"="#012345")
 
-likert_plot = ggplot(likert_data, aes(x = reorder(Question,-Counts), y = Counts, fill = Subject)) + 
+likert_plot = ggplot(likert_data, aes(x = reorder(Question,-weighted_avg), y = weighted_avg, fill = Subject)) + 
   geom_bar(position="stack", stat="identity")+
-  geom_text(aes(label = round(Counts), group = Subject),
+  geom_text(aes(label = round(weighted_avg,2), group = Subject),
             colour = "white",
             position = position_stack(vjust = .5),
             angle = 90,
             size = 6)+
   xlab("Survey Question")+
+  ylab("Average Score") +
   scale_fill_manual(values = cols)+
   theme_bw()+
   scale_x_discrete(expand = c(0,0))+
