@@ -5,7 +5,13 @@ The new simulation code generates data based on the anova model (as opposed to g
 The data generation code takes in each row from the table of starting parameters to create the data using the below code: (which is subsetted out from the larger "ring" function that simultaneously simulates data and calculates covariance functions/gxe functions, boot straps, and permutations.
 
 The degree of interaction is set by generating an interaction number by sampling a normal distribution with a mean of 0 and standard deviation matching the starting interaction parameter. 
-Thus, the higher the starting interaction parameter, the greater the variation among genotypes and environments *should* be. 
+Thus, the higher the starting interaction parameter, the greater the variation among genotypes and environments *should* be.
+
+#### Update for 2/18/20
+Something not evident is my (Molly's) confusion that was hidden in the language i use to describe the interaction. The interaction is an "interaction term" in the regression model, and is not just setting the "amount" or "degree" of interaction to expect. Interaction terms in a multiple regression design matrix look like: 
+
+**Y = B0 + B1w + B2x + B3wx + error**
+In that model the interaction term is B3wx (the slope of the interaction between covariate w and x) 
 
 ```(data generation)
 data_gen <- function(param_table, n_boot){
