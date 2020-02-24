@@ -11,14 +11,14 @@ init_params <- list(
 
 # Starting list of parameters
 param_list <- list(
-  reps = 10,
-  delta_env = c(0.01,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(-1,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  reps = 5,
+  delta_env = c(0.01),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
   sample_size = c(5), 
   n_genotypes = c(2),
   n_environments = NULL,
   std_dev= c(0.0), # Random noise, with standard deviation of 1,
-  interaction= c(0,5,20)) # this sd determines the amount of GxE)
+  interaction= c(0,20)) # this sd determines the amount of GxE)
 
 
 # Table of parameters
@@ -80,14 +80,16 @@ ring <- function(param_table, n_boot){
     # Approximate Cov(G,E)
     cov_GE_approx = param_table$delta_env[i] * param_table$delta_gen[i]
     
+    # Establish starting dataset parameters
     gen <- rep(1:param_table$n_genotypes[i], each = param_table$sample_size[i])
     env <- rep(1:n_environments, times = param_table$sample_size[i]) 
-    
-    noise <- rnorm(param_table$sample_size[i] * param_table$n_genotypes[i], 0, sd = param_table$std_dev[i]) # Random noise
     
     # Create Interactions
     int <- rnorm(param_table$n_genotypes[i] * n_environments, 0, sd = param_table$interaction[i]) # sd determines the amount of GxE
     int_df <- data.frame(expand.grid(G = 1:param_table$n_genotypes[i], E = 1:n_environments), int)
+    
+    # Generate model error
+    noise <- rnorm(param_table$sample_size[i] * param_table$n_genotypes[i], 0, sd = param_table$std_dev[i]) # Random noise
     
     # Create the model dataframe 
     model_df <- data.frame(gen, env, noise)
@@ -96,6 +98,7 @@ ring <- function(param_table, n_boot){
     model_df$exp_env_factor = factor(paste("E", model_df$E, sep = "_"))
     
     # Generate phenotype data using regression equation
+   
     phen = param_table$delta_env[i] * model_df$E + param_table$delta_gen[i] * model_df$G  + model_df$noise + model_df$int # error
     no_err_phen = param_table$delta_env[i] * model_df$E + param_table$delta_gen[i] * model_df$G + model_df$int # no error
     
@@ -376,7 +379,7 @@ test = ring(df,0) # Parameter table, then number of bootstraps/perms
 #write.table(test,"Power_data.txt")
 #write.csv(test,"Power_data.csv")
 
-ggplot(test,aes(x=true_cov,y=true_GxE))+geom_point()
+ggplot(test,aes(x=interaction,y=true_GxE,colour = GxE_pvalue))+geom_point(shape = interaction)
 
 
 ##########
