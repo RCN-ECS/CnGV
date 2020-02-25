@@ -10,14 +10,17 @@ These data were coded according to the below table. Some people selected 2 ranki
 
 | Response | Value Assigned |
 | --- | --- | 
-| Very Important | 2 |
-| Very Important/Somewhat Important | 1.5 |
-| Somewhat Important | 1 |
-| Somewhat Important/Not Important | 0.5 |
-| Not Important | 0 |
+| Very Important | 5 |
+| Very Important/Somewhat Important | 4 |
+| Somewhat Important | 3 |
+| Somewhat Important/Not Important | 2 |
+| Not Important | 1 |
 
-### Likert Plot
+### Likert Plot (2.25.2020)
+![image]()
 
+
+### Original Likert Plot
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Likert_plot.png)
 
 
@@ -27,6 +30,11 @@ In this set of questions, users picked three questions for each subject (Evoluti
 
 ### "Rank" plot
 
+#### Updated 2.25.20202
+Below: This plot is filled relative to the average tallies (mean = 11 tallies per question). If the question was selected more than average, it is colored peach. The color white is for tallies near average, blue is if the question was selected less than average. Because more seem to be below average I also looked at the median value, which is 9. This disparity suggests that a few questions are driving the average and we may consider using the median? 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Scaled_rank.tiff)
+
+#### Original plots
 Below: Y axis ordered from its own rank - the most cumulative tallies are at the top, the least are at the bottom
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Rank_Heatmap.png)
 
