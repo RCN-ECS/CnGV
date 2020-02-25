@@ -29,9 +29,12 @@ These data were coded according to the below table. Some people selected 2 ranki
 In this set of questions, users picked three questions for each subject (Evolutionary biology, Marine Science, and Conservation biology) that are most needed to advance the field. These are coded simply - if the user chose the question, it was assigned a "1". The number of times each question was selected was then tallied.  
 
 ### "Rank" plot
+
+#### Updated 2.25.20202
 Below: This plot is filled relative to the average tallies (mean = 11 tallies per question). If the question was selected more than average, it is colored peach. The color white is for tallies near average, blue is if the question was selected less than average. Because more seem to be below average I also looked at the median value, which is 9. This disparity suggests that a few questions are driving the average and we may consider using the median? 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Scaled_rank.tiff)
 
+#### Original plots
 Below: Y axis ordered from its own rank - the most cumulative tallies are at the top, the least are at the bottom
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Rank_Heatmap.png)
 
