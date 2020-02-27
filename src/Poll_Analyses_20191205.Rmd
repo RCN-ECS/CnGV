@@ -1315,21 +1315,24 @@ rank_data = rbind(rank_con,rank_mar,rank_evo)
 sum_df <- rank_data %>%
   group_by(Question) %>%
   summarize(response=sum(Counts))
-rank_data$response = rep(rank(sum_df$response), times = 3)
+rank_data$ranked = rep(rank(sum_df$response), times = 3)
+rank_data$response = rep(sum_df$response,times = 3)
+rank_data$Question = as.integer(rank_data$Question)
 
 # Scale by Average
 response_mean = mean(rank_data$Counts)
 rank_data$scaled_response = rank_data$Counts - response_mean
 
 # Heatmap Original order (most votes on top, least votes on bottom)
-rankplot = ggplot(rank_data, aes(y =reorder(Question,response), x = Subject, fill = scaled_response)) + 
+rankplot = ggplot(rank_data, aes(y =reorder(Question,ranked), x = Subject, fill = scaled_response, label=response)) + 
   geom_tile() + theme_bw()+
   ylab("Survey Question")+
   geom_text(aes(label = round(scaled_response, 1))) +
+  #scale_y_continuous(sec_axis = sec_axis(rank_data$response)) +
   scale_x_discrete(expand = c(0, 0),
-                   position = "top") +
+                      position = "top") +
   scale_y_discrete(#limits=rank_data$Question[order(rank_data$response)],
-                   expand = c(0, 0)) +
+                  expand = c(0, 0)) +
   scale_fill_gradientn(colours=c("#012345","white","#FFBFA8"))+
   labs(fill = "Survey Response")+
   theme(plot.background = element_blank(),
@@ -1344,6 +1347,8 @@ rankplot = ggplot(rank_data, aes(y =reorder(Question,response), x = Subject, fil
         axis.title.y = element_text(colour = "black",size = 16),
         axis.title.x = element_text(colour = "black",size = 16))
 rankplot
+
+
 ```
 
 ```{r}

@@ -1,14 +1,3 @@
-# Set seed for reproducibility.
-
-init_params <- list(
-  delta_env = seq(from = -2, to = 2, by = 0.75), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = seq(from = -2, to = 2, by = 0.75), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(5,7), 
-  n_genotypes = c(2),
-  n_environments = NA,
-  std_dev= seq(from = 0, to = 1, by = 0.5), # Random noise, with standard deviation of 1,
-  interaction= seq(from = 0, to = 2, by = 0.5)) # this sd determines the amount of GxE)
-
 # Starting list of parameters
 param_list <- list(
   reps = 7,
@@ -71,7 +60,7 @@ ring <- function(param_table, n_boot){
     
     # For reproducibility
     set.seed = 999
-  
+    
     n_environments = param_table$n_genotypes[i]
     
     # Approximate Cov(G,E)
@@ -102,15 +91,33 @@ ring <- function(param_table, n_boot){
     dat_std <- sd(phen)
     model_df$phen_corrected <- ((phen - dat_avg)/dat_std)
     
-    # Anova
-    test_temp <- aov(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
+      # New dataset from means and SE
+    mean_df = model_df %>%
+        group_by(gen_factor, exp_env_factor) %>%
+        summarise(new_mean = mean(phen_corrected),
+                  new_sd = sd(phen_corrected))
+    mean_df$se = mean_df$new_sd/sqrt(unique(model_df$sample_size))
 
-    # Estimated Marginal Means
-    emm_options(msg.interaction = FALSE)
-    emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
-    emm_G = as.data.frame(emmeans(test_temp, "gen_factor"))
-    emm_GxE = as.data.frame(emmeans(test_temp, ~ exp_env_factor*gen_factor))
+    # Marginal Means
+    overall_mean <- mean(mean_df$new_mean)
     
+    mm_df = data.frame()
+    for(a in 1:nrow(mean_df)){
+      name = paste(mean_df$gen_factor[a],mean_df$exp_env_factor[a],sep = ":") 
+      value = mean_df$new_mean[a] - overall_mean
+      mm_df. = data.frame(name, value)
+      mm_df = rbind(mm_df, mm_df.)
+    }
+    
+    G11m <- mean_df$new_mean[1] - overall_mean
+    G12m <- mean_df$new_mean[2] - overall_mean
+    G21m <- mean_df$new_mean[3] - overall_mean
+    G22m <- mean_df$new_mean[4] - overall_mean
+
+    G1_mean <- mean(c(G11m,G12m)) ## THIS IS WHERE YOU ARE = NEED TO SOFT CODE THIS IN
+    E1_mean <- mean(c(G11m,G21m))
+    gxe = abs(overall_mean - G1_mean - E1_mean + mean_df$new_mean[1])
+  
     # Gmeans and Emeans  
     G_matrix = data.frame()
     E_matrix = data.frame()
@@ -190,9 +197,9 @@ ring <- function(param_table, n_boot){
     
     # Magnitude of GxE using EMMs
     true_GxE <- abs(mean(model_df$phen_corrected) - # Overall mean
-                     (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
-                     (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
-                     (emm_GxE[1,3])) # GxE
+                      (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
+                      (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
+                      (emm_GxE[1,3])) # GxE
     
     ###############
     ## Bootstrap ##
@@ -366,43 +373,3 @@ ring <- function(param_table, n_boot){
 }
 
 test = ring(df,25) # Parameter table, then number of bootstraps/perms    
-#write.table(test,"Power_data.txt")
-#write.csv(test,"Power_data.csv")
-
-ggplot(test,aes(x=interaction,y=true_GxE,colour = GxE_pvalue))+geom_point(shape = interaction)
-
-
-##########
-## Plot ##
-##########
-
-pdata <- read.csv("~/Desktop/Power_Data.csv")
-pdata$index = df$index
-
-pdata$tickmark <- NULL
-for(i in 1:nrow(pdata)){
-if(pdata$cov_pvalue[i] > 0.05){pdata$tickmark[i]=0}else{pdata$tickmark[i]=1} # do 100 replicates for this power
-}
-# How many times is null false? Check true covariance and true GxE when noise = 0 for null expectation. (no sense in looking at power for noise = 0)
-
-powerdata = data.frame()
-for(i in 1:length(unique(pdata$index))){
-  tempdata <- filter(pdata, index == unique(pdata$index)[i])
-  num = sum(tempdata$tickmark)
-  denom = length(tempdata$tickmark)
-  power = num/denom
-  powerdata. = data.frame("index" = unique(tempdata$index),
-                          "power" = power)
-  powerdata = rbind(powerdata,powerdata.)
-  power_df = inner_join(powerdata,df,by = "index")
-}
-
-str(power_df)
-ggplot(power_df,aes(x = sample_size, y = std_dev, fill = power)) + geom_tile() + scale_fill_gradient(low="white", high="blue") +
-  theme_classic()
-
-ggplot(power_df,aes(x = sample_size, y = n_genotypes, fill = power)) + geom_tile() + scale_fill_gradient(low="white", high="blue") +
-  theme_classic()
-
-ggplot(power_df,aes(x = n_genotypes, y = std_dev, fill = power)) + geom_tile() + scale_fill_gradient(low="white", high="blue") +
-  theme_classic()
