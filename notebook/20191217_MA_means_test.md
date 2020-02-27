@@ -21,8 +21,10 @@ I ran the full code which *includes standardizing the data*
 Upon running this code I plotted the estimated CovGE and GxE against the true values. *If they were generated correctly, they should fall along a 1:1 line, with higher standard deviation being further from that line*
 #### AND THATS WHAT I FOUND 
 Looks like whatever bias that was generated in the old coding approach is reduced in the new coding approach! Wahoo! However, when standard deviation IS present, the covGE estimates do seem to be biased downwardly still. GxE seem fine.  
+
 **Covariance:**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/CovTest_means.png)
+
 **GxE**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/GxEtest_means.png)
 
