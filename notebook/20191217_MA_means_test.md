@@ -1,7 +1,9 @@
 # Test of means and bootstrapping approach
 
 ## Update for 2/27/2020
-Since writing this post, we have changed the way we generate data from using linear models to regression design matrices. Even Below, I write that we found the previously estimated means/SE data produces downwardly biased covariance and GxE estimates. I rewrote the code for the means/SE data in which I use the new data generation approach. In my new code, kept the overall approach the same (i.e., estimating covariance and GxE on the provided means without using Anovas), but I built in a small function in which I calculate the true covariance and GxE values (i.e., the values calculated on the full raw dataset with no noise). In doing so, I can compare how accurately the means/SE data are performing. 
+Since writing this post, we have changed the way we generate data from using linear models to regression design matrices. As described below, we found the previously estimated means/SE data downwardly biased covariance and GxE estimates. 
+
+I rewrote the code for the means/SE data in which I use the new data generation approach. In my new code, kept the overall approach the same (i.e., estimating covariance and GxE on the provided means without using Anovas), but I built in a small function in which I calculate the true covariance and GxE values (i.e., the values calculated on the full raw dataset with no noise). In doing so, I can compare how accurately the means/SE data are performing. 
 **If CovGE and GxE estimates are accurate, they should match the TRUE values**
 
 I ran a small simulation with the following starting parameters in which I varied only the standard deviation (but with a small interaction built in): 
