@@ -30,6 +30,16 @@ Looks like whatever bias that was generated in the old coding approach is reduce
 **GxE**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/GxEtest_means.png)
 
+### Why is CovGE increasing if the only thing changing is standard deviation? 
+My guess was that the moderate (0.5) interaction term was leading to some amount of covariance being picked up. When I re-ran the above with interaction term of Zero, I got the expected pattern of no change in "true" covGE but just variation of standard deviation: 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Cov_noInt.png)
+
+### Error bars! 
+After finding and fixing the bug in my bootstrap code, I ran a sim with sample sizes of 5 and 100. As expected, error gets smaller with the larger sample size. So that's a bit reassuring. Unfortunately, the error bars for the higher std. dev covGEs do not overlap with the 1:1 line, which we would hope for if there was no real bias. So it looks like for covariance, the bias of lower CovGEs with means/SE data persists. GxE all seem to overlap the 1:1 line though, suggesting those data are a bit more robust. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Cov_SampleSize_error.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/GxE_SampleSize_error.png)
+
+
 ## 12/17/2020: 
 As noted [here](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20191204_Categorical_Analyses.md), I recently re-made code into a more manageable unit.
 
