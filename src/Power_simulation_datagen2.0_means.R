@@ -1,13 +1,13 @@
 # Starting list of parameters
 param_list <- list(
-  reps = 5,
+  reps = c(5),
   delta_env = c(1),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(5), 
+  sample_size = c(5,100), 
   n_genotypes = c(3),
   n_environments = NULL,
   std_dev= c(0.01,0.5,1),#,0.25,0.5,0.75,1,1.5,2), # Random noise, with standard deviation of 1,
-  interaction= c(0)) # this sd determines the amount of GxE)
+  interaction= c(0.5)) # this sd determines the amount of GxE)
 
 
 # Table of parameters
@@ -95,7 +95,6 @@ ring_means <- function(param_table, n_boot){
                   new_sd = sd(phen_corrected))
     mean_df$se = mean_df$new_sd/sqrt(param_table$sample_size[i])
 
-    # 
     overall_mean <- mean(mean_df$new_mean)
     
     # Marginal Means = Each value - overall mean
@@ -113,7 +112,6 @@ ring_means <- function(param_table, n_boot){
     E1_mean <- mean(mm_df$value[mm_df$E_mm == "E_1"])
     GxEmag = abs(overall_mean - G1_mean - E1_mean + mean_df$new_mean[1])
   
-     
     # Gmeans
     G_matrix = data.frame()
     for(h in 1:length(unique(mean_df$gen_factor))){
@@ -376,12 +374,12 @@ ring_means <- function(param_table, n_boot){
 
 test = ring_means(df,25) # Parameter table, then number of bootstraps/perms 
 
-ggplot(test,aes(x=true_cov,y=cov_estimate,colour = factor(std_dev)))+
+ggplot(test,aes(x=true_cov,y=cov_estimate, group = factor(sample_size),shape = factor(sample_size), colour = factor(std_dev)))+
   geom_point(size = 2)+
   geom_errorbar(aes(ymin = cov_lwrCI,ymax = cov_uprCI))+
   theme_classic()+
   geom_abline(aes(slope = 1,intercept = 0))
-ggplot(test,aes(x=true_GxE,y=GxE_estimate,colour = factor(std_dev)))+
+ggplot(test,aes(x=true_GxE,y=GxE_estimate,group = factor(sample_size),shape = factor(sample_size), colour = factor(std_dev)))+
   geom_point(size = 2)+
   geom_errorbar(aes(ymin = GxE_lwrCI,ymax = GxE_uprCI))+
   theme_classic()+
