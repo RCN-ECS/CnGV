@@ -34,6 +34,9 @@ In this set of questions, users picked three questions for each subject (Evoluti
 Below: This plot is filled relative to the average tallies (mean = 11 tallies per question). If the question was selected more than average, it is colored peach. The color white is for tallies near average, blue is if the question was selected less than average. Because more seem to be below average I also looked at the median value, which is 9. This disparity suggests that a few questions are driving the average and we may consider using the median? 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Scaled_Rank.png)
 
+Below: Heatmap colored by actual value (not relative to average). This plot has 4th column added to show cumulative totals across subjects. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Rank_withCumulative.png)
+
 #### Original plots
 Below: Y axis ordered from its own rank - the most cumulative tallies are at the top, the least are at the bottom
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Rank_Heatmap.png)
