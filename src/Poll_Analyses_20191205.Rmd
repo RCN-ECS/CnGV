@@ -1226,7 +1226,7 @@ colnames(likert_df)<- colnames(temp_df)
 ```
 
 ```{r}
-## Which questions are highest Ranked?
+## Likert 
 sums = data.frame(t(colSums(likert_df,na.rm=T))) #.1 = marine; .2 = evobio
 
 marine_names = grep(".1_", names(sums), value = TRUE)
@@ -1292,7 +1292,7 @@ mar_titles = grep("4_0_", names(ranksums), value = TRUE)
 evo_titles = grep("4_1_", names(ranksums), value = TRUE)
 con_titles = grep("4_2_", names(ranksums), value = TRUE)
 
-rank_mar = data.frame(t(mar_rank[ , which(names(mar_rank) %in% mar_titles)])) 
+rank_mar = data.frame(t(ranksums[ , which(names(ranksums) %in% mar_titles)])) 
 rank_mar$Question = as.factor(seq(1:nrow(rank_mar)))
 rank_mar$subject = rep("Marine Science",nrow(rank_mar))
 colnames(rank_mar) <-c("Counts","Question","Subject")
@@ -1352,7 +1352,6 @@ rankplot
 ```
 
 ```{r}
-
 # Heatmap Ordered to match Likert plot order 
 new_order = data.frame("Question" = rep(c(4,8,2,1,13,7,5,15,18,16,21,19,20,6,14,3,12,11,17,9,10),each = 3))
 rank_data2 =rank_data[order(match(rank_data$Question,new_order$Question)),]
@@ -1380,6 +1379,39 @@ new_rankplot = ggplot(rank_data2, aes(y = reorder(Question,-response), x = Subje
         axis.title.y = element_text(colour = "black",size = 16),
         axis.title.x = element_text(colour = "black",size = 16),)
 new_rankplot
+```
+
+```{r}
+
+sum_df$Subject = rep("Cumulative Total",times = nrow(sum_df))
+colnames(sum_df)[2]<- "Counts"
+cumulative_data <- rbind(sum_df,rank_data) # IF ERROR --  Rerun the original rank_data 
+cumulative_data$Subject <- factor(cumulative_data$Subject, levels=c("Evolutionary Biology", "Marine Science", "Conservation and Management","Cumulative Total"))
+
+# Heatmap With Cumulative Panel
+
+cumulative_rankplot = ggplot(cumulative_data, aes(y = reorder(Question,Counts), x = Subject, fill = Counts)) + 
+  geom_tile() + theme_bw()+
+  ylab("Survey Question")+
+  geom_text(aes(label = round(Counts, 1))) +
+  scale_x_discrete(expand = c(0, 0),
+                   position = "top") +
+  scale_y_discrete(#limits=rank_data$Question[order(rank_data$response)],
+                   expand = c(0, 0)) +
+  scale_fill_gradient(low = "white",
+                      high = "#012345")+
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        legend.position = "none")+
+  theme(axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y = element_text(colour = "black",size = 14),       
+        axis.text.x = element_text(colour = "black",size = 14),
+        axis.title.y = element_text(colour = "black",size = 16),
+        axis.title.x = element_text(colour = "black",size = 16),)
+cumulative_rankplot
 ```
 
 

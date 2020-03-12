@@ -3,10 +3,10 @@ param_list <- list(
   reps = c(5),
   delta_env = c(1),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(5,100), 
+  sample_size = c(5), 
   n_genotypes = c(3),
   n_environments = NULL,
-  std_dev= c(0.01,0.5,1),#,0.25,0.5,0.75,1,1.5,2), # Random noise, with standard deviation of 1,
+  std_dev= c(0.01,0.25,0.5,0.75,1,1.5,2), # Random noise, with standard deviation of 1,
   interaction= c(0.5)) # this sd determines the amount of GxE)
 
 
@@ -32,14 +32,14 @@ table_fun <- function(param_list){
   
   # Final data frame
   param_table <- data.frame("row"= seq(1:length(reps)), 
-                            "reps" = reps,
+                            "replicate" = reps,
                             param_temp)
   
   return(param_table)
 }
 df = table_fun(param_list)
 dim(df)
-#write.csv(df, file = "~/Desktop/df.csv")
+#write.csv(df, file = "~/Desktop/test_df.csv")
 
 
 ring_means <- function(param_table, n_boot){

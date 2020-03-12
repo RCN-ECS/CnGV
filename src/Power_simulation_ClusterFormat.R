@@ -1,70 +1,4 @@
-# Set seed for reproducibility.
-
-init_params <- list(
-  delta_env = seq(from = -2, to = 2, by = 0.75), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = seq(from = -2, to = 2, by = 0.75), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(5,7), 
-  n_genotypes = c(2),
-  n_environments = NA,
-  std_dev= seq(from = 0, to = 1, by = 0.5), # Random noise, with standard deviation of 1,
-  interaction= seq(from = 0, to = 2, by = 0.5)) # this sd determines the amount of GxE)
-
-# Starting list of parameters
-param_list <- list(
-  reps = c(100),
-  delta_env = seq(from = 0.01, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(2,5,7,10,15), 
-  n_genotypes = c(2,3,4,5),
-  n_environments = NULL,
-  std_dev= seq(from = 0.01, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(0,5,10,20,50)) # this sd determines the amount of GxE)
-
-# Starting list of parameters
-param_list <- list(
-  reps = c(5),
-  delta_env = c(1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(5), 
-  n_genotypes = c(3),
-  n_environments = NULL,
-  std_dev= c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(20)) # this sd determines the amount of GxE)
-
-
-# Table of parameters
-table_fun <- function(param_list){
-  
-  # Basic parameters
-  param_temp <- expand.grid("delta_env" = param_list$delta_env,
-                            "delta_gen" = param_list$delta_gen,
-                            "sample_size" = param_list$sample_size,
-                            "n_genotypes" = param_list$n_genotypes,
-                            "std_dev" = param_list$std_dev,
-                            "interaction" = param_list$interaction)
-  
-  # Book keeping rows
-  n_combo <- length(param_list$delta_env)*
-    length(param_list$delta_gen)*
-    length(param_list$sample_size)*
-    length(param_list$n_genotypes)*
-    length(param_list$std_dev)*
-    length(param_list$interaction)
-  reps <- rep(c(1:param_list$reps), each = n_combo)
-  
-  # Final data frame
-  param_table <- data.frame("row"= seq(1:length(reps)), 
-                            "replicate" = reps,
-                            param_temp)
-  
-  return(param_table)
-}
-df = table_fun(param_list)
-dim(df)
-#write.csv(df, file = "~/Desktop/df.csv")
-
-
-ring <- function(param_table, n_boot){
+# To create new df, run "table_fun" in Power_simulation_datagen2.0
   
   # Load packages
   library("emmeans")
@@ -72,39 +6,47 @@ ring <- function(param_table, n_boot){
   library("tidyverse")
   library("rlist")
   
+  # Load Parameters
+  args = commandArgs(trailingOnly = TRUE)
+  
+  row = as.numeric(args[1])
+  replicate = as.numeric(args[2])
+  delta_env = as.numeric(args[3])
+  delta_gen = as.numeric(args[4])
+  sample_size = as.numeric(args[5])
+  n_genotypes = as.numeric(args[6])
+  std_dev = as.numeric(args[7])
+  interaction = as.numeric(args[8])
+  n_boot = 100
+  
   # Output dataframe
-  output <- data.frame()
+  output <- data.frame() 
   
-  for(i in 1:nrow(param_table)){
+  # For reproducibility
+  set.seed = 999
     
-    # Counter
-    cat(i, "\n")
+  n_environments = n_genotypes
     
-    # For reproducibility
-    set.seed = 999
+  # Approximate Cov(G,E)
+  cov_GE_approx = delta_env * delta_gen
+    
+  # Dataframe foundations
+  gen <- rep(1:n_genotypes, each = sample_size*n_environments)
+  env <- rep(1:n_environments, each = sample_size, times = n_environments) 
+    
+  # Random Noise
+  noise <- rnorm(sample_size *n_genotypes * n_environments, 0, sd = std_dev) 
+    
+  # Interaction Terms
+  int <- rep(rnorm(n_genotypes * n_environments, 0, sd = interaction),each = sample_size) # interaction term - one for each GE level
   
-    n_environments = param_table$n_genotypes[i]
-    
-    # Approximate Cov(G,E)
-    cov_GE_approx = param_table$delta_env[i] * param_table$delta_gen[i]
-    
-    # Dataframe foundations
-    gen <- rep(1:param_table$n_genotypes[i], each = param_table$sample_size[i]*n_environments)
-    env <- rep(1:n_environments, each = param_table$sample_size[i],times = n_environments) 
-    
-    # Random Noise
-    noise <- rnorm(param_table$sample_size[i] * param_table$n_genotypes[i] * n_environments, 0, sd = param_table$std_dev[i]) 
-    
-    # Interaction Terms
-    int <- rep(rnorm(param_table$n_genotypes[i] * n_environments, 0, sd = param_table$interaction[i]),each = param_table$sample_size[i]) # interaction term - one for each GE level
-    
-    # Create the model dataframe 
+  # Create the model dataframe 
     model_df <- data.frame(gen, env, noise, int)
     model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
     model_df$exp_env_factor = factor(paste("E", model_df$env, sep = "_"))
     
     # Generate phenotype data using regression equation
-    phen = param_table$delta_env[i] * model_df$env + param_table$delta_gen[i] * model_df$gen  + model_df$noise + model_df$int 
+    phen = delta_env * model_df$env + delta_gen * model_df$gen  + model_df$noise + model_df$int 
     model_df$phen = phen
     
     # Standardize data
@@ -114,7 +56,7 @@ ring <- function(param_table, n_boot){
     
     # Anova
     test_temp <- aov(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
-
+    
     # Estimated Marginal Means
     emm_options(msg.interaction = FALSE)
     emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
@@ -125,7 +67,7 @@ ring <- function(param_table, n_boot){
     G_matrix = data.frame()
     for(h in 1:length(unique(emm_GxE$gen_factor))){
       gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[h])
-      gmean <- sum(gtemp[,3])/param_table$n_genotypes[h]
+      gmean <- sum(gtemp[,3])/n_genotypes
       tempdat = data.frame("G_means" = gmean,
                            "gen_factor" = unique(model_df$gen_factor)[h])
       G_matrix = rbind(G_matrix,tempdat)
@@ -157,7 +99,7 @@ ring <- function(param_table, n_boot){
     #############################
     
     # Generate phenotype data with no error using same regression equation
-    no_err_phen = param_table$delta_env[i] * model_df$env + param_table$delta_gen[i] * model_df$gen + model_df$int 
+    no_err_phen = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
     
     # Standardize no error data
     dat_avg_noerror <- mean(no_err_phen) 
@@ -178,7 +120,7 @@ ring <- function(param_table, n_boot){
     G_matrix = data.frame()
     for(y in 1:length(unique(emm_GxE$gen_factor))){
       gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[y])
-      gmean <- sum(gtemp[,3])/param_table$n_genotypes[y]
+      gmean <- sum(gtemp[,3])/n_genotypes
       tempdat = data.frame("G_means" = gmean,
                            "gen_factor" = unique(model_df$gen_factor)[y])
       G_matrix = rbind(G_matrix,tempdat)
@@ -201,9 +143,9 @@ ring <- function(param_table, n_boot){
     
     # Magnitude of GxE with no error 
     true_GxE <- abs(mean(model_df$phen_corrected) - # Overall mean
-                     (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
-                     (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
-                     (emm_GxE[1,3])) # GxE
+                      (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
+                      (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
+                      (emm_GxE[1,3])) # GxE
     
     ###############
     ## Bootstrap ##
@@ -311,7 +253,7 @@ ring <- function(param_table, n_boot){
       emm_E_perm = as.data.frame(emmeans(test_perm,"exp_env_factor"))
       emm_G_perm = as.data.frame(emmeans(test_perm, "gen_factor"))
       emm_GxE_perm = as.data.frame(emmeans(test_perm, ~ exp_env_factor*gen_factor))
-       
+      
       # Gmeans - Permutation
       G_matrix_perm = data.frame()
       for(r in 1:length(unique(emm_GxE_perm$gen_factor))){
@@ -359,13 +301,13 @@ ring <- function(param_table, n_boot){
     if(ptemp1 < 0.5){GxE_pvalue = ptemp1}else{GxE_pvalue = (1-ptemp1)} # 2-tailed
     
     # Generate Outputs
-    temp_out <- data.frame("row" = param_table$row[i],
-                           "delta_env" = param_table$delta_env[i],
-                           "delta_gen" = param_table$delta_gen[i],
-                           "sample_size" = param_table$sample_size[i],
-                           "n_genotypes" = param_table$n_genotypes[i],
-                           "std_dev" = param_table$std_dev[i],
-                           "interaction" = param_table$interaction[i],
+    output <- data.frame("row" = row,
+                           "delta_env" = delta_env,
+                           "delta_gen" = delta_gen,
+                           "sample_size" = sample_size,
+                           "n_genotypes" = n_genotypes,
+                           "std_dev" = std_dev,
+                           "interaction" = interaction,
                            "true_cov" = true_cov,
                            "cov_estimate" = cov_est,
                            "cov_lwrCI" = cov_CI[[1]],
@@ -376,48 +318,8 @@ ring <- function(param_table, n_boot){
                            "GxE_lwrCI" = GxE_CI[[1]],
                            "GxE_uprCI" = GxE_CI[[2]],
                            "GxE_pvalue" = GxE_pvalue)
-    output = rbind(output, temp_out)
-  }
-  return(output)
-}
-
-test = ring(df,25) # Parameter table, then number of bootstraps/perms    
-#write.table(test,"Power_data.txt")
-#write.csv(test,"Power_data.csv")
 
 
+# Output
+write.csv(output,paste0("Power_data_",row,"_output.csv"))
 
-##########
-## Plot ##
-##########
-
-pdata <- read.csv("~/Desktop/Power_Data.csv")
-pdata$index = df$index
-
-pdata$tickmark <- NULL
-for(i in 1:nrow(pdata)){
-if(pdata$cov_pvalue[i] > 0.05){pdata$tickmark[i]=0}else{pdata$tickmark[i]=1} # do 100 replicates for this power
-}
-# How many times is null false? Check true covariance and true GxE when noise = 0 for null expectation. (no sense in looking at power for noise = 0)
-
-powerdata = data.frame()
-for(i in 1:length(unique(pdata$index))){
-  tempdata <- filter(pdata, index == unique(pdata$index)[i])
-  num = sum(tempdata$tickmark)
-  denom = length(tempdata$tickmark)
-  power = num/denom
-  powerdata. = data.frame("index" = unique(tempdata$index),
-                          "power" = power)
-  powerdata = rbind(powerdata,powerdata.)
-  power_df = inner_join(powerdata,df,by = "index")
-}
-
-str(power_df)
-ggplot(power_df,aes(x = sample_size, y = std_dev, fill = power)) + geom_tile() + scale_fill_gradient(low="white", high="blue") +
-  theme_classic()
-
-ggplot(power_df,aes(x = sample_size, y = n_genotypes, fill = power)) + geom_tile() + scale_fill_gradient(low="white", high="blue") +
-  theme_classic()
-
-ggplot(power_df,aes(x = n_genotypes, y = std_dev, fill = power)) + geom_tile() + scale_fill_gradient(low="white", high="blue") +
-  theme_classic()
