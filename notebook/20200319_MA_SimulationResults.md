@@ -40,6 +40,7 @@ This plot has me thinking perhaps something went wrong:
 a) why are GxE values near 0 showing up as significant? A look at the data shows that these are estimates 
 
  delta_env |delta_gen |sample_size|n_genotypes | std_dev | interaction |true_cov |cov_estimate|cov_lwrCI|cov_uprCI|cov_pvalue|true_GxE |GxE_estimate| GxE_lwrCI|  GxE_uprCI| GxE_pvalue 
+ |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
      0.50      |   1    |       5     |     8  |   0.5    |       0 | 4.557143e-01  | 0.43726556  |0.414614449 | 0.458338031 |0.00000000 |2.664535e-15  |0.025624170 |0.0057347299 |0.20497646 |0.04950495  
    0.75  |      -1      |    10       |    8   |  0.5    |       0| -5.477143e-01  |-0.52953110| -0.546005341 |-0.51518242| 0.00990099 |2.065015e-14  |0.007083631 |0.0012061898 |0.10145796 |0.00990099   
    1.00   |      1       |   10     |      8  |   0.5     |      0 | 5.705357e-01 |  0.55723254 | 0.544511283 | 0.57069669| 0.00000000 |2.575717e-14  |0.011259819| 0.0007435781 |0.07277978 |0.01980198
