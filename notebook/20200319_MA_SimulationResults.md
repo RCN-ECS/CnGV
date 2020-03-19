@@ -35,9 +35,9 @@ Now showing the same plot layout but now using the data with random noise. These
 Same as above, but only showing those data that have significant covariance and gxe estimates (p<0.05). 
 
 This plot has me thinking perhaps something went wrong: 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/SigGxE_cov.png)
 
-
-a) why are GxE values near 0 showing up as significant? A look at the data shows that these are estimates 
+Why are GxE values near 0 showing up as significant? A look at the data shows that these are estimates slightly off zero with very small confidence intervals but from a variety of different starting parameters. However, then there is the blank space as magnitude of GxE increases that are not statistically significant... why are these small estimates significant but not the larger ones?  
 
  delta_env |delta_gen |sample_size|n_genotypes | std_dev | interaction |true_cov |cov_estimate|cov_lwrCI|cov_uprCI|cov_pvalue|true_GxE |GxE_estimate| GxE_lwrCI|  GxE_uprCI| GxE_pvalue 
  |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
