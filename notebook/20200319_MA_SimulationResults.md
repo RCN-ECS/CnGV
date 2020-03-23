@@ -51,9 +51,11 @@ Why are GxE values near 0 showing up as significant? A look at the data shows th
 ## 3.20.2020 Update
 Per Katie's suggestions, I visualized boxplots of phenotype across environments for different parameter sets. 
 
-Plot 1 - Each column is sample size levels, each row are the 2 standard deviation levels. 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/devxsamplesize.png)
+I'm sorry this is just points - I could not for the life of me get geom_boxplot() to cooperate with me. This decently shows the patterns though... 
 
-Plot 2 - Each column is the effect values grouped together (delta_env _ delta_gen), and each row are the 3 interaction term levels. 
+Plot 1 - This just shows that sample size doesn't drive much difference in spread, so I'm going to use sample size of 10 for plot 2
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/group%20%20vs%20sample%20size.png)
+
+Plot 2 - Each columns are GxE, rows are interaction term. Covariance and GxE estimates and significance are shown
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/effect%20vs%20interaction.png)
 
