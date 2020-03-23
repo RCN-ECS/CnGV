@@ -10,28 +10,23 @@ param_list <- list( # For future - make sure this set of parameters catches full
   reps = c(10),
   delta_env = c(0,0.25,0.5,0.75,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(-1,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(5,10,20), 
+  sample_size = c(10), 
   n_genotypes = c(2,4,8,16),
   n_environments = NULL,
   std_dev= c(0.1,0.5),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
   interaction= c(0,0.5,1)) # this sd determines the amount of GxE)
 
-a = rnorm(1000,1,0.5)
-b = rnorm(1000,0,0.5)
-
-hist(a,xlim = c(-2,5))
-hist(b, xlim = c(-2,5))
-
 # Starting list of parameters
+
 param_list <- list( 
-  reps = c(5),
-  delta_env = c(1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(5), 
-  n_genotypes = c(3),
+  reps = c(1),
+  delta_env = c(0,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = c(-1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  sample_size = c(10), 
+  n_genotypes = c(16),
   n_environments = NULL,
-  std_dev= c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(20)) # this sd determines the amount of GxE)
+  std_dev= c(0.1),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
+  interaction= c(0,1))
 
 
 # Table of parameters
@@ -62,24 +57,11 @@ table_fun <- function(param_list){
   return(param_table)
 }
 df = table_fun(param_list) 
-df # remove rows with zeros.
 dim(df)
 
-df1 = df[-which(rowSums(df[c(3,4)])==0),]
+df1 = df[-which(rowSums(df[c(3,4)])==0),] # remove rows with zeros.
 dim(df1)
-write.csv(df1,"~/Desktop/df.csv")
-
-# If I need to subset dataframes:
-n <- 500
-nr <- nrow(df1)
-split_df = split(df1, rep(1:ceiling(nr/n), each=n, length.out=nr))
-
-for (i in seq(split_df)){
-  assign(paste0("df", i), split_df[[i]])
-  write.csv(split_df[[i]],paste0("~/Desktop/df",i,".csv"))
-}
-
-
+#write.csv(df1,"~/Desktop/df.csv")
 
 ring <- function(param_table, n_boot){
   
@@ -114,7 +96,7 @@ ring <- function(param_table, n_boot){
     
     # Interaction Terms
     int <- rep(rnorm(param_table$n_genotypes[i] * n_environments, 0, sd = param_table$interaction[i]),each = param_table$sample_size[i]) # interaction term - one for each GE level
-    
+
     # Create the model dataframe 
     model_df <- data.frame(gen, env, noise, int)
     model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
@@ -142,9 +124,9 @@ ring <- function(param_table, n_boot){
     G_matrix = data.frame()
     for(h in 1:length(unique(emm_GxE$gen_factor))){
       gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[h])
-      gmean <- sum(gtemp[,3])/param_table$n_genotypes[h]
+      gmean <- sum(gtemp[,3])/length(unique(emm_GxE$gen_factor))
       tempdat = data.frame("G_means" = gmean,
-                           "gen_factor" = unique(model_df$gen_factor)[h])
+                           "gen_factor" = unique(emm_GxE$gen_factor)[h])
       G_matrix = rbind(G_matrix,tempdat)
     }
     
@@ -398,7 +380,7 @@ ring <- function(param_table, n_boot){
   return(output)
 }
 
-test = ring(df,25) # Parameter table, then number of bootstraps/perms    
+test = ring(df,50) # Parameter table, then number of bootstraps/perms    
 #write.table(test,"Power_data.txt")
 #write.csv(test,"Power_data.csv")
 
@@ -408,8 +390,8 @@ test = ring(df,25) # Parameter table, then number of bootstraps/perms
 ## Plot ##
 ##########
 
-pdata <- read.csv("~/Desktop/Power_Data.csv")
-pdata$index = df$index
+pdata <- read.csv("~/Desktop/power_output/compiled_simdata.csv")
+
 
 pdata$tickmark <- NULL
 for(i in 1:nrow(pdata)){
