@@ -48,5 +48,12 @@ Why are GxE values near 0 showing up as significant? A look at the data shows th
   0.75    |     1     |    20     |      8  |   0.5    |       0 | 5.481429e-01 |  0.53131347 | 0.520841860 | 0.54268961| 0.00000000 |8.881784e-15  |0.005441563 |0.0012904921| 0.08105676 |0.01980198
   0.25     |   -1      |     5    |      16 |    0.5   |        0| -2.507843e-01 | -0.24216729 |-0.249369251|-0.23666770 |0.00990099 |4.862777e-14  |0.005811667 |0.0022374175 |0.11026737 |0.01980198   
   
-    
+## 3.20.2020 Update
+Per Katie's suggestions, I visualized boxplots of phenotype across environments for different parameter sets. 
+
+Plot 1 - Each column is sample size levels, each row are the 2 standard deviation levels. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/devxsamplesize.png)
+
+Plot 2 - Each column is the effect values grouped together (delta_env _ delta_gen), and each row are the 3 interaction term levels. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/effect%20vs%20interaction.png)
 
