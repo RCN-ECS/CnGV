@@ -56,6 +56,8 @@ I'm sorry this is just points - I could not for the life of me get geom_boxplot(
 Plot 1 - This just shows that sample size doesn't drive much difference in spread, so I'm going to use sample size of 10 for plot 2
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/group%20%20vs%20sample%20size.png)
 
-Plot 2 - Each columns are GxE, rows are interaction term. Covariance and GxE estimates and significance are shown
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/effect%20vs%20interaction.png)
+Plot 2 - Each columns are GxE, rows are interaction term. Covariance and GxE estimates and significance are shown. Obviously something is wrong with my permutation code. I will post permutation plots later, and I will also be going through my code to make sure there are no dumb errors. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/deltaenv_interaction.png)
+
+
 
