@@ -1,31 +1,17 @@
 mean_generation_cat <- function(genphenenv_df){
   #Input: Takes simulated, categorical, data 
   #Output: new data
+  require(tidyverse)
   
-  # Output Dataframes
-  sample_data <- data.frame()
+  # New dataset from means and SE
+  tempdat = genphenenv_df %>%
+    group_by(row, gen_factor, exp_env_factor) %>%
+    summarise(new_mean = mean(phen_corrected),
+              new_sd = sd(phen_corrected))
+  tempdat$se = tempdat$new_sd/sqrt(unique(genphenenv_df$sample_size))
   
-  # Indexing
-  for(z in 1:length(unique(genphenenv_df$index))){
-    subdat <- filter(genphenenv_df, index == unique(genphenenv_df$index)[z])
-    
-    # New dataset from means and SE
-    new_data = data.frame()
-    for(a in 1:length(unique(subdat$gen_factor))){
-      for(b in 1:length(unique(subdat$exp_env_factor))){
-        g <- unique(subdat$gen_factor)[a]
-        e <- unique(subdat$exp_env_factor)[b]
-        gdat <- filter(subdat, gen_factor == g)
-        edat <- filter(gdat, exp_env_factor == e)
-
-        new_data. <- data.frame("index" = rep(unique(edat$index),edat$phen_n),
-                                   "phen_data" = (rnorm(edat$phen_n,edat$phen_data,edat$phen_mean_SE)),
-                                   "gen_factor" = rep(g,edat$phen_n),
-                                   "exp_env_factor" = rep(e,edat$phen_n))
-        new_data <- rbind(new_data,new_data.)
-      }
-    }
-    sample_data <- rbind(sample_data, new_data)
+  
+return(tempdat)
+  
   }
-  return(sample_data) 
-}
+test1 <- mean_generation_cat(temp_df)

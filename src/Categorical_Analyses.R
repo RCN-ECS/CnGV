@@ -25,30 +25,30 @@ fun1 <- function(input_df){
   # Gmeans and Emeans  
   if(ngen == nenv){
     
+    G_matrix = data.frame()
+    E_matrix = data.frame()
     Cov_matrix = data.frame()
-    Cov_matrix. = data.frame()
-    Cov_matrix.. = data.frame()
     
     for(i in 1:length(unique(input_df$gen_factor))){
       gtemp <- sum(emm_GxE[emm_GxE$gen_factor == unique(input_df$gen_factor)[i],3])/ngen
       tempdat = data.frame("G_means" = gtemp,
                            "gen_factor" = unique(input_df$gen_factor)[i])
-      Cov_matrix. = rbind(Cov_matrix.,tempdat)
+      G_matrix = rbind(G_matrix,tempdat)
     }
     
     for(j in 1:length(unique(input_df$exp_env_factor))){
       etemp <- sum(emm_GxE[emm_GxE$exp_env_factor == unique(input_df$exp_env_factor)[j] ,3])/nenv
       tempdat. = data.frame("E_means_unmatched" = etemp,
                             "exp_env_factor" = unique(input_df$exp_env_factor)[j])
-      Cov_matrix.. = rbind(Cov_matrix..,tempdat.)
+      E_matrix = rbind(E_matrix,tempdat.)
     }
     
     # Match genotypes to native environments
-    Cov_matrix.$E_means = Cov_matrix..$E_means_unmatched[match(Cov_matrix..$exp_env_factor,unique(input_df$nat_env_factor_corrected))]
-    Cov_matrix.$exp_env_factor = Cov_matrix..$exp_env_factor[match(Cov_matrix.$E_means,Cov_matrix..$E_means_unmatched)]
+    G_matrix$E_means <- E_matrix$E_means_unmatched[match(E_matrix$exp_env_factor,factor(unique(input_df$nat_env_factor_corrected)))]
+    G_matrix$exp_env_factor = E_matrix$exp_env_factor[match(G_matrix$E_means,E_matrix$E_means_unmatched)]
     
     # Final Output
-    Cov_matrix = Cov_matrix.
+    Cov_matrix = G_matrix
     
   }else if(ngen == (2*nenv)){
     
@@ -166,12 +166,13 @@ bootstrap_categorical <- function(input_df){
         
         # Shuffle data 
         new_phen <- sample(cond_E$phen_data, size=nrow(cond_E), replace=TRUE)
-            
+        
+        # Output    
         shuffle_dat_temp <- data.frame("gen_factor" = cond_E$gen_factor,
-                                      "exp_env_factor" = cond_E$exp_env_factor,
-                                      "nat_env_factor" = cond_E$nat_env_factor,
-                                      "nat_env_factor_corrected" = cond_E$nat_env_factor_corrected,
-                                      "phen_data" = new_phen)
+                                       "exp_env_factor" = cond_E$exp_env_factor,
+                                       "nat_env_factor" = cond_E$nat_env_factor,
+                                       "nat_env_factor_corrected" = cond_E$nat_env_factor_corrected,
+                                       "phen_data" = new_phen)
         shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
       }
     }
@@ -295,11 +296,8 @@ Categorical_sim <- function(input_df,iterations){
   # Output dataframe
   results = data.frame()
   
-  # Add native environment information
-  input_df$nat_env_factor_corrected <- NULL
-  for(i in 1:nrow(input_df)){
-  if(input_df$gen_factor[i] == "G_1") {input_df$nat_env_factor_corrected[i] = "E_1"}else{input_df$nat_env_factor_corrected[i] = "E_2"}
-  }
+  # Add native environment column for universality
+  input_df$nat_env_factor_corrected <- input_df$nat_env_factor
   
   # Indexing
   for(z in 1:length(unique(input_df$index))){
@@ -354,26 +352,12 @@ Categorical_sim <- function(input_df,iterations){
   GxE_pvalue = NULL
   if(ptemp1 < 0.5){GxE_pvalue = ptemp1}else{GxE_pvalue = (1-ptemp1)}
   
-  # Power  
-  cross.null<-NULL  
-  cov_dat = unlist(lapply(bootdat, `[`, 2))
-  for(i in 1:length(cov_dat)){
-    # Is CI estimate less than zero? 1 = no, 0 = yes
-    if(true_covariance[[1]] < 0 & cov_dat[[i]] < 0) {cross.null[i] = 1
-    }else if(true_covariance[[1]] > 0 & cov_dat[[i]] > 0) {cross.null[i] = 1
-    }else{cross.null[i] = 0}
-    #Power is the proportion of replicates whose 95% CI do not include 0
-  }
-  numerator <- sum(cross.null)
-  denominator <- length(cov_dat)
-  power <- numerator/denominator
-  
   # Output
   results. = data.frame("Index" = unique(df_temp$index),
                         "Sample_size" = unique(df_temp$phen_n),
                         "std_deviation" = unique(df_temp$stdev),
-                        "Slope_difference" = unique(df_temp$slope_diff),
-                        "intercept_difference" = unique(df_temp$intercept_diff),
+                        "n_environments"= unique(df_temp$n_environments),
+                        "n_genotypes" =  length(unique(df_temp$gen_factor)),
                         "true_covariance" = true_covariance[[1]], 
                         "Cov_lowCI" = cov_CI[[1]], 
                         "Cov_highCI" = cov_CI[[2]], 
@@ -381,8 +365,8 @@ Categorical_sim <- function(input_df,iterations){
                         "GxE_magnitude" = GxE_magnitude[[1]],
                         "GxE_lowCI" = GxE_CI[[1]],
                         "GxE_highCI" = GxE_CI[[2]],
-                        "GxE_pvalue" = GxE_pvalue,
-                        "power" = power)
+                        "GxE_pvalue" = GxE_pvalue)
+                
   results <- rbind(results,results.)
   }
   return(results)
@@ -468,21 +452,22 @@ Categorical_meta <- function(input_df,meta_data,iterations){
 # Test  Data #
 ##############
 
-# Categorical Starting parameters
-Catdat <- list(
-  "cat_cont" = c("categorical"), 
-  "intercept_G1" = 0,
-  "slope_G1" = 1,
-  "intercept_G2" = c(2),#seq(from = -5, to = 5, by = 3),
-  "slope_G2" = c(-1),#seq(from = -5, to = 5, by = 3),
-  "sd" = 0.5,#seq(from = 0, to = 1, by = 0.5),
-  "sample_size" = seq(from = 3, to = 12, by = 2))
-source("~/Documents/GitHub/CnGV/src/data_generation_function.R") # Generate data (either cat. or cont.)
+# Starting parameters
+init_params <- list(
+  delta_env = seq(from = -5, to = 5, by = 1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = seq(from = -5, to = 5, by = 1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  sample_size = c(3,5,7,10), 
+  n_genotypes = c(2,4,6,8),
+  n_environments = n_genotypes,
+  std_dev= seq(from = 0, to = 3, by = 0.5), # Random noise, with standard deviation of 1,
+  interaction= seq(from = 0, to = 3, by = 0.5)) # this sd determines the amount of GxE)
+
+#source("~/Documents/GitHub/CnGV/src/data_generation_function.R") # Generate data (either cat. or cont.)
 source("~/Documents/GitHub/CnGV/src/sim_means_se.R") # Generate means and SE from raw sim. data (either cat. or cont.)
 
 # Generate categorical data
-cat_raw <- data.frame(data_generation(Catdat)) # raw
-outdat <- Categorical_sim(cat_raw,50) # Covariance and GxE on Raw data 
+cat_raw <- data.frame(data_generation(init_params)) # raw
+outdat <- replicate(10,Categorical_sim(cat_raw,10)) # Covariance and GxE on Raw data 
 
 print(ggplot(outdat, aes(x=true_covariance,y=power,colour= Sample_size))) + geom_point()
 
@@ -525,50 +510,17 @@ test5 = read.csv("~/Desktop/test5.csv") # Raw but ngen!= nenv #630_male_wing_len
 power_data = read.csv("~/Desktop/power_analysis_data_20200102.csv")
 power_analysis <- Categorical_sim(power_data,1) # Covariance and GxE on Raw data
 
-###########
-## Power ##
-###########
-#Power is the proportion of replicates whose 95% CI do not include 0
-newdat = outdat
-powerdat = data.frame()
-for(i in 1:length(unique(newdat$reps))){
-  rep = unique(newdat$reps)[i]
-  repdat = filter(newdat, reps == rep)
-  for(j in 1:length(unique(repdat$std.dev))){
-    sdev = unique(newdat$std.dev)[j]
-    repdat2 = filter(repdat, std.dev == sdev)
-    for(k in 1:length(unique(repdat2$effect.size))){
-      effsize = unique(repdat2$effect.size)[k]
-      repdat3 = filter(repdat2, effect.size == effsize)
-      
-      powerdat. = data.frame("reps" = unique(repdat3$reps),
-                             "std.dev" = unique(repdat3$std.dev),
-                             "effect.size" = unique(repdat3$effect.size),
-                             "numer" = sum(repdat3$overunder),
-                             "denom" = nrow(repdat3))
-      powerdat = rbind(powerdat,powerdat.)
-    }
-  }
+
+# Power  
+cross.null<-NULL  
+cov_dat = unlist(lapply(bootdat, `[`, 2))
+for(i in 1:length(cov_dat)){
+  # Is CI estimate less than zero? 1 = no, 0 = yes
+  if(true_covariance[[1]] < 0 & cov_dat[[i]] < 0) {cross.null[i] = 1
+  }else if(true_covariance[[1]] > 0 & cov_dat[[i]] > 0) {cross.null[i] = 1
+  }else{cross.null[i] = 0}
+  #Power is the proportion of replicates whose 95% CI do not include 0
 }
-
-## Plot Heatmap
-
-simplot = ggplot(data = powerdat, aes(x = reps, y = effect.size))+ #reorder(std.dev,-std.dev)
-  geom_tile(aes(fill = power), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue")+
-  theme_classic()+ 
-  #ylab("Difference in G and E") + xlab("Sample Size")+
-  theme_bw(base_size = 30, base_family = "Helvetica")+ 
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'black')) +
-  theme(plot.background = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.ticks = element_line(colour = "black"))+
-  theme(axis.text= element_text(colour = "black"))+
-  labs(colour = "Sample Size")+
-  theme(legend.position="bottom")+
-  theme(legend.title = element_text(size = 14),
-        legend.text = element_text(size = 14))
-#theme(legend.position="none")
-simplot
-
-
-powerdat$power = (powerdat$numer/powerdat$denom) 
+numerator <- sum(cross.null)
+denominator <- length(cov_dat)
+power <- numerator/denominator

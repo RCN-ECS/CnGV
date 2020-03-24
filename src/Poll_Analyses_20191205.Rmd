@@ -13,6 +13,7 @@ library("ggplot2")
 library("tidyverse")
 library("data.table")
 library("rworldmap")
+library("gridExtra")
 ```
 
 In November 2019, a survey was sent to RCN members that attended the workshop at Shoals Marine Lab. Below are plots depicting poll results. 
@@ -24,7 +25,7 @@ avg_duration <-  mean(polldata$Duration..in.seconds.)
 (median_duration/60)
 
 # Any duplicated pollsters?
-which(duplicated(polldata$IPAddress))
+which(duplicated(polldata$IPAddress)) # No
 
 ```
 118 unique IP addresses (people) completed the survey. 
@@ -47,7 +48,7 @@ user_profiles = ggplot(user_profiles[-1,], aes(fill=Q11, y=educ, x=Q7)) +
 ```
 Geographic Spread of Polls
 ```{r}
-newmap <- getMap(resolution = "low")
+newmap <- getMap(resolution = "high")
 plot(newmap, asp = 1) +
 points(polldata$LocationLongitude, polldata$LocationLatitude, col = "red", pch = 20, cex = .6)
 ```
@@ -929,6 +930,9 @@ Which of the 20 questions were ranked as "very important"?
 rankdat = rbind(Q18,Q29,Q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41,q42,q43,q44,q45,q46,q47,q48)
 
 very_important = filter(rankdat, Importance == "Very important")
+very_important_marine = filter(very_important, field == "marine science")
+very_important_evol = filter(very_important, field =="evolutionary biology")
+
 very_important_plot = ggplot(very_important, aes(fill = field, y=counts, x=reorder(question,-counts))) + 
   theme_bw()+ 
   geom_bar(position="dodge", stat="identity") + 
@@ -955,6 +959,86 @@ semi_important_plot = ggplot(semi_important, aes(fill = field, y=counts, x=reord
 
 grid.arrange(very_important_plot,semi_important_plot,not_important_plot,nrow=3)
 ```
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(readr)
+
+mar <- filter(rankdat, field == "marine science")
+evo <- filter(rankdat, field == "evolutionary biology")
+
+permutation_poll <- function(input_df, replicates){
+  
+  #Outputs
+  n_permute = 0
+  test_stat = data.frame()
+  null_dist = data.frame()
+  outdat = data.frame()
+
+  # Calculate proportion ranked "Very Important"
+  for(j in 1:length(unique(input_df$question))){
+    q = unique(as.factor(input_df$question))[j]
+    sample_df <- filter(input_df, question == q[1])
+    test_stat. <- data.frame("test_stat" = sum(sample_df$counts[sample_df$Importance == "Very important"])/sum(sample_df$counts),
+                             "question" = q[1],
+                             "Importance" = "Very important")
+    test_stat <- rbind(test_stat,test_stat.)
+  }
+  
+  # Shuffle data
+  for(k in 1:replicates){
+    n_permute = n_permute + 1
+    null_temp = data.frame()
+    for(i in 1:length(unique(input_df$question))){
+      r = unique(as.factor(input_df$question))[i]
+      sample_df <- filter(input_df, question == r)
+      nulls <- sample(sample_df$counts, size=nrow(sample_df), replace = FALSE)
+      nulldat <- data.frame("counts" = nulls,
+                            "Importance" = sample_df$Importance)
+      new_stat. <- data.frame("new_stat" = sum(nulldat$counts[nulldat$Importance == "Very important"])/sum(nulldat$counts),
+                              "question" = r[1],
+                              "rep" = n_permute)
+      null_temp <- rbind(null_temp,new_stat.)
+    }
+    null_dist <- rbind(null_dist,null_temp)
+  }
+    
+    # Hypothesis test
+  for(l in 1:length(unique(null_dist$question))){
+    test_df <- filter(null_dist, question == unique(null_dist$question)[l])
+    obs <- unique(test_stat$test_stat[match(test_df$question,test_stat$question)])
+    ptemp = (rank(c(obs,test_df[,1]))[1])/(replicates+1) 
+    pvalue = NULL
+    if(ptemp < 0.5){pvalue = ptemp}else{pvalue = (1-ptemp)}
+    outdat. <- data.frame("question" = unique(null_dist$question)[l],
+                          "test_stat"= obs,
+                          "pvalue" = pvalue)
+    outdat <-rbind(outdat,outdat.)
+  }
+  return(outdat)
+}
+
+marine_results = permutation_poll(mar,999)
+length(which(marine_results$pvalue < 0.05)) # none significant
+
+evolution_results = permutation_poll(evo,999)
+length(which(evolution_results$pvalue < 0.05)) # none significant
+
+combined_results = permutation_poll(rankdat,999)
+length(which(combined_results$pvalue < 0.05)) # 12 are significant
+
+combined_results$combostat = combined_results$test_stat/combined_results$pvalue
+
+#ggplot(combined_results,aes(x = question,y=combostat))+ geom_bar(stat="identity")
+ggplot(combined_results, aes(x = pvalue,y=test_stat)) + ggtitle("Marine and Evolution Combined") + theme_bw() + xlab("P-value") + ylab("% that Ranked question as 'Very Important'") + geom_text(aes(y = test_stat,label = question))
+
+ggplot(evolution_results, aes(x = pvalue,y=test_stat)) + ggtitle("Evolutionary Science")+ theme_bw() + xlab("P-value") + ylab("% that Ranked question as 'Very Important'")+ geom_text(aes(y = test_stat,label = question))
+
+ggplot(marine_results, aes(x = pvalue,y=test_stat)) + ggtitle("Marine Science")+ theme_bw()+ xlab("P-value") + ylab("% that Ranked question as 'Very Important'")+ geom_text(aes(y = test_stat,label = question))
+
+```
+To permute - need to go back and shuffle between all outcomes (important, not important, etc.). Then determine if 
 
 Q34. Choose up to 3 questions you think are most important for advancing each field. Questions can be important for more than one field.
 
@@ -1094,7 +1178,6 @@ cons_plot
 
 Final question: Rank how you determine importance of a subject (Q33)
 ```{r}
-Q33_1	Q33_2	Q33_3	Q33_4	Q33_5
 
 a <- data.frame("rank" = polldata$Q33_1,
                "criteria" = rep("Novelty", nrow(polldata)))
@@ -1124,3 +1207,212 @@ import_plot = ggplot(import1, aes(fill = as.factor(rank), y=counts, x=reorder(cr
   guides(fill=guide_legend(title="Rank"))
 import_plot
 ```
+
+# Rank Questions for statistical Analyses
+```{r likert}
+temp_df <- polldata[,c(37:78)]
+likert_df = tibble()
+for(i in 1:nrow(temp_df)){
+  for(j in 1:ncol(temp_df)){
+    if(temp_df[i,j] == "Very important"){likert_df[i,j] = 5
+    }else if(temp_df[i,j] == "Very important,Somewhat important"){likert_df[i,j] = 4
+    }else if(temp_df[i,j] == "Somewhat important"){likert_df[i,j] = 3
+    }else if(temp_df[i,j] == "Somewhat important,Not important"){likert_df[i,j] = 2
+    }else if(temp_df[i,j] == "Not important"){likert_df[i,j] = 1
+    }else{temp_df[i,j] = likert_df[i,j]}
+  }
+}
+colnames(likert_df)<- colnames(temp_df)
+```
+
+```{r}
+## Likert 
+sums = data.frame(t(colSums(likert_df,na.rm=T))) #.1 = marine; .2 = evobio
+
+marine_names = grep(".1_", names(sums), value = TRUE)
+evo_names = grep(".2_", names(sums), value = TRUE)
+
+likert_mar = data.frame(t(sums[ , which(names(sums) %in% marine_names)]))
+likert_mar$Question = seq(1:nrow(likert_mar))
+colnames(likert_mar) <- c("Counts","Question")
+likert_mar$Subject = rep("Marine Science",nrow(likert_mar))
+likert_mar$weighted_avg = (likert_mar$Counts/118)
+
+likert_evo = data.frame(t(sums[ , which(names(sums) %in% evo_names)]))
+likert_evo$Question = seq(1:nrow(likert_evo))
+#setDT(likert_evo, keep.rownames = TRUE)[]
+colnames(likert_evo) <- c("Counts","Question")
+#d <- as.data.frame(unlist(strsplit(likert_evo$Question, "\\.")))
+#toDelete <- seq(2, nrow(d), 2)
+#likert_evo$Question = d[-toDelete,]
+likert_evo$Subject = rep("Evolutionary Biology",nrow(likert_evo))
+likert_evo$weighted_avg = (likert_evo$Counts/118)
+
+likert_data = rbind(likert_evo,likert_mar)
+cols = c("Evolutionary Biology"="#83c0fd","Marine Science"="#012345")
+
+likert_plot = ggplot(likert_data, aes(x = reorder(Question,-weighted_avg), y = weighted_avg, fill = Subject)) + 
+  geom_bar(position="stack", stat="identity")+
+  geom_text(aes(label = round(weighted_avg,2), group = Subject),
+            colour = "white",
+            position = position_stack(vjust = .5),
+            angle = 90,
+            size = 6)+
+  xlab("Survey Question")+
+  ylab("Average Score") +
+  scale_fill_manual(values = cols)+
+  theme_bw()+
+  scale_x_discrete(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))+
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank())+
+  theme(axis.text.y = element_text(colour = "black",size = 14),       
+        axis.text.x = element_text(colour = "black",size = 14),
+        axis.title.y = element_text(colour = "black",size = 16),
+        axis.title.x = element_text(colour = "black",size = 16))
+likert_plot
+```
+
+```{r rank}
+temp_df <- polldata[,82:144]
+rank_df = tibble()
+for(i in 1:nrow(temp_df)){
+  for(j in 1:ncol(temp_df)){
+    if(is.na(temp_df[i,j])){rank_df[i,j] = 0
+    }else{rank_df[i,j] = 1}
+  }
+}
+colnames(rank_df)<- colnames(temp_df)
+
+ranksums = data.frame(t(colSums(rank_df,na.rm=T))) #.1 = marine; .2 = evobio
+
+mar_titles = grep("4_0_", names(ranksums), value = TRUE)
+evo_titles = grep("4_1_", names(ranksums), value = TRUE)
+con_titles = grep("4_2_", names(ranksums), value = TRUE)
+
+rank_mar = data.frame(t(ranksums[ , which(names(ranksums) %in% mar_titles)])) 
+rank_mar$Question = as.factor(seq(1:nrow(rank_mar)))
+rank_mar$subject = rep("Marine Science",nrow(rank_mar))
+colnames(rank_mar) <-c("Counts","Question","Subject")
+
+rank_evo = data.frame(t(ranksums[ , which(names(ranksums) %in% evo_titles)])) 
+rank_evo$Question = as.factor(seq(1:nrow(rank_evo)))
+rank_evo$subject = rep("Evolutionary Biology",nrow(rank_evo))
+colnames(rank_evo) <-c("Counts","Question","Subject")
+
+rank_con = data.frame(t(ranksums[ , which(names(ranksums) %in% con_titles)])) 
+rank_con$Question = as.factor(seq(1:nrow(rank_con)))
+rank_con$subject = rep("Conservation and Management",nrow(rank_con))
+colnames(rank_con) <- c("Counts","Question","Subject")
+
+rank_data = rbind(rank_con,rank_mar,rank_evo)
+```
+
+```{r}
+# For ordering according to highest cumulative: 
+sum_df <- rank_data %>%
+  group_by(Question) %>%
+  summarize(response=sum(Counts))
+rank_data$ranked = rep(rank(sum_df$response), times = 3)
+rank_data$response = rep(sum_df$response,times = 3)
+rank_data$Question = as.integer(rank_data$Question)
+
+# Scale by Average
+response_mean = mean(rank_data$Counts)
+rank_data$scaled_response = rank_data$Counts - response_mean
+
+# Heatmap Original order (most votes on top, least votes on bottom)
+rankplot = ggplot(rank_data, aes(y =reorder(Question,ranked), x = Subject, fill = scaled_response, label=response)) + 
+  geom_tile() + theme_bw()+
+  ylab("Survey Question")+
+  geom_text(aes(label = round(scaled_response, 1))) +
+  #scale_y_continuous(sec_axis = sec_axis(rank_data$response)) +
+  scale_x_discrete(expand = c(0, 0),
+                      position = "top") +
+  scale_y_discrete(#limits=rank_data$Question[order(rank_data$response)],
+                  expand = c(0, 0)) +
+  scale_fill_gradientn(colours=c("#012345","white","#FFBFA8"))+
+  labs(fill = "Survey Response")+
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank())+
+        #legend.position = "none")+
+  theme(axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y = element_text(colour = "black",size = 14),       
+        axis.text.x = element_text(colour = "black",size = 14),
+        axis.title.y = element_text(colour = "black",size = 16),
+        axis.title.x = element_text(colour = "black",size = 16))
+rankplot
+
+
+```
+
+```{r}
+# Heatmap Ordered to match Likert plot order 
+new_order = data.frame("Question" = rep(c(4,8,2,1,13,7,5,15,18,16,21,19,20,6,14,3,12,11,17,9,10),each = 3))
+rank_data2 =rank_data[order(match(rank_data$Question,new_order$Question)),]
+rank_data2$response = rep(c(1:21),each = 3)
+
+new_rankplot = ggplot(rank_data2, aes(y = reorder(Question,-response), x = Subject, fill = Counts)) + 
+  geom_tile() + theme_bw()+
+  ylab("Survey Question")+
+  geom_text(aes(label = round(Counts, 1))) +
+  scale_x_discrete(expand = c(0, 0),
+                   position = "top") +
+  scale_y_discrete(#limits=rank_data$Question[order(rank_data$response)],
+                   expand = c(0, 0)) +
+  scale_fill_gradient(low = "white",
+                      high = "#012345")+
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        legend.position = "none")+
+  theme(axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y = element_text(colour = "black",size = 14),       
+        axis.text.x = element_text(colour = "black",size = 14),
+        axis.title.y = element_text(colour = "black",size = 16),
+        axis.title.x = element_text(colour = "black",size = 16),)
+new_rankplot
+```
+
+```{r}
+
+sum_df$Subject = rep("Cumulative Total",times = nrow(sum_df))
+colnames(sum_df)[2]<- "Counts"
+cumulative_data <- rbind(sum_df,rank_data) # IF ERROR --  Rerun the original rank_data 
+cumulative_data$Subject <- factor(cumulative_data$Subject, levels=c("Evolutionary Biology", "Marine Science", "Conservation and Management","Cumulative Total"))
+
+# Heatmap With Cumulative Panel
+
+cumulative_rankplot = ggplot(cumulative_data, aes(y = reorder(Question,Counts), x = Subject, fill = Counts)) + 
+  geom_tile() + theme_bw()+
+  ylab("Survey Question")+
+  geom_text(aes(label = round(Counts, 1))) +
+  scale_x_discrete(expand = c(0, 0),
+                   position = "top") +
+  scale_y_discrete(#limits=rank_data$Question[order(rank_data$response)],
+                   expand = c(0, 0)) +
+  scale_fill_gradient(low = "white",
+                      high = "#012345")+
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        legend.position = "none")+
+  theme(axis.ticks.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.y = element_text(colour = "black",size = 14),       
+        axis.text.x = element_text(colour = "black",size = 14),
+        axis.title.y = element_text(colour = "black",size = 16),
+        axis.title.x = element_text(colour = "black",size = 16),)
+cumulative_rankplot
+```
+
+
+

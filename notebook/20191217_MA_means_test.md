@@ -1,5 +1,53 @@
 # Test of means and bootstrapping approach
 
+## Update for 2/27/2020
+Since writing this post, we have changed the way we generate data from using linear models to regression design matrices. As described below, we found the previously estimated means/SE data downwardly biased covariance and GxE estimates. 
+
+I rewrote the code for the means/SE data in which I use the new data generation approach. In my new code, kept the overall approach the same (i.e., estimating covariance and GxE on the provided means without using Anovas), but I built in a small function in which I calculate the true covariance and GxE values (i.e., the values calculated on the full raw dataset with no noise). In doing so, I can compare how accurately the means/SE data are performing. 
+**If CovGE and GxE estimates are accurate, they should match the TRUE values**
+
+I ran a small simulation with the following starting parameters in which I varied only the standard deviation (but with a small interaction built in): 
+```
+param_list <- list(
+  reps = 5,
+  delta_env = c(1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = c(-1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  sample_size = c(5), 
+  n_genotypes = c(3),
+  n_environments = NULL,
+  std_dev= c(0.01,0.5,1), # Random noise, with standard deviation of 1,
+  interaction= c(0.5)) # this sd determines the amount of GxE)
+```
+I ran the full code which *includes standardizing the data*
+
+Upon running this code I plotted the estimated CovGE and GxE against the true values. *If they were generated correctly, they should fall along a 1:1 line, with higher standard deviation being further from that line*
+
+#### AND THATS WHAT I FOUND 
+
+Looks like whatever bias that was generated in the old coding approach is reduced in the new coding approach! Wahoo! However, when standard deviation IS present, the covGE estimates do seem to be biased downwardly still. GxE seem fine.  
+
+**Covariance:**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/CovTest_means.png)
+
+**GxE**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/GxEtest_means.png)
+
+### Why is CovGE increasing if the only thing changing is standard deviation? 
+My guess was that the moderate (0.5) interaction term was leading to some amount of covariance being picked up. When I re-ran the above with interaction term of Zero, I got the expected pattern of no change in "true" covGE but just variation of standard deviation: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Cov_noInt.png)
+
+### Error bars! 
+After finding and fixing the bug in my bootstrap code, I ran a sim with sample sizes of 5 and 100. As expected, error gets smaller with the larger sample size. So that's a bit reassuring. Unfortunately, the error bars for the higher std. dev covGEs do not overlap with the 1:1 line, which we would hope for if there was no real bias. So it looks like for covariance, the bias of lower CovGEs with means/SE data persists. GxE all seem to overlap the 1:1 line though, suggesting those data are a bit more robust. Again, there is an interaction term included, hence the variability in covGE and GxE. Shape of point signifies sample size.
+
+#### Covariance
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Cov_SampleSize_error.png)
+
+#### GxE
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/GxE_SampleSize_error.png)
+
+
+## 12/17/2020: 
 As noted [here](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20191204_Categorical_Analyses.md), I recently re-made code into a more manageable unit.
 
 In doing so, I modified the bootstrapping code for data means. (Bootstrapping approach for the raw data is the same as it was before).
