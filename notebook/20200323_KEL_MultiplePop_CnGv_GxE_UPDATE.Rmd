@@ -20,6 +20,34 @@ Basically, we model the phenotype as an additive function of:
 **Below, I edited this previous post to show solutions for issues that were arising with simulating a reciprocal transplant with more than 2 genotypes. Basically we kept getting an issue where the maximum possible covariance was decreasing with increaseing number of reciprocal transplant sites. By changine `n_genotypes` in the code below, you can see the issue that arises after standardizing the phenotypic data to a mean of 0 and unit variance. I also show that a solution is to use cov(G,E) when n_genotypes = 2, and use cor(G, E) when n_genotypes > 2.**
 
 ```{r}
+G <- -5:5
+E <- -5:5
+cov(G, E)
+
+# If G and E are independent, then scaling each one independently essentially gives a correlation:
+cov(scale(G), scale(E))
+cor(G, E)
+
+G <- -5:5 + rnorm(11,0,3)
+E <- -5:5
+cov(G, E)
+
+# If G and E are independent, then scaling each one independently essentially gives a correlation:
+cov(scale(G), scale(E))
+cor(G, E)
+
+# However, in our case, the G and E are not independent, because they are 
+# both estimated from phenotype data. And because we scale the phenotype
+# data before we calculate the G means and E means, with more than 2
+# gentotypes this scaling has weird effects on the covariance.
+
+# So this suggests that correlation is a better measure. However,
+# we know that correlation doesn't work with only 2 genotypes 
+# the correlation between two unequal points will either be -1 or 1
+
+```
+
+```{r}
 
 beta1 = 1 # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
 
