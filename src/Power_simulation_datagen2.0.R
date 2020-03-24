@@ -11,7 +11,7 @@ param_list <- list( # For future - make sure this set of parameters catches full
   delta_env = c(0,0.25,0.5,0.75,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(-1,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
   sample_size = c(10), 
-  n_genotypes = c(2,4,8,16),
+  n_pop = c(2,4,8,16),
   n_environments = NULL,
   std_dev= c(0.1,0.5),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
   interaction= c(0,0.5,1)) # this sd determines the amount of GxE)
@@ -20,13 +20,13 @@ param_list <- list( # For future - make sure this set of parameters catches full
 
 param_list <- list( 
   reps = c(1),
-  delta_env = c(0,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_env = c(1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(-1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(10), 
-  n_genotypes = c(16),
+  sample_size = c(5,10), 
+  n_pop = c(2,10),
   n_environments = NULL,
   std_dev= c(0.1),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(0,1))
+  interaction= c(0.1,1.5))
 
 
 # Table of parameters
@@ -36,7 +36,7 @@ table_fun <- function(param_list){
   param_temp <- expand.grid("delta_env" = param_list$delta_env,
                             "delta_gen" = param_list$delta_gen,
                             "sample_size" = param_list$sample_size,
-                            "n_genotypes" = param_list$n_genotypes,
+                            "n_pop" = param_list$n_pop,
                             "std_dev" = param_list$std_dev,
                             "interaction" = param_list$interaction)
   
@@ -44,7 +44,7 @@ table_fun <- function(param_list){
   n_combo <- length(param_list$delta_env)*
     length(param_list$delta_gen)*
     length(param_list$sample_size)*
-    length(param_list$n_genotypes)*
+    length(param_list$n_pop)*
     length(param_list$std_dev)*
     length(param_list$interaction)
   reps <- rep(c(1:param_list$reps), each = n_combo)
@@ -58,6 +58,7 @@ table_fun <- function(param_list){
 }
 df = table_fun(param_list) 
 dim(df)
+param_table = df
 
 df1 = df[-which(rowSums(df[c(3,4)])==0),] # remove rows with zeros.
 dim(df1)
@@ -81,21 +82,22 @@ ring <- function(param_table, n_boot){
     
     # For reproducibility
     set.seed = 999
+    model_df = NULL
   
-    n_environments = param_table$n_genotypes[i]
+    n_environments = param_table$n_pop[i]
     
     # Approximate Cov(G,E)
     cov_GE_approx = param_table$delta_env[i] * param_table$delta_gen[i]
     
     # Dataframe foundations
-    gen <- rep(1:param_table$n_genotypes[i], each = param_table$sample_size[i]*n_environments)
+    gen <- rep(1:param_table$n_pop[i], each = param_table$sample_size[i]*n_environments)
     env <- rep(1:n_environments, each = param_table$sample_size[i],times = n_environments) 
     
     # Random Noise
-    noise <- rnorm(param_table$sample_size[i] * param_table$n_genotypes[i] * n_environments, 0, sd = param_table$std_dev[i]) 
+    noise <- rnorm(param_table$sample_size[i] * param_table$n_pop[i] * n_environments, 0, sd = param_table$std_dev[i]) 
     
     # Interaction Terms
-    int <- rep(rnorm(param_table$n_genotypes[i] * n_environments, 0, sd = param_table$interaction[i]),each = param_table$sample_size[i]) # interaction term - one for each GE level
+    int <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = param_table$interaction[i]),each = param_table$sample_size[i]) # interaction term - one for each GE level
 
     # Create the model dataframe 
     model_df <- data.frame(gen, env, noise, int)
@@ -107,13 +109,11 @@ ring <- function(param_table, n_boot){
     model_df$phen = phen
     
     # Standardize data
-    dat_avg <- mean(phen) 
-    dat_std <- sd(phen)
-    model_df$phen_corrected <- ((phen - dat_avg)/dat_std)
+    model_df$phen_corrected = (phen-mean(phen))/sd(phen)
     
     # Anova
-    test_temp <- aov(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
-
+    test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
+    
     # Estimated Marginal Means
     emm_options(msg.interaction = FALSE)
     emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
@@ -136,16 +136,17 @@ ring <- function(param_table, n_boot){
       etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[j])
       emean <- sum(etemp[,3])/n_environments
       tempdat. = data.frame("E_means" = emean,
-                            "exp_env_factor" = unique(model_df$exp_env_factor)[j])
+                            "exp_env_factor" = unique(emm_GxE$exp_env_factor)[j])
       E_matrix = rbind(E_matrix,tempdat.)
     }
     
     # Covariance
     Cov_matrix = data.frame()
     Cov_matrix <- cbind(G_matrix,E_matrix)
-    cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
-    
-    # Magnitude of GxE using EMMs
+    if(param_table$n_pop[i]==2){cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
+    }else{cov_est = cor(Cov_matrix$G_means,Cov_matrix$E_means)}
+
+        # Magnitude of GxE using EMMs
     GxE_emm <- abs(mean(model_df$phen_corrected) - # Overall mean
                      (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
                      (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
@@ -156,15 +157,13 @@ ring <- function(param_table, n_boot){
     #############################
     
     # Generate phenotype data with no error using same regression equation
-    no_err_phen = param_table$delta_env[i] * model_df$env + param_table$delta_gen[i] * model_df$gen + model_df$int 
+    no_err_phen = param_table$delta_env[i] * model_df$env + param_table$delta_gen[i] * model_df$gen + model_df$int
     
     # Standardize no error data
-    dat_avg_noerror <- mean(no_err_phen) 
-    dat_std_noerror <- sd(no_err_phen)
-    model_df$no_err_phen_corrected <- ((no_err_phen - dat_avg_noerror)/dat_std_noerror)
+    model_df$no_err_phen_corrected = (no_err_phen-mean(no_err_phen))/sd(no_err_phen)
     
     # Anova with no error
-    test_temp_noerror <- aov(no_err_phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
+    test_temp_noerror <- lm(no_err_phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
     
     # Estimated Marginal Means with no error
     emm_options(msg.interaction = FALSE)
@@ -177,9 +176,9 @@ ring <- function(param_table, n_boot){
     G_matrix = data.frame()
     for(y in 1:length(unique(emm_GxE$gen_factor))){
       gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[y])
-      gmean <- sum(gtemp[,3])/param_table$n_genotypes[y]
+      gmean <- sum(gtemp[,3])/length(unique(emm_GxE$gen_factor))
       tempdat = data.frame("G_means" = gmean,
-                           "gen_factor" = unique(model_df$gen_factor)[y])
+                           "gen_factor" = unique(emm_GxE$gen_factor)[y])
       G_matrix = rbind(G_matrix,tempdat)
     }
     
@@ -189,17 +188,18 @@ ring <- function(param_table, n_boot){
       etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[f])
       emean <- sum(etemp[,3])/n_environments
       tempdat. = data.frame("E_means" = emean,
-                            "exp_env_factor" = unique(model_df$exp_env_factor)[f])
+                            "exp_env_factor" = unique(emm_GxE$exp_env_factor)[f])
       E_matrix = rbind(E_matrix,tempdat.)
     }
     
     # Covariance with no error
     Cov_matrix = data.frame()
     Cov_matrix <- cbind(G_matrix,E_matrix)
-    true_cov = cov(Cov_matrix$G_means,Cov_matrix$E_means)
-    
-    # Magnitude of GxE with no error 
-    true_GxE <- abs(mean(model_df$phen_corrected) - # Overall mean
+    if(param_table$n_genotypes[i]==2){true_cov = cov(Cov_matrix$G_means,Cov_matrix$E_means)
+    }else{true_cov = cor(Cov_matrix$G_means,Cov_matrix$E_means)}
+
+        # Magnitude of GxE with no error 
+    true_GxE <- abs(mean(model_df$no_err_phen_corrected) - # Overall mean
                      (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
                      (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
                      (emm_GxE[1,3])) # GxE
@@ -234,7 +234,7 @@ ring <- function(param_table, n_boot){
       }
       
       # Anova
-      test_boot <- aov(phen_corrected ~ exp_env_factor * gen_factor, data = shuffle_dat)
+      test_boot <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = shuffle_dat)
       
       # Estimated Marginal Means
       emm_options(msg.interaction = FALSE)
@@ -265,8 +265,9 @@ ring <- function(param_table, n_boot){
       # Covariance - Bootstrap
       Cov_matrix_boot = data.frame()
       Cov_matrix_boot <- cbind(G_matrix_boot,E_matrix_boot)
-      cov_est_boot = cov(Cov_matrix_boot$G_means,Cov_matrix_boot$E_means)
-      
+      if(param_table$n_pop[i]==2){cov_est_boot = cov(Cov_matrix_boot$G_means,Cov_matrix_boot$E_means)
+      }else{cov_est_boot = cor(Cov_matrix_boot$G_means,Cov_matrix_boot$E_means)}
+
       # Magnitude of GxE - Bootstrap
       GxE_emm_boot <- abs(mean(shuffle_dat$phen_corrected) - # Overall mean
                             (emm_G_boot$emmean[emm_G_boot$gen_factor=="G_1"])- # G
@@ -303,7 +304,7 @@ ring <- function(param_table, n_boot){
                              "phen_corrected" = null_temp)
       
       # Anova
-      test_perm <- aov(phen_corrected ~ exp_env_factor * gen_factor, data = perm_dat)
+      test_perm <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = perm_dat)
       
       # Estimated Marginal Means - Permutation
       emm_options(msg.interaction = FALSE)
@@ -334,7 +335,8 @@ ring <- function(param_table, n_boot){
       # Covariance - Permutation
       Cov_matrix_perm = data.frame()
       Cov_matrix_perm <- cbind(G_matrix_perm,E_matrix_perm)
-      cov_est_perm = cov(Cov_matrix_perm$G_means,Cov_matrix_perm$E_means)
+      if(param_table$n_pop[i]==2){cov_est_perm = cov(Cov_matrix_perm$G_means,Cov_matrix_perm$E_means)
+      }else{cov_est_perm = cor(Cov_matrix_perm$G_means,Cov_matrix_perm$E_means)}
       
       # Magnitude of GxE - Permutation
       GxE_emm_perm <- abs(mean(perm_dat$phen_corrected) - # Overall mean
@@ -362,7 +364,7 @@ ring <- function(param_table, n_boot){
                            "delta_env" = param_table$delta_env[i],
                            "delta_gen" = param_table$delta_gen[i],
                            "sample_size" = param_table$sample_size[i],
-                           "n_genotypes" = param_table$n_genotypes[i],
+                           "n_pop" = param_table$n_pop[i],
                            "std_dev" = param_table$std_dev[i],
                            "interaction" = param_table$interaction[i],
                            "true_cov" = true_cov,
@@ -380,7 +382,9 @@ ring <- function(param_table, n_boot){
   return(output)
 }
 
-test = ring(df,50) # Parameter table, then number of bootstraps/perms    
+test2 = ring(df,50) # Parameter table, then number of bootstraps/perms  
+
+# really want to know trade off between n_genotypes and sample size.
 #write.table(test,"Power_data.txt")
 #write.csv(test,"Power_data.csv")
 
