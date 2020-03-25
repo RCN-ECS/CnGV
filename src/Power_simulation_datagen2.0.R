@@ -6,15 +6,15 @@
 
 
 # Starting list of parameters
-param_list <- list( # For future - make sure this set of parameters catches full range of GxE we want
+param_list <- list( 
   reps = c(10),
-  delta_env = c(0,0.25,0.5,0.75,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_env = c(0,0.5,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(-1,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(10), 
-  n_pop = c(2,4,8,16),
+  sample_size = c(2,16), 
+  n_pop = c(2,16),
   n_environments = NULL,
   std_dev= c(0.1,0.5),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(0,0.5,1)) # this sd determines the amount of GxE)
+  interaction= c(0,1)) # this sd determines the amount of GxE)
 
 # Starting list of parameters
 
@@ -26,7 +26,7 @@ param_list <- list(
   n_pop = c(2,10),
   n_environments = NULL,
   std_dev= c(0.1),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(0.1,1.5))
+  interaction= c(1.5))
 
 
 # Table of parameters
@@ -60,9 +60,18 @@ df = table_fun(param_list)
 dim(df)
 param_table = df
 
-df1 = df[-which(rowSums(df[c(3,4)])==0),] # remove rows with zeros.
-dim(df1)
-#write.csv(df1,"~/Desktop/df.csv")
+df <- df[!(df$delta_env==0 & df$delta_gen==0),]
+
+testset = sample(df$row, 4, replace = FALSE)
+test_df = df[testset,]
+
+# Split dataframes into workable pieces
+n <- 100
+nr <- nrow(df)
+df1 = split(df, rep(1:ceiling(nr/n), each=n, length.out=nr))
+write.csv(df,"~/Desktop/df.csv")
+
+
 
 ring <- function(param_table, n_boot){
   
@@ -195,7 +204,7 @@ ring <- function(param_table, n_boot){
     # Covariance with no error
     Cov_matrix = data.frame()
     Cov_matrix <- cbind(G_matrix,E_matrix)
-    if(param_table$n_genotypes[i]==2){true_cov = cov(Cov_matrix$G_means,Cov_matrix$E_means)
+    if(param_table$n_pop[i]==2){true_cov = cov(Cov_matrix$G_means,Cov_matrix$E_means)
     }else{true_cov = cor(Cov_matrix$G_means,Cov_matrix$E_means)}
 
         # Magnitude of GxE with no error 
@@ -384,7 +393,7 @@ ring <- function(param_table, n_boot){
 
 test2 = ring(df,50) # Parameter table, then number of bootstraps/perms  
 
-# really want to know trade off between n_genotypes and sample size.
+# really want to know trade off between n_pop and sample size.
 #write.table(test,"Power_data.txt")
 #write.csv(test,"Power_data.csv")
 
