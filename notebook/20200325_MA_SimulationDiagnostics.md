@@ -28,4 +28,7 @@ My next thought is maybe the number of bootstraps is an issue? So here are those
 Next thought is what Katie suggested - maybe in addition to shuffling phenotype, I need to shuffle the genotype and environment values too. Back to just the 4 scenarios with 100 bootstraps: Still no improvement. Actually makes #3 look worse. Back to the original coding. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/genenvshuffletoo.png)
 
-Perhaps I need to retain some 
+Perhaps I need to retain some sampling structure like I do with the bootstrap code - Im going to resample just within gen/env levels without replacement: STILL NO IMPROVEMENT. WHATTTTTTTTTT. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/structurelevels.png)
+
+
