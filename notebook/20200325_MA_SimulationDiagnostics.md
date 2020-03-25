@@ -31,4 +31,5 @@ Next thought is what Katie suggested - maybe in addition to shuffling phenotype,
 Perhaps I need to retain some sampling structure like I do with the bootstrap code - Im going to resample just within gen/env levels without replacement: STILL NO IMPROVEMENT. WHATTTTTTTTTT. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/structurelevels.png)
 
-
+Next idea: maybe something about the data standardization is driving this. I'm going to reshuffle the non-standardized phenotypes and then standardize AFTER i shuffle. (Before I was shuffling the standardized phenotypes) ... NOPE 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/standardized.png)
