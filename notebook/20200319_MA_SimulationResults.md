@@ -78,9 +78,11 @@ param_list <- list(
 
 Here is one of the results: 
 
-Here is the plot showing JUST significant covariance and GxE values. Columns are the number of pops, rows are sample size. 
+This plot shows JUST significant covariance and GxE values. Columns are the number of pops, rows are sample size. 
 
 This makes more sense in terms of the tradeoff between GxE, Covariance, population number and sample size. THe max number of signifiant values are found with 2 populations but 16 replicates. this makes sense. 
+
+I'm still not sure why there is a cluster of data points near -1 and 1 covariance.... need to investigate that further. 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/324sim_sig.png)
 
