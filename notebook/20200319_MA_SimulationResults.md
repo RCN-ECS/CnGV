@@ -59,5 +59,30 @@ Plot 1 - This just shows that sample size doesn't drive much difference in sprea
 Plot 2 - Each columns are GxE, rows are interaction term. Covariance and GxE estimates and significance are shown. Obviously something is wrong with my permutation code. I will post permutation plots later, and I will also be going through my code to make sure there are no dumb errors. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/deltaenv_interaction.png)
 
+## 3.24.2020 Update
+
+I changed the code so that we run covariance on 2 genotypes (populations), but a correlation on 3+ genotypes. This is to account for the weirdness that happens to covariance when we standardize the data. I also checked the code to make sure there were no silly errors anywhere. I couldn't find any, so hopefully there are no hidden bugs. I then ran a quick round of sims on the extreme values (eg- low and high sample size, low and high n_pop (which used to be n_genotype)
+
+```{values}
+# Starting list of parameters
+param_list <- list( 
+  reps = c(10),
+  delta_env = c(0,0.5,1),
+  delta_gen = c(-1,0,1),
+  sample_size = c(2,16), 
+  n_pop = c(2,16),
+  n_environments = NULL,
+  std_dev= c(0.1,0.5),
+  interaction= c(0,1))
+```
+
+Here is one of the results: 
+
+Here is the plot showing JUST significant covariance and GxE values. Columns are the number of pops, rows are sample size. 
+
+This makes more sense in terms of the tradeoff between GxE, Covariance, population number and sample size. THe max number of signifiant values are found with 2 populations but 16 replicates. this makes sense. 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/324sim_sig.png)
+
 
 
