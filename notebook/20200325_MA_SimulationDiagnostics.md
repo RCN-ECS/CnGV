@@ -16,3 +16,16 @@ Columns = index
 
 The null distribution looks the most "normal" for index 3, which is the one that is behaving as expected. Panels 1 is super wonky.
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/PvalueHistogram.png)
+
+My first quick notice from the set of parameters between 1 and 3 is that 3 has an interaction term of 1.5. To see if that might explain the weird histogram, i re-ran the same set of parameters from index 1 but with and interaction term. 
+
+This does not fix the weirdness in the histogram: (though does extend the margins on the x axis a bit)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/histogram_addedint.png)
+
+My next thought is maybe the number of bootstraps is an issue? So here are those 4 scenarios again (1 and 4 are same but 4 has interaction of 1.5) with 100 (1=4; top row) and 1000 bootstraps (5-8; bottom row). Again, does not change the pattern.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/hundredthousand.png)
+
+Next thought is what Katie suggested - maybe in addition to shuffling phenotype, I need to shuffle the genotype and environment values too. Back to just the 4 scenarios with 100 bootstraps: Still no improvement. Actually makes #3 look worse. Back to the original coding. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/genenvshuffletoo.png)
+
+Perhaps I need to retain some 
