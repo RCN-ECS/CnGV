@@ -34,8 +34,17 @@ But because you asked - first here is my code for how I am calculating p-values:
 Ok. The null distribution, estimates, and pvalues for Covariance look to be okay: (black vertical line signifies Covariance estimate, red line = true covariance)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/correctNullCov.png)
 
-Onto GxE. I am getting significant Pvalues when GxE is near zero because the null does not center around zero. Now. Why might that be?
+Onto GxE. I am getting significant Pvalues when GxE is near zero because the null does not center around zero. Now. Why might that be? DUH. Because I'm running a 2-tailed test when I only want a 1-tailed test. Jesus H. Christ. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/correctNull_GxE.png)
+
+To make the p-value code one tailed, I now use this code to estimate GxE significance: 
+```{r}
+# GxE P-value
+    ptemp1 = (rank(c(GxE_emm,perm_df[,2]))[1])/(n_boot+1) 
+    GxE_pvalue = 1-ptemp1 # Right-tailed
+```
+After fixing the GxE p-value code, I ran a 16 parameter combos (50 bootstraps for speed) just to make sure its all going the way its supposed to. And from the looks of these panels, it is. Phew. Puzzle solved. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/GxE_puzzlesolved.png)
 
 
 
