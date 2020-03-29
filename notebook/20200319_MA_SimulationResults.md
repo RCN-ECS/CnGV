@@ -1,5 +1,59 @@
 # SIMULATION RESULTS! #
 
+## Updated for 3.27.2020
+Below I present the results of a sim that was wrong --- see [here](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200325_MA_SimulationDiagnostics.md) for details.
+
+Now that its correct, I ran a new set of parameters - full spectrum but reduced representation to get a feel for how it worked 
+```{new params}
+# Starting list of parameters
+param_list <- list( 
+  reps = c(10),
+  delta_env = c(0,0.5,1),
+  delta_gen = c(-1,0,1),
+  sample_size = c(2,4,8,16), 
+  n_pop = c(2,4,8,16),
+  n_environments = NULL,
+  std_dev= c(0.1,0.5),
+  interaction= c(0,1))
+
+```
+## True covariance and True GxE
+These panels show the relationship of "true" GxE and CovGE (i.e., no random noise added to phenotype). Columns are the number of pops (2,4,8, or 16) and rows are sample size (also 2,4,8,16).
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/trutrue3.27.png)
+
+## Covariance and GxE Estimates
+Same plot layout but now using the data with random noise.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/estest3.27.png)
+
+## Significant Covariance and GxE Estimates
+Same as above, but only showing those data that have significant covariance and gxe estimates (p<0.05). 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/sigsig3.27.png)
+
+## Substitute Runif
+New parameter set for limited test: 
+```{new set}
+param_list <- list( 
+  reps = c(1),
+  delta_env = runif(5,0,1),
+  delta_gen = c(-1,0,1),
+  sample_size = c(4), 
+  n_pop = c(16),
+  n_environments = NULL,
+  std_dev= c(0.1),
+  interaction= c(0.1))
+```
+## 16 Population Comparison of Two Approaches
+Using the original approach where delta_env = c(0,0.5,1) vs. delta_env = runif(5,0,1).
+
+Top plot only has 16 datapoints so I could get it done semi-quickly. The bottom plot is from the full simulation so there are many more datapoints, but I filtered the full dataset to only the datapoints with sample size = 4, n_pop = 16, std. dev = 0.1 and int = 0.0.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/Runifvsfull.png)
+
+
+
+
+
+### Results from earlier which we now know are WRONG.
+
 Here I present several plots created from the first full-scale simulation! In this simulation, I ran the following parameter set:
 
 ```{parameter set}
