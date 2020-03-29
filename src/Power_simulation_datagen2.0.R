@@ -393,11 +393,29 @@ ring <- function(param_table, n_boot){
 
 test2 = ring(df,25) # Parameter table, then number of bootstraps/perms  
 
-ggplot(test2, aes(x = true_cov, y = true_GxE, group = factor(n_pop),colour = factor(sample_size))) + 
+p1=ggplot(test2, aes(x = cov_estimate, y = GxE_estimate, group = factor(n_pop),colour = factor(sample_size))) + 
   geom_point() + theme_classic() + 
-  xlab("True Covariance") + ylab("True GxE") +
-  scale_color_brewer(palette="Set1",name = "Sample Size")#+
-  #facet_wrap(~n_pop,ncol=2 )
+  xlab("Covariance Estimate") + ylab("GxE Estimate") +
+  scale_color_brewer(palette="Set1",name = "Sample Size")+
+  ggtitle("Simulation - runif coding")
+
+p2=ggplot(nint, aes(x = cov_estimate, y = GxE_estimate, group = factor(n_pop),colour = factor(sample_size))) + 
+  geom_point() + theme_classic() + 
+  xlab("Covariance Estimate") + ylab("GxE Estimate") +
+  scale_color_brewer(palette="Set1",name = "Sample Size")+
+  ggtitle("Full Simulation - original coding")
+
+require(lattice)
+require(gridExtra)
+grid.arrange(p1,p2)
+
+
+
+n16df=filter(dat_csv,n_pop == 16)
+n4 = filter(n16df, sample_size == 4)
+nstd = filter(n4, std_dev == 0.1)
+nint = filter(nstd, interaction == 0) # +
+  #facet_grid(sample_size~n_pop)
 # really want to know trade off between n_pop and sample size.
 #write.table(test,"Power_data.txt")
 #write.csv(test,"Power_data.csv")
