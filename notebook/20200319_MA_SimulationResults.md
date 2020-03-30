@@ -13,7 +13,7 @@ Grey | Neither are significant
 That produced this plot: (columns = n_pop; rows = sample size)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/sig_colored.png)
 
-The next challenge is to find the parameters that fill the space. Katie suggested the following parameters (note that interaction matches n_pop)
+The next challenge is to find the parameters that fill the space. Katie suggested the following parameters:
 ```{r}
 param_list <- list( 
   reps = c(50),
