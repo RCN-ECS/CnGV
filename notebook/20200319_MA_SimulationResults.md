@@ -1,5 +1,14 @@
 # SIMULATION RESULTS! #
 
+## Updated for 3.30.2020
+After some tinkering this morning, we came up with the plot with points colored in terms of significance: 
+Red = Both GxE and covariance are significant
+Blue = Just GxE is significant
+Green = Just covariance is significant
+Grey = Neither are significant. 
+
+That produced this plot: 
+![image]()
 ## Updated for 3.27.2020
 Below I present the results of a sim that was wrong --- see [here](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200325_MA_SimulationDiagnostics.md) for details.
 
