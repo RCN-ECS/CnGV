@@ -2,10 +2,13 @@
 
 ## Updated for 3.30.2020
 After some tinkering this morning, we came up with the plot with points colored in terms of significance: 
-Red = Both GxE and covariance are significant
-Blue = Just GxE is significant
-Green = Just covariance is significant
-Grey = Neither are significant. 
+
+Color | Meaning
+|---|---|
+Red | BOTH terms are significant
+Blue | GxE is significant
+Green | Covariance is significant
+Grey | Neither are significant 
 
 That produced this plot: (columns = n_pop; rows = sample size)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/sig_colored.png)
