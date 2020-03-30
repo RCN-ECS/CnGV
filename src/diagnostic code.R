@@ -67,11 +67,11 @@ checkfunc <- function(param_table, n_boot){
 df3 <- checkfunc(df,1)
 
 ggplot(df3, aes(x = exp_env_factor, y = phen_corrected, colour = factor(gen_factor), group = factor(gen_factor))) + 
-  geom_point()+geom_line()+theme_classic()+#geom_boxplot()
+  geom_point()+theme_classic()+#geom_boxplot()
   xlab("Environment") + ylab("Phenotype") +
   #scale_color_brewer(palette="Set1") +
   #scale_fill_manual(values = getPalette(16))+
-  facet_grid(delta_env ~ interaction)
+  facet_wrap(~index)
 
 str(df_16gen)
 View(df_16gen)

@@ -7,7 +7,7 @@
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(10),
+  reps = c(1),
   delta_env = c(0,0.5,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
   delta_gen = c(-1,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
   sample_size = c(2,4,8,16), 
@@ -20,13 +20,13 @@ param_list <- list(
 
 param_list <- list( 
   reps = c(1),
-  delta_env = runif(5,0,1),#c(0,0.5,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(-1,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+  delta_env = c(1),#c(0,0.5,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+  delta_gen = c(-1),#,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
   sample_size = c(4), 
   n_pop = c(16),
   n_environments = NULL,
   std_dev= c(0.1),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(0.1))#,1.5))
+  interaction= c(1,10))#,1.5))
 
 
 # Table of parameters
@@ -66,13 +66,6 @@ write.csv(df,"~/Desktop/df.csv")
 testset = df[c(1,4,11),]
 test_df = df[testset,]
 
-# Split dataframes into workable pieces
-n <- 100
-nr <- nrow(df)
-df1 = split(df, rep(1:ceiling(nr/n), each=n, length.out=nr))
-write.csv(df,"~/Desktop/df.csv")
-
-
 
 ring <- function(param_table, n_boot){
   
@@ -108,7 +101,9 @@ ring <- function(param_table, n_boot){
     
     # Interaction Terms
     int <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = param_table$interaction[i]),each = param_table$sample_size[i]) # interaction term - one for each GE level
-
+    int1 <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = 1),each = param_table$sample_size[i]) # interaction term - one for each GE level
+    int10 <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = 10),each = param_table$sample_size[i]) # interaction term - one for each GE level
+    
     # Create the model dataframe 
     model_df <- data.frame(gen, env, noise, int)
     model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
@@ -407,15 +402,6 @@ p2=ggplot(nint, aes(x = cov_estimate, y = GxE_estimate, group = factor(n_pop),co
 
 require(lattice)
 require(gridExtra)
-grid.arrange(p1,p2)
-
-
-
-n16df=filter(dat_csv,n_pop == 16)
-n4 = filter(n16df, sample_size == 4)
-nstd = filter(n4, std_dev == 0.1)
-nint = filter(nstd, interaction == 0) # +
-  #facet_grid(sample_size~n_pop)
 # really want to know trade off between n_pop and sample size.
 #write.table(test,"Power_data.txt")
 #write.csv(test,"Power_data.csv")
