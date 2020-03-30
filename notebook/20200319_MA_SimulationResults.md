@@ -7,8 +7,25 @@ Blue = Just GxE is significant
 Green = Just covariance is significant
 Grey = Neither are significant. 
 
-That produced this plot: 
-![image]()
+That produced this plot: (columns = n_pop; rows = sample size)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/sig_colored.png)
+
+The next challenge is to find the parameters that fill the space. Katie suggested the following parameters (note that interaction matches n_pop)
+```{r}
+param_list <- list( 
+  reps = c(50),
+  delta_env = c(0,0.5,1),
+  delta_gen = c(-1,0,1),
+  sample_size = c(5), 
+  n_pop = c(16),
+  n_environments = NULL,
+  std_dev= c(0.1),
+  interaction= c(0,8,16))
+```
+
+Here is the resulting plot with the same color scheme as above. In this plot, columns are interaction term. I assume the single dot in the 0 interacton panel is all the datapoints stacked on top of eachother. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_03152020/interactioncrazy.png)
+
 ## Updated for 3.27.2020
 Below I present the results of a sim that was wrong --- see [here](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200325_MA_SimulationDiagnostics.md) for details.
 
