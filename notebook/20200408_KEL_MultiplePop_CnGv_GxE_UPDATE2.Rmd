@@ -55,7 +55,7 @@ n_genotypes_levels = c(2,10, 50) # the number of genotypes collected from differ
 
 beta2_levels = c(0.5,1, 2) # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
 
-error_var <- 0.1
+error_var <- 0.0001
 
 for (i in 1:length(beta1_levels)){
   print(i)
