@@ -1,0 +1,205 @@
+---
+title: "Multiple Populations for CnGv and GxE"
+author: "KE Lotterhos"
+date: "1/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The purpose of this code is to provide a more general framework for modeling phenotypes in a reciprocal transplant experiment with more than two locations, when there is both GxE and cov(G,E) affecting the phenotype.
+
+Basically, we model the phenotype as an additive function of:
+- an intercept that is based on the location/environment the phenotype was collected from. Intercepts increase or decrease in a linear manner across the environment.
+- a slope that determines the plastic response of the phenotype across the environment
+- an interaction term that determines how the phenotype of genotype $i$ in environment $j$ deviates from the main effects
+- random error or noise
+
+We still need a solution for the issue that arises when simulating a reciprocal transplant with the cov(G,E) vs cor(G,E) approaches. 
+
+# Issues with cov(G,E)
+Basically we kept getting an issue where the maximum possible covariance was decreasing with increaseing number of reciprocal transplant sites. By changing `n_genotypes` in the code below, you can see the issue that arises after standardizing the phenotypic data to a mean of 0 and unit variance. To further dig into the issue, the greater the number of reciprocal transplant locations, the smaller the sd in the G_means and E_means after standardizing the phenotype data
+
+# Issues with cor(G,E)
+
+# A possible solution
+
+
+```{r}
+G <- -5:5
+E <- -5:5
+cov(G, E)
+
+# If G and E are independent, then scaling each one independently essentially gives a correlation:
+cov(scale(G), scale(E))
+cor(G, E)
+
+# However, in our case, the G and E are not independent, because they are 
+# both estimated from phenotype data. And because we scale the phenotype
+# data before we calculate the G means and E means, with more than 2
+# gentotypes this scaling has weird effects on the covariance.
+
+# So this suggests that correlation is a better measure. However,
+# we know that correlation doesn't work with only 2 genotypes 
+# the correlation between two unequal points will either be -1 or 1
+
+```
+
+```{r}
+
+beta1_levels = c(0,0.1,0.5, 1, 2) # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+
+n_genotypes_levels = c(2,10, 50) # the number of genotypes collected from different locations
+
+beta2_levels = c(0.5,1, 2) # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+
+error_var <- 0.1
+
+for (i in 1:length(beta1_levels)){
+  print(i)
+  for (j in 1:length(beta2_levels)){
+    for (k in 1:length(n_genotypes_levels)){
+      beta1 <- beta1_levels[i]
+      beta2 <- beta2_levels[j]
+      n_genotypes <- n_genotypes_levels[k]
+    #  beta1 <- 1
+    #  beta2 <- 1
+      
+    # expectation (not sure if this is right)
+    if(beta1==beta2){
+      (cov_GE_exp = 1)
+    }
+    if(beta1>beta2){
+       (cov_GE_exp =  beta2/beta1)
+    }
+    if(beta1<beta2){
+       (cov_GE_exp =  beta1/beta2)
+    }
+    if(beta1==0 | beta2==0){
+       (cov_GE_exp =  0)
+    }
+     
+     # will be correlated with the magnitude of cov(G,E)
+      
+    # Generate data
+    n = 5 # sample size
+    n_environments = n_genotypes # the number of common garden environments that the genotypes are grown in. Basically, genotype[i] orginates from environment[i]. This matching between genotypes and environment is important for the the cov(G,E) calculation. Here, we only consider the case of the complete reciprocal transplant experiment.
+
+    ## Create levels of genotypes and environments ####
+    G = rep(1:n_genotypes, each=n*n_genotypes) # '0' n times, '1' n times
+    E = rep(1:n_environments,times=n*n_genotypes) # '0'x50, '1'x50, '0'x50, '1'x50
+    set.seed(97)
+    e = rnorm(n*n_genotypes, 0, sd=error_var) # Random noise, with standard deviation of 1
+    #e = 0 # EVALUATION
+
+    ## Create interaction effect for each level of both factors ####
+    # In this case we assume the GxE interactions are a 
+    # normally distributed random variable with a mean of 0
+    # As the sd increases, so does the GxE among treatments
+    int <- 0#rnorm(n_genotypes * n_environments, 0, sd=10)
+    # no GxE
+    #int <- 0 # EVALUATION
+ 
+     # this sd determines the amount of GxE
+    int_df <- data.frame(expand.grid(G=1:n_genotypes, E=1:n_environments), 
+                         int)
+    
+    ### Create the model dataframe ####
+    model_df <- data.frame(G, E, e)
+    
+    model_df <- merge(model_df, int_df)
+    model_df <- model_df[order(model_df$G, model_df$E),]
+    dim(model_df)
+    head(model_df, 30)
+    
+    # Generate phenotype data using the regression equation ####
+    phenotype = beta1*model_df$E + beta2*model_df$G  + model_df$e + model_df$int
+    
+    
+    model_df$phenotype = phenotype
+    head(model_df)
+
+    (E_means <- tapply(phenotype, model_df$E, mean))
+    (G_means <- tapply(phenotype, model_df$G, mean))
+    (raw_data_cov <- round(cov(E_means, G_means),2))
+    raw_data_cov_scaled_means <- cov(scale(E_means), scale(G_means))
+    raw_data_cor <- round(cor(E_means, G_means),2)
+    correctb <- max(sd(E_means), sd(G_means))
+    raw_data_cov_CE4 <- round(cov(E_means, G_means)/(correctb^2),2)
+  # this should match the "true cov for raw data" I put above
+
+
+  # but the issue is we standardize the phenotype. So what happens when we do that?
+  phenotype_stn = (phenotype-mean(phenotype))/sd(phenotype)
+  (E_means_stn <- tapply(phenotype_stn, model_df$E, mean))
+  (G_means_stn <- tapply(phenotype_stn, model_df$G, mean))
+  #plot(E_means_stn, G_means_stn)
+  (stn_data_cov <- round(cov(E_means_stn, G_means_stn),2))
+  (stn_data_cor <- round(cor(E_means_stn, G_means_stn),2))
+  
+  (stn_data_cov_CE1 <- round(cov(E_means_stn, G_means_stn)/sd(E_means_stn),2))
+  (stn_data_cov_CE2 <- round(cov(E_means_stn/sd(E_means_stn), G_means_stn/sd(G_means_stn)),2)) #BAD
+  (stn_data_cov_CE3 <- round(cov(E_means_stn, G_means_stn),2)/sd(E_means_stn))
+  
+  correct <- min(c(sd(E_means_stn)/sd(G_means_stn), sd(G_means_stn)/sd(E_means_stn)))
+  correctc <- max(sd(E_means_stn),sd(G_means_stn))
+  (stn_data_cov_CE4 <- round(cor(E_means_stn, G_means_stn)*correct,2))
+  (stn_data_cov_CE4b <- round(cov(E_means_stn, G_means_stn)/(correctc^2),2))
+  
+  sd_E_means_sd <- round(sd(E_means_stn),2)
+  sd_G_means_sd <- round(sd(G_means_stn),2)
+
+  out <- data.frame(beta1, beta2, 
+                    n_genotypes,
+                    int,
+                    raw_data_cov,
+                    #raw_data_cov_scaled_means,
+                    raw_data_cor,
+                    stn_data_cov,
+                    stn_data_cor,
+                    sd_E_means_sd,
+                    sd_G_means_sd,
+                    #stn_data_cov_CE1,
+                    #stn_data_cov_CE2,
+                    #stn_data_cov_CE3,
+                    raw_data_cov_CE4,
+                    stn_data_cov_CE4,
+                    stn_data_cov_CE4b,
+                    cov_GE_exp
+                    )
+      
+      if (i == 1 & j==1 & k ==1){
+        full_examp <- out
+      }else{
+        full_examp <- rbind(full_examp, out)
+      }
+  
+    # diagnostic plots
+  setwd("/Users/lotterhos/Documents/GitHub/CnGV/notebook/20200408_diagnosticplots")
+    #need to make relative path
+  pdf(paste0("slope=", beta1,"_g=",beta2,"_ngenotypes=",n_genotypes,".pdf"))
+    # would also add true GxE (not the int), and the error variance
+    par(mfrow=c(2,1), mar=c(4,4,1,1))
+    plot(E_means_stn, G_means_stn, xlim=c(-2,2), ylim=c(-2,2)) # with bootstrap, woudl be good to add uncertainty to plot
+    abline(0,1, col="lightgrey")
+    abline(h=0, col="lightgrey")
+    
+    plot(phenotype_stn~model_df$E, col=0, xlim=c(1,n_genotypes+1), ylim=c(-3,3))
+    for (m in 1:nlevels(factor(model_df$G))){
+      x <- model_df$E[model_df$G==m]+0.05*(m-1)
+      points(phenotype_stn[model_df$G==m]~x, col=m+1)
+      p_means <- tapply(phenotype_stn[model_df$G==m],model_df$E[model_df$G==m], mean)
+      points(p_means~as.numeric(names(p_means)),
+             col=m+1, type="l")
+    }
+    mtext(paste("CovCE=", raw_data_cov_CE4),adj=1 )
+    mtext(paste("cov_stn=", stn_data_cov), adj=0)
+  dev.off()  
+    }
+  }
+}
+#full_examp
+```
+

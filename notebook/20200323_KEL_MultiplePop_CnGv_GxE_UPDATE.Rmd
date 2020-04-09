@@ -51,7 +51,7 @@ cor(G, E)
 
 beta1 = 1 # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
 
-n_genotypes = 2 # the number of genotypes collected from different locations
+n_genotypes = 16 # the number of genotypes collected from different locations
 
 beta2 = -1 # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
 
@@ -88,7 +88,7 @@ e = rnorm(n*n_genotypes, 0, sd=0.01) # Random noise, with standard deviation of 
 # In this case we assume the GxE interactions are a 
 # normally distributed random variable with a mean of 0
 # As the sd increases, so does the GxE among treatments
-int <- rnorm(n_genotypes * n_environments, 0, sd=1)
+int <- 0#rnorm(n_genotypes * n_environments, 0, sd=10)
 #int <- 0 # EVALUATION
  
  # this sd determines the amount of GxE
