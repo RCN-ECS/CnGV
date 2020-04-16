@@ -25,5 +25,5 @@ First, 4 vignettes to prove that everything is working ok:
 
 | --- | Negative Covariance | Positive Covariance | 
 | --- | --- | --- | 
-| Low GxE| https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row5.png |https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row7.png |
-| High GxE|https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row61.png | https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row59.png|
+| Low GxE| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row5.png) | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row7.png) |
+| High GxE|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row61.png) | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row59.png)|
