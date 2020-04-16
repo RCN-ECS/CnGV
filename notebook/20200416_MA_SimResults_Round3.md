@@ -34,13 +34,23 @@ Now to look at how significance lines up according to GxE and Covariance: (GxE i
 
 Still looking good. 
 
-Now to see how the correction affects the estimates. In this round of sims I generated 6 different covariance metrics for raw simulated data and again for the means data: 
+Further Diagnostics may be necessary. In addition to the endpoints listed below, I have the following for each set of parameters, I have a) phenotype data, b) Gmeans and Emeans, c) bootstrap data, d) permutation data. 
+
+I generated 6 different covariance metrics for raw simulated data and again for the means data (with CIs and p-values): 
 1. True covariance uncorrected
 2. Covariance estimate uncorrected
 3. True correlation 
 4. Correlation estimated
 5. True covariance corrected
 6. Covariance estimate corrected
+
+Finally I have different GxE metrics (with CIs and p-values): 
+1. True GxE using EMMs
+2. GxE using EMMs
+3. True GxE using Omega^2
+4. GxE using Omega^2
+
+**What diagnostics would be helpful*
 
 ## Means vs. Raw: 
 
