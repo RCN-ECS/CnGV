@@ -1,73 +1,73 @@
 ## ForLoop for Cluster
 
-# files=$(ls *0.bash)
-# echo $files #Check to see if all files are accounted for
-# for file in $files; do sbatch $file; done
-
+# Starting list of parameters
+param_list <- list( 
+  reps = c(10),
+  delta_env = c(0,0.5,1,1.5),
+  delta_gen = c(-1,0,1),
+  sample_size = c(2,3,5,10), 
+  n_pop = c(2,3,5,10), # 
+  n_environments = NULL,
+  std_dev= c(0.25),
+  interaction = 5) # Vector LENGTH not magnitude
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(1),
-  delta_env = c(0,0.5,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(-1,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(2,4,8,16), 
-  n_pop = c(2,4,8,16),
+  reps = c(5),
+  delta_env = c(1,0),
+  delta_gen = c(-1,1),
+  sample_size = c(2,5), 
+  n_pop = c(5,10),
   n_environments = NULL,
-  std_dev= c(0.1,0.5),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(0,1)) # this sd determines the amount of GxE)
-
-# Starting list of parameters
-
-param_list <- list( 
-  reps = c(1),
-  delta_env = c(1),#c(0,0.5,1),#seq(from = 0.0, to = 3.1, by = 0.5),#,1), # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
-  delta_gen = c(-1),#,0,1),#seq(from = -2, to = 2, by = 0.5),#c(-1),#,0,1), # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
-  sample_size = c(4), 
-  n_pop = c(16),
-  n_environments = NULL,
-  std_dev= c(0.1),#seq(from = 0.0, to = 2.1, by = 0.5),#c(0.5), # Random noise, with standard deviation of 1,
-  interaction= c(1,10))#,1.5))
-
+  std_dev= c(0.25),
+  interaction = 3)
 
 # Table of parameters
-table_fun <- function(param_list){
+parameter_generation <- function(param_list){
   
   # Basic parameters
   param_temp <- expand.grid("delta_env" = param_list$delta_env,
                             "delta_gen" = param_list$delta_gen,
                             "sample_size" = param_list$sample_size,
                             "n_pop" = param_list$n_pop,
-                            "std_dev" = param_list$std_dev,
-                            "interaction" = param_list$interaction)
+                            "std_dev" = param_list$std_dev)
   
-  # Book keeping rows
-  n_combo <- length(param_list$delta_env)*
-    length(param_list$delta_gen)*
-    length(param_list$sample_size)*
-    length(param_list$n_pop)*
-    length(param_list$std_dev)*
-    length(param_list$interaction)
-  reps <- rep(c(1:param_list$reps), each = n_combo)
+  # Add replicates
+  reps <- rep(c(1:param_list$reps), each = nrow(param_temp))
+  param_temp2 <- data.frame("replicate" = reps, param_temp)
   
-  # Final data frame
-  param_table <- data.frame("row"= seq(1:length(reps)), 
-                            "replicate" = reps,
-                            param_temp)
+  # Generate Interaction term - Magnitude depends on n_pop
+  param_temp3 = data.frame()
+  for(i in 1:length(unique(param_temp2$replicate))){
+    for(j in 1:length(unique(param_temp2$n_pop))){
+      sub = dplyr::filter(param_temp2,replicate==unique(param_temp2$replicate)[i])
+      subsub = dplyr::filter(sub,n_pop == unique(sub$n_pop)[j])
+      interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = param_list$interaction)
+      inter_data = merge(subsub,interaction_term)
+      colnames(inter_data)[7]<- "interaction"
+      param_temp3 = rbind(inter_data,param_temp3)
+    }
+  }
+  
+  # Assign Rows to dataframe
+  row = seq(1:nrow(param_temp3))
+  param_table = data.frame("row" = row, param_temp3)
   
   return(param_table)
-}
-df = table_fun(param_list) 
+  }
+  
 
+df = parameter_generation(param_list) 
 dim(df)
-param_table = df
-
 df <- df[!(df$delta_env==0 & df$delta_gen==0),]
+dim(df)
+head(df)
+
 write.csv(df,"~/Desktop/df.csv")
-testset = df[c(1,4,11),]
-test_df = df[testset,]
 
 
 ring <- function(param_table, n_boot){
+  start_time <- Sys.time()
   
   # Load packages
   library("emmeans")
@@ -84,9 +84,10 @@ ring <- function(param_table, n_boot){
     cat(i, "\n")
     
     # For reproducibility
-    set.seed = 999
+   # set.seed = 999
     model_df = NULL
-  
+    
+    # Set Conditional Parameters
     n_environments = param_table$n_pop[i]
     
     # Approximate Cov(G,E)
@@ -101,9 +102,7 @@ ring <- function(param_table, n_boot){
     
     # Interaction Terms
     int <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = param_table$interaction[i]),each = param_table$sample_size[i]) # interaction term - one for each GE level
-    int1 <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = 1),each = param_table$sample_size[i]) # interaction term - one for each GE level
-    int10 <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = 10),each = param_table$sample_size[i]) # interaction term - one for each GE level
-    
+
     # Create the model dataframe 
     model_df <- data.frame(gen, env, noise, int)
     model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
@@ -121,12 +120,14 @@ ring <- function(param_table, n_boot){
     
     # Estimated Marginal Means
     emm_options(msg.interaction = FALSE)
+    emm_E = emm_G = emm_GxE = NULL
     emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
     emm_G = as.data.frame(emmeans(test_temp, "gen_factor"))
     emm_GxE = as.data.frame(emmeans(test_temp, ~ exp_env_factor*gen_factor))
     
     # Gmeans
     G_matrix = data.frame()
+    gtemp = gmean = tempdat = NULL
     for(h in 1:length(unique(emm_GxE$gen_factor))){
       gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[h])
       gmean <- sum(gtemp[,3])/length(unique(emm_GxE$gen_factor))
@@ -137,6 +138,7 @@ ring <- function(param_table, n_boot){
     
     # Emeans
     E_matrix = data.frame()
+    etemp = emean = tempdat. = NULL
     for(j in 1:length(unique(emm_GxE$exp_env_factor))){
       etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[j])
       emean <- sum(etemp[,3])/n_environments
@@ -146,12 +148,10 @@ ring <- function(param_table, n_boot){
     }
     
     # Covariance
-    Cov_matrix = data.frame()
-    Cov_matrix <- cbind(G_matrix,E_matrix)
-    if(param_table$n_pop[i]==2){cov_est = cov(Cov_matrix$G_means,Cov_matrix$E_means)
-    }else{cov_est = cor(Cov_matrix$G_means,Cov_matrix$E_means)}
+    if(length(G_matrix[,1]) == 2){cov_est = cov(G_matrix$G_means,E_matrix$E_means)
+    }else{cov_est = cor(G_matrix$G_means,E_matrix$E_means)}
 
-        # Magnitude of GxE using EMMs
+    # Magnitude of GxE using EMMs
     GxE_emm <- abs(mean(model_df$phen_corrected) - # Overall mean
                      (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
                      (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
@@ -173,41 +173,42 @@ ring <- function(param_table, n_boot){
     # Estimated Marginal Means with no error
     emm_options(msg.interaction = FALSE)
     emm_options(quietly = TRUE) # Will get perfect fit warning
-    emm_E = as.data.frame(emmeans(test_temp_noerror,"exp_env_factor"))
-    emm_G = as.data.frame(emmeans(test_temp_noerror, "gen_factor"))
-    emm_GxE = as.data.frame(emmeans(test_temp_noerror, ~ exp_env_factor*gen_factor))
+    emm_E_ne = emm_G_ne = emm_GxE_ne = NULL
+    emm_E_ne = as.data.frame(emmeans(test_temp_noerror,"exp_env_factor"))
+    emm_G_ne = as.data.frame(emmeans(test_temp_noerror, "gen_factor"))
+    emm_GxE_ne = as.data.frame(emmeans(test_temp_noerror, ~ exp_env_factor*gen_factor))
     
     # Gmeans with no error
-    G_matrix = data.frame()
-    for(y in 1:length(unique(emm_GxE$gen_factor))){
-      gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[y])
-      gmean <- sum(gtemp[,3])/length(unique(emm_GxE$gen_factor))
-      tempdat = data.frame("G_means" = gmean,
-                           "gen_factor" = unique(emm_GxE$gen_factor)[y])
-      G_matrix = rbind(G_matrix,tempdat)
+    G_matrix_ne = data.frame()
+    gtemp_ne = gmean_ne  = tempdat_ne = NULL
+    for(y in 1:length(unique(emm_GxE_ne$gen_factor))){
+      gtemp_ne <- filter(emm_GxE_ne, gen_factor == unique(emm_GxE_ne$gen_factor)[y])
+      gmean_ne <- sum(gtemp_ne[,3])/length(unique(emm_GxE_ne$gen_factor))
+      tempdat_ne = data.frame("G_means" = gmean_ne,
+                           "gen_factor" = unique(emm_GxE_ne$gen_factor)[y])
+      G_matrix_ne = rbind(G_matrix_ne,tempdat_ne)
     }
     
     # Emeans with no error
-    E_matrix = data.frame()
-    for(f in 1:length(unique(emm_GxE$exp_env_factor))){
-      etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[f])
-      emean <- sum(etemp[,3])/n_environments
-      tempdat. = data.frame("E_means" = emean,
-                            "exp_env_factor" = unique(emm_GxE$exp_env_factor)[f])
-      E_matrix = rbind(E_matrix,tempdat.)
+    E_matrix_ne = data.frame()
+    etemp_ne = emean_ne = tempdat._ne = NULL
+    for(f in 1:length(unique(emm_GxE_ne$exp_env_factor))){
+      etemp_ne <- filter(emm_GxE_ne, exp_env_factor == unique(emm_GxE_ne$exp_env_factor)[f])
+      emean_ne <- sum(etemp_ne[,3])/n_environments
+      tempdat._ne = data.frame("E_means" = emean_ne,
+                                "exp_env_factor" = unique(emm_GxE_ne$exp_env_factor)[f])
+      E_matrix_ne = rbind(E_matrix_ne,tempdat._ne)
     }
     
-    # Covariance with no error
-    Cov_matrix = data.frame()
-    Cov_matrix <- cbind(G_matrix,E_matrix)
-    if(param_table$n_pop[i]==2){true_cov = cov(Cov_matrix$G_means,Cov_matrix$E_means)
-    }else{true_cov = cor(Cov_matrix$G_means,Cov_matrix$E_means)}
+    # Covariance
+    if(length(G_matrix_ne[,1]) == 2){true_cov = cov(G_matrix_ne$G_means,E_matrix_ne$E_means)
+    }else{true_cov = cor(G_matrix_ne$G_means,E_matrix_ne$E_means)}
 
-        # Magnitude of GxE with no error 
+    # Magnitude of GxE with no error 
     true_GxE <- abs(mean(model_df$no_err_phen_corrected) - # Overall mean
-                     (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
-                     (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E
-                     (emm_GxE[1,3])) # GxE
+                     (emm_G_ne$emmean[emm_G_ne$gen_factor=="G_1"])- # G
+                     (emm_E_ne$emmean[emm_E_ne$exp_env_factor=="E_1"])+ # E
+                     (emm_GxE_ne[1,3])) # GxE
     
     ###############
     ## Bootstrap ##
@@ -382,11 +383,36 @@ ring <- function(param_table, n_boot){
                            "GxE_uprCI" = GxE_CI[[2]],
                            "GxE_pvalue" = GxE_pvalue)
     output = rbind(output, temp_out)
+
+    end_time <- Sys.time()
+    
+    time_difference = end_time - start_time
   }
-  return(output)
+  return(list(output,time_difference))
 }
 
-test2 = ring(df,25) # Parameter table, then number of bootstraps/perms  
+test2 = ring(df[df$row == 831,],100) # Parameter table, then number of bootstraps/perms  
+
+test2$col = NULL
+for(i in 1:nrow(test2)){
+  if(test2$cov_pvalue[i] <= 0.05 & test2$GxE_pvalue[i] <= 0.05){test2$col[i] = "red" # Both significant
+  }else if(test2$cov_pvalue[i] <= 0.05 & test2$GxE_pvalue[i] > 0.05){test2$col[i] = "darkgreen" # Cov significant
+  }else if(test2$cov_pvalue[i] > 0.05 & test2$GxE_pvalue[i] <= 0.05){test2$col[i] = "dodgerblue" # GxE significant
+  }else{test2$col[i] = "grey"} # None significant
+}
+
+
+
+# dat_csv$GxE_estimate = 1.855347e+00
+
+# True GxE by Covariance
+require(RColorBrewer)
+ggplot(test2, aes(x = true_cov, y = true_GxE, group = factor(n_pop),colour=col)) + 
+  geom_point() + theme_classic() + ylim(0,2)+ xlim(-1,1)+
+  xlab("True Covariance") + ylab("True GxE") +
+  scale_colour_identity()+
+  #scale_color_brewer(palette="Set1",name = "Sample Size") +
+  facet_grid(~interaction)
 
 p1=ggplot(test2, aes(x = cov_estimate, y = GxE_estimate, group = factor(n_pop),colour = factor(sample_size))) + 
   geom_point() + theme_classic() + 

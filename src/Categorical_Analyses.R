@@ -240,6 +240,7 @@ permutation_categorical <- function(input_df){
   
   # Each genotype and environment
   if(length(unique(input_df$gen_factor)) == length(unique(input_df$exp_env_factor))){
+    
     # Shuffle data
     null_temp <- sample(input_df$phen_data, size=nrow(input_df), replace=FALSE)
     
