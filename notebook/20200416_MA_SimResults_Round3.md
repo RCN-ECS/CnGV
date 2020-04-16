@@ -29,6 +29,7 @@ First, 4 vignettes to prove that everything is working ok: Note that these covar
 | High GxE|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row61.png) | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row59.png)|
 
 Now to look at how significance lines up according to GxE and Covariance: (GxE is based on estimated marginal means; Covariance is corrected)
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/CorrectedCov.png)
 
 Still looking good. 
@@ -41,7 +42,10 @@ Now to see how the correction affects the estimates. In this round of sims I gen
 5. True covariance corrected
 6. Covariance estimate corrected
 
-Good news - the new correction eliminates any differences in covariance estimates between means and raw data (diff = 0) and the differences between true GxE on raw vs means are tiny too. 
+## Means vs. Raw: 
+
+Good news - the new correction eliminates any differences in covariance estimates between means and raw data (diff = 0) and the differences between true GxE on raw vs means are tiny too (see histogram of differences below): 
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/hist_gxe%20diffs.png)
 
 
