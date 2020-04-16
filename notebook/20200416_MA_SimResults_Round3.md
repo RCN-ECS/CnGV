@@ -28,7 +28,7 @@ First, 4 vignettes to prove that everything is working ok: Note that these covar
 | Low GxE| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row5.png) | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row7.png) |
 | High GxE|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row61.png) | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/plot_row59.png)|
 
-Now to look at how significance lines up according to GxE and Covariance: (GxE is based on estimated marginal means; Covariance is corrected)
+Now to look at how significance lines up according to GxE and Covariance. GxE is based on estimated marginal means; Covariance is corrected. Rows are sample size; columns are n_pop.
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/CorrectedCov.png)
 
