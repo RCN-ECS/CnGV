@@ -32,9 +32,11 @@ Now to look at how significance lines up according to GxE and Covariance: (GxE i
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/CorrectedCov.png)
 
-Still looking good. 
+Using the new Correction looks really good. I know other diagnostic plots may be useful, but I am unsure which ones to create. 
+**What diagnostics would be helpful?*
 
-Further Diagnostics may be necessary. In addition to the endpoints listed below, I have the following for each set of parameters, I have a) phenotype data, b) Gmeans and Emeans, c) bootstrap data, d) permutation data. 
+
+**Data to Choose from**: In addition to the endpoints listed below, I have the following for each set of parameters, I have a) phenotype data, b) Gmeans and Emeans, c) bootstrap data, d) permutation data. 
 
 I generated 6 different covariance metrics for raw simulated data and again for the means data (with CIs and p-values): 
 1. True covariance uncorrected
@@ -50,7 +52,7 @@ Finally I have different GxE metrics (with CIs and p-values):
 3. True GxE using Omega^2
 4. GxE using Omega^2
 
-**What diagnostics would be helpful*
+
 
 ## Means vs. Raw: 
 
