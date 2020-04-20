@@ -60,4 +60,13 @@ Good news - the new correction eliminates any differences in covariance estimate
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/hist_gxe%20diffs.png)
 
+**Why are there zero differences in covariance but subtle differences in GxE?**
+The means and EMMs are in fact different by very small margins. When I take the unstandardized covariance, these differences are preserved (and match the differences in GxE). However when I standardize the covariance, these differences are lost.
 
+| EMM - Emeans | EMM - Gmeans | raw means - Emeans | raw means - Gmeans |
+|---|---|---|---|
+-0.15399250  |0.58823449 |-0.1517924 |0.57983053
+0.09169482 |-0.20917987|0.0903848 |-0.20619137
+-0.23684704 |-0.0377928|-0.2334633 | -0.03725295 
+-0.14327593  | 0.19146278|-0.1412290| 0.18872740 
+0.44242065 |-0.53272451|0.4360999 |-0.52511361 
