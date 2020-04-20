@@ -73,6 +73,7 @@ The means and EMMs are in fact different by very small margins. When I take the 
 0.44242065 |-0.53272451|0.4360999 |-0.52511361 
 
 measurement | result | notes 
+|---|---|---|
 EMM - Covariance Unstandardized | -0.0909834 |
 Raw means - covariance Unstandardized |-0.08840226 | difference of -0.00258114
 EMM - Covariance Standardized | -0.5113885 | standardized by sd of Gmeans: 0.421799
