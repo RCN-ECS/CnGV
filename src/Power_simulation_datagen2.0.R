@@ -2,13 +2,13 @@
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(10),
-  delta_env = c(0,0.5,1,1.5),
+  reps = c(10), # or more?
+  delta_env = c(0,0.5,1),
   delta_gen = c(-1,0,1),
-  sample_size = c(2,3,5,10), 
-  n_pop = c(2,3,5,10), # 
+  sample_size = c(5,10,20), # Per our discussion on tuesday April 7
+  n_pop = c(2,3,5,10,15), # Per our discussion on tuesday April 7
   n_environments = NULL,
-  std_dev= c(0.25),
+  std_dev= c(0.5,1), # Could just do one or the other
   interaction = 5) # Vector LENGTH not magnitude
 
 # Starting list of parameters
@@ -59,7 +59,7 @@ parameter_generation <- function(param_list){
 
 df = parameter_generation(param_list) 
 dim(df)
-df <- df[!(df$delta_env==0 & df$delta_gen==0),]
+df <- df[!(df$delta_env==0 & df$delta_gen==0),] # remove any 0s that'll blow up the phenotype
 dim(df)
 head(df)
 
