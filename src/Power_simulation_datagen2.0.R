@@ -3,24 +3,24 @@
 # Starting list of parameters
 param_list <- list( 
   reps = c(10), # or more?
-  delta_env = c(0,0.5,1),
-  delta_gen = c(-1,0,1),
-  sample_size = c(5,10,20), # Per our discussion on tuesday April 7
-  n_pop = c(2,3,5,10,15), # Per our discussion on tuesday April 7
+  delta_env = c(0.01,0.5,1),
+  delta_gen = c(-1,0.01,1),
+  sample_size = c(5,10,20), 
+  n_pop = c(2,3,5,10,15), 
   n_environments = NULL,
-  std_dev= c(0.5,1), # Could just do one or the other
+  std_dev= c(0.5,1), 
   interaction = 5) # Vector LENGTH not magnitude
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(5),
-  delta_env = c(1,0),
-  delta_gen = c(-1,1),
-  sample_size = c(2,5), 
-  n_pop = c(5,10),
+  reps = c(10), # or more?
+  delta_env = c(0.01),
+  delta_gen = c(0.01),
+  sample_size = c(5,10,20), 
+  n_pop = c(2,3,5,10,15), 
   n_environments = NULL,
-  std_dev= c(0.25),
-  interaction = 3)
+  std_dev= c(0.5,1), 
+  interaction = 5) # Vector LENGTH not magnitude
 
 # Table of parameters
 parameter_generation <- function(param_list){
@@ -63,7 +63,7 @@ df <- df[!(df$delta_env==0 & df$delta_gen==0),] # remove any 0s that'll blow up 
 dim(df)
 head(df)
 
-write.csv(df,"~/Desktop/df.csv")
+write.csv(df,"~/Desktop/df.csv",)
 
 
 ring <- function(param_table, n_boot){
