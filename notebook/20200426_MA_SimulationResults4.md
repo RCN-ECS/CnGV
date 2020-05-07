@@ -35,6 +35,11 @@ Note that the magnitude of GxE increases with n_pop because we set our interacti
 #### GxE calculated using Omega^2
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7cov_gxe_omega2.png)
 
+#### HexPlot to show coverage
+To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. 
+It seems like we are doing a good job with coverage
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.hexplot.png)
+
 ## Power Heatmaps
 This is a standard heatmap showing how power changes according to standard deviation, sample size, and number of populations. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.6.PowerPlots.png)
