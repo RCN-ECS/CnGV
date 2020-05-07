@@ -39,10 +39,10 @@ Here are plots showing examples of the reaction norms look like in co/counter gr
 
 | Number of Populations | |
 |--- | --- |
-| 2| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/2pop.pdf)|
-| 3| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/3pop.pdf)|
-| 5| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5pop.pdf)|
-| 10| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/10pop.pdf)|
-| 15| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/15pop.pdf)| 
+| 2| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/2pop.png)|
+| 3| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/3pop.png)|
+| 5| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5pop.png)|
+| 10| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/10pop.png)|
+| 15| ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/15pop.png)| 
 
 Any suggestions for plots/improvements are welcome. 
