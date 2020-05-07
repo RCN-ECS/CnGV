@@ -27,8 +27,13 @@ Here is an updated plot showing estimates of GxE and covariance, colored accordi
 
 Just as the preliminary sims showed, we see that the number of sample size affects ability to detect GxE (higher sample size = greater ability to detect GxE) while number of populations affects covariance (higher number of populations = greater ability to detect significant covariation). 
 
-Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop. 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.5.covgxe.png)
+Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop. Data standardization  
+
+#### GxE calculated using Estimated Marginal Means
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.gxe_covEMM.png)
+
+#### GxE calculated using Omega^2
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7cov_gxe_omega2.png)
 
 ## Power Heatmaps
 This is a standard heatmap showing how power changes according to standard deviation, sample size, and number of populations. 
