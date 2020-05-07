@@ -25,7 +25,7 @@ Here is an updated plot showing estimates of GxE and covariance, colored accordi
 **Red** = Both are significant
 **Grey** = None are significant
 
-Just as the preliminary sims showed, we see that the number of populations/genotypes affects ability to detect GxE (higher pops = greater ability to detect GxE) while sample size affects covariance (higher sample size = greater ability to detect significant covariation). I'm still mulling over why this is (I feel like I'm on the cusp of a lightbulb moment! My lightbulbs take a while to turn on sometimes.)
+Just as the preliminary sims showed, we see that the number of sample size affects ability to detect GxE (higher sample size = greater ability to detect GxE) while number of populations affects covariance (higher number of populations = greater ability to detect significant covariation). 
 
 Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.5.covgxe.png)
