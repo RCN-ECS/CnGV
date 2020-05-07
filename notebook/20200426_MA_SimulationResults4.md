@@ -37,7 +37,7 @@ Note that the magnitude of GxE increases with n_pop because we set our interacti
 
 #### HexPlot to show coverage
 To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. 
-It seems like we are doing a good job with coverage
+There are a couple areas without data, but it does not seem like there are any gaps that would drive a bias or blind spot.
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.hexplot.png)
 
 ## Power Heatmaps
