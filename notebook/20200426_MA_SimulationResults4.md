@@ -59,7 +59,9 @@ Any suggestions for plots/improvements are welcome.
 
 ## Suggested Checks: 
 
-Katie suggested that I make sure my confidence interavals for Covariance and GxE are overlapping with the known TRUE value (i.e., the covariance and GxE without any standard deviation. Here are those plots. Each point is the value from a single replicate set of parameters. Red points are the true value, whereas the black lines are the 95% confidence intervals of the estimates. Seems we have nothing to worry about with covariance, but some of the higher GxE magnitude values may need to be checked into.
+Katie suggested that I make sure my confidence intervals for covGE and GxE are overlapping with the known TRUE value (i.e., the covGE and GxE without any standard deviation. Here are those plots. Each point is the value from a single replicate set of parameters. Red points are the true value, and the black lines are the 95% confidence intervals of the estimates. 
+
+For replicate 1, 439 out of 1350 (33%) have true GxE values that fall outside of the confidence intervals -- however only 5.5% (75/1350) of those report false positive p-values (< 0.05). In contrast - 126/1350 (9%) CovGE values are outside the confidence intervals, but of those, 3% (45/1350) are false positives. Seems ok? 
 **Covariance**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.test_truecovCI.png)
 
