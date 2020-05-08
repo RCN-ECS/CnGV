@@ -59,6 +59,7 @@ Any suggestions for plots/improvements are welcome.
 
 ## Suggested Checks: 
 
+#### True CovGE and GxE vs. Estimated Values
 Katie suggested that I make sure my confidence intervals for covGE and GxE are overlapping with the known TRUE value (i.e., the covGE and GxE without any standard deviation. The plots below show **only those that have true values fall outside of the 95% confidence interval**. Each point is the value from a single replicate set of parameters. Red points are the true value, and the black lines are the 95% confidence intervals of the estimates. 
 
 Across all replicates, 4392 out of 13500 (33%) have true GxE values that fall outside of the confidence intervals. In contrast - 1304/13500 (10%) true CovGE values are outside the confidence intervals. But if you look at the plots, the vast majority have confidence intervals that are very close to the true value, so I am not sure if this is acceptable or expected. There is no particular parameter driving these patterns. 
@@ -68,3 +69,23 @@ Across all replicates, 4392 out of 13500 (33%) have true GxE values that fall ou
 
 **GxE**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.GxEanoms.png)
+
+
+#### Means vs raw
+
+I took 2 approaches. First I checked the estimates themselves - made sure that CovGE and GxE for means and raw match. If so, they should fall along the 1:1 (red) line. Covariance matches perfectly, GxE is close but the means estimates seem to be a tad lower than raw GxE estimates. 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.covmeansraw.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.gxemeancheck.png)
+
+I also regressed the lengths of the confidence intervals for the means against the length of the CIs for raw data. For this, I also colored the points according to significance to make sure there were no biases in significance. **Red** = both means and raw are significant, **blue** = means are sig but raw is not, **green** = raw is sig but means are not, and **grey** = neither are significant.Again, if they matched we would expect a perfect 1:1 fit. For CovGE, we see some variability - seems like most fall around the 1:1 line with perhaps a slightly greater error for means. 
+
+For GxE, we see much greater variability - greater error for means data than raw, but apart from a few blues/greens near GxE = 0; there doesn't seem to be a major bias in significance. For CovGE, we again see more variability but a fairly even spread across the 1:1 line. It also looks like there is more significance for raw (green) but again it doesn't look like there's any systematic bias.
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.coverrormeans.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.GxEmeanserror.png)
+
+
+
+
+
