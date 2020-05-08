@@ -59,11 +59,12 @@ Any suggestions for plots/improvements are welcome.
 
 ## Suggested Checks: 
 
-Katie suggested that I make sure my confidence intervals for covGE and GxE are overlapping with the known TRUE value (i.e., the covGE and GxE without any standard deviation. Here are those plots. Each point is the value from a single replicate set of parameters. Red points are the true value, and the black lines are the 95% confidence intervals of the estimates. 
+Katie suggested that I make sure my confidence intervals for covGE and GxE are overlapping with the known TRUE value (i.e., the covGE and GxE without any standard deviation. The plots below show **only those that have true values fall outside of the 95% confidence interval**. Each point is the value from a single replicate set of parameters. Red points are the true value, and the black lines are the 95% confidence intervals of the estimates. 
 
-For replicate 1, 439 out of 1350 (33%) have true GxE values that fall outside of the confidence intervals -- however only 5.5% (75/1350) of those report false positive p-values (< 0.05). In contrast - 126/1350 (9%) CovGE values are outside the confidence intervals, but of those, 3% (45/1350) are false positives. Seems ok? 
+Across all replicates, 4392 out of 13500 (33%) have true GxE values that fall outside of the confidence intervals. In contrast - 1304/13500 (10%) true CovGE values are outside the confidence intervals. But if you look at the plots, the vast majority have confidence intervals that are very close to the true value, so I am not sure if this is acceptable or expected. There is no particular parameter driving these patterns. 
+
 **Covariance**
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.test_truecovCI.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.covanoms.png)
 
 **GxE**
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.testGxEtrue.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.GxEanoms.png)
