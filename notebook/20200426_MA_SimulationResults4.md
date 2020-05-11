@@ -55,7 +55,14 @@ Here are plots showing examples of the reaction norms look like in co/counter gr
 | **10** | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/10pop.png)|
 | **15** | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/15pop.png)| 
 
-Any suggestions for plots/improvements are welcome. 
+## Combines
+Holding the total the same (either 50 or 100), I played around with the four different combinations of n_pop and sample_size that resulted in those 2 totals
+| Sample Size | N_pop | Total |
+| --- | --- | --- |
+5|10|50
+10|5|50
+5|20|100
+20|5|100
 
 ## Suggested Checks: 
 
