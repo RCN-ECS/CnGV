@@ -41,11 +41,11 @@ There are a couple areas without data, but it does not seem like there are any g
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.hexplot.png)
 
 ## Power Heatmaps
-This is a standard heatmap showing how power changes according to standard deviation, sample size, and number of populations. 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.6.PowerPlots.png)
+This is a standard heatmap showing how power changes according to standard deviation, sample size, and number of populations. These plots only show the power for covGE and GxE that fall between 0.4 and 0.6, since these windows encapsulate the full range of power.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11Gxe_Cov_heatmap.png)
 
 ## Phenotype Examples
-Here are plots showing examples of the reaction norms look like in co/counter gradient scenarios with low and high GxE. Its interesting how our ability to visually identify these patterns (which is how these patterns have been typically been. identified in the past) is almost impossible as the number of populations/magnitude of GxE increases. 
+Here are plots showing examples of the reaction norms look like in co/counter gradient scenarios with low and high GxE. Its interesting how our ability to visually identify these patterns (which is how these patterns have been typically been. identified in the past) is almost impossible as the number of populations/magnitude of GxE increases. *These all have standard deviation of 0.5*
 
 | Number of Populations | |
 |--- | --- |
