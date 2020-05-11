@@ -5,7 +5,7 @@ After resolving the covariance correction [issue](https://github.com/RCN-ECS/CnG
 
 ```{param list}
 param_list <- list( 
-  reps = c(10), # or more?
+  reps = c(10),
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
   sample_size = c(5,10,20), 
@@ -16,10 +16,10 @@ param_list <- list(
 ```
 Note that I changed delta_env and delta_gen from 0 to 0.01. I did this to improve representation of very small changes in slope and intercept (before, zeros would result in a zero for phenotype). 
 
-I've been playing around with plots and here's what I've come up with so far. I'd like a better way of showing the tradeoff between sample size and n_pop (see first plot below) but I can't come up with a good way of showing it. Any suggestions would be welcome.
+I've been playing around with plots and here's what I've come up with so far (as of May 6, updated May 11). I'd like a better way of showing the tradeoff between sample size and n_pop (see first plot below) but I can't come up with a good way of showing it. Any suggestions would be welcome.
 
 ## Covariance and GxE
-Here is an updated plot showing estimates of GxE and covariance, colored according to significance. Rows are number of populations/genotypes, while columns are sample sizes. 
+Here is an updated plot (5.6) showing estimates of GxE and covariance, colored according to significance. Rows are number of populations/genotypes, while columns are sample sizes. 
 **Blue** = GxE is significant
 **Green** = Covariance is significant
 **Red** = Both are significant
@@ -30,24 +30,29 @@ Just as the preliminary sims showed, we see that the number of sample size affec
 Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop. 
 
 #### GxE calculated using Estimated Marginal Means
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.gxe_covEMM.png)
 
 #### GxE calculated using Omega^2
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7cov_gxe_omega2.png)
 
 #### HexPlot to show coverage
+
 To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. 
-There are a couple areas without data, but it does not seem like there are any gaps that would drive a bias or blind spot.
+There are a couple areas without data, but it does not seem like there are any major gaps or areas of oversampling that would drive a bias or blind spot.
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.hexplot.png)
 
 ## Power Heatmaps
-This is a standard heatmap showing how power changes according to standard deviation, sample size, and number of populations. These plots only show the power for covGE and GxE that fall between 0.4 and 0.6, since these windows encapsulate the full range of power. I like this approach because it shows the tradeoff in power for n_pop and sample size.
+
+This is a heatmap showing how power changes according to standard deviation, sample size, and number of populations. **These plots only show the power for covGE and GxE that fall between 0.4 and 0.6, since these windows encapsulate the full range of power.** I like this approach because it shows the tradeoff in power for n_pop and sample size.
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11Gxe_Cov_heatmap.png)
 
 ## Phenotype Examples
-Here are plots showing examples of the reaction norms look like in co/counter gradient scenarios with low and high GxE. Its interesting how our ability to visually identify these patterns (which is how these patterns have been typically been. identified in the past) is almost impossible as the number of populations/magnitude of GxE increases. *These all have standard deviation of 0.5*
+
+Examples of the reaction norms in co/counter gradient scenarios with low and high GxE. It is interesting how our ability to visually identify these patterns (which is how these patterns have been typically been identified in the past) is almost impossible as the number of populations/magnitude of GxE increases. *These all have standard deviation of 0.5*
 
 | Number of Populations | |
 |--- | --- |
@@ -57,8 +62,9 @@ Here are plots showing examples of the reaction norms look like in co/counter gr
 | **10** | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/10pop.png)|
 | **15** | ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/15pop.png)| 
 
-## Combines
-Holding the total the same (either 50 or 100), I played around with the four different combinations of n_pop and sample_size that resulted in those 2 totals. Here are a few plots. I think my favorite is the heatmap because it shows how the n_pop and sample size differently affect power across n_pop and sample size.
+## Combinations
+
+Holding the total the same (either 50 or 100), I played around with a couple different combinations of n_pop and sample_size that resulted in those 2 totals (see table). Here are a few plots. I think my favorite is the heatmap for the Total = 50, because it shows how the n_pop and sample size differently affect power. 
 
 | Sample Size | N_pop | Total |
 | --- | --- | --- |
@@ -68,49 +74,60 @@ Holding the total the same (either 50 or 100), I played around with the four dif
 20|5|100
 
 #### Covariance vs. GxE
-**Hundred Totals**
+
+**N = Hundred**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.hundie_covgxe.png)
 
-**Fifty Totals**
+**N = Fifty**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.fitty_covgxe.png)
 
 #### Heatmaps
-**Hundred Totals**
+
+**N = Hundred**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.hundieHeatmaps.png)
 
-**Fifty Totals**
+**N = Fifty**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.fitty_heatmap.png)
 
 
 ## Suggested Checks: 
 
 #### True CovGE and GxE vs. Estimated Values
-Katie suggested that I make sure my confidence intervals for covGE and GxE are overlapping with the known TRUE value (i.e., the covGE and GxE without any standard deviation. The plots below show **only those that have true values fall outside of the 95% confidence interval**. Each point is the value from a single replicate set of parameters. Red points are the true value, and the black lines are the 95% confidence intervals of the estimates. 
+Katie suggested that I make sure my confidence intervals for covGE and GxE are overlapping with the known TRUE value (i.e., the covGE and GxE without any standard deviation. **The plots below show only those that have true values fall outside of the 95% confidence interval**. Each point is the value produced by one set of parameters. Red points are the true value, and the black lines are the 95% confidence intervals of the estimates. 
 
-Across all replicates, 4392 out of 13500 (33%) have true GxE values that fall outside of the confidence intervals. In contrast - 1304/13500 (10%) true CovGE values are outside the confidence intervals. But if you look at the plots, the vast majority have confidence intervals that are very close to the true value, so I am not sure if this is acceptable or expected. There is no particular parameter driving these patterns. 
+Across all 10 replicates, 4392 out of 13500 (33%) have true GxE values that fall outside of the confidence intervals. In contrast - 1304/13500 (10%) of true CovGE values are outside the confidence intervals. If you look at the plots, the vast majority have confidence intervals that are *close* to the true value, so I am not sure if this is acceptable or expected. A brief visual check of the parameters suggests there is no particular parameter driving these patterns. 
 
 **Covariance**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.covanoms.png)
 
 **GxE**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.GxEanoms.png)
 
 
-#### Means vs raw data
+#### Means vs Raw data Check
 
-I took 2 approaches. First I checked the estimates themselves - made sure that CovGE and GxE for means and raw match. If so, they should fall along the 1:1 (red) line. Covariance matches perfectly, GxE is close but the means estimates seem to be a tad lower than raw GxE estimates. 
+To check whether the estimates based on means data match estimates from raw data, I took 2 approaches. First I checked the estimates themselves - made sure that CovGE and GxE for means and raw match. If so, they should fall along the 1:1 (red) line. Covariance matches perfectly, GxE is close but the means estimates seem to fall tad lower than raw GxE estimates. 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.covmeansraw.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.gxemeancheck.png)
 
-I also regressed the lengths of the confidence intervals for the means against the length of the CIs for raw data. For this, I also colored the points according to significance to make sure there were no biases in significance. **Red** = both means and raw are significant, **blue** = means are sig but raw is not, **green** = raw is sig but means are not, and **grey** = neither are significant. Again, if they matched we would expect a perfect 1:1 fit. For CovGE, we see some variability - seems like most fall around the 1:1 line with perhaps a slightly greater error for means. 
+I also regressed the *lengths of the confidence intervals* for the means against the *lengths of the CIs* for raw data. For this plot, I also colored the points according to significance to make sure there were no biases in significance. 
 
-For GxE, we see much greater variability - greater error for means data than raw, but apart from a few blues/greens near GxE = 0; there doesn't seem to be a major bias in significance. For CovGE, we again see more variability but a fairly even spread across the 1:1 line. It also looks like there is more significance for raw (green) but again it doesn't look like there's any systematic bias.
+**Red** = estimates from means and raw are significant, **blue** = estimates from means data are significant but estimates from raw are not signficant, **green** = raw is sig but means are not significant, and **grey** = neither are significant. Again, if the lengths of CIs matched we would expect a perfect 1:1 fit. 
+
+For CovGE, we see some variability - seems like most fall around the 1:1 line with perhaps a slightly larger error for means than raw (more points cluster above the 1:1 line. It looks like there is more significance for raw data (green) but again it doesn't look like there's any systematic bias.
+
+For GxE, we see much greater variability - larger error for means data than raw data, but apart from a few blues/greens clustering around GxE = 0, there doesn't seem to be a major bias in significance. 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.coverrormeans.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.GxEmeanserror.png)
 
-
+Please do let me know of any thoughts or additional checks I can make. 
 
 
 
