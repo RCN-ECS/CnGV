@@ -46,6 +46,17 @@ We predicted that since as GxE increases, the relationship between genotype and 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.CovGxETradeoff.png)
 
+#### 2 population claim by Conover/Schultz
+Conover and Schultz claimed that 2 populations was insufficient to estimate covariance. Well, it turns out they weren't entirely wrong. Here is the power for n_pop = 2:
+| Std. Deviation | Sample Size | Average Power | 
+|---|---|---|
+ 0.5 | 5 | 0.08
+0.5| 10 | 0.10
+0.5| 20 | 0.09
+1| 5 | 0.13
+1| 10 | 0.12
+1| 20 | 0.13
+
 #### HexPlot to show coverage
 
 To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. 
