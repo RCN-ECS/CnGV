@@ -13,13 +13,13 @@ param_list <- list(
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(10), # or more?
-  delta_env = c(0.01),
-  delta_gen = c(0.01),
-  sample_size = c(5,10,20), 
-  n_pop = c(2,3,5,10,15), 
+  reps = c(1), # or more?
+  delta_env = c(1),
+  delta_gen = c(-1),
+  sample_size = 5,#c(5,10,20), 
+  n_pop = 2,#c(2,3,5,10,15), 
   n_environments = NULL,
-  std_dev= c(0.5,1), 
+  std_dev= 0.5,#c(0.5,1), 
   interaction = 5) # Vector LENGTH not magnitude
 
 # Table of parameters
