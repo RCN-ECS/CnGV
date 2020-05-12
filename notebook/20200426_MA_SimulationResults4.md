@@ -110,6 +110,8 @@ Holding the total the same (either 50 or 100), I played around with a couple dif
 
 #### Heatmaps
 
+Note the legend's power scale is a bit misleading here. I'd have to change the scale if we included it in the paper.
+
 **N = 100**
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.HundieHeatmap.png)
