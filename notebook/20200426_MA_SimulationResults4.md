@@ -67,6 +67,10 @@ There are a couple areas without data, but it does not seem like there are any m
 ## Power Heatmaps
 This is a heatmap showing how power changes according to standard deviation, sample size, and number of populations. 
 
+**Full Parameter Coverage**
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.TotalHeatmapGxE.png)
+
 **Reduced Coverage -- Only covGE and GxE between 0.4 and 0.6, since these windows encapsulate the full range of power.** 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.PowerHeatmap.png)
@@ -96,11 +100,11 @@ Holding the total the same (either 50 or 100), I played around with a couple dif
 
 #### Covariance vs. GxE
 
-**N = Hundred**
+**N = 100**
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.hundie_covgxe.png)
 
-**N = Fifty**
+**N = 50**
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.fitty_covgxe.png)
 
