@@ -42,7 +42,7 @@ Just as the preliminary sims showed, we see that the number of populations affec
 
 #### Tradeoff with GxE and Covariance
 
-We predicted that since as GxE increases, the relationship between genotype and environment must become increasingly independent which should reduce the amount of CovGE. Here is a potential way to show that relationship: 
+We predicted that since as GxE increases, the relationship between genotype and environment must become increasingly independent which should reduce the amount of CovGE observed. Looks like our hypothesis is supported! *This data has been filtered to just significant GxE OR significant CovGE values.*
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.CovGxETradeoff.png)
 
@@ -141,9 +141,14 @@ To check whether the estimates based on means data match estimates from raw data
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.covmeansraw.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.gxemeancheck.png)
 
-I also regressed the *lengths of the confidence intervals* for the means against the *lengths of the CIs* for raw data. For this plot, I also colored the points according to significance to make sure there were no biases in significance. 
+I also regressed the *lengths of the confidence intervals* for the means against the *lengths of the CIs* for raw data. For this plot, I also colored the points according to significance to make sure there were no biases in significance. Again, if the lengths of CIs matched we would expect a perfect 1:1 fit.
 
-**Red** = estimates from means and raw are significant, **blue** = estimates from means data are significant but estimates from raw are not signficant, **green** = raw is sig but means are not significant, and **grey** = neither are significant. Again, if the lengths of CIs matched we would expect a perfect 1:1 fit. 
+Color | Meaning
+|---|---|
+**Red** |estimates from means and raw are significant
+**Blue** | estimates from means data are significant but estimates from raw are not signficant
+**Green** | raw is sig but means are not significant
+**Grey** | neither are significant.  
 
 For CovGE, we see some variability - seems like most fall around the 1:1 line with perhaps a slightly larger error for means than raw (more points cluster above the 1:1 line. It looks like there is more significance for raw data (green) but again it doesn't look like there's any systematic bias.
 
@@ -152,7 +157,7 @@ For GxE, we see much greater variability - larger error for means data than raw 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.coverrormeans.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.8.GxEmeanserror.png)
 
-Please do let me know of any thoughts or additional checks I can make. 
+Please let me know of any thoughts or additional checks I can make. 
 
 
 
