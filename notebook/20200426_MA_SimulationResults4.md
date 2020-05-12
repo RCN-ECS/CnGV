@@ -20,6 +20,8 @@ I've been playing around with plots and here's what I've come up with so far (as
 
 ## Covariance and GxE
 Here is an updated plot (5.6) showing estimates of GxE and covariance, colored according to significance. Columns are number of populations/genotypes, while rows are sample sizes. **THESE WERE INCORRECTLY LABELED BEFORE**
+|Color|Meaning|
+|---|---|
 **Blue** = GxE is significant
 **Green** = Covariance is significant
 **Red** = Both are significant
@@ -38,6 +40,7 @@ Just as the preliminary sims showed, we see that the number of populations affec
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7cov_gxe_omega2.png)
 
 #### Tradeoff with GxE and Covariance
+
 We predicted that since as GxE increases, the relationship between genotype and environment must become increasingly independent which should reduce the amount of CovGE. Here is a potential way to show that relationship: 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.CovGxETradeoff.png)
