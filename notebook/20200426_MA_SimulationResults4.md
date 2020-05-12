@@ -19,15 +19,18 @@ Note that I changed delta_env and delta_gen from 0 to 0.01. I did this to improv
 I've been playing around with plots and here's what I've come up with so far (as of May 6, updated May 11). I'd like a better way of showing the tradeoff between sample size and n_pop (see first plot below) but I can't come up with a good way of showing it. Any suggestions would be welcome.
 
 ## Covariance and GxE
-Here is an updated plot (5.6) showing estimates of GxE and covariance, colored according to significance. Rows are number of populations/genotypes, while columns are sample sizes. 
-**Blue** = GxE is significant
-**Green** = Covariance is significant
-**Red** = Both are significant
-**Grey** = None are significant
+Here is an updated plot (5.6) showing estimates of GxE and covariance, colored according to significance. Columns are number of populations/genotypes, while rows are sample sizes. **THESE WERE INCORRECTLY LABELED BEFORE**
 
-Just as the preliminary sims showed, we see that the number of sample size affects ability to detect GxE (higher sample size = greater ability to detect GxE) while number of populations affects covariance (higher number of populations = greater ability to detect significant covariation). 
+|Color|Meaning|
+|---|---|
+**Blue** | GxE is significant
+**Green** | Covariance is significant
+**Red** | Both are significant
+**Grey** | None are significant
 
-Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop. 
+Just as the preliminary sims showed, we see that the number of populations affects ability to detect GxE (higher n_pop = greater ability to detect GxE) while sample size affects covariance (higher number of samples = greater ability to detect significant covariation). 
+
+*Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop.* 
 
 #### GxE calculated using Estimated Marginal Means
 
@@ -36,6 +39,23 @@ Note that the magnitude of GxE increases with n_pop because we set our interacti
 #### GxE calculated using Omega^2
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7cov_gxe_omega2.png)
+
+#### Tradeoff with GxE and Covariance
+
+We predicted that since as GxE increases, the relationship between genotype and environment must become increasingly independent which should reduce the amount of CovGE. Here is a potential way to show that relationship: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.CovGxETradeoff.png)
+
+#### 2 population claim by Conover/Schultz
+Conover and Schultz claimed that 2 populations was insufficient to estimate covariance. Well, it turns out they weren't entirely wrong. Here is the power for n_pop = 2:
+| Std. Deviation | Sample Size | Average Power | 
+|---|---|---|
+ 0.5 | 5 | 0.08
+0.5| 10 | 0.10
+0.5| 20 | 0.09
+1| 5 | 0.13
+1| 10 | 0.12
+1| 20 | 0.13
 
 #### HexPlot to show coverage
 
