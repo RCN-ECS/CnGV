@@ -20,12 +20,13 @@ I've been playing around with plots and here's what I've come up with so far (as
 
 ## Covariance and GxE
 Here is an updated plot (5.6) showing estimates of GxE and covariance, colored according to significance. Columns are number of populations/genotypes, while rows are sample sizes. **THESE WERE INCORRECTLY LABELED BEFORE**
+
 |Color|Meaning|
 |---|---|
-**Blue** = GxE is significant
-**Green** = Covariance is significant
-**Red** = Both are significant
-**Grey** = None are significant
+**Blue** | GxE is significant
+**Green** | Covariance is significant
+**Red** | Both are significant
+**Grey** | None are significant
 
 Just as the preliminary sims showed, we see that the number of populations affects ability to detect GxE (higher n_pop = greater ability to detect GxE) while sample size affects covariance (higher number of samples = greater ability to detect significant covariation). 
 
