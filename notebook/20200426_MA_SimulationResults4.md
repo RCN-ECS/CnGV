@@ -65,10 +65,11 @@ There are a couple areas without data, but it does not seem like there are any m
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.hexplot.png)
 
 ## Power Heatmaps
+This is a heatmap showing how power changes according to standard deviation, sample size, and number of populations. 
 
-This is a heatmap showing how power changes according to standard deviation, sample size, and number of populations. **These plots only show the power for covGE and GxE that fall between 0.4 and 0.6, since these windows encapsulate the full range of power.** I like this approach because it shows the tradeoff in power for n_pop and sample size.
+**Reduced Coverage -- Only covGE and GxE between 0.4 and 0.6, since these windows encapsulate the full range of power.** 
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11Gxe_Cov_heatmap.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.PowerHeatmap.png)
 
 ## Phenotype Examples
 
@@ -105,12 +106,12 @@ Holding the total the same (either 50 or 100), I played around with a couple dif
 
 #### Heatmaps
 
-**N = Hundred**
+**N = 100**
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.hundieHeatmaps.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.HundieHeatmap.png)
 
-**N = Fifty**
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.11.fitty_heatmap.png)
+**N = 50**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.FittyHeatmap.png)
 
 
 ## Suggested Checks: 
