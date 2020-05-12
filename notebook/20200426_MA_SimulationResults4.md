@@ -37,6 +37,11 @@ Note that the magnitude of GxE increases with n_pop because we set our interacti
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7cov_gxe_omega2.png)
 
+#### Tradeoff with GxE and Covariance
+We predicted that since as GxE increases, the relationship between genotype and environment must become increasingly independent which should reduce the amount of CovGE. Here is a potential way to show that relationship: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.CovGxETradeoff.png)
+
 #### HexPlot to show coverage
 
 To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. 
