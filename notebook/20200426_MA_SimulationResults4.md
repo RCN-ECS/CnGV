@@ -19,15 +19,15 @@ Note that I changed delta_env and delta_gen from 0 to 0.01. I did this to improv
 I've been playing around with plots and here's what I've come up with so far (as of May 6, updated May 11). I'd like a better way of showing the tradeoff between sample size and n_pop (see first plot below) but I can't come up with a good way of showing it. Any suggestions would be welcome.
 
 ## Covariance and GxE
-Here is an updated plot (5.6) showing estimates of GxE and covariance, colored according to significance. Rows are number of populations/genotypes, while columns are sample sizes. 
+Here is an updated plot (5.6) showing estimates of GxE and covariance, colored according to significance. Columns are number of populations/genotypes, while rows are sample sizes. **THESE WERE INCORRECTLY LABELED BEFORE**
 **Blue** = GxE is significant
 **Green** = Covariance is significant
 **Red** = Both are significant
 **Grey** = None are significant
 
-Just as the preliminary sims showed, we see that the number of sample size affects ability to detect GxE (higher sample size = greater ability to detect GxE) while number of populations affects covariance (higher number of populations = greater ability to detect significant covariation). 
+Just as the preliminary sims showed, we see that the number of populations affects ability to detect GxE (higher n_pop = greater ability to detect GxE) while sample size affects covariance (higher number of samples = greater ability to detect significant covariation). 
 
-Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop. 
+*Note that the magnitude of GxE increases with n_pop because we set our interaction term to increase with n_pop.* 
 
 #### GxE calculated using Estimated Marginal Means
 
