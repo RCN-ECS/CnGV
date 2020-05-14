@@ -1,6 +1,5 @@
 # Full simulation Results
 
-
 After resolving the covariance correction [issue](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200416_MA_SimResults_Round3.md), I ran ten replicates of the full array of parameters which were: 
 
 ```{param list}
@@ -161,5 +160,11 @@ For GxE, we see much greater variability - larger error for means data than raw 
 
 Please let me know of any thoughts or additional checks I can make. 
 
+# Analysis on Empirical Data: 
 
+For this I used the raw data from my frog study and I extracted the means from Geoff's 2002 MEPS paper. I just picked one phenotype per analysis. For the raw data (molly's data), I chose the age at metamorphosis data (only using freshwater and 6ppt treatments as "freshwater" and "saltwater" for simplicity). For the means data (Geoff's data), I chose the Shell mass growth data (figure 3). 
 
+I ran each through the framework and here's what I got: Very interesting that even though we both report CnGV -- its trending that way but not significant! 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.GeoffPlot.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.Mollyplot.png)
