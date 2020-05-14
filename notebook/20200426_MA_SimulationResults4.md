@@ -166,6 +166,5 @@ For this I used the raw data from my frog study and I extracted the means from G
 
 I ran each through the framework and here's what I got: Very interesting that even though we both report CnGV -- its trending that way but not significant! 
 
-| | |
-|---|---|
-|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.GeoffPlot.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.Mollyplot.png)|
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.GeoffPlot.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.Mollyplot.png)
