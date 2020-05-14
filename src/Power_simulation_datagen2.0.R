@@ -2,7 +2,7 @@
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(10), # or more?
+  reps = c(90), # or more?
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
   sample_size = c(5,10,20), 

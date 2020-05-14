@@ -1,0 +1,5 @@
+﻿phen_data,phen_se,gen_factor,exp_env_factor,nat_env_factor,paperId,paperEnv
+5.244444444,0.59,G_1,E_1,E_1,Sheltered,LowFlow
+2.162962963,0.62,G_1,E_2,E_1,Sheltered,HighFlow
+11.14074074,0.56,G_2,E_1,E_2,Wave-exposed,LowFlow
+7.762962963,0.59,G_2,E_2,E_2,Wave-exposed,HighFlow
