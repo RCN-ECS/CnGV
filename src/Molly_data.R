@@ -1,23 +1,29 @@
 # Molly's age at metamorphosis data
 mm = read.csv("~/Desktop/Work/DataSets/Tadpole Plasticity_2017/mortality2017.csv")
-
-# Massage data to just what I need (Genotype/Environment/PHenotype)
 mm = mm[-which(is.na(mm$Jul_metamorph)),] # Include only those that metamorphosed
 mm$age = mm$Jul_metamorph-mm$Jul_hatch # Calculate age at MM
-mm = mm %>%
-  filter(tad %in% c(0,6)) %>% # Exclude 8ppt tadpole treatment bc only 2 from coastal mm'd
-  
+mm = droplevels(mm$Pop == "BELL")
 # Rename variables for analysis
-mm$gen_factor = paste0("G_",as.numeric(mm$loc))
-mm$exp_env_factor = paste0("E_",as.numeric(as.factor(mm$tad))) # G_1 native to E_2; G_2 native to E_1
-mm$nat_env_factor_corrected = NULL
-for(i in 1:nrow(mm)){
-  if(mm$gen_factor[i] == "G_1"){ mm$nat_env_factor_corrected[i] = "E_2"
-    }else{ mm$nat_env_factor_corrected[i] = "E_1"}
+mm1 = mm %>%
+  filter(Pop != "BELL") %>% # Exclude bellamy bc missing data at 6ppt
+  filter(tad %in% c(0,6)) %>% # Only use 0, 6ppt
+  droplevels()
+
+mm1$gen_factor = paste0("G_",as.numeric(mm1$Pop))
+mm1$exp_env_factor = paste0("E_",as.numeric(as.factor(mm1$tad))) 
+mm1$nat_env_factor = NULL
+for(i in 1:nrow(mm1)){
+  if(mm1$Pop[i] == "BOD" | mm1$Pop[i] == "CSI" |mm1$Pop[i] == "LH" |mm1$Pop[i] == "DQ"){ mm1$nat_env_factor[i] = "E_2"
+  }else{ mm1$nat_env_factor[i] = "E_1"}
 }
 
-input_df = data.frame("index" = rep(1, nrow(mm)),
-                      "gen_factor" = mm$gen_factor,
-                      "exp_env_factor" = mm$exp_env_factor,
-                      "nat_env_factor" = mm$nat_env_factor_corrected,
-                      "phen_data"= mm$age)
+ma = data.frame("data_type" = rep("raw", nrow(mm1)),
+                "gen_factor" = mm1$gen_factor,
+                "exp_env_factor" = factor(mm1$exp_env_factor), 
+                "nat_env_factor" = factor(mm1$nat_env_factor), # E_2 = coastal; E_1 = inland
+                "phen_data"= mm1$age)
+
+
+## Geoff's Shell mass growth (mg) data (Fig. 3)
+gt = read.csv("~/Documents/GitHub/CnGV/data/GeoffMeansData.csv")
+gt$data_type = rep("means",nrow(gt))
