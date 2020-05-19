@@ -48,8 +48,8 @@ We predicted that since as GxE increases, the relationship between genotype and 
 
 ## Different way to show tradeoff betweeen GxE and covariance: 
 
-|---|---|---
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.bluedat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.greendat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.reddat.png)
+|---|---|---|
+|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.bluedat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.greendat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.reddat.png)|
 
 
 #### 2 population claim by Conover/Schultz
