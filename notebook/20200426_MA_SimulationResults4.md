@@ -45,6 +45,13 @@ We predicted that since as GxE increases, the relationship between genotype and 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.CovGxETradeoff.png)
 
+
+## Different way to show tradeoff betweeen GxE and covariance: 
+
+|---|---|---
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.bluedat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.greendat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.reddat.png)
+
+
 #### 2 population claim by Conover/Schultz
 Conover and Schultz claimed that 2 populations was insufficient to estimate covariance. Well, it turns out they weren't entirely wrong. Here is the power for n_pop = 2:
 | Std. Deviation | Sample Size | Average Power | 
