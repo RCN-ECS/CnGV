@@ -47,7 +47,7 @@ We predicted that since as GxE increases, the relationship between genotype and 
 
 
 ## Different way to show tradeoff betweeen GxE and covariance: 
-
+|GxE | Cov | Both |
 |---|---|---|
 |![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.bluedat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.greendat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.reddat.png)|
 
