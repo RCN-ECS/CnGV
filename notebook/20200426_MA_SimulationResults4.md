@@ -75,7 +75,7 @@ To ensure that all parameter space is being covered, here is a hexplot that quan
 ## Power Heatmaps
 This is a heatmap showing how power changes according to standard deviation, sample size, and number of populations. 
 
-**Full Parameter Coverage**
+**Full Data (all values of CovGE and GxE)**
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.FulldataHeatmap.png)
 
