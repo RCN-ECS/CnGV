@@ -1,6 +1,6 @@
 # Full simulation Results
 
-After resolving the covariance correction [issue](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200416_MA_SimResults_Round3.md), I ran ten replicates of the full array of parameters which were: 
+After resolving the covariance correction [issue](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200416_MA_SimResults_Round3.md), I ran **100 replicates** of the full array of parameters which were: 
 
 ```{param list}
 param_list <- list( 
