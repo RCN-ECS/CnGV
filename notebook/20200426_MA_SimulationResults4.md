@@ -47,6 +47,8 @@ We predicted that since as GxE increases, the relationship between genotype and 
 
 
 ## Different way to show tradeoff betweeen GxE and covariance: 
+These show covGE and GxE between 0.4 and 0.6, since these windows encapsulate the full range of power.
+
 |GxE | Cov | Both |
 |---|---|---|
 |![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.bluedat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.greendat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.reddat.png)|
@@ -66,8 +68,7 @@ Conover and Schultz claimed that 2 populations was insufficient to estimate cova
 
 #### HexPlot to show coverage
 
-To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. 
-After running the full 100 replicates, there don't seem to be any major gaps or areas of oversampling that would drive a bias or blind spot.
+To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. After running the full 100 replicates, there don't seem to be any major gaps or areas of oversampling that would drive a bias or blind spot.
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.hexplot.png)
 
