@@ -1,5 +1,9 @@
-﻿phen_data,phen_se,gen_factor,exp_env_factor,nat_env_factor,paperId,paperEnv
-5.244444444,0.59,G_1,E_1,E_1,Sheltered,LowFlow
-2.162962963,0.62,G_1,E_2,E_1,Sheltered,HighFlow
-11.14074074,0.56,G_2,E_1,E_2,Wave-exposed,LowFlow
-7.762962963,0.59,G_2,E_2,E_2,Wave-exposed,HighFlow
+﻿phen_data,phen_se,gen_factor,exp_env_factor,nat_env_factor,paperId,paperEnv,Paper,Phenotype
+5.244444444,0.59,G_1,E_1,E_1,Sheltered,LowFlow,2002,
+2.162962963,0.62,G_1,E_2,E_1,Sheltered,HighFlow,2002,
+11.14074074,0.56,G_2,E_1,E_2,Wave-exposed,LowFlow,2002,
+7.762962963,0.59,G_2,E_2,E_2,Wave-exposed,HighFlow,2002,
+0.60077356,0.030085433,G_2,E_1,E_2,Northern,Southern,2000,Shell Thickness Growth (mm)
+0.319924745,0.010798973,G_2,E_2,E_2,Northern,Northern,2000,Shell Thickness Growth (mm)
+0.400928534,0.01851487,G_1,E_1,E_1,Southern,Southern,2000,Shell Thickness Growth (mm)
+0.249706796,0.010030667,G_1,E_2,E_1,Southern,Northern,2000,Shell Thickness Growth (mm)

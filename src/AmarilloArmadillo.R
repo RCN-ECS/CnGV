@@ -405,9 +405,9 @@ MollyTest = amarillo_armadillo(ma, 1000) # Molly's raw data
 GeoffTest = amarillo_armadillo(gt, 1000)
 
 # Plots for paper
-colors = c("G_1" = "#0066BB", "G_2" = "#FF6633")
-molly_labels = c("G_1" = "Coastal populations", "G_2" = "Inland populations")
-geoff_labels = c("G_1" = "Sheltered populations", "G_2" = "Wave-exposed populations")
+colors = c("E_1" = "#0066BB", "E_2" = "#FF6633")
+molly_labels = c("E_1" = "Coastal populations", "E_2" = "Inland populations")
+geoff_labels = c("E_1" = "Sheltered populations", "E_2" = "Wave-exposed populations")
 
 mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = gen_factor)) + 
   geom_point(position = position_dodge(width = 0.1))+geom_smooth(aes(fill=gen_factor),method = "glm")+

@@ -2,7 +2,7 @@
 mm = read.csv("~/Desktop/Work/DataSets/Tadpole Plasticity_2017/mortality2017.csv")
 mm = mm[-which(is.na(mm$Jul_metamorph)),] # Include only those that metamorphosed
 mm$age = mm$Jul_metamorph-mm$Jul_hatch # Calculate age at MM
-mm = droplevels(mm$Pop == "BELL")
+
 # Rename variables for analysis
 mm1 = mm %>%
   filter(Pop != "BELL") %>% # Exclude bellamy bc missing data at 6ppt
@@ -27,3 +27,5 @@ ma = data.frame("data_type" = rep("raw", nrow(mm1)),
 ## Geoff's Shell mass growth (mg) data (Fig. 3)
 gt = read.csv("~/Documents/GitHub/CnGV/data/GeoffMeansData.csv")
 gt$data_type = rep("means",nrow(gt))
+
+
