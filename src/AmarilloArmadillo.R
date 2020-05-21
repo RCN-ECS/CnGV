@@ -402,15 +402,17 @@ amarillo_armadillo <- function(input_df, n_boot){ # Data, Number of bootstraps
     }
   
 MollyTest = amarillo_armadillo(ma, 1000) # Molly's raw data
-GeoffTest = amarillo_armadillo(gt, 1000)
+GeoffTest2002 = amarillo_armadillo(gt[gt$Paper == 2002,], 1000)
+GeoffTest2000 = amarillo_armadillo(gt[gt$Paper == 2000,], 1000)
 
 # Plots for paper
 colors = c("E_1" = "#0066BB", "E_2" = "#FF6633")
-molly_labels = c("E_1" = "Coastal populations", "E_2" = "Inland populations")
-geoff_labels = c("E_1" = "Sheltered populations", "E_2" = "Wave-exposed populations")
+molly_labels = c("E_1" = "Inland populations", "E_2" = "Coastal populations")
+geoff_labels1 = c("E_1" = "Sheltered populations", "E_2" = "Wave-exposed populations")
+geoff_labels2 = c("E_1" = "Southern Population", "E_2" = "Northern Population")
 
-mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = gen_factor)) + 
-  geom_point(position = position_dodge(width = 0.1))+geom_smooth(aes(fill=gen_factor),method = "glm")+
+mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = nat_env_factor)) + 
+  geom_point(position = position_dodge(width = 0.1))+geom_smooth(aes(fill=nat_env_factor),method = "glm")+
   xlab("Environment")+ylab("Phenotype (age at metamorphosis in days)")+
   scale_x_discrete(breaks=c("E_1","E_2"),labels=c("Freshwater", "Saltwater"))+
   scale_colour_manual(values = colors,labels = molly_labels)+
@@ -431,13 +433,13 @@ mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_data, group = gen_factor
                    label = paste0("GxE = ",round(MollyTest$GxE.Estimate,2),", p = ",round(MollyTest$GxE.p.value,2)), size = 6, hjust = 0)
 mollyplot
 
-geoffplot = ggplot(gt, aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = gen_factor)) + 
+geoffplot2002 = ggplot(gt[gt$Paper == 2002,], aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = nat_env_factor)) + 
   geom_point()+geom_line()+
   geom_errorbar(aes(ymin = (phen_data-phen_se),ymax = (phen_data+phen_se)),width = 0.1)+
   xlab("Environment")+ylab("Phenotype (Shell mass growth (mg))")+
   scale_x_discrete(breaks=c("E_1","E_2"),labels=c("Low Flow", "High Flow"))+
-  scale_colour_manual(values = colors,labels = geoff_labels)+
-  scale_fill_manual(values = colors,labels = geoff_labels)+
+  scale_colour_manual(values = colors,labels = geoff_labels1)+
+  scale_fill_manual(values = colors,labels = geoff_labels1)+
   labs(col=" ")+
   theme_bw(base_size = 24, base_family = "Helvetica")+
   theme(axis.text.x = element_text(size=14,colour = "black"),
@@ -449,8 +451,31 @@ geoffplot = ggplot(gt, aes(x = exp_env_factor, y = phen_data, group = gen_factor
         panel.grid.minor = element_blank(),
         panel.border = element_rect(size = 2)) +
   annotate("text", x = "E_1", y = 14, 
-           label = paste0("Cov = ", GeoffTest$Covariance.Estimate,", p = ", round(GeoffTest$Covariance.p.value,2)), size = 6, hjust = 0)+
+           label = paste0("Cov = ", GeoffTest2002$Covariance.Estimate,", p = ", round(GeoffTest2002$Covariance.p.value,2)), size = 6, hjust = 0)+
   annotate("text", x = "E_1", y = 13, 
-           label = paste0("GxE = ",round(GeoffTest$GxE.Estimate,2),", p = ",round(GeoffTest$GxE.p.value,2)), size = 6, hjust = 0)
-geoffplot
-                   
+           label = paste0("GxE = ",round(GeoffTest2002$GxE.Estimate,2),", p = ",round(GeoffTest2002$GxE.p.value,2)), size = 6, hjust = 0)
+geoffplot2002
+             
+
+geoffplot2000 = ggplot(gt[gt$Paper == 2000,], aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = nat_env_factor)) + 
+  geom_point()+geom_line()+
+  geom_errorbar(aes(ymin = (phen_data-phen_se),ymax = (phen_data+phen_se)),width = 0.1)+
+  xlab("Environment")+ylab("Phenotype (Shell thickness growth (mm))")+
+  scale_x_discrete(breaks=c("E_1","E_2"),labels=c("South", "North"))+
+  scale_colour_manual(values = colors,labels = geoff_labels2)+
+  scale_fill_manual(values = colors,labels = geoff_labels2)+
+  labs(col=" ")+
+  theme_bw(base_size = 24, base_family = "Helvetica")+
+  theme(axis.text.x = element_text(size=14,colour = "black"),
+        axis.title.x = element_text(size=16,face="bold")) +
+  theme(axis.text.y = element_text(size=14,colour = "black"),
+        axis.title.y = element_text(size=16,face="bold")) +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(size = 2)) +
+  annotate("text", x = "E_1", y = 0.75, 
+           label = paste0("Cov = ", GeoffTest2000$Covariance.Estimate,", p = ", round(GeoffTest2000$Covariance.p.value,3)), size = 6, hjust = 0)+
+  annotate("text", x = "E_1", y = 0.7, 
+           label = paste0("GxE = ",round(GeoffTest2000$GxE.Estimate,2),", p = ",round(GeoffTest2000$GxE.p.value,3)), size = 6, hjust = 0)
+geoffplot2000      
