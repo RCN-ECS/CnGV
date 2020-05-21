@@ -171,9 +171,10 @@ Please let me know of any thoughts or additional checks I can make.
 
 # Analysis on Empirical Data: 
 
-For this I used the raw data from my frog study and I extracted the means from Geoff's 2002 MEPS paper. I just picked one phenotype per analysis. For the raw data (molly's data), I chose the age at metamorphosis data (only using freshwater and 6ppt treatments as "freshwater" and "saltwater" for simplicity). For the means data (Geoff's data), I chose the Shell mass growth data (figure 3). 
+For this I used the raw data from my frog study and I extracted the means from Geoff's 2002 MEPS paper and Geoff's 2000 Evolution paper. I picked one phenotype per analysis. For the raw data (molly's data), I chose the age at metamorphosis data (only using freshwater and 6ppt treatments as "freshwater" and "saltwater" for simplicity). Each population is a genotype, but the genotypes share an environment. For the means data (Geoff's data), I chose the Shell mass growth data (figure 3) from the 2002 study and shell thickness (fig 7) from the 2000 study.  
 
-I ran each through the framework and here's what I got: Very interesting that even though we both report CnGV -- its trending that way but not significant! 
+I ran each through the framework with 1000 bootstraps. When I group by population, the raw data (molly's study) gets significant cngv. Because both of geoff's studies have just 2 genotypes, they lack power to acheive significance (but given that covGE is pretty low, I believe they would be significant had more populations been tested).
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.GeoffPlot.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.21.Geoff2000.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.21.Geoff2002.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.Mollyplot.png)
