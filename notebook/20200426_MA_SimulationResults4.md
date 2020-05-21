@@ -1,6 +1,6 @@
 # Full simulation Results
 
-After resolving the covariance correction [issue](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200416_MA_SimResults_Round3.md), I ran ten replicates of the full array of parameters which were: 
+After resolving the covariance correction [issue](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200416_MA_SimResults_Round3.md), I ran **100 replicates** of the full array of parameters which were: 
 
 ```{param list}
 param_list <- list( 
@@ -33,20 +33,22 @@ Just as the preliminary sims showed, we see that the number of populations affec
 
 #### GxE calculated using Estimated Marginal Means
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.gxe_covEMM.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.covandGxe.png)
 
 #### GxE calculated using Omega^2
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7cov_gxe_omega2.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19_GxEcov_omega2.png)
 
 #### Tradeoff with GxE and Covariance
 
 We predicted that since as GxE increases, the relationship between genotype and environment must become increasingly independent which should reduce the amount of CovGE observed. Looks like our hypothesis is supported! *This data has been filtered to just significant GxE OR significant CovGE values.*
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.CovGxETradeoff.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.CovGEtradeoff.png)
 
 
 ## Different way to show tradeoff betweeen GxE and covariance: 
+These show covGE and GxE between 0.4 and 0.6, since these windows encapsulate the full range of power.
+
 |GxE | Cov | Both |
 |---|---|---|
 |![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.bluedat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.greendat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.reddat.png)|
@@ -54,28 +56,28 @@ We predicted that since as GxE increases, the relationship between genotype and 
 
 #### 2 population claim by Conover/Schultz
 Conover and Schultz claimed that 2 populations was insufficient to estimate covariance. Well, it turns out they weren't entirely wrong. Here is the power for n_pop = 2:
-| Std. Deviation | Sample Size | Average Power | 
+
+| Std. Deviation | Sample Size | Power | 
 |---|---|---|
- 0.5 | 5 | 0.08
-0.5| 10 | 0.10
-0.5| 20 | 0.09
-1| 5 | 0.13
+ 0.5 | 5 | 0.10
+0.5| 10 | 0.12
+0.5| 20 | 0.10
+1| 5 | 0.12
 1| 10 | 0.12
-1| 20 | 0.13
+1| 20 | 0.12
 
 #### HexPlot to show coverage
 
-To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. 
-There are a couple areas without data, but it does not seem like there are any major gaps or areas of oversampling that would drive a bias or blind spot.
+To ensure that all parameter space is being covered, here is a hexplot that quantifies the number of cases in hexagonal bins. After running the full 100 replicates, there don't seem to be any major gaps or areas of oversampling that would drive a bias or blind spot.
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.7.hexplot.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.hexplot.png)
 
 ## Power Heatmaps
 This is a heatmap showing how power changes according to standard deviation, sample size, and number of populations. 
 
-**Full Parameter Coverage**
+**Full Data (all values of CovGE and GxE)**
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.12.TotalHeatmapGxE.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19.FulldataHeatmap.png)
 
 **Reduced Coverage -- Only covGE and GxE between 0.4 and 0.6, since these windows encapsulate the full range of power.** 
 
