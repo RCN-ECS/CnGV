@@ -177,4 +177,4 @@ I ran each through the framework with 1000 bootstraps. When I group by populatio
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.21.Geoff2000.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.21.Geoff2002.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.14.Mollyplot.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.21.MollyData.png)
