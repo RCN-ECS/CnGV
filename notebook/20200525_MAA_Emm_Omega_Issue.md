@@ -12,6 +12,8 @@ Here is the code used to estimate both - based on model:
 ```
 
 Estimated marginal means: 
+
+Formula: GxE_emm = |(Pij - Gi- Ej+ P)| 
 ```{emm}
 # Magnitude of GxE -- EMMs
     GxE_emm <- abs(mean(model_df$phen_corrected) - # Overall mean
@@ -19,6 +21,10 @@ Estimated marginal means:
                   (emm_E$emmean[emm_E$exp_env_factor == "E_1"])+ # E
                   (emm_GxE[1,3])) # GxE
 ```
+Omega^2: 
+
+Formula: ω2 = (SSeffect – (dfeffect)(MSerror)) / MSerror + SStotal
+
 
 ```{omega}
 # Magnitude of GxE -- Omega^2
@@ -27,3 +33,14 @@ Estimated marginal means:
              (sum(summary(aov(test_temp))[[1]][,2]) + # (SS_total+
              (summary(aov(test_temp))[[1]][4,3])) # MS_error)
 ```
+Here is an example output from an aov for double checking: 
+
+```{output}
+summary(aov(test_temp))
+                          Df Sum Sq Mean Sq F value  Pr(>F)    
+exp_env_factor             1   5.14   5.143   56.18 2.5e-10 ***
+gen_factor                 7  66.75   9.536  104.16 < 2e-16 ***
+exp_env_factor:gen_factor  7   1.24   0.178    1.94  0.0776 .  
+Residuals                 64   5.86   0.092                    
+```
+In the above, the above code with the output listed above produces w2_GxE = 0.007614049
