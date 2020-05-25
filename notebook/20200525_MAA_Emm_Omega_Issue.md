@@ -35,6 +35,7 @@ delta_env |delta_gen| sample_size |n_pop |std_dev |interaction
    |  0.01     | 0.01       |    5   | 15   |  1.0     |  15.00
    |  0.01     | 0.01       |   20   | 15   |  1.0     |  15.00
 
+Interesting that they are all the same delta_gen... Unsure how that would affect things though. 
 
 Here is the code used to estimate both - based on model: 
 
@@ -76,3 +77,5 @@ exp_env_factor:gen_factor  7   1.24   0.178    1.94  0.0776 .
 Residuals                 64   5.86   0.092                    
 ```
 In the above, the above code with the output listed above produces w2_GxE = 0.007614049
+
+
