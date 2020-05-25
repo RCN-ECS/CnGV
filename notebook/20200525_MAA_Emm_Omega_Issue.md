@@ -4,6 +4,38 @@ When I plot the magnitude of GxE using emms vs omega^2, here is the result. Purp
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.25.OmegaVsEmm.png)
 
+If I filter this data to just Omega^2 estimates above 0.9 and EMM estimates below 0.1, I get 26 hits. The parameters that led to that outcome are: 
+
+delta_env |delta_gen| sample_size |n_pop |std_dev |interaction
+|---|---|---|---|---|---|
+       0.01   |   0.01   |       10  |  15   |  1.0  |      7.50
+       0.01  |    0.01    |      20   | 15  |   0.5  |     11.25
+       0.01   |   0.01      |     5 |   15  |   0.5    |   11.25
+       0.50   |   0.01   |       20  |  15   |  0.5   |    15.00
+       0.01    |  0.01     |      5  |  15   |  1.0   |    15.00
+       0.01     | 0.01     |      5  |  15   |  0.5   |    11.25
+       0.50     | 0.01     |     10  |  15   |  1.0   |    15.00
+       0.01     | 0.01     |     10  |  15   |  0.5   |    11.25
+       0.01     | 0.01     |     10  |  15   |  0.5   |    11.25
+     0.01  |    0.01       |   20   | 15   |  0.5     |  11.25
+     0.01   |   0.01       |   20   | 15   |  0.5     |   7.50
+     0.01    |  0.01       |   20   | 15   |  0.5     |  15.00
+     0.01  |    0.01       |    5   | 15   |  0.5     |  15.00
+     0.01   |   0.01       |    5   | 15   |  1.0     |  15.00
+     0.01   |   0.01       |   10   | 15   |  0.5     |  15.00
+     0.50   |   0.01       |   20   | 15   |  0.5     |  15.00
+      0.01  |    0.01      |     5  |  15  |   1.0    |   15.00
+     0.01   |   0.01       |   10   | 10   |  0.5     |   7.50
+      1.00  |    0.01      |     5  |  15  |   1.0    |   15.00
+     0.01    |  0.01       |   20   | 15   |  1.0     |  11.25
+      0.50   |   0.01      |    20  |  15  |   1.0    |   11.25
+      0.01   |   0.01      |    10  |  15  |   0.5    |    7.50
+      0.01   |   0.01      |     5  |  15  |   0.5    |   11.25
+      0.01   |   0.01      |     5  |  15  |   1.0    |   11.25
+     0.01     | 0.01       |    5   | 15   |  1.0     |  15.00
+     0.01     | 0.01       |   20   | 15   |  1.0     |  15.00
+
+
 Here is the code used to estimate both - based on model: 
 
 ```{m1}
