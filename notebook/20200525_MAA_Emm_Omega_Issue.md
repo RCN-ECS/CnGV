@@ -2,7 +2,7 @@
 
 When I plot the magnitude of GxE using emms vs omega^2, here is the result. Purple = Omega^2 is significant, grey = not signficant. 
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/Omega%20Vs.%20Emm.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.25.OmegaVsEmm.png)
 
 Here is the code used to estimate both - based on model: 
 
