@@ -16,9 +16,9 @@ param_list <- list(
   reps = c(1), # or more?
   delta_env = c(1),
   delta_gen = c(-1),
-  sample_size = 5,#c(5,10,20), 
-  n_pop = 2,#c(2,3,5,10,15), 
-  n_environments = NULL,
+  sample_size = 20,#c(5,10,20), 
+  n_pop = c(1,5),#c(2,3,5,10,15), 
+  n_environments = c(2,10),
   std_dev= 0.5,#c(0.5,1), 
   interaction = 5) # Vector LENGTH not magnitude
 
@@ -29,9 +29,13 @@ parameter_generation <- function(param_list){
   param_temp <- expand.grid("delta_env" = param_list$delta_env,
                             "delta_gen" = param_list$delta_gen,
                             "sample_size" = param_list$sample_size,
-                            "n_pop" = param_list$n_pop,
+                            "n_gen" = param_list$n_pop,
+                            "n_env" = param_list$n_environments,
                             "std_dev" = param_list$std_dev)
-  
+  # Add genotypes
+  param_temp$n_pop = param_temp$n_gen*param_temp$n_env
+  param_temp = param_temp[,-4] # Delete n_gen
+
   # Add replicates
   reps <- rep(c(1:param_list$reps), each = nrow(param_temp))
   param_temp2 <- data.frame("replicate" = reps, param_temp)
@@ -44,7 +48,7 @@ parameter_generation <- function(param_list){
       subsub = dplyr::filter(sub,n_pop == unique(sub$n_pop)[j])
       interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = param_list$interaction)
       inter_data = merge(subsub,interaction_term)
-      colnames(inter_data)[7]<- "interaction"
+      colnames(inter_data)[8]<- "interaction"
       param_temp3 = rbind(inter_data,param_temp3)
     }
   }
@@ -59,11 +63,8 @@ parameter_generation <- function(param_list){
 
 df = parameter_generation(param_list) 
 dim(df)
-df <- df[!(df$delta_env==0 & df$delta_gen==0),] # remove any 0s that'll blow up the phenotype
-dim(df)
-head(df)
 
-write.csv(df,"~/Desktop/df.csv",)
+write.csv(df,"~/Desktop/df526.csv",)
 
 
 ring <- function(param_table, n_boot){
