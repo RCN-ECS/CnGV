@@ -1,4 +1,4 @@
-####Mo' Problemz. 
+#### Mo' Problemz. 
 
 When I plot the magnitude of GxE using emms vs omega^2, here is the result. Purple = Omega^2 is significant, grey = not signficant. 
 
@@ -81,7 +81,7 @@ As I state above, I narrowed my sims to just those outputs that gave me an Omega
 Parameter set: 
 delta_env| delta_gen|sample_size|n_pop|std_dev|interaction
 |---|---|---|---|---|---|
-    |0.01  | 0.01 |  10 | 15  | 1 | 7.5|
+| 0.01  | 0.01 |  10 | 15  | 1 | 7.5|
 
 Which resulted in this pattern: 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.26.GxEdiscrepancy.png)
