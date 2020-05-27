@@ -86,9 +86,9 @@ delta_env| delta_gen|sample_size|n_pop|std_dev|interaction
 Which resulted in this pattern: 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.26.GxEdiscrepancy.png)
  
- As observed, visually it LOOKS like there is a GxE. The omega^2 picks this up, but EMM does not. 
+ Visually, it LOOKS like there is a GxE. The omega^2 picks this up, but EMM does not. 
  
- In running the code from this particular set of parameters, I cannot find any particular issue/error that would drive this discrepancy. I am really at a loss for why there would be such a low EMM GxE. 
+ I ran the code for this particular set of parameters, but I cannot find any particular issue/error that would drive this discrepancy. I am really at a loss for why there would be such a low EMM GxE. 
  
  My one comforting thought is that out of ~10k sims, there are only 26 that have such an odd discrepancy. Perhaps just a fluke? 
  
