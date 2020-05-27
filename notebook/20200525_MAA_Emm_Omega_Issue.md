@@ -76,6 +76,21 @@ gen_factor                 7  66.75   9.536  104.16 < 2e-16 ***
 exp_env_factor:gen_factor  7   1.24   0.178    1.94  0.0776 .  
 Residuals                 64   5.86   0.092                    
 ```
-In the above, the above code with the output listed above produces w2_GxE = 0.007614049
+### 5/26
+As I state above, I narrowed my sims to just those outputs that gave me an Omega^2 >.90 and GxE_Emm <0.1. This yielded 26 results. I picked one to investigate further: 
+Parameter set: 
+delta_env| delta_gen|sample_size|n_pop|std_dev|interaction
+|---|---|---|---|---|---|
+    |0.01  | 0.01 |  10 | 15  | 1 | 7.5|
 
+Which resulted in this pattern: 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.26.GxEdiscrepancy.png)
+ 
+ As observed, visually it LOOKS like there is a GxE. The omega^2 picks this up, but EMM does not. 
+ 
+ In running the code from this particular set of parameters, I cannot find any particular issue/error that would drive this discrepancy. I am really at a loss for why there would be such a low EMM GxE. 
+ 
+ My one comforting thought is that out of ~10k sims, there are only 26 that have such an odd discrepancy. Perhaps just a fluke? 
+ 
+ Really uncertain about what to think about this.
 
