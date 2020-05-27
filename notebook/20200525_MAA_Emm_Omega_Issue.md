@@ -103,3 +103,6 @@ Katie recommended to expand to Omega^2 >0.5 and GxE_emm < 0.1. When I do that, 3
 Katie also suggested to replot the above case to boxplots and correctly order the X-axis. This yields: 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.27.BoxplotProbPlot.png)
+
+One with n_pop = 5;
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.27.ProbPlot2.png)
