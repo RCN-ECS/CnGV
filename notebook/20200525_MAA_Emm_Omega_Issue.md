@@ -94,3 +94,12 @@ Which resulted in this pattern:
  
  Really uncertain about what to think about this.
 
+## 5.27
+
+Katie recommended to expand to Omega^2 >0.5 and GxE_emm < 0.1. When I do that, 3376 cases are returned. Katie predicted that most would be 10-15 pops. This is partially true: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.27.numhistogram.png)
+
+Katie also suggested to replot the above case to boxplots and correctly order the X-axis. This yields: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.27.BoxplotProbPlot.png)
