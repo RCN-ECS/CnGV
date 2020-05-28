@@ -117,7 +117,7 @@ One with n_pop = 5;
   
   # .csv sent via Slack
   model_df <- read.csv("model_df.csv")
-  result <- read.csv("result.csb") # FOR REFERENCE: original parameter set and results from full code
+  result <- read.csv("result.csv") # FOR REFERENCE: original parameter set and results from full code
   
   # Anova
     test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
