@@ -1,0 +1,108 @@
+---
+title: "Untitled"
+author: "KE Lotterhos"
+date: "5/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+setwd("/Users/lotterhos/Documents/GitHub/CnGV/notebook/20200528_data")
+```{r cars}
+# Load packages
+  library("emmeans")
+  library("lme4")
+  library("rlist")
+  library("dplyr")
+  
+  # .csv sent via Slack
+  model_df <- read.csv("model_df.csv")
+  result <- read.csv("result.csb") # FOR REFERENCE: original parameter set and results from full code
+  
+  # Anova
+    test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
+    summary(aov(test_temp))
+    
+    # Estimated Marginal Means
+    emm_options(msg.interaction = FALSE)
+    emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
+    emm_G = as.data.frame(emmeans(test_temp, "gen_factor"))
+    emm_GxE = as.data.frame(emmeans(test_temp, ~ exp_env_factor*gen_factor))
+    
+    ## Just checking ###
+    mean(model_df$phen_corrected)
+    mean(model_df$phen_corrected[model_df$exp_env_factor=="E_1"])
+    emm_E
+    
+    mean(model_df$phen_corrected[model_df$gen_factor=="G_1"])
+    emm_G
+    
+    mean(model_df$phen_corrected[model_df$gen_factor=="G_1" & model_df$exp_env_factor=="E_1"])
+    emm_GxE
+    
+    # Magnitude of GxE -- EMMs
+    
+    ## Should not matter on levels of G's and E's 
+    ## But it does...
+    GxE_emm <- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
+                  emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                  emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
+                  mean(model_df$phen_corrected)) # Overall mean phenotype # GxE_emm = 0.05991497 
+    
+       GxE_emm <- abs(mean(model_df$phen_corrected) - 
+         # GxE (Phenotype of ith genotype in jth environment)
+                  emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                  emm_E$emmean[emm_E$exp_env_factor == "E_2"] + # phenotype of jth Environment
+           emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_2"] 
+                  )
+    
+    GxE_emm
+    
+      GxE_emm <- abs(mean(model_df$phen_corrected) - 
+         # GxE (Phenotype of ith genotype in jth environment)
+                  emm_G$emmean[emm_G$gen_factor == "G_2"] - # phenotype of ith Genotype
+                  emm_E$emmean[emm_E$exp_env_factor == "E_2"] + # phenotype of jth Environment
+           emm_GxE$emmean[emm_GxE$gen_factor == "G_2" & emm_GxE$exp_env_factor == "E_2"] 
+                  )
+    
+    GxE_emm
+    
+    allGE <- c()
+    for (i in 1:nlevels(model_df$gen_factor)){
+      for (j in 1:nlevels(model_df$exp_env_factor)){
+        G_levels <- levels(model_df$gen_factor)
+        E_levels <- levels(model_df$exp_env_factor)
+        GxE_emm <- abs(mean(model_df$phen_corrected) - 
+         # GxE (Phenotype of ith genotype in jth environment)
+                  emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # phenotype of ith Genotype
+                  emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
+           emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] 
+                  )
+        allGE <- c(allGE, GxE_emm)
+      }
+    }
+    hist(allGE)
+    mean(allGE)
+     
+    
+    # Magnitude of GxE -- Omega^2
+    w2_GxE = (summary(aov(test_temp))[[1]][3,2] - #(SS_effect -
+             (summary(aov(test_temp))[[1]][3,1]*summary(aov(test_temp))[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(aov(test_temp))[[1]][,2]) + # (SS_total+
+             (summary(aov(test_temp))[[1]][4,3])) # MS_error) #  = 0.807962
+    w2_GxE
+    # Magnitude of GxE -- Eta^2
+    eta2_GxE = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2]) # = 0.8260634
+    eta2_GxE
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

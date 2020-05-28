@@ -126,18 +126,75 @@ plot(phenotype~model_df$E, col=model_df$G+1)
 
 ```
 
+
+## What effect does modeling the environment as a continuous variable vs. factor have on the resulting omega^2?
+
 ```{r}
 head(model_df)
 model_df$phenotype_stn  <- phenotype_stn 
+model_df$env_stn <- (model_df$E-mean(model_df$E))/(sd(model_df$E))
+model_df$G_fact <- as.factor(model_df$G)
+model_df$E_fact <- as.factor(model_df$E)
+str(model_df)
 
+# Explore anova with G and E as continuous
 model <- aov(phenotype_stn ~ G*E, model_df)
-summary(model)[[1]]
-
-
+summary(model)
  w2_GxE = (summary(model)[[1]][3,2] - #(SS_effect -
              (summary(model)[[1]][3,1]*summary(model)[[1]][4,3])) / #(Df_effect * MS_error))/
              (sum(summary(model)[[1]][,2]) + # (SS_total+
              (summary(model)[[1]][4,3])) # MS_error)
-
  
+  (GxE_emm <- abs(mean(model_df$phenotype_stn) - # Overall mean
+                    mean(model_df$phenotype_stn[model_df$G=="1"])- # G
+      mean(model_df$phenotype_stn[model_df$E=="1"])+ # E
+      mean(model_df$phenotype_stn[model_df$E=="1" & model_df$G=="1"])) # GxE
+  )
+ #################################
+ # same as last case but with lm()
+ model2 <- aov(lm(phenotype_stn ~ G*E, model_df))
+ summary(model2)
+ ( w2_GxE_2 = (summary(model2)[[1]][3,2] - #(SS_effect -
+             (summary(model2)[[1]][3,1]*summary(model)[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(model2)[[1]][,2]) + # (SS_total+
+             (summary(model2)[[1]][4,3])) # MS_error))
+ )
+ 
+  #################################
+ # same as last case but with standardized E
+ model3 <- aov(lm(phenotype_stn ~ G*env_stn, model_df))
+ summary(model3)
+ ( w2_GxE_3 = (summary(model3)[[1]][3,2] - #(SS_effect -
+             (summary(model3)[[1]][3,1]*summary(model)[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(model3)[[1]][,2]) + # (SS_total+
+             (summary(model3)[[1]][4,3])) # MS_error))
+ )
+ 
+   #################################
+ # same as last case but with factors
+ model4 <- aov(lm(phenotype_stn ~ G_fact*E_fact, model_df))
+ summary(model4)
+ ( w2_GxE_4 = (summary(model4)[[1]][3,2] - #(SS_effect -
+             (summary(model4)[[1]][3,1]*summary(model)[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(model4)[[1]][,2]) + # (SS_total+
+             (summary(model4)[[1]][4,3])) # MS_error))
+ )
+ 
+  # same as last case but with G as factor and E as a covariate
+ model5 <- aov(lm(phenotype_stn ~ G_fact*E, model_df))
+ summary(model5)
+ ( w2_GxE_5 = (summary(model5)[[1]][3,2] - #(SS_effect -
+             (summary(model5)[[1]][3,1]*summary(model)[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(model5)[[1]][,2]) + # (SS_total+
+             (summary(model5)[[1]][4,3])) # MS_error))
+ )
+ 
+   # same as last case but with G as factor and E as a STANDARDIZED covariate
+ model4 <- aov(lm(phenotype_stn ~ G_fact*env_stn, model_df))
+ ( w2_GxE_4 = (summary(model4)[[1]][3,2] - #(SS_effect -
+             (summary(model4)[[1]][3,1]*summary(model)[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(model4)[[1]][,2]) + # (SS_total+
+             (summary(model4)[[1]][4,3])) # MS_error))
+ )
+
 ```

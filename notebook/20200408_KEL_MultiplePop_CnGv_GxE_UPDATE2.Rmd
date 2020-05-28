@@ -139,9 +139,10 @@ for (i in 1:length(beta1_levels)){
   (stn_data_cov <- round(cov(E_means_stn, G_means_stn),2))
   (stn_data_cor <- round(cor(E_means_stn, G_means_stn),2))
   
-  (stn_data_cov_CE1 <- round(cov(E_means_stn, G_means_stn)/sd(E_means_stn),2))
-  (stn_data_cov_CE2 <- round(cov(E_means_stn/sd(E_means_stn), G_means_stn/sd(G_means_stn)),2)) #BAD
-  (stn_data_cov_CE3 <- round(cov(E_means_stn, G_means_stn),2)/sd(E_means_stn))
+  #crap
+  #(stn_data_cov_CE1 <- round(cov(E_means_stn, G_means_stn)/sd(E_means_stn),2))
+  #(stn_data_cov_CE2 <- round(cov(E_means_stn/sd(E_means_stn), G_means_stn/sd(G_means_stn)),2)) #BAD
+  #(stn_data_cov_CE3 <- round(cov(E_means_stn, G_means_stn),2)/sd(E_means_stn))
   
   correct <- min(c(sd(E_means_stn)/sd(G_means_stn), sd(G_means_stn)/sd(E_means_stn)))
   correctc <- max(sd(E_means_stn),sd(G_means_stn))
