@@ -460,7 +460,7 @@ geoffplot2002 = ggplot(gt1, aes(x = exp_env_factor, y = phen_corrected, group = 
   annotate("text", x = "E_1", y = 2.5, 
            label = paste0("GxE = ",round(GeoffTest2002$GxE.Estimate,2),", p = ",round(GeoffTest2002$GxE.p.value,2)), size = 6, hjust = 0)
 geoffplot2002
-             
+
 
 geoffplot2000 = ggplot(gt[gt$Paper == 2000,], aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = nat_env_factor)) + 
   geom_point()+geom_line()+
