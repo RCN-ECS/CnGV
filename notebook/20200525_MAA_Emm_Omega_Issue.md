@@ -103,3 +103,44 @@ Katie recommended to expand to Omega^2 >0.5 and GxE_emm < 0.1. When I do that, 3
 Katie also suggested to replot the above case to boxplots and correctly order the X-axis. This yields: 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.27.BoxplotProbPlot.png)
+
+One with n_pop = 5;
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.27.ProbPlot2.png)
+
+## Code to Reproduce results from params that produced above plot (n_pop = 5)
+```{code}
+# Load packages
+  library("emmeans")
+  library("lme4")
+  library("rlist")
+  library("dplyr")
+  
+  # .csv sent via Slack
+  model_df <- read.csv("model_df.csv")
+  result <- read.csv("result.csb") # Full parameter set and results from full code
+  
+  # Anova
+    test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
+    
+    # Estimated Marginal Means
+    emm_options(msg.interaction = FALSE)
+    emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
+    emm_G = as.data.frame(emmeans(test_temp, "gen_factor"))
+    emm_GxE = as.data.frame(emmeans(test_temp, ~ exp_env_factor*gen_factor))
+    
+    # Magnitude of GxE -- EMMs
+    GxE_emm <- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
+                  emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                  emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
+                  mean(model_df$phen_corrected)) # Overall mean phenotype # GxE_emm = 0.05991497 
+    
+    # Magnitude of GxE -- Omega^2
+    w2_GxE = (summary(aov(test_temp))[[1]][3,2] - #(SS_effect -
+             (summary(aov(test_temp))[[1]][3,1]*summary(aov(test_temp))[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(aov(test_temp))[[1]][,2]) + # (SS_total+
+             (summary(aov(test_temp))[[1]][4,3])) # MS_error) #  = 0.807962
+    
+    # Magnitude of GxE -- Eta^2
+    eta2_GxE = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2]) # = 0.8260634
+ 
+```
