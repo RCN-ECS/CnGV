@@ -411,9 +411,14 @@ molly_labels = c("E_1" = "Inland populations", "E_2" = "Coastal populations")
 geoff_labels1 = c("E_1" = "Sheltered populations", "E_2" = "Wave-exposed populations")
 geoff_labels2 = c("E_1" = "Southern Population", "E_2" = "Northern Population")
 
-mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = nat_env_factor)) + 
+# Standardize data for plots 
+ma$phen_corrected =  (ma$phen_data - mean(ma$phen_data))/sd(ma$phen_data)
+gt1 = gt[gt$Paper == 2002,]
+gt1$phen_corrected =  (gt1$phen_data - mean(gt1$phen_data))/sd(gt1$phen_data)
+
+mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = nat_env_factor)) + 
   geom_point(position = position_dodge(width = 0.1))+geom_smooth(aes(fill=nat_env_factor),method = "glm")+
-  xlab("Environment")+ylab("Phenotype (age at metamorphosis in days)")+
+  xlab("Environment")+ylab("Normalized Phenotype (age at metamorphosis)")+
   scale_x_discrete(breaks=c("E_1","E_2"),labels=c("Freshwater", "Saltwater"))+
   scale_colour_manual(values = colors,labels = molly_labels)+
   scale_fill_manual(values = colors,labels = molly_labels)+
@@ -427,16 +432,16 @@ mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_data, group = gen_factor
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_rect(size = 2)) +
-          annotate("text", x = "E_1", y = 60, 
+          annotate("text", x = "E_1", y = 3, 
                    label = paste0("Cov = ", MollyTest$Covariance.Estimate,", p = ", round(MollyTest$Covariance.p.value,2)), size = 6, hjust = 0)+
-          annotate("text", x = "E_1", y = 57, 
+          annotate("text", x = "E_1", y = 2.5, 
                    label = paste0("GxE = ",round(MollyTest$GxE.Estimate,2),", p = ",round(MollyTest$GxE.p.value,2)), size = 6, hjust = 0)
 mollyplot
 
-geoffplot2002 = ggplot(gt[gt$Paper == 2002,], aes(x = exp_env_factor, y = phen_data, group = gen_factor, colour = nat_env_factor)) + 
+geoffplot2002 = ggplot(gt1, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = nat_env_factor)) + 
   geom_point()+geom_line()+
-  geom_errorbar(aes(ymin = (phen_data-phen_se),ymax = (phen_data+phen_se)),width = 0.1)+
-  xlab("Environment")+ylab("Phenotype (Shell mass growth (mg))")+
+  geom_errorbar(aes(ymin = (phen_corrected-phen_se),ymax = (phen_corrected+phen_se)),width = 0.1)+
+  xlab("Environment")+ylab("Normalized Phenotype (Shell mass growth)")+
   scale_x_discrete(breaks=c("E_1","E_2"),labels=c("Low Flow", "High Flow"))+
   scale_colour_manual(values = colors,labels = geoff_labels1)+
   scale_fill_manual(values = colors,labels = geoff_labels1)+
@@ -450,9 +455,9 @@ geoffplot2002 = ggplot(gt[gt$Paper == 2002,], aes(x = exp_env_factor, y = phen_d
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_rect(size = 2)) +
-  annotate("text", x = "E_1", y = 14, 
+  annotate("text", x = "E_1", y = 3, 
            label = paste0("Cov = ", GeoffTest2002$Covariance.Estimate,", p = ", round(GeoffTest2002$Covariance.p.value,2)), size = 6, hjust = 0)+
-  annotate("text", x = "E_1", y = 13, 
+  annotate("text", x = "E_1", y = 2.5, 
            label = paste0("GxE = ",round(GeoffTest2002$GxE.Estimate,2),", p = ",round(GeoffTest2002$GxE.p.value,2)), size = 6, hjust = 0)
 geoffplot2002
              
