@@ -151,7 +151,7 @@ model.bern<-function(){
     beta[j] ~ dnorm(0,tau) 
   }
   
-  ba ~ dnorm(0,tau)
+  ba ~ dnorm(0,tau) # Prior for intercept
   sigma.a ~ dunif(0, 100) # standard deviation of random effect (variance between individuals)
 	tau.a <- 1 / (sigma.a * sigma.a) # convert to precision
 	
@@ -208,7 +208,7 @@ gelman.diag(b2) #provides the Gelman-Rubin statistics # Rule of thumb - anything
 # For words like species name, R goes in alphabetical order so 1 = first alphabetical name, 2 = second in alphabetical order
 # Numbers go in numerical order (duh)- so time =1 is time 0, time=2 is 24 hrs... etc.
 
-#Fixed Effects
+# Fixed Effects
 Time_hrs<-df2$time #beta[4]
 Spp = as.numeric(df2$Spp) #beta[1]
 Trt = as.numeric(df2$Trt) # beta[2]
@@ -239,13 +239,13 @@ for(j in 1:length(unique(Time_hrs))){
         pred<-predict_surv(b2[[1]],Int,unique(Time_hrs)[j],unique(Trt)[k],unique(Spp)[l],unique(PopID)[m]) # Puts each value through function
         
         out=data.frame("Time" = unique(Time_hrs)[j],
-              "Trt" = unique(Trt)[k],
-              "Spp" = unique(Spp)[l],
-              "PopID" = unique(PopID)[m],
-              "mean" = mean(pred), # this is output from function - mean survival
-              "median" = median(pred),
-              "quantile_lwr" = quantile(pred,p=c(0.025,0.975))[1],
-              "quantile_upr" = quantile(pred,p=c(0.025,0.975))[2])
+                        "Trt" = unique(Trt)[k],
+                        "Spp" = unique(Spp)[l],
+                        "PopID" = unique(PopID)[m],
+                        "mean" = mean(pred), # this is output from function - mean survival
+                        "median" = median(pred),
+                        "quantile_lwr" = quantile(pred,p=c(0.025,0.975))[1],
+                        "quantile_upr" = quantile(pred,p=c(0.025,0.975))[2])
         out_dat2<-rbind(out_dat2,out)
       }
       }

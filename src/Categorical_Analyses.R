@@ -93,7 +93,7 @@ fun1 <- function(input_df){
   # Magnitude of GxE using EMMs
   GxE_emm <- abs(mean(input_df$phen_corrected) - # Overall mean
                 (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G1
-                (emm_E$emmean[emm_E$exp_env_factor=="E_1"])+ # E1
+                (emm_E$emmean[emm_E$exp_env_factor=="E_6"])+ # E1
                 (emm_GxE[1,3])) # G1E1
   
   output <- data.frame("GxE_magnitude" = GxE_emm, 
@@ -240,6 +240,7 @@ permutation_categorical <- function(input_df){
   
   # Each genotype and environment
   if(length(unique(input_df$gen_factor)) == length(unique(input_df$exp_env_factor))){
+    
     # Shuffle data
     null_temp <- sample(input_df$phen_data, size=nrow(input_df), replace=FALSE)
     
@@ -451,6 +452,9 @@ Categorical_meta <- function(input_df,meta_data,iterations){
 ##############
 # Test  Data #
 ##############
+
+# Test with molly's data
+mollydf = Categorical_sim(input_df, 100)
 
 # Starting parameters
 init_params <- list(

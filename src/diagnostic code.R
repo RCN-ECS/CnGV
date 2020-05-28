@@ -63,7 +63,7 @@ checkfunc <- function(param_table, n_boot){
     return(output)
 }
 
-
+# Generates phenotype data only
 df3 <- checkfunc(df,1)
 
 ggplot(df3, aes(x = exp_env_factor, y = phen_corrected, colour = factor(gen_factor), group = factor(gen_factor))) + 
