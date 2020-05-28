@@ -26,6 +26,9 @@
   phen_out <- data.frame()
   GEmeans_out <- data.frame()
   
+  # Make reproduceable: 
+  set.seed(86)
+  
     # Dataframe foundations
     n_environments = n_env 
     gen <- rep(1:n_pop, each = sample_size*n_environments)
@@ -990,12 +993,13 @@ ggplot(sigGxE, aes(x = GxE_emm_estimate, y = covtick))+
         panel.border = element_rect(size = 2))
 
 # Hex plot
-ggplot(dat_csv, aes(x = cov_corrected, y = GxE_emm_estimate)) + 
+ggplot(dat_csv, aes(x = cov_corrected, y = GxE_omega_estimate)) + 
   geom_hex()+
-    theme_classic() + ylim(0,3)+ xlim(-1,1)+
+    theme_classic() + ylim(0,1.2)+ xlim(-1,1)+
   xlab("Covariance Estimate") + ylab("GxE Estimate") +
+  ggtitle("HexPlot for Omega^2")+
   #theme(legend.position = "none")+
-  #scale_colour_identity()+
+  #scale_colour_identity()+ 
   facet_grid(sample_size~n_pop)#,
 #labeller=labeller(sample_size = as_labeller(sample.labs),
 # n_pop = as_labeller(pop.labs)))
