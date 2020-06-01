@@ -401,9 +401,9 @@ amarillo_armadillo <- function(input_df, n_boot){ # Data, Number of bootstraps
     } 
     }
   
-MollyTest = amarillo_armadillo(ma, 1000) # Molly's raw data
+MollyTest = amarillo_armadillo(ma, 100) # Molly's raw data
 GeoffTest2002 = amarillo_armadillo(gt[gt$Paper == 2002,], 1000)
-GeoffTest2000 = amarillo_armadillo(gt[gt$Paper == 2000,], 1000)
+GeoffTest2000 = amarillo_armadillo(gt[gt$Paper == 2000,], 100)
 
 # Plots for paper
 colors = c("E_1" = "#0066BB", "E_2" = "#FF6633")
