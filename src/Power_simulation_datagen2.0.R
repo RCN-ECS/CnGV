@@ -13,14 +13,14 @@ param_list <- list(
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(100), # or more?
+  reps = c(5), # or more?
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
-  sample_size = c(5,10,20),#c(5,10,20), 
-  n_pop = c(2,3,4,5),#c(2,3,5,10,15), 
-  n_environments = c(2,3,5,7,10),
-  std_dev= c(0.5,1), 
-  interaction = 5) # Vector LENGTH not magnitude
+  sample_size = c(5),#c(5,10,20),#c(5,10,20), 
+  n_pop = c(2,5),#c(2,3,4,5),#c(2,3,5,10,15), 
+  n_environments = c(2,5),#c(2,3,5,7,10),
+  std_dev= 0.5,#c(0.5,1), 
+  interaction = 2) # Vector LENGTH not magnitude
 
 # Table of parameters
 parameter_generation <- function(param_list){
@@ -62,10 +62,11 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
+#args = df[45,]
+#args = df[20,]
 dim(df)
 
-write.csv(df,"~/Desktop/df526.csv",)
-
+write.csv(df,"~/Desktop/df62.csv",)
 
 ring <- function(param_table, n_boot){
   start_time <- Sys.time()
