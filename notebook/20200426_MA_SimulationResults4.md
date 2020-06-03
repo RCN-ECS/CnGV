@@ -37,7 +37,7 @@ Just as the preliminary sims showed, we see that the number of populations affec
 
 #### GxE calculated using Omega^2
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/5.19_GxEcov_omega2.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/6.1.GxE_Omega_colors.png)
 
 #### Tradeoff with GxE and Covariance
 
