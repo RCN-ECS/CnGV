@@ -1,120 +1,121 @@
+## Wtf is going on with means GxE permutation?
 
-  # Load packages
-  library("emmeans")
-  library("lme4")
-  library("rlist")
-  library("dplyr")
-  library("ggplot2")
-  start.time <- Sys.time()
+
+# Load packages
+library("emmeans")
+emm_options(msg.interaction = FALSE)
+library("lme4")
+library("rlist")
+library("dplyr")
+library("ggplot2")
   
-  # Load Parameters
+  start.time <- Sys.time()
+  set.seed(86)
   args = commandArgs(trailingOnly = TRUE)
   
-  row = as.numeric(args[1])
-  replicate = as.numeric(args[2])
-  delta_env = as.numeric(args[3])
-  delta_gen = as.numeric(args[4])
-  sample_size = as.numeric(args[5])
-  n_env = as.numeric(args[6])
-  std_dev = as.numeric(args[7])
-  n_pop = as.numeric(args[8])
-  interaction = as.numeric(args[9])
-  n_boot = 100
+  # Load Parameters
+  row <- as.numeric(args[1])
+  replicate <- as.numeric(args[2])
+  delta_env <- as.numeric(args[3])
+  delta_gen <- as.numeric(args[4])
+  sample_size <- as.numeric(args[5])
+  n_env <- as.numeric(args[6])
+  std_dev <- as.numeric(args[7])
+  n_pop <- as.numeric(args[8])
+  interaction <- as.numeric(args[9])
+  n_boot <- 100
   
   # Output dataframes
   output <- data.frame()
   phen_out <- data.frame()
   GEmeans_out <- data.frame()
+  boot_df <- data.frame()
+  perm_df <- data.frame()
   
-  # Make reproduceable: 
-  set.seed(86)
-  
-    # Dataframe foundations
-    n_environments = n_env 
-    gen <- rep(1:n_pop, each = sample_size*n_environments)
-    env <- rep(1:n_environments, times = n_pop, each = sample_size) 
+  # Dataframe foundations
+  n_environments <- n_env 
+  gen <- rep(1:n_pop, each = sample_size*n_environments)
+  env <- rep(1:n_environments, times = n_pop, each = sample_size) 
     
-    # Random Noise
-    noise <- rnorm(sample_size * n_pop * n_environments, 0, sd = std_dev) 
+  # Random Noise
+  noise <- rnorm(sample_size * n_pop * n_environments, 0, sd = std_dev) 
     
-    # Interaction Terms
-    int <- rep(rnorm(n_pop * n_environments, 0, sd = interaction), each = sample_size) # interaction term - one for each GE level
+  # Interaction Term
+  int <- rep(rnorm(n_pop * n_environments, 0, sd = interaction), each = sample_size) # interaction term - one for each GE level
     
-    # Create the model dataframe 
-    model_df <- data.frame(gen, env, noise, int)
-    model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
-    model_df$exp_env_factor = factor(paste("E", model_df$env, sep = "_"))
+  # Create model dataframe 
+  model_df <- data.frame(gen, env, noise, int)
+  model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
+  model_df$exp_env_factor = factor(paste("E", model_df$env, sep = "_"))
     
-    # Native environments
-    model_df$nat_env_factor = rep(unique(model_df$exp_env_factor), each = (sample_size*n_pop))
+  # Native environments
+  model_df$nat_env_factor = rep(unique(model_df$exp_env_factor), each = (sample_size*n_pop))
     
-    # Generate phenotype data using regression equation
-    phen = delta_env * model_df$env + delta_gen * model_df$gen  + model_df$noise + model_df$int 
-    model_df$phen = phen
+  # Phenotype data using regression equation
+  phen = delta_env * model_df$env + delta_gen * model_df$gen  + model_df$noise + model_df$int 
+  model_df$phen = phen
     
-    # Generate means dataframe
-    mean_df = model_df %>%
-      group_by(gen_factor, exp_env_factor) %>%
-      summarize("avg_phen" = mean(phen),
-                "deviation" = sd(phen))
-    mean_df$se = mean_df$deviation/(sqrt(sample_size))
-    mean_df$nat_env_factor = model_df$nat_env_factor[match(mean_df$gen_factor,model_df$gen_factor)]
+  # Generate means dataframe
+  mean_df = model_df %>%
+    group_by(gen_factor, exp_env_factor) %>%
+    summarize("avg_phen" = mean(phen),
+              "deviation" = sd(phen))
+  mean_df$se = mean_df$deviation/(sqrt(sample_size))
+  mean_df$nat_env_factor = model_df$nat_env_factor[match(mean_df$gen_factor,model_df$gen_factor)]
     
-    # Standardize data
-    model_df$phen_corrected = (phen - mean(phen))/sd(phen)
-    mean_df$avg_phen_corrected = (mean_df$avg_phen - mean(mean_df$avg_phen))/sd(mean_df$avg_phen) 
+  # Standardize data
+  model_df$phen_corrected = (phen - mean(phen))/sd(phen)
+  mean_df$avg_phen_corrected = (mean_df$avg_phen - mean(mean_df$avg_phen))/sd(mean_df$avg_phen) 
     
-    # To check phenotypes: 
-    #ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + 
-         #   geom_point() + geom_smooth(method = "glm") + theme_classic()
+  # Create Phenotype output
+  phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)), 
+                          "replicate" = rep(unique(replicate),nrow(model_df)), 
+                          "delta_env" = rep(unique(delta_env),nrow(model_df)), 
+                          "delta_gen" = rep(unique(delta_gen),nrow(model_df)), 
+                          "sample_size" = rep(unique(sample_size),nrow(model_df)), 
+                          "n_pop" = rep(unique(n_pop),nrow(model_df)), 
+                          "n_env" = rep(unique(n_env),nrow(model_df)),
+                          "std_dev" = rep(unique(std_dev),nrow(model_df)), 
+                          "interaction" = rep(unique(interaction),nrow(model_df))) 
+  phen_out <- cbind(phen_out.,model_df)
     
-    # Create Phenotype output
-    phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)), 
-                            "replicate" = rep(unique(replicate),nrow(model_df)), 
-                            "delta_env" = rep(unique(delta_env),nrow(model_df)), 
-                            "delta_gen" = rep(unique(delta_gen),nrow(model_df)), 
-                            "sample_size" = rep(unique(sample_size),nrow(model_df)), 
-                            "n_pop" = rep(unique(n_pop),nrow(model_df)), 
-                            "n_env" = rep(unique(n_env),nrow(model_df)),
-                            "std_dev" = rep(unique(std_dev),nrow(model_df)), 
-                            "interaction" = rep(unique(interaction),nrow(model_df))) 
-    phen_out <- cbind(phen_out.,model_df)
+  # To check phenotypes: 
+  #ggplot(phen_out, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(method = "glm") + theme_classic()
     
-    # Anova
-    test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
+  # Anova
+  test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
     
-    # Save Model Output
-    mod_df = as.data.frame(summary(aov(test_temp))[[1]])
-    mod_df = rownames_to_column(mod_df) 
-    colnames(mod_df)[1] <- "Fixed_effect"
-    mod_df$data_class = rep("Raw_data_model", nrow(mod_df))
+  # Save Model Output
+  mod_df = as.data.frame(summary(aov(test_temp))[[1]])
+  mod_df = rownames_to_column(mod_df) 
+  colnames(mod_df)[1] <- "Fixed_effect"
+  mod_df$data_class = rep("Raw_data_model", nrow(mod_df))
     
-    # Estimated Marginal Means
-    emm_options(msg.interaction = FALSE)
-    emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
-    emm_G = as.data.frame(emmeans(test_temp, "gen_factor"))
-    emm_GxE = as.data.frame(emmeans(test_temp, ~ exp_env_factor*gen_factor))
+  # Estimated Marginal Means
+  emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
+  emm_G = as.data.frame(emmeans(test_temp, "gen_factor"))
+  emm_GxE = as.data.frame(emmeans(test_temp, ~ exp_env_factor*gen_factor))
     
-    # Gmeans
-    G_matrix = data.frame()
-    for(h in 1:length(unique(emm_GxE$gen_factor))){
+  # Gmeans
+  G_matrix = data.frame()
+  for(h in 1:length(unique(emm_GxE$gen_factor))){
       gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[h])
       gmean <- mean(gtemp[,3])
       tempdat = data.frame("G_means" = gmean,
                            "gen_factor" = unique(emm_GxE$gen_factor)[h])
       G_matrix = rbind(G_matrix,tempdat)
-    }
+  }
     
-    # Emeans
-    E_matrix = data.frame()
-    for(j in 1:length(unique(emm_GxE$exp_env_factor))){
-      etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[j])
-      emean <- mean(etemp[,3])
-      tempdat. = data.frame("E_means" = emean,
-                            "exp_env_factor" = unique(emm_GxE$exp_env_factor)[j])
-      E_matrix = rbind(E_matrix,tempdat.)
-    }
-    
+  # Emeans
+  E_matrix = data.frame()
+  for(j in 1:length(unique(emm_GxE$exp_env_factor))){
+    etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[j])
+    emean <- mean(etemp[,3])
+    tempdat. = data.frame("E_means" = emean,
+                          "exp_env_factor" = unique(emm_GxE$exp_env_factor)[j])
+    E_matrix = rbind(E_matrix,tempdat.)
+  }
+  
     # Match Genotypes to Native Environment
     Cov_matrix = G_matrix
     Cov_matrix$exp_env_factor <- model_df$nat_env_factor[match(G_matrix$gen_factor,model_df$gen_factor)]
@@ -143,7 +144,7 @@
     cov_means_corrected = round(cov(Cov_mean_matrix$E_means, Cov_mean_matrix$G_means)/(means_correction^2),2)
     
     # Magnitude of GxE -- EMMs
-    GxE_emm <- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
+    GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
                   emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
                   emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
                   mean(model_df$phen_corrected)) # Overall mean phenotype
@@ -173,6 +174,9 @@
     
     # Magnitude of GxE -- Eta2 
     eta_GxE = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
+    
+    # Residual Variation
+    ResVar = summary(aov(test_temp))[[1]][3,2]/(summary(aov(test_temp))[[1]][1,2]+summary(aov(test_temp))[[1]][2,2]+summary(aov(test_temp))[[1]][3,2])
     
     # Magnitude of GxE -- Loop on Means
     allGEmeans <- c()
@@ -303,6 +307,9 @@
     # Magnitude of GxE -- Eta2 -- No Error
     eta_GxE_ne = summary(aov(test_temp_noerror))[[1]][3,2]/sum(summary(aov(test_temp_noerror))[[1]][,2])
     
+    # Residual Variation
+    ResVar_ne = summary(aov(test_temp_noerror))[[1]][3,2]/(summary(aov(test_temp_noerror))[[1]][1,2]+summary(aov(test_temp_noerror))[[1]][2,2]+summary(aov(test_temp_noerror))[[1]][3,2])
+    
     # Magnitude of GxE -- Looped Means -- No Error
     allGEmeans_ne <- c()
     for (i in 1:nlevels(mean_df_ne$gen_factor)){
@@ -341,9 +348,6 @@
     ###############
     ## Bootstrap ##
     ###############
-    
-    # Output Dataframes
-    boot_df <- data.frame()
 
     # Resampling Loop
     for(a in 1:n_boot){
@@ -477,6 +481,9 @@
       
       # Magnitude of GxE -- Eta2 -- Bootstrap
       boot_eta_GxE = summary(aov(test_boot))[[1]][3,2]/sum(summary(aov(test_boot))[[1]][,2]) 
+      
+      # Residual Variation
+      ResVar_boot = summary(aov(test_boot))[[1]][3,2]/(summary(aov(test_boot))[[1]][1,2]+summary(aov(test_boot))[[1]][2,2]+summary(aov(test_boot))[[1]][3,2])
            
       # Magnitude of GxE -- Means -- Bootstrap
       allGE_means_boot <- c()
@@ -505,6 +512,7 @@
                               "GxE_mag_loop" = loopGxE_boot,
                               "GxE_mag_omega" = boot_w2_GxE,
                               "GxE_eta_boot" = boot_eta_GxE,
+                              "GxE_resvar_boot" = ResVar_boot,
                               "GxE_means_boot" = GxE_means_boot)
       boot_df <- rbind(boot_df,boot_dat)
     }
@@ -522,14 +530,13 @@
     GxE_loop_CI = quantile(boot_df$GxE_mag_loop, probs = c(0.025, 0.975), type=1)
     GxE_omega_CI = quantile(boot_df$GxE_mag_omega, probs=c(0.025, 0.975), type=1)
     GxE_eta_CI = quantile(boot_df$GxE_eta_boot, probs=c(0.025,0.975), type = 1)
+    GxE_resvar_CI = quantile(boot_df$GxE_resvar_boot, probs = c(0.025,0.975), type = 1)
     GxE_means_CI = quantile(boot_df$GxE_means_boot, probs=c(0.025, 0.975), type=1)
     
     #################
     ## Permutation ##
     #################
     
-    # Output Dataframes
-    perm_df <- data.frame()
     
     for(b in 1:n_boot){  
       
@@ -720,6 +727,9 @@
       # Magnitude of GxE -- Eta2 -- Permutation -- No Error
       perm_eta_GxE_ne = summary(aov(test_perm_ne))[[1]][3,2]/sum(summary(aov(test_perm_ne))[[1]][,2])
       
+      # Residual Variation
+      ResVar_perm = summary(aov(test_perm))[[1]][3,2]/(summary(aov(test_perm))[[1]][1,2]+summary(aov(test_perm))[[1]][2,2]+summary(aov(test_perm))[[1]][3,2])
+      
       # Magnitude of GxE -- Means -- Permutation
       allGE_means_perm <- c()
       for (i in 1:nlevels(perm_means$gen_factor)){
@@ -770,13 +780,14 @@
                               "true_GxE_omega_perm" = perm_w2_GxE_ne,
                               "GxE_eta_perm" = perm_eta_GxE,
                               "true_GxE_eta_perm" = perm_eta_GxE_ne,
+                              "Resid_var_perm" = ResVar_perm,
                               "GxE_means_perm" = GxE_means_perm,
                               "true_GxE_means_perm" = GxE_means_perm_ne)
       perm_df <- rbind(perm_df,perm_dat.)
     }
     
      ## Sanity Check: Null distribution histogram
-    ggplot(perm_df, aes(x = GxE_means_perm))+geom_histogram() # Insert variable of interest as x
+    ggplot(perm_df, aes(x = true_GxE_mag_perm))+geom_histogram() # Insert variable of interest as x
     
     # Covariance p-value
     ptemp1 = (rank(c(cov_est,perm_df$covariance_perm))[1])/(n_boot+1) 
@@ -824,7 +835,7 @@
     if(ptemp6 < 0.5){cov_means_correct_pvalue = ptemp6}else{cov_means_correct_pvalue = (1-ptemp6)} # 2-tailed
     
     # GxE - EMM - P-value
-    ptemp7 = (rank(c(GxE_emm,perm_df$GxE_mag))[1])/(n_boot+1) 
+    ptemp7 = (rank(c(GxE_emm_original,perm_df$GxE_mag))[1])/(n_boot+1) 
     GxE_pvalue = 1-ptemp7 # Right-tailed
     
     # GxE - EMM - No Error - P-value
@@ -862,7 +873,11 @@
     ptemp11_ne = (rank(c(eta_GxE_ne,perm_df$true_GxE_eta_perm))[1])/(n_boot+1) 
     GxE_eta_pvalue_ne = 1-ptemp11_ne
     
-    # Model Output
+    # GxE - Residual Variation
+    ptemp12 = (rank(c(ResVar, perm_df$Resid_var_perm))[1])/(n_boot + 1)
+    Resid_var_pvalue = (1-ptemp12)
+   
+     # Model Output
     model_info = rbind(mod_df,mod_df_ne)
 
     end.time <- Sys.time()
@@ -880,7 +895,6 @@
                          "Sim_time" = time.taken)
     
     Covariance <- data.frame("row" = row,
-                         
                          "true_cov" = true_cov, #Covariance Original
                          "true_cov_pvalue" = true_cov_pvalue,
                          "cov_estimate" = cov_est,
@@ -921,8 +935,7 @@
                          "cov_means_correct_pvalue" = cov_means_correct_pvalue)
     
     GxE <- data.frame("row" = row,
-                          
-                         "true_GxE" = true_GxE, # Emmeans GxE 
+                         "true_GxE" = GxE_emm_original, # Emmeans GxE 
                          "true_GxE_pvalue" = true_GxE_pvalue,
                          "GxE_emm_estimate" = GxE_emm,
                          "GxE_emm_lwrCI" = GxE_CI[[1]],
@@ -949,6 +962,12 @@
                          "GxE_eta_lwrCI" = GxE_eta_CI[[1]],
                          "GxE_eta_uprCI" = GxE_eta_CI[[2]],
                          "GxE_eta_pvalue" = ptemp11,
+                      
+                         "True_resid_variation" = ResVar_ne,   
+                         "Resid_variation" = ResVar,
+                         "GxE_residVar_lwrCI" = GxE_resvar_CI[[1]],
+                         "GxE_residVar_uprCI" = GxE_resvar_CI[[2]],
+                         "Resid_variation_pvalue" = Resid_var_pvalue,
                          
                          "true_GxE_means" = GxE_means_ne, # GxE on means
                          "true_GxE_means_pvalue"=true_GxE_means_pvalue,

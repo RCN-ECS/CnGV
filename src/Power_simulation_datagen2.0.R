@@ -62,8 +62,8 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-#args = df[45,]
-#args = df[20,]
+args = df[45,]
+args = df[20,]
 dim(df)
 
 write.csv(df,"~/Desktop/df62.csv",)
