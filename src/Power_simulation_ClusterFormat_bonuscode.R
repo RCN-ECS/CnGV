@@ -122,7 +122,7 @@ Cov_matrix = G_matrix
 Cov_matrix$exp_env_factor <- model_df$nat_env_factor[match(G_matrix$gen_factor,model_df$gen_factor)]
 Cov_matrix$E_means <- E_matrix$E_means[match(Cov_matrix$exp_env_factor,E_matrix$exp_env_factor)]
 
-# Means on Means -- stacks on stacks of means
+# Means of Means
 E_means <- tapply(mean_df$avg_phen_corrected, mean_df$exp_env_factor, mean)
 G_means <- tapply(mean_df$avg_phen_corrected, mean_df$gen_factor, mean)
 Gmean_mat <- data.frame("G_means" = G_means, "gen_factor" = unique(mean_df$gen_factor))
