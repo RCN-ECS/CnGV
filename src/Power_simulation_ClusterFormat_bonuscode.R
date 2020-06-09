@@ -185,11 +185,11 @@ for (i in 1:nlevels(mean_df$gen_factor)){
 for (j in 1:nlevels(mean_df$exp_env_factor)){
   G_levels <- levels(mean_df$gen_factor)
   E_levels <- levels(mean_df$exp_env_factor)
-  GxE_emm_mean <- abs(mean_df$avg_phen_corrected[mean_df$gen_factor == G_levels[i] & mean_df$exp_env_factor == E_levels[j]] - 
+  GxE_emm_mean1 <- abs(mean_df$avg_phen_corrected[mean_df$gen_factor == G_levels[i] & mean_df$exp_env_factor == E_levels[j]] - 
                       mean(mean_df$avg_phen_corrected[mean_df$gen_factor == G_levels[i]]) - # phenotype of ith Genotype
                       mean(mean_df$avg_phen_corrected[mean_df$exp_env_factor == E_levels[j]]) + # phenotype of jth Environment
                       mean(mean_df$avg_phen_corrected)) # Overall mean
-  allGEmeans <- c(allGEmeans, GxE_emm_mean)
+  allGEmeans <- c(allGEmeans, GxE_emm_mean1)
 }
 }
 #hist(allGEmeans)
@@ -767,18 +767,6 @@ for (i in 1:nlevels(perm_means$gen_factor)){
 #hist(allGE_means_perm_ne)
 GxE_means_perm_ne = mean(allGE_means_perm_ne)
 
-#}else{
-  #GxE_means_perm <- abs(mean(perm_means$avg_phen_corrected) - # phen of ith and jth
-  #                      mean(perm_means$avg_phen_corrected[perm_means$gen_factor == "G_1"])- 
-  #                      mean(perm_means$avg_phen_corrected[perm_means$exp_env_factor == "E_1"])+ 
-   #                     perm_means$avg_phen_corrected[perm_means$gen_factor == "G_1" & perm_means$exp_env_factor == "E_1"])
-  
-  #GxE_means_perm_ne <- abs(mean(perm_means$avg_phen_corrected_ne) - # Overall mean
-  #                         mean(perm_means$avg_phen_corrected_ne[perm_means$gen_factor == "G_1"]) - # phenotype of ith Genotype
-  #                         mean(perm_means$avg_phen_corrected_ne[perm_means$exp_env_factor == "E_1"]) + # phenotype of jth Environment
-   #                        perm_means$avg_phen_corrected_ne[perm_means$gen_factor == "G_1" & perm_means$exp_env_factor == "E_1"]) # phen of ith and jth
-#}
-
 # Permutation Output
 perm_dat. <- data.frame("covariance_perm" = cov_est_perm,
                         "true_covariance_perm" = true_cov_est_perm,
@@ -861,15 +849,15 @@ true_GxE_pvalue = 1-ptemp7_ne # Right-tailed
 
 # GxE - Omega2 - p-value
 ptemp8 = (rank(c(w2_GxE,perm_df$GxE_omega_perm))[1])/(n_boot+1) 
-GxE_omega_pvalue = 1-ptemp8 # Right-tailed
+GxE_omega_pvalue = (1-ptemp8) # Right-tailed
 
 # GxE - Omega2 - No error - p-value
 ptemp8_ne = (rank(c(true_w2_GxE,perm_df$true_GxE_omega_perm))[1])/(n_boot+1) 
-true_GxE_omega_pvalue = 1-ptemp8_ne # Right-tailed
+true_GxE_omega_pvalue = (1-ptemp8_ne) # Right-tailed
 
 # GxE - Means - p-value
 ptemp9 = (rank(c(GxE_means,perm_df$GxE_means_perm))[1])/(n_boot+1) 
-GxE_means_pvalue = 1-ptemp9 # Right-tailed
+GxE_means_pvalue = (1-ptemp9) # Right-tailed
 
 # GxE - Means - No error - p-value
 ptemp9_ne= (rank(c(GxE_means_ne,perm_df$true_GxE_means_perm))[1])/(n_boot+1) 
