@@ -17,8 +17,8 @@ param_list <- list(
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
   sample_size = c(5),#c(5,10,20),#c(5,10,20), 
-  n_pop = c(2,5),#c(2,3,4,5),#c(2,3,5,10,15), 
-  n_environments = c(2,5),#c(2,3,5,7,10),
+  n_pop = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
+  n_environments = c(2),#c(2,3,5,7,10),
   std_dev= 0.5,#c(0.5,1), 
   interaction = 2) # Vector LENGTH not magnitude
 
@@ -62,8 +62,8 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-args = df[45,]
-args = df[20,]
+args = df[84,]
+args = df[78,]
 dim(df)
 
 write.csv(df,"~/Desktop/df62.csv",)

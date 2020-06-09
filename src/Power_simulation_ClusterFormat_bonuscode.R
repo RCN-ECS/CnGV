@@ -9,7 +9,7 @@ library("ggplot2")
 
 start.time <- Sys.time()
 set.seed(86)
-args = commandArgs(trailingOnly = TRUE)
+#args = commandArgs(trailingOnly = TRUE)
   
 # Load Parameters
 row <- as.numeric(args[1])
@@ -21,7 +21,7 @@ n_env <- as.numeric(args[6])
 std_dev <- as.numeric(args[7])
 n_pop <- as.numeric(args[8])
 interaction <- as.numeric(args[9])
-n_boot <- 1000
+n_boot <- 100
   
 # Output dataframes
 output <- data.frame()
@@ -43,8 +43,8 @@ int <- rep(rnorm(n_pop * n_environments, 0, sd = interaction), each = sample_siz
   
 # Create model dataframe 
 model_df <- data.frame(gen, env, noise, int)
-model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
-model_df$exp_env_factor = factor(paste("E", model_df$env, sep = "_"))
+model_df$gen_factor <- factor(paste("G", model_df$gen, sep = "_"))
+model_df$exp_env_factor <- factor(paste("E", model_df$env, sep = "_"))
   
 # Native environments
 model_df$nat_env_factor = rep(unique(model_df$exp_env_factor), each = (sample_size*n_pop))
@@ -58,12 +58,12 @@ mean_df = model_df %>%
   group_by(gen_factor, exp_env_factor) %>%
   summarize("avg_phen" = mean(phen),
             "deviation" = sd(phen))
-mean_df$se = mean_df$deviation/(sqrt(sample_size))
-mean_df$nat_env_factor = model_df$nat_env_factor[match(mean_df$gen_factor,model_df$gen_factor)]
+mean_df$se <- mean_df$deviation/(sqrt(sample_size))
+mean_df$nat_env_factor <- model_df$nat_env_factor[match(mean_df$gen_factor,model_df$gen_factor)]
   
 # Standardize data
-model_df$phen_corrected = (phen - mean(phen))/sd(phen)
-mean_df$avg_phen_corrected = (mean_df$avg_phen - mean(mean_df$avg_phen))/sd(mean_df$avg_phen) 
+model_df$phen_corrected <- (phen - mean(phen))/sd(phen)
+mean_df$avg_phen_corrected <- (mean_df$avg_phen - mean(mean_df$avg_phen))/sd(mean_df$avg_phen) 
   
 # Create Phenotype output
 phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)), 
@@ -78,19 +78,20 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
   
 # Raw Phenotype plot
-#ggplot(phen_out, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(method = "glm") + theme_classic()
+#ggplot(phen_out, aes(x = exp_env_factor, y = phen, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Mean Phenotype plot
-#ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(method = "glm") + theme_classic()
+#ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Anova
 test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
 
 # Save Model Output
-mod_df = as.data.frame(summary(aov(test_temp))[[1]])
-mod_df = rownames_to_column(mod_df) 
+mod_df <- as.data.frame(summary(aov(test_temp))[[1]])
+mod_df <- rownames_to_column(mod_df) 
 colnames(mod_df)[1] <- "Fixed_effect"
-mod_df$data_class = rep("Raw_anova", nrow(mod_df))
+mod_df$data_class <- rep("Raw_anova", nrow(mod_df))
+GxE_anova_pvalue <- mod_df[3,6]
 
 # Estimated Marginal Means
 emm_E = as.data.frame(emmeans(test_temp,"exp_env_factor"))
@@ -113,7 +114,7 @@ for(j in 1:length(unique(emm_GxE$exp_env_factor))){
 etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[j])
 emean <- mean(etemp[,3])
 tempdat. = data.frame("E_means" = emean,
-                    "exp_env_factor" = unique(emm_GxE$exp_env_factor)[j])
+                      "exp_env_factor" = unique(emm_GxE$exp_env_factor)[j])
 E_matrix = rbind(E_matrix,tempdat.)
 }
 
@@ -146,21 +147,20 @@ cov_means_corrected = round(cov(Cov_mean_matrix$E_means, Cov_mean_matrix$G_means
 
 # Magnitude of GxE -- EMMs
 GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
-            emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
-            emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
-            mean(model_df$phen_corrected)) # Overall mean phenotype
+                       emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                       emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
+                       mean(emm_GxE$emmean)) # Overall mean phenotype
 
 # Magnitude of GxE -- Loop
 allGE <- c()
-for (i in 1:nlevels(model_df$gen_factor)){
-for (j in 1:nlevels(model_df$exp_env_factor)){
-  G_levels <- levels(model_df$gen_factor)
-  E_levels <- levels(model_df$exp_env_factor)
-  loopGxE <- abs(mean(model_df$phen_corrected) - # GxE (Phenotype of ith genotype in jth environment)
-                   emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # phenotype of ith Genotype
-                   emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
-                   emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] 
-  )
+for (i in 1:nlevels(emm_GxE$gen_factor)){
+  for (j in 1:nlevels(emm_GxE$exp_env_factor)){
+    G_levels <- levels(emm_GxE$gen_factor)
+    E_levels <- levels(emm_GxE$exp_env_factor)
+    loopGxE <- abs(emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
+                  emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # phenotype of ith Genotype
+                  emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
+                  mean(emm_GxE$emmean)) # Overall mean
   allGE <- c(allGE, loopGxE)
 }
 }
@@ -169,9 +169,9 @@ GxE_emm_loop = mean(allGE)
 
 # Magnitude of GxE -- Omega^2
 w2_GxE = (summary(aov(test_temp))[[1]][3,2] - #(SS_effect -
-       (summary(aov(test_temp))[[1]][3,1]*summary(aov(test_temp))[[1]][4,3])) / #(Df_effect * MS_error))/
-       (sum(summary(aov(test_temp))[[1]][,2]) + # (SS_total+
-       (summary(aov(test_temp))[[1]][4,3])) # MS_error)
+         (summary(aov(test_temp))[[1]][3,1]*summary(aov(test_temp))[[1]][4,3])) / #(Df_effect * MS_error))/
+         (sum(summary(aov(test_temp))[[1]][,2]) + # (SS_total+
+         (summary(aov(test_temp))[[1]][4,3])) # MS_error)
 
 # Magnitude of GxE -- Eta2 
 eta_GxE = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2])
@@ -185,11 +185,10 @@ for (i in 1:nlevels(mean_df$gen_factor)){
 for (j in 1:nlevels(mean_df$exp_env_factor)){
   G_levels <- levels(mean_df$gen_factor)
   E_levels <- levels(mean_df$exp_env_factor)
-  GxE_emm_mean <- abs(mean(mean_df$avg_phen_corrected) - # Overall mean
+  GxE_emm_mean <- abs(mean_df$avg_phen_corrected[mean_df$gen_factor == G_levels[i] & mean_df$exp_env_factor == E_levels[j]] - 
                       mean(mean_df$avg_phen_corrected[mean_df$gen_factor == G_levels[i]]) - # phenotype of ith Genotype
                       mean(mean_df$avg_phen_corrected[mean_df$exp_env_factor == E_levels[j]]) + # phenotype of jth Environment
-                      mean(mean_df$avg_phen_corrected[mean_df$gen_factor == G_levels[i] & mean_df$exp_env_factor == E_levels[j]])) 
-  
+                      mean(mean_df$avg_phen_corrected)) # Overall mean
   allGEmeans <- c(allGEmeans, GxE_emm_mean)
 }
 }
@@ -272,18 +271,18 @@ Cov_mean_matrix_ne$E_means <- Emean_mat_ne$E_means[match(Cov_mean_matrix_ne$exp_
 true_cov = cov(Cov_matrix_ne$G_means,Cov_matrix_ne$E_means)
 true_cor = cor(Cov_matrix_ne$G_means,Cov_matrix_ne$E_means)
 correction_ratio_noerror = max(sd(Cov_matrix_ne$E_means),sd(Cov_matrix_ne$G_means))
-true_cov_corrected = round(cov(Cov_matrix_ne$E_means, Cov_matrix_ne$G_means)/(correction_ratio_noerror^2),2)
+true_cov_corrected = round(cov(Cov_matrix_ne$G_means, Cov_matrix_ne$E_means)/(correction_ratio_noerror^2),2)
 
 true_cov_means = cov(Cov_mean_matrix_ne$G_means, Cov_mean_matrix_ne$E_means)
 true_cor_means = cor(Cov_mean_matrix_ne$G_means, Cov_mean_matrix_ne$E_means)
 means_correction_ne = max(sd(Cov_mean_matrix_ne$E_means),sd(Cov_mean_matrix_ne$G_means))
-true_cov_means_corrected = round(cov(Cov_mean_matrix_ne$E_means, Cov_mean_matrix_ne$G_means)/(means_correction_ne^2),2)
+true_cov_means_corrected = round(cov(Cov_mean_matrix_ne$G_means, Cov_mean_matrix_ne$E_means)/(means_correction_ne^2),2)
 
 # Magnitude of GxE -- EMM -- no error
-true_GxE_original <- abs(mean(model_df$phen_corrected_ne) - # Overall mean
-             (emm_G_noerror$emmean[emm_G_noerror$gen_factor=="G_1"])- # G
-             (emm_E_noerror$emmean[emm_E_noerror$exp_env_factor=="E_1"])+ # E
-             (emm_GxE_noerror[1,3])) # GxE
+true_GxE_original <- abs(mean(emm_GxE_noerror$emmean) - # Overall mean
+                         mean(emm_GxE_noerror$emmean[emm_GxE_noerror$gen_factor=="G_1"])- # G
+                         mean(emm_GxE_noerror$emmean[emm_GxE_noerror$exp_env_factor=="E_1"])+ # E
+                         emm_GxE_noerror$emmean[emm_GxE_noerror$gen_factor == "G_1" & emm_GxE_noerror$exp_env_factor == "E_1"]) # GxE
 
 # Magnitude of True GxE -- Loop
 allGE_ne <- c()
@@ -291,10 +290,10 @@ for (i in 1:nlevels(model_df$gen_factor)){
 for (j in 1:nlevels(model_df$exp_env_factor)){
   G_levels <- levels(model_df$gen_factor)
   E_levels <- levels(model_df$exp_env_factor)
-  loopGxE_ne  <- abs(mean(model_df$phen_corrected_ne) - 
-                   emm_G_noerror$emmean[emm_G_noerror$gen_factor == G_levels[i]] - # phenotype of ith Genotype
-                   emm_E_noerror$emmean[emm_E_noerror$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
-                   emm_GxE_noerror$emmean[emm_GxE_noerror$gen_factor == G_levels[i] & emm_GxE_noerror$exp_env_factor == E_levels[j]])
+  loopGxE_ne  <- abs(mean(emm_GxE_noerror$emmean) - # Overall mean
+                     emm_G_noerror$emmean[emm_G_noerror$gen_factor == G_levels[i]] - # average phenotype of ith Genotype
+                     emm_E_noerror$emmean[emm_E_noerror$exp_env_factor == E_levels[j]] + # average phenotype of jth Environment
+                     emm_GxE_noerror$emmean[emm_GxE_noerror$gen_factor == G_levels[i] & emm_GxE_noerror$exp_env_factor == E_levels[j]]) # Phenotype of interaction
   allGE_ne <- c(allGE_ne, loopGxE_ne)
 }
 }
@@ -320,9 +319,9 @@ for (j in 1:nlevels(Cov_mean_matrix_ne$exp_env_factor)){
   G_levels <- levels(Cov_mean_matrix_ne$gen_factor)
   E_levels <- levels(Cov_mean_matrix_ne$exp_env_factor)
   GxE_emm_mean_ne <- abs(mean(mean_df_ne$avg_phen_corrected_ne) - # Overall mean
-                        (Cov_mean_matrix_ne$G_means[Cov_mean_matrix_ne$gen_factor == G_levels[i]]) - # phenotype of ith Genotype
+                        Cov_mean_matrix_ne$G_means[Cov_mean_matrix_ne$gen_factor == G_levels[i]] - # phenotype of ith Genotype
                         unique(Cov_mean_matrix_ne$E_means[Cov_mean_matrix_ne$exp_env_factor == E_levels[j]]) + # phenotype of jth Environment
-                        (mean_df_ne$avg_phen_corrected_ne[mean_df_ne$gen_factor == G_levels[i] & mean_df_ne$exp_env_factor == E_levels[j]])) # phen of ith and jth
+                        mean_df_ne$avg_phen_corrected_ne[mean_df_ne$gen_factor == G_levels[i] & mean_df_ne$exp_env_factor == E_levels[j]]) # phen of ith and jth
   
   allGEmeans_ne <- c(allGEmeans_ne, GxE_emm_mean_ne)
 }
@@ -332,20 +331,25 @@ GxE_means_ne = mean(allGEmeans_ne)
 
 ## Generate Means output
 means_out <- data.frame("row" = rep(unique(row),length(G_means)), 
-                      "replicate" = rep(unique(replicate),length(G_means)), 
-                      "delta_env" = rep(unique(delta_env),length(G_means)), 
-                      "delta_gen" = rep(unique(delta_gen),length(G_means)), 
-                      "sample_size" = rep(unique(sample_size),length(G_means)), 
-                      "n_pop" = rep(unique(n_pop),length(G_means)), 
-                      "n_env" = rep(unique(n_env),length(G_means)),
-                      "std_dev" = rep(unique(std_dev),length(G_means)), 
-                      "interaction" = rep(unique(interaction),length(G_means)),
-                      "Gmeans_EMM" = G_matrix$G_means,
-                      "Gmeans_EMM_ne" = G_matrix_noerror$G_means,
-                      "gen_factor" = G_matrix$gen_factor,
-                      "Emeans_EMM" = E_matrix$E_means,
-                      "Emeans_EMM_ne" = E_matrix_noerror$E_means,
-                      "exp_env_factor" = E_matrix$exp_env_factor) 
+                        "replicate" = rep(unique(replicate),length(G_means)), 
+                        "delta_env" = rep(unique(delta_env),length(G_means)), 
+                        "delta_gen" = rep(unique(delta_gen),length(G_means)), 
+                        "sample_size" = rep(unique(sample_size),length(G_means)), 
+                        "n_pop" = rep(unique(n_pop),length(G_means)), 
+                        "n_env" = rep(unique(n_env),length(G_means)),
+                        "std_dev" = rep(unique(std_dev),length(G_means)), 
+                        "interaction" = rep(unique(interaction),length(G_means)),
+                        "gen_factor" = Cov_matrix$gen_factor,
+                        "Anova.Gmeans_EMM" = Cov_matrix$G_means,
+                        "Anova.Gmeans_EMM_ne" = Cov_matrix_ne$G_means,
+                        "Means.Gmeans" = Cov_mean_matrix$G_means,
+                        "Means.Gmeans_ne" = Cov_mean_matrix_ne$G_means,
+                        "exp_env_factor" = Cov_matrix$exp_env_factor, 
+                        "Anova.Emeans_EMM" = Cov_matrix$E_means,
+                        "Anova.Emeans_EMM_ne" = Cov_matrix_ne$E_means,
+                        "Means.Emeans" = Cov_mean_matrix$E_means,
+                        "Means.Emeans_ne" = Cov_mean_matrix_ne$E_means)
+                        
 GEmeans_out <- rbind(GEmeans_out,means_out)
 
 ###############
@@ -361,15 +365,17 @@ shuffle_dat <- data.frame()
 # Resample data within each genotype and environment
 for (l in 1:nlevels(model_df$gen_factor)){
   for (j in 1:nlevels(model_df$exp_env_factor)){
-    cond_G <- filter(model_df, gen_factor == unique(model_df$gen_factor)[l])
-    cond_E <- filter(cond_G, exp_env_factor == unique(model_df$exp_env_factor)[j])
+    
+    cond <- model_df %>%
+              filter(gen_factor == unique(model_df$gen_factor)[l]) %>%
+              filter(exp_env_factor == unique(model_df$exp_env_factor)[j])
     
     # Shuffle data 
-    new_phen <- sample(cond_E$phen_corrected, size=nrow(cond_E), replace=TRUE)
+    new_phen <- sample(cond$phen_corrected, size=nrow(cond), replace=TRUE)
     
     # Output    
-    shuffle_dat_temp <- data.frame("gen_factor" = cond_E$gen_factor,
-                                   "exp_env_factor" = cond_E$exp_env_factor,
+    shuffle_dat_temp <- data.frame("gen_factor" = cond$gen_factor,
+                                   "exp_env_factor" = cond$exp_env_factor,
                                    "phen_corrected" = new_phen)
     shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
   }
@@ -381,15 +387,17 @@ new_means <- data.frame()
 for (u in 1:nlevels(mean_df$gen_factor)){
   for (r in 1:nlevels(mean_df$exp_env_factor)){
     
-    cond_G <- filter(mean_df, gen_factor == unique(mean_df$gen_factor)[u])
-    cond_E <- filter(cond_G, exp_env_factor == unique(mean_df$exp_env_factor)[r])
+    # Retain levels
+    cond <- mean_df %>%
+      filter(gen_factor == unique(mean_df$gen_factor)[u]) %>%
+      filter(exp_env_factor == unique(mean_df$exp_env_factor)[r])
     
-    # Create new means data 
-    new_phen <- rnorm(nrow(cond_E), mean = cond_E$avg_phen, sd = cond_E$se)
+    # Create new means data
+    new_phen <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se)
     
     # Output
-    new_mean_temp <- data.frame("gen_factor" = cond_E$gen_factor,
-                                "exp_env_factor" = cond_E$exp_env_factor,
+    new_mean_temp <- data.frame("gen_factor" = cond$gen_factor,
+                                "exp_env_factor" = cond$exp_env_factor,
                                 "mean_phen" = new_phen)
     new_means <- rbind(new_means, new_mean_temp)
   }
@@ -446,7 +454,7 @@ Cov_mean_matrix_boot$E_means <- Emean_mat_boot$E_means[match(Cov_mean_matrix_boo
 cov_est_boot = cov(Cov_matrix_boot$G_means,Cov_matrix_boot$E_means)
 cor_est_boot = cor(Cov_matrix_boot$G_means,Cov_matrix_boot$E_means)
 correction_ratio_boot = max(sd(Cov_matrix_boot$E_means),sd(Cov_matrix_boot$G_means))
-cov_corrected_boot = round(cov(Cov_matrix_boot$E_means, Cov_matrix_boot$G_means)/(correction_ratio_boot^2),2)
+cov_corrected_boot = round(cov(Cov_matrix_boot$G_means, Cov_matrix_boot$E_means)/(correction_ratio_boot^2),2)
 
 cov_means_boot = cov(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means) 
 cor_means_boot = cor(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
@@ -454,10 +462,10 @@ means_correction_shuffle = max(sd(Cov_mean_matrix_boot$E_means),sd(Cov_mean_matr
 cov_means_correct_boot = round(cov(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)/(means_correction_shuffle^2),2)
 
 # Magnitude of GxE -- EMMs -- Bootstrap
-GxE_emm_boot <- abs(mean(shuffle_dat$phen_corrected) - # Overall mean
-                      (emm_G_boot$emmean[emm_G_boot$gen_factor=="G_1"])- # G
-                      (emm_E_boot$emmean[emm_E_boot$exp_env_factor=="E_1"])+ # E
-                      (emm_GxE_boot[1,3])) # GxE
+GxE_emm_boot <- abs(mean(emm_GxE_boot$emmean) - # Overall mean
+                    emm_G_boot$emmean[emm_G_boot$gen_factor=="G_1"]- # G
+                    emm_E_boot$emmean[emm_E_boot$exp_env_factor=="E_1"]+ # E
+                    emm_GxE_boot$emmean[emm_GxE_boot$gen_factor=="G_1"&emm_GxE_boot$exp_env_factor=="E_1"]) # GxE
 
 # Magnitude of GxE -- Loop
 allGE_boot <- c()
@@ -465,11 +473,11 @@ for (i in 1:nlevels(shuffle_dat$gen_factor)){
   for (j in 1:nlevels(shuffle_dat$exp_env_factor)){
     G_levels <- levels(shuffle_dat$gen_factor)
     E_levels <- levels(shuffle_dat$exp_env_factor)
-    GxE_emm_boot <- abs(mean(shuffle_dat$phen_corrected) - 
-                     emm_G_boot$emmean[emm_G_boot$gen_factor == G_levels[i]] - # phenotype of ith Genotype
-                     emm_E_boot$emmean[emm_E_boot$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
-                     emm_GxE_boot$emmean[emm_GxE_boot$gen_factor == G_levels[i] & emm_GxE_boot$exp_env_factor == E_levels[j]])
-    allGE_boot <- c(allGE_boot, GxE_emm_boot)
+    GxE_emm_boot1 <- abs(mean(emm_GxE_boot$emmean) - 
+                        emm_G_boot$emmean[emm_G_boot$gen_factor == G_levels[i]] - # phenotype of ith Genotype
+                        emm_E_boot$emmean[emm_E_boot$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
+                        emm_GxE_boot$emmean[emm_GxE_boot$gen_factor == G_levels[i] & emm_GxE_boot$exp_env_factor == E_levels[j]])
+    allGE_boot <- c(allGE_boot, GxE_emm_boot1)
   }
 }
 #hist(allGE_boot)
@@ -494,9 +502,9 @@ for (i in 1:nlevels(new_means$gen_factor)){
     G_levels <- levels(new_means$gen_factor)
     E_levels <- levels(new_means$exp_env_factor)
     GxE_emm_boot_means <- abs(mean(new_means$new_mean_corrected) - # Overall mean
-                             (Cov_mean_matrix_boot$G_means[Cov_mean_matrix_boot$gen_factor == G_levels[i]]) - # phenotype of ith Genotype
-                             unique(Cov_mean_matrix_boot$E_means[Cov_mean_matrix_boot$exp_env_factor == E_levels[j]]) + # phenotype of jth Environment
-                             (new_means$new_mean_corrected[new_means$gen_factor == G_levels[i] & new_means$exp_env_factor == E_levels[j]])) # phen of ith and jth
+                              mean(new_means$new_mean_corrected[new_means$gen_factor == G_levels[i]]) - # phenotype of ith Genotype
+                              mean(new_means$new_mean_corrected[new_means$exp_env_factor == E_levels[j]]) + # phenotype of jth Environment
+                              new_means$new_mean_corrected[new_means$gen_factor == G_levels[i] & new_means$exp_env_factor == E_levels[j]]) # phen of ith and jth
     allGE_means_boot <- c(allGE_means_boot, GxE_emm_boot_means)
   }
 }
@@ -542,8 +550,8 @@ GxE_means_CI = quantile(boot_df$GxE_means_boot, probs=c(0.025, 0.975), type=1)
 for(b in 1:n_boot){  
 
 # Shuffle raw data
-null_temp <- sample(model_df$phen, size=nrow(model_df), replace=FALSE)
-null_temp_ne <- sample(model_df$no_err_phen, size=nrow(model_df), replace=FALSE)
+null_temp <- sample(model_df$phen_corrected, size=nrow(model_df), replace=FALSE)
+null_temp_ne <- sample(model_df$phen_corrected_ne, size=nrow(model_df), replace=FALSE)
 
 perm_dat <- data.frame("gen_factor" = model_df$gen_factor,
                        "exp_env_factor" = model_df$exp_env_factor,
@@ -551,8 +559,9 @@ perm_dat <- data.frame("gen_factor" = model_df$gen_factor,
                        "phen_ne" = null_temp_ne)
 
 # Shuffle means data
-null_means. <- rnorm(nrow(mean_df), mean = mean_df$avg_phen, sd = mean_df$se)
-null_means <- sample(null_means., size=length(null_means.), replace=FALSE)
+#null_means. <- rnorm(nrow(mean_df), mean = mean_df$avg_phen, sd = mean_df$se)
+#null_means <- sample(null_means., size=length(null_means.), replace=FALSE)
+null_means <- sample(mean_df$avg_phen_corrected, size=nrow(mean_df), replace=FALSE)      
 null_means_ne <- sample(mean_df_ne$avg_phen_corrected_ne, size=nrow(mean_df_ne), replace=FALSE)
 
 perm_means <- data.frame("gen_factor" = mean_df$gen_factor,
@@ -561,9 +570,9 @@ perm_means <- data.frame("gen_factor" = mean_df$gen_factor,
                          "phen_data_ne" = null_means_ne)
 
 # Re-Standardize 
-perm_dat$phen_corrected = (perm_dat$phen - mean(perm_dat$phen))/sd(perm_dat$phen)
-perm_dat$phen_corrected_ne = (perm_dat$phen_ne - mean(perm_dat$phen_ne))/sd(perm_dat$phen_ne)
-perm_means$avg_phen_corrected = (perm_means$phen_data - mean(perm_means$phen_data))/sd(perm_means$phen_data)
+perm_dat$phen_corrected = perm_dat$phen#(perm_dat$phen - mean(perm_dat$phen))/sd(perm_dat$phen)
+perm_dat$phen_corrected_ne = perm_dat$phen_ne#(perm_dat$phen_ne - mean(perm_dat$phen_ne))/sd(perm_dat$phen_ne)
+perm_means$avg_phen_corrected = perm_means$phen_data#(perm_means$phen_data - mean(perm_means$phen_data))/sd(perm_means$phen_data)
 perm_means$avg_phen_corrected_ne = perm_means$phen_data_ne#(perm_means$phen_data_ne - mean(perm_means$phen_data_ne))/sd(perm_means$phen_data_ne)
 
 # Anovas
@@ -661,10 +670,10 @@ means_correction_perm = max(sd(Cov_mean_matrix_perm$G_means),sd(Cov_mean_matrix_
 cov_means_correct_perm = round(cov(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)/(means_correction_perm^2),2)
 
 # Magnitude of GxE -- EMMs -- Permutation
-GxE_emm_perm <- abs(mean(perm_dat$phen_corrected) - # Overall mean
-                   (emm_G_perm$emmean[emm_G_perm$gen_factor=="G_1"])- # G
-                   (emm_E_perm$emmean[emm_E_perm$exp_env_factor=="E_1"])+ # E
-                   (emm_GxE_perm[1,3])) # GxE
+GxE_emm_perm <- abs(mean(emm_GxE_perm$emmean) - # Overall mean
+                    emm_G_perm$emmean[emm_G_perm$gen_factor=="G_1"]- # G
+                    emm_E_perm$emmean[emm_E_perm$exp_env_factor=="E_1"]+ # E
+                    emm_GxE_perm$emmean[emm_GxE_perm$gen_factor=="G_1" & emm_GxE_perm$exp_env_factor=="E_1"]) # GxE
 
 # Magnitude of GxE -- Loop
 allGE_perm <- c()
@@ -672,21 +681,21 @@ for (i in 1:nlevels(perm_dat$gen_factor)){
   for (j in 1:nlevels(perm_dat$exp_env_factor)){
     G_levels <- levels(perm_dat$gen_factor)
     E_levels <- levels(perm_dat$exp_env_factor)
-    GxE_emm_perm <- abs(mean(perm_dat$phen_corrected) - 
-                        emm_G_perm$emmean[emm_G_perm$gen_factor == G_levels[i]] - # phenotype of ith Genotype
-                        emm_E_perm$emmean[emm_E_perm$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
-                        emm_GxE_perm$emmean[emm_GxE_perm$gen_factor == G_levels[i] & emm_GxE_perm$exp_env_factor == E_levels[j]]) 
-    allGE_perm <- c(allGE_perm, GxE_emm_perm)
+    GxE_emm_perm1 <- abs(mean(emm_GxE_perm$emmean) - # Overall mean
+                        emm_G_perm$emmean[emm_G_perm$gen_factor == G_levels[i]]- # G
+                        emm_E_perm$emmean[emm_E_perm$exp_env_factor == E_levels[j]]+ # E
+                        emm_GxE_perm$emmean[emm_GxE_perm$gen_facto == G_levels[i] & emm_GxE_perm$exp_env_factor == E_levels[j]]) # GxE
+    allGE_perm <- c(allGE_perm, GxE_emm_perm1)
   }
 }
 #hist(allGE_perm)
 loopGxE_perm = mean(allGE_perm)
 
 # Magnitude of GxE -- EMMs -- Permutation -- No Error
-GxE_emm_perm_ne <- abs(mean(perm_dat$phen_corrected_ne) - # Overall mean
+GxE_emm_perm_ne <- abs(mean(emm_GxE_perm_ne$emmean) - # Overall mean
                       emm_G_perm_ne$emmean[emm_G_perm_ne$gen_factor=="G_1"]- # G
                       emm_E_perm_ne$emmean[emm_E_perm_ne$exp_env_factor=="E_1"]+ # E
-                      emm_GxE_perm_ne[1,3]) # GxE
+                      emm_GxE_perm_ne$emmean[emm_GxE_perm_ne$gen_factor=="G_1" & emm_GxE_perm_ne$exp_env_factor=="E_1"]) # GxE
 
 # Magnitude of GxE -- Loop -- EMMs -- Permutation -- No Error
 allGE_true_perm <- c()
@@ -694,11 +703,10 @@ for (i in 1:nlevels(perm_dat$gen_factor)){
   for (j in 1:nlevels(perm_dat$exp_env_factor)){
     G_levels <- levels(perm_dat$gen_factor)
     E_levels <- levels(perm_dat$exp_env_factor)
-    true_GxE_emm_perm <- abs(mean(perm_dat$phen_corrected_ne) - 
-                            emm_G_perm_ne$emmean[emm_G_perm_ne$gen_factor == G_levels[i]] - # phenotype of ith Genotype
-                            emm_E_perm_ne$emmean[emm_E_perm_ne$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
-                            emm_GxE_perm_ne$emmean[emm_GxE_perm_ne$gen_factor == G_levels[i] & emm_GxE_perm_ne$exp_env_factor == E_levels[j]])
-    
+    true_GxE_emm_perm <- abs(mean(emm_GxE_perm_ne$emmean) - 
+                             emm_G_perm_ne$emmean[emm_G_perm_ne$gen_factor == G_levels[i]] - # phenotype of ith Genotype
+                             emm_E_perm_ne$emmean[emm_E_perm_ne$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
+                             emm_GxE_perm_ne$emmean[emm_GxE_perm_ne$gen_factor == G_levels[i] & emm_GxE_perm_ne$exp_env_factor == E_levels[j]])
     allGE_true_perm <- c(allGE_true_perm, true_GxE_emm_perm)
   }
 }
@@ -726,16 +734,17 @@ perm_eta_GxE_ne = summary(aov(test_perm_ne))[[1]][3,2]/sum(summary(aov(test_perm
 # Residual Variation
 ResVar_perm = summary(aov(test_perm))[[1]][3,2]/sum(summary(aov(test_perm))[[1]][c(1:3),2])
 
+#if(length(unique(perm_means$gen_factor))>2{
 # Magnitude of GxE -- Means -- Permutation
 allGE_means_perm <- c()
 for (i in 1:nlevels(perm_means$gen_factor)){
   for (j in 1:nlevels(perm_means$exp_env_factor)){
     G_levels <- levels(perm_means$gen_factor)
     E_levels <- levels(perm_means$exp_env_factor)
-    GxE_emm_perm_means <- abs(mean(perm_means$avg_phen_corrected) - # Overall mean
-                                (Cov_mean_matrix_perm$G_means[Cov_mean_matrix_perm$gen_factor == G_levels[i]]) - # phenotype of ith Genotype
-                                unique(Cov_mean_matrix_perm$E_means[Cov_mean_matrix_perm$exp_env_factor == E_levels[j]]) + # phenotype of jth Environment
-                                (perm_means$avg_phen_corrected[perm_means$gen_factor == G_levels[i] & perm_means$exp_env_factor == E_levels[j]])) # phen of ith and jth
+    GxE_emm_perm_means <- abs(mean(perm_means$avg_phen_corrected) - # phen of ith and jth
+                              mean(perm_means$avg_phen_corrected[perm_means$exp_env_factor == E_levels[j]]) - # phenotype of jth Environment
+                              mean(perm_means$avg_phen_corrected[perm_means$gen_factor == G_levels[i]]) + # phenotype of ith Genotype
+                              perm_means$avg_phen_corrected[perm_means$gen_factor == G_levels[i] & perm_means$exp_env_factor == E_levels[j]])
     allGE_means_perm <- c(allGE_means_perm, GxE_emm_perm_means)
   }
 }
@@ -749,14 +758,26 @@ for (i in 1:nlevels(perm_means$gen_factor)){
     G_levels <- levels(perm_means$gen_factor)
     E_levels <- levels(perm_means$exp_env_factor)
     GxE_emm_means_perm_ne <- abs(mean(perm_means$avg_phen_corrected_ne) - # Overall mean
-                                (Cov_matrix_perm_ne$G_means[Cov_matrix_perm_ne$gen_factor ==  G_levels[i]]) - # phenotype of ith Genotype
-                                unique(Cov_matrix_perm_ne$E_means[Cov_matrix_perm_ne$exp_env_factor ==  E_levels[j]]) + # phenotype of jth Environment
-                                (perm_means$avg_phen_corrected_ne[perm_means$gen_factor == G_levels[i] & perm_means$exp_env_factor == E_levels[j]]))
+                                 mean(perm_means$avg_phen_corrected_ne[perm_means$gen_factor == G_levels[i]]) - # phenotype of ith Genotype
+                                 mean(perm_means$avg_phen_corrected_ne[perm_means$exp_env_factor == E_levels[j]]) + # phenotype of jth Environment
+                                 perm_means$avg_phen_corrected_ne[perm_means$gen_factor == G_levels[i] & perm_means$exp_env_factor == E_levels[j]]) # phen of ith and jth
     allGE_means_perm_ne <- c(allGE_means_perm_ne, GxE_emm_means_perm_ne)
   }
 }
 #hist(allGE_means_perm_ne)
 GxE_means_perm_ne = mean(allGE_means_perm_ne)
+
+#}else{
+  #GxE_means_perm <- abs(mean(perm_means$avg_phen_corrected) - # phen of ith and jth
+  #                      mean(perm_means$avg_phen_corrected[perm_means$gen_factor == "G_1"])- 
+  #                      mean(perm_means$avg_phen_corrected[perm_means$exp_env_factor == "E_1"])+ 
+   #                     perm_means$avg_phen_corrected[perm_means$gen_factor == "G_1" & perm_means$exp_env_factor == "E_1"])
+  
+  #GxE_means_perm_ne <- abs(mean(perm_means$avg_phen_corrected_ne) - # Overall mean
+  #                         mean(perm_means$avg_phen_corrected_ne[perm_means$gen_factor == "G_1"]) - # phenotype of ith Genotype
+  #                         mean(perm_means$avg_phen_corrected_ne[perm_means$exp_env_factor == "E_1"]) + # phenotype of jth Environment
+   #                        perm_means$avg_phen_corrected_ne[perm_means$gen_factor == "G_1" & perm_means$exp_env_factor == "E_1"]) # phen of ith and jth
+#}
 
 # Permutation Output
 perm_dat. <- data.frame("covariance_perm" = cov_est_perm,
@@ -776,14 +797,14 @@ perm_dat. <- data.frame("covariance_perm" = cov_est_perm,
                         "true_GxE_omega_perm" = perm_w2_GxE_ne,
                         "GxE_eta_perm" = perm_eta_GxE,
                         "true_GxE_eta_perm" = perm_eta_GxE_ne,
-                        "Resid_var_perm" = ResVar_perm,
+                        #"Resid_var_perm" = ResVar_perm,
                         "GxE_means_perm" = GxE_means_perm,
                         "true_GxE_means_perm" = GxE_means_perm_ne)
 perm_df <- rbind(perm_df,perm_dat.)
 }
 
 ## Sanity Check: Null distribution histogram
-#ggplot(perm_df, aes(x = GxE_means_perm))+geom_histogram() # Insert variable of interest as x
+#ggplot(perm_df, aes(x = Resid_var_perm))+geom_histogram() # Insert variable of interest as x
 
 # Covariance p-value
 ptemp1 = (rank(c(cov_est,perm_df$covariance_perm))[1])/(n_boot+1) 
@@ -850,28 +871,29 @@ true_GxE_omega_pvalue = 1-ptemp8_ne # Right-tailed
 ptemp9 = (rank(c(GxE_means,perm_df$GxE_means_perm))[1])/(n_boot+1) 
 GxE_means_pvalue = 1-ptemp9 # Right-tailed
 
+# GxE - Means - No error - p-value
 ptemp9_ne= (rank(c(GxE_means_ne,perm_df$true_GxE_means_perm))[1])/(n_boot+1) 
-true_GxE_means_pvalue = 1-ptemp9_ne
+true_GxE_means_pvalue = (1-ptemp9_ne)
 
 # GxE - Looped Emms
 ptemp10 = (rank(c(GxE_emm_loop,perm_df$GxE_emm_loop_perm))[1])/(n_boot+1) 
-GxE_loop_pvalue = 1-ptemp10
+GxE_loop_pvalue = (1-ptemp10)
 
 # GxE - Looped Emms - no error
 ptemp10_ne = (rank(c(GxE_emm_ne_loop,perm_df$true_GxE_emm_loop_perm))[1])/(n_boot+1) 
-true_GxE_loop_pvalue = 1-ptemp10_ne
+true_GxE_loop_pvalue = (1-ptemp10_ne)
 
 # GxE - Eta Squared
 ptemp11 = (rank(c(eta_GxE,perm_df$GxE_eta_perm))[1])/(n_boot+1) 
-GxE_eta_pvalue = 1-ptemp11
+GxE_eta_pvalue = (1-ptemp11)
 
 # GxE - Eta Squared - no error
 ptemp11_ne = (rank(c(eta_GxE_ne,perm_df$true_GxE_eta_perm))[1])/(n_boot+1) 
-GxE_eta_pvalue_ne = 1-ptemp11_ne
+GxE_eta_pvalue_ne = (1-ptemp11_ne)
 
 # GxE - Residual Variation
-ptemp12 = (rank(c(ResVar, perm_df$Resid_var_perm))[1])/(n_boot + 1)
-Resid_var_pvalue = (1-ptemp12)
+#ptemp12 = (rank(c(ResVar, perm_df$Resid_var_perm))[1])/(n_boot + 1)
+#Resid_var_pvalue = (1-ptemp12)
 
 # Model Output
 model_info = rbind(mod_df,mod_df_ne)
@@ -881,14 +903,14 @@ time.taken <- end.time - start.time
 
 # Generate Outputs
 Parameters <- data.frame("row" = row, # Original Parameters
-                   "replicate" = replicate,
-                   "delta_env" = delta_env,
-                   "delta_gen" = delta_gen,
-                   "sample_size" = sample_size,
-                   "n_pop" = n_pop,
-                   "std_dev" = std_dev,
-                   "interaction" = interaction,
-                   "Sim_time" = time.taken)
+                         "replicate" = replicate,
+                         "delta_env" = delta_env,
+                         "delta_gen" = delta_gen,
+                         "sample_size" = sample_size,
+                         "n_pop" = n_pop,
+                         "std_dev" = std_dev,
+                         "interaction" = interaction,
+                         "Sim_time" = time.taken)
 
 Covariance <- data.frame("row" = row,
                    "true_cov" = true_cov, #Covariance Original
@@ -931,47 +953,47 @@ Covariance <- data.frame("row" = row,
                    "cov_means_correct_pvalue" = cov_means_correct_pvalue)
 
 GxE <- data.frame("row" = row,
-                "true_GxE" = true_GxE_original, # Emmeans GxE 
-                "true_GxE_pvalue" = true_GxE_pvalue,
-                "GxE_emm_estimate" = GxE_emm_original,
-                "GxE_emm_lwrCI" = GxE_CI[[1]],
-                "GxE_emm_uprCI" = GxE_CI[[2]],
-                "GxE_emm_pvalue" = GxE_pvalue,
-                   
-                   "GxE_emm_loop" = GxE_emm_loop, # GxE Emmeans from loop
-                   "true_GxE_emm_loop" = GxE_emm_ne_loop,
-                   "true_GxE_emm_loop_pvalue" = true_GxE_loop_pvalue,
-                   "GxE_emm_loop_lwrCI" = GxE_loop_CI[[1]],
-                   "GxE_emm_loop_uprCI" = GxE_loop_CI[[2]],
-                   "GxE_emm_loop_pvalue" = GxE_loop_pvalue,
-                   
-                   "true_omega_GxE" = true_w2_GxE, # Omega^2 GxE 
-                   "true_omega_GxE_pvalue" = true_GxE_omega_pvalue,
-                   "GxE_omega_estimate" = w2_GxE, 
-                   "GxE_omega_lwrCI" = GxE_omega_CI[[1]],
-                   "GxE_omega_uprCI" = GxE_omega_CI[[2]],
-                   "GxE_omega_pvalue" = GxE_omega_pvalue, 
-                   
-                   "true_eta_GxE" = eta_GxE_ne,
-                   "true_eta_GxE_pvalue" = GxE_eta_pvalue_ne,
-                   "GxE_eta" = eta_GxE,
-                   "GxE_eta_lwrCI" = GxE_eta_CI[[1]],
-                   "GxE_eta_uprCI" = GxE_eta_CI[[2]],
-                   "GxE_eta_pvalue" = ptemp11,
-                
-                   "True_resid_variation" = ResVar_ne,   
-                   "Resid_variation" = ResVar,
-                   "GxE_residVar_lwrCI" = GxE_resvar_CI[[1]],
-                   "GxE_residVar_uprCI" = GxE_resvar_CI[[2]],
-                   "Resid_variation_pvalue" = Resid_var_pvalue,
-                   
-                   "true_GxE_means" = GxE_means_ne, # GxE on means
-                   "true_GxE_means_pvalue"=true_GxE_means_pvalue,
-                   "GxE_means" = GxE_means,
-                   "GxE_means_lwrCI" = GxE_means_CI[[1]],
-                   "GxE_means_uprCI" = GxE_means_CI[[2]],
-                   "GxE_means_pvalue" = GxE_means_pvalue
-                   ) 
+                  "true_GxE" = round(true_GxE_original,2), # Emmeans GxE 
+                  "true_GxE_pvalue" = round(true_GxE_pvalue,2),
+                  "GxE_emm_estimate" = round(GxE_emm_original,2),
+                  "GxE_emm_lwrCI" = round(GxE_CI[[1]],2),
+                  "GxE_emm_uprCI" = round(GxE_CI[[2]],2),
+                  "GxE_emm_pvalue" = round(GxE_pvalue,2),
+                     
+                  "GxE_emm_loop" = round(GxE_emm_loop,2), # GxE Emmeans from loop
+                  "true_GxE_emm_loop" = round(GxE_emm_ne_loop,2),
+                  "true_GxE_emm_loop_pvalue" = round(true_GxE_loop_pvalue,2),
+                  "GxE_emm_loop_lwrCI" = round(GxE_loop_CI[[1]],2),
+                  "GxE_emm_loop_uprCI" = round(GxE_loop_CI[[2]],2),
+                  "GxE_emm_loop_pvalue" = round(GxE_loop_pvalue,2),
+                 
+                  "true_omega_GxE" = round(true_w2_GxE,2), # Omega^2 GxE 
+                  "true_omega_GxE_pvalue" = round(true_GxE_omega_pvalue,2),
+                  "GxE_omega_estimate" = round(w2_GxE,2), 
+                  "GxE_omega_lwrCI" = round(GxE_omega_CI[[1]],2),
+                  "GxE_omega_uprCI" = round(GxE_omega_CI[[2]],2),
+                  "GxE_omega_pvalue" = round(GxE_omega_pvalue,2), 
+                 
+                  "true_eta_GxE" = round(eta_GxE_ne,2),
+                  "true_eta_GxE_pvalue" = round(GxE_eta_pvalue_ne,2),
+                  "GxE_eta" = round(eta_GxE,2),
+                  "GxE_eta_lwrCI" = round(GxE_eta_CI[[1]],2),
+                  "GxE_eta_uprCI" = round(GxE_eta_CI[[2]],2),
+                  "GxE_eta_pvalue" = round(GxE_eta_pvalue,2),
+              
+                  "True_resid_variation" = round(ResVar_ne,2),   
+                  "Resid_variation" = round(ResVar,2),
+                  "GxE_residVar_lwrCI" = round(GxE_resvar_CI[[1]],2),
+                  "GxE_residVar_uprCI" = round(GxE_resvar_CI[[2]],2),
+                  #"Resid_variation_pvalue" = Resid_var_pvalue,
+                 
+                  "true_GxE_means" = round(GxE_means_ne,2), # GxE on means
+                  "true_GxE_means_pvalue"= round(true_GxE_means_pvalue,2),
+                  "GxE_means" = round(GxE_means,2),
+                  "GxE_means_lwrCI" = round(GxE_means_CI[[1]],2),
+                  "GxE_means_uprCI" = round(GxE_means_CI[[2]],2),
+                  "GxE_means_pvalue" = round(GxE_means_pvalue,2)
+                  ) 
 
 # Output
 write.csv(GxE,paste0("/scratch/albecker/Power_analysis/power_output/GxE_",row,"_output.csv"))
