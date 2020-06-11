@@ -589,7 +589,7 @@ emm_E_perm_ne = as.data.frame(emmeans(test_perm_ne,"exp_env_factor"))
 emm_G_perm_ne = as.data.frame(emmeans(test_perm_ne, "gen_factor"))
 emm_GxE_perm_ne = as.data.frame(emmeans(test_perm_ne, ~ exp_env_factor*gen_factor))
 
-# Gmeans - Permutation
+# Gmeans - Permutation - EMMs
 G_matrix_perm = data.frame()
 for(r in 1:length(unique(emm_GxE_perm$gen_factor))){
   g_perm <- filter(emm_GxE_perm, gen_factor == unique(emm_GxE_perm$gen_factor)[r])
@@ -599,7 +599,7 @@ for(r in 1:length(unique(emm_GxE_perm$gen_factor))){
   G_matrix_perm = rbind(G_matrix_perm,tempdat)
 }
 
-# Emeans - Permutation
+# Emeans - Permutation - EMMs
 E_matrix_perm = data.frame()
 for(s in 1:length(unique(emm_GxE_perm$exp_env_factor))){
   e_perm <- filter(emm_GxE_perm, exp_env_factor == unique(emm_GxE_perm$exp_env_factor)[s])
@@ -734,7 +734,6 @@ perm_eta_GxE_ne = summary(aov(test_perm_ne))[[1]][3,2]/sum(summary(aov(test_perm
 # Residual Variation
 ResVar_perm = summary(aov(test_perm))[[1]][3,2]/sum(summary(aov(test_perm))[[1]][c(1:3),2])
 
-#if(length(unique(perm_means$gen_factor))>2{
 # Magnitude of GxE -- Means -- Permutation
 allGE_means_perm <- c()
 for (i in 1:nlevels(perm_means$gen_factor)){

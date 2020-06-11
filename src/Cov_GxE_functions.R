@@ -1,7 +1,8 @@
+###################################################################################
+##              Functions for co-counter gradient simulations                    ##  
+###################################################################################
 
-# Functions for co-counter gradient simulations
-
-df.foundations <- function(row, replicate, delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction){
+df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction){
   
   # Dataframe foundations
   n_environments <- n_env 
@@ -206,10 +207,9 @@ bootstrap_raw <- function(input_df){
                                      "nat_env_factor" = cond$nat_env_factor,
                                      "phen_corrected" = new_phen)
       shuffle_dat <- rbind(shuffle_dat, shuffle_dat_temp)
-      
-      return(shuffle_dat)
     }
   }
+  return(shuffle_dat)
 }
 
 bootstrap_means <- function(input_df){
@@ -236,19 +236,11 @@ bootstrap_means <- function(input_df){
       new_means <- rbind(new_means, new_mean_temp)
     }
   }
-  
   # Standardize resampled means
   new_means$avg_phen_corrected = (new_means$mean_phen - mean(new_means$mean_phen))/sd(new_means$mean_phen) 
-  
   return(new_means)
 }
 
-  
-  # Standardize resampled means
-  new_means$new_mean_corrected = (new_means$mean_phen - mean(new_means$mean_phen))/sd(new_means$mean_phen) 
-  
-  
-}
 
 permutation_raw <- function(input_df){
   
@@ -262,15 +254,28 @@ permutation_raw <- function(input_df){
   return(perm_dat)
 }
 
-pvalue_fun <- function(estimate, perm_dat, test){ #Test = "twotail" or "righttail"
-  p.value = NULL
+permutation_means <- function(input_df){
   
+  # Shuffle means data
+  #null_means. <- rnorm(nrow(mean_df), mean = mean_df$avg_phen, sd = mean_df$se)
+  #null_means <- sample(null_means., size=length(null_means.), replace=FALSE)
+  null_means <- sample(input_df$avg_phen_corrected, size=nrow(input_df), replace=FALSE)      
+  
+  perm_means <- data.frame("gen_factor" = input_df$gen_factor,
+                           "exp_env_factor" = input_df$exp_env_factor,
+                           "nat_env_factor" = input_df$nat_env_factor,
+                           "avg_phen_corrected" = null_means)
+  return(perm_means)
+}
+
+pvalue_fun <- function(estimate, rankdat, test){ #Test = "twotail" or "righttail"
+  p.value = NULL
   if(test == "twotail"){
-    temp = (rank(c(estimate,perm_dat))[1])/(n_boot+1) 
+    temp = (rank(c(estimate,rankdat))[1])/(n_boot+1) 
     if(temp < 0.5){p.value = temp}else{p.value = (1-temp)}
     
   }else{
-    temp = (rank(c(estimate,perm_dat))[1])/(n_boot+1) 
+    temp = (rank(c(estimate,rankdat))[1])/(n_boot+1) 
     p.value = 1-temp # Right-tailed
   }
    return(p.value)
