@@ -1,5 +1,15 @@
-#Another Day, Another Problem
+# Another Day, Another Problem
 
+## Updated for June 10th.
+I have reformatted the code into functions. Functions are [here](https://github.com/RCN-ECS/CnGV/blob/master/src/Cov_GxE_functions.R), and the code is [here](https://github.com/RCN-ECS/CnGV/blob/master/src/Cov_GxE_clusterFun.R)
+
+Unfortunately, reformatting and the presumed issue (redundant means code) did not solve the issue. I'll take another look soon, but I remain stumped.
+
+Me: 
+[image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/treestump.jpeg)
+
+
+## From June 9: 
 The permutation code is not giving me accurate p-values for the GxE means values. 
 
 I have tried everything I can think of (i've been debugging for 3 days straight) and I cannot find the problem. 
