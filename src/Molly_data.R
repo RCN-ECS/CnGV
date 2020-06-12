@@ -28,4 +28,26 @@ ma = data.frame("data_type" = rep("raw", nrow(mm1)),
 gt = read.csv("~/Documents/GitHub/CnGV/data/GeoffMeansData.csv")
 gt$data_type = rep("means",nrow(gt))
 
+## Berven 1979
+berven = data.frame("Temp" = c(18,23,28,18,23,28),
+                    "Population" = c("Montane","Montane","Montane","Lowland","Lowland","Lowland"),
+                    "SizeatMM" = c(3.61,1.98,3.27,4.63,2.33,2.22),
+                    "SizeatMM_se" = c(.14,0.05,0.13,0.1,0.11,0.1),
+                    "gen_factor" = c("G_1","G_1","G_1","G_2","G_2","G_2"),
+                    "nat_env_factor" = c("E_1","E_1","E_1","E_2","E_2","E_2"),
+                    "exp_env_factor" = c("E_1","E_3","E_2","E_1","E_3","E_2"),
+                    "TimetoMM" = c(347.5,106.1,140.4,419.5,136.6,99.6),
+                    "TimetoMM_se" = c(14.9,4.4,15.7,20.2,10.1,5.2),
+                    "data_type" = rep("means",6))
+berven1 = berven %>%
+  filter(exp_env_factor != "E_3") %>%
+  droplevels()
+
+size_df = data.frame("phen_data" = berven1$SizeatMM,"phen_se" = berven1$SizeatMM_se, berven1[,c(5:7,10)])
+days_df = data.frame("phen_data" = berven1$TimetoMM,"phen_se" = berven1$TimetoMM_se, berven1[,c(5:7,10)])
+
+
+
+
+
 

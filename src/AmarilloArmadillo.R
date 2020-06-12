@@ -405,6 +405,11 @@ MollyTest = amarillo_armadillo(ma, 100) # Molly's raw data
 GeoffTest2002 = amarillo_armadillo(gt[gt$Paper == 2002,], 100)
 GeoffTest2000 = amarillo_armadillo(gt[gt$Paper == 2000,], 100)
 
+
+Berven_size = amarillo_armadillo(size_df,100)
+Berven_time = amarillo_armadillo(days_df,100)
+
+
 # Plots for paper
 colors = c("E_1" = "#0066BB", "E_2" = "#FF6633")
 molly_labels = c("E_1" = "Inland populations", "E_2" = "Coastal populations")
