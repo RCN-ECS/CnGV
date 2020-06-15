@@ -76,7 +76,7 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   return(list(model_df,mean_df,df.ne,mean_df_ne))
 }
 
-mod.GxE <- function(input_df){
+mod.GxE <- function(input_df){ # input is model_df
   
   # Clear outputs
   allGE <- c()
@@ -143,7 +143,7 @@ mod.GxE <- function(input_df){
   return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df))
 }
 
-mean.GxE <- function(input_df){
+mean.GxE <- function(input_df){ # input is mean_df
   
   # Clear outputs
   allGEmeans <- c()
@@ -178,7 +178,7 @@ mean.GxE <- function(input_df){
   return(list(Cov_mean_matrix, GxE_means, allGEmeans))
 }
 
-bootstrap_raw <- function(input_df){
+bootstrap_raw <- function(input_df){ # input is model_df
   
   # Clear outputs
   new_phen <- NULL
@@ -207,7 +207,7 @@ bootstrap_raw <- function(input_df){
   return(shuffle_dat)
 }
 
-bootstrap_means <- function(input_df){
+bootstrap_means <- function(input_df){ # input is means_df
   
   # Clear outputs
   new_phen.<- NULL
@@ -240,8 +240,7 @@ bootstrap_means <- function(input_df){
   return(new_means)
 }
 
-
-permutation_raw <- function(input_df){
+permutation_raw <- function(input_df){ # input is model_df
   
   # Clear outputs
   perm_dat = data.frame()
