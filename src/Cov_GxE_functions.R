@@ -76,8 +76,11 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   return(list(model_df,mean_df,df.ne,mean_df_ne))
 }
 
-
 mod.GxE <- function(input_df){
+  
+  # Clear outputs
+  allGE <- c()
+  loopGxE <- c()
   
   # Anova
   aov.test <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = input_df)
@@ -105,7 +108,7 @@ mod.GxE <- function(input_df){
                          mean(emm_GxE$emmean)) # Overall mean phenotype
   
   # Magnitude of GxE -- Loop
-  allGE <- c()
+ 
   for (i in 1:nlevels(emm_GxE$gen_factor)){
     for (j in 1:nlevels(emm_GxE$exp_env_factor)){
       G_levels <- levels(emm_GxE$gen_factor)
@@ -142,6 +145,10 @@ mod.GxE <- function(input_df){
 
 mean.GxE <- function(input_df){
   
+  # Clear outputs
+  allGEmeans <- c()
+  GxE_mean.temp <- c()
+  
   # Means of Means
   E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
   G_means <- tapply(input_df$avg_phen_corrected, input_df$gen_factor, mean)
@@ -154,7 +161,6 @@ mean.GxE <- function(input_df){
   Cov_mean_matrix$E_means <- Emean_mat$E_means[match(Cov_mean_matrix$exp_env_factor,Emean_mat$exp_env_factor)]
   
   # Magnitude of GxE -- Loop -- Means
-  allGEmeans <- c()
   for (i in 1:nlevels(input_df$gen_factor)){
     for (j in 1:nlevels(input_df$exp_env_factor)){
       G_levels <- levels(input_df$gen_factor)
@@ -174,8 +180,10 @@ mean.GxE <- function(input_df){
 
 bootstrap_raw <- function(input_df){
   
+  # Clear outputs
   new_phen <- NULL
   shuffle_dat <- data.frame()
+  shuffle_dat_temp <- data.frame()
   
   # Resample data within each genotype and environment
   for (l in 1:nlevels(input_df$gen_factor)){
@@ -201,6 +209,9 @@ bootstrap_raw <- function(input_df){
 
 bootstrap_means <- function(input_df){
   
+  # Clear outputs
+  new_phen.<- NULL
+  new_mean_temp <- data.frame()
   new_means <- data.frame()
   
   # Resample means dataframe
@@ -232,6 +243,10 @@ bootstrap_means <- function(input_df){
 
 permutation_raw <- function(input_df){
   
+  # Clear outputs
+  perm_dat = data.frame()
+  null_temp <- NULL
+  
   # Shuffle raw data
   null_temp <- sample(input_df$phen_corrected, size=nrow(input_df), replace=FALSE)
   
@@ -242,10 +257,14 @@ permutation_raw <- function(input_df){
   return(perm_dat)
 }
 
-permutation_means <- function(input_df){
+permutation_means <- function(input_df){ # means dataframe (mean_df)
+  
+  # Clear outputs
+  perm_means <- data.frame()
+  null_means. = null_means = NULL
   
   # Shuffle means data
-  null_means. <- rnorm(nrow(input_df), mean = input_df$avg_phen_corrected, sd = input_df$se) # create replicate mean
+  null_means. <- rnorm(nrow(input_df), mean = input_df$avg_phen, sd = input_df$se) # create replicate mean
   null_means <- sample(null_means., size=length(null_means.), replace = FALSE) # shuffle means without replacement
 
   perm_means <- data.frame("gen_factor" = input_df$gen_factor,
@@ -253,7 +272,7 @@ permutation_means <- function(input_df){
                            "nat_env_factor" = input_df$nat_env_factor,
                            "avg_phen" = null_means)
   # Restandardize
-  perm_means$avg_phen_corrected = perm_means$avg_phen#(perm_means$avg_phen - mean(perm_means$avg_phen))/sd(perm_means$avg_phen)
+  perm_means$avg_phen_corrected = (perm_means$avg_phen - mean(perm_means$avg_phen))/sd(perm_means$avg_phen)
 
   return(perm_means)
 }

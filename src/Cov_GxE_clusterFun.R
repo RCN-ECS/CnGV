@@ -24,7 +24,7 @@ n_env <- as.numeric(args[6])
 std_dev <- as.numeric(args[7])
 n_pop <- as.numeric(args[8])
 interaction <- as.numeric(args[9])
-n_boot <- 19
+n_boot <- 99
 
 # Output dataframes
 output <- data.frame()
@@ -275,7 +275,7 @@ GxE_means_CI = quantile(boot_df_means$GxE_means_boot, probs=c(0.025, 0.975), typ
 #######################################
 
 for(i in 1:n_boot){
-  
+
   # Resample Data
   perm_means <- permutation_means(mean_df)
   

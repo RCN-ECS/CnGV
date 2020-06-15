@@ -62,8 +62,8 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-args = df[90,] # Expect significant GxE
-args = df[78,] # Expect no GxE
+args = df[84,] # Expect significant GxE
+args = df[75,] # Expect no GxE
 dim(df)
 
 write.csv(df,"~/Desktop/df62.csv",)
