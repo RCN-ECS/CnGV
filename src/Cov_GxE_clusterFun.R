@@ -24,7 +24,7 @@ n_env <- as.numeric(args[6])
 std_dev <- as.numeric(args[7])
 n_pop <- as.numeric(args[8])
 interaction <- as.numeric(args[9])
-n_boot <- 99
+n_boot <- 19
 
 # Output dataframes
 output <- data.frame()
@@ -58,16 +58,16 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype 
-#ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Check: Mean Phenotype 
-#ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Check: Raw Phenotype with no error
-#ggplot(model_df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(model_df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
 
 # Check: Mean Phenotype with no error
-#ggplot(mean_df.ne, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(mean_df.ne, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
 
 ###########################
 ##   RAW DATA ANALYSES   ##
@@ -140,6 +140,9 @@ for(i in 1:n_boot){
   boot_df_raw <- rbind(boot_df_raw,boot_dat_raw)
 }
 
+# Check: Histograms of Bootstrap
+hist(boot_df_raw$GxE_emm_boot)
+
 # Covariance Confidence Intervals 
 cov_CI = quantile(boot_df_raw$covariance, probs=c(0.025, 0.975), type=1) 
 cor_CI = quantile(boot_df_raw$cor_est_boot, probs=c(0.025, 0.975), type=1) 
@@ -190,6 +193,9 @@ for(i in 1:n_boot){
                              "GxE_SSq_perm" = GxE_SSq_perm)
   perm_df_raw <- rbind(perm_df_raw,perm_dat_raw)
 }
+
+# Check: Permutation histogram
+hist(perm_df_raw$cov_corrected_perm)
 
 # Covariance P-values
 cov_original_pvalue <- pvalue_fun(cov_est,perm_df_raw$cov_est_perm,"twotail")
@@ -297,6 +303,9 @@ for(i in 1:n_boot){
                                "GxE_means_perm" = GxE_means_perm)
   perm_df_means <- rbind(perm_df_means,perm_dat_means)
 }
+
+# Check: Histogram
+hist(perm_df_means$GxE_means_perm)
 
 # Covariance P-values
 cov_original_mean_pvalue <- pvalue_fun(cov_est_means,perm_df_means$cov_means_perm,"twotail")
@@ -461,14 +470,14 @@ GxE <- data.frame("row" = row,
                   "GxE_means_pvalue" = round(GxE_mean_pvalue,2)) 
 
 # Write Files
-write.csv(GxE,paste0("/scratch/albecker/Power_analysis/power_output/GxE_",row,"_output.csv"))
-write.csv(Covariance,paste0("/scratch/albecker/Power_analysis/power_output/Covariance_",row,"_output.csv"))
-write.csv(Parameters,paste0("/scratch/albecker/Power_analysis/power_output/Parameters_",row,"_output.csv"))
+#write.csv(GxE,paste0("/scratch/albecker/Power_analysis/power_output/GxE_",row,"_output.csv"))
+#write.csv(Covariance,paste0("/scratch/albecker/Power_analysis/power_output/Covariance_",row,"_output.csv"))
+#write.csv(Parameters,paste0("/scratch/albecker/Power_analysis/power_output/Parameters_",row,"_output.csv"))
 
-write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,"_output.csv"))
-write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,"_output.csv"))
-write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,"_output.csv"))
-write.csv(Cov_Matrix_Output,paste0("/scratch/albecker/Power_analysis/GEmeans_output/covmatrix_",row,"_output.csv"))
-write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_info_data",row,"_output.csv"))
+#write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,"_output.csv"))
+#write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,"_output.csv"))
+#write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,"_output.csv"))
+#write.csv(Cov_Matrix_Output,paste0("/scratch/albecker/Power_analysis/GEmeans_output/covmatrix_",row,"_output.csv"))
+#write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_info_data",row,"_output.csv"))
 
 

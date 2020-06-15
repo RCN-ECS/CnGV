@@ -88,24 +88,10 @@ mod.GxE <- function(input_df){
   emm_GxE = as.data.frame(emmeans(aov.test, ~ exp_env_factor*gen_factor))
   
   # Gmeans
-  G_matrix = data.frame()
-  for(h in 1:length(unique(emm_GxE$gen_factor))){
-    gtemp <- filter(emm_GxE, gen_factor == unique(emm_GxE$gen_factor)[h])
-    gmean <- mean(gtemp[,3])
-    tempdat = data.frame("G_means" = gmean,
-                         "gen_factor" = unique(emm_GxE$gen_factor)[h])
-    G_matrix = rbind(G_matrix,tempdat)
-  }
-  
-  # Emeans
-  E_matrix = data.frame()
-  for(j in 1:length(unique(emm_GxE$exp_env_factor))){
-    etemp <- filter(emm_GxE, exp_env_factor == unique(emm_GxE$exp_env_factor)[j])
-    emean <- mean(etemp[,3])
-    tempdat. = data.frame("E_means" = emean,
-                          "exp_env_factor" = unique(emm_GxE$exp_env_factor)[j])
-    E_matrix = rbind(E_matrix,tempdat.)
-  }
+  E_means <- tapply(emm_GxE$emmean, emm_GxE$exp_env_factor, mean)
+  G_means <- tapply(emm_GxE$emmean, emm_GxE$gen_factor, mean)
+  G_matrix <- data.frame("G_means" = G_means, "gen_factor" = unique(emm_GxE$gen_factor))
+  E_matrix <- data.frame("E_means" = E_means, "exp_env_factor" = unique(emm_GxE$exp_env_factor))
   
   # Match Genotypes to Native Environment
   Cov_matrix = G_matrix
@@ -131,7 +117,7 @@ mod.GxE <- function(input_df){
       allGE <- c(allGE, loopGxE)
     }
   }
-  #hist(allGE)
+  hist(allGE)
   GxE_emm_loop = mean(allGE)
   
   # Omega^2
@@ -173,13 +159,14 @@ mean.GxE <- function(input_df){
     for (j in 1:nlevels(input_df$exp_env_factor)){
       G_levels <- levels(input_df$gen_factor)
       E_levels <- levels(input_df$exp_env_factor)
-      GxE_emm_mean1 <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
-                           Cov_mean_matrix$G_means[Cov_mean_matrix$gen_factor == G_levels[i]] - # phenotype of ith Genotype
-                           Cov_mean_matrix$E_means[Cov_mean_matrix$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
-                           mean(c(Cov_mean_matrix$G_means, Cov_mean_matrix$E_means))) # Overall mean
-      allGEmeans <- c(allGEmeans, GxE_emm_mean1)
+      GxE_mean.temp <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
+                            mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i]])- # mean phenotype of ith Genotype
+                            mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]])+ # mean phenotype of jth Environment
+                            mean(input_df$avg_phen_corrected)) # Overall mean
+      allGEmeans <- c(allGEmeans, GxE_mean.temp)
     }
   }
+  hist(allGEmeans)
   GxE_means = mean(allGEmeans)
   
   return(list(Cov_mean_matrix, GxE_means, allGEmeans))
@@ -217,17 +204,18 @@ bootstrap_means <- function(input_df){
   new_means <- data.frame()
   
   # Resample means dataframe
-  for (u in 1:nlevels(mean_df$gen_factor)){
-    for (r in 1:nlevels(mean_df$exp_env_factor)){
+  for (u in 1:nlevels(input_df$gen_factor)){
+    for (r in 1:nlevels(input_df$exp_env_factor)){
       
       # Retain levels
-      cond <- mean_df %>%
-        filter(gen_factor == unique(mean_df$gen_factor)[u]) %>%
-        filter(exp_env_factor == unique(mean_df$exp_env_factor)[r])
+      cond <- input_df %>%
+        filter(gen_factor == unique(input_df$gen_factor)[u]) %>%
+        filter(exp_env_factor == unique(input_df$exp_env_factor)[r])
       
       # Create new means data
-      new_phen <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se)
-      
+      new_phen. <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se) # generate replicate mean
+      new_phen <- sample(new_phen., size = length(new_phen.), replace = TRUE) # shuffle
+
       # Output
       new_mean_temp <- data.frame("gen_factor" = cond$gen_factor,
                                   "exp_env_factor" = cond$exp_env_factor,
@@ -257,26 +245,32 @@ permutation_raw <- function(input_df){
 permutation_means <- function(input_df){
   
   # Shuffle means data
-  #null_means. <- rnorm(nrow(mean_df), mean = mean_df$avg_phen, sd = mean_df$se)
-  #null_means <- sample(null_means., size=length(null_means.), replace=FALSE)
-  null_means <- sample(input_df$avg_phen_corrected, size=nrow(input_df), replace=FALSE)      
-  
+  null_means. <- rnorm(nrow(input_df), mean = input_df$avg_phen_corrected, sd = input_df$se) # create replicate mean
+  null_means <- sample(null_means., size=length(null_means.), replace = FALSE) # shuffle means without replacement
+
   perm_means <- data.frame("gen_factor" = input_df$gen_factor,
                            "exp_env_factor" = input_df$exp_env_factor,
                            "nat_env_factor" = input_df$nat_env_factor,
-                           "avg_phen_corrected" = null_means)
+                           "avg_phen" = null_means)
+  # Restandardize
+  perm_means$avg_phen_corrected = perm_means$avg_phen#(perm_means$avg_phen - mean(perm_means$avg_phen))/sd(perm_means$avg_phen)
+
   return(perm_means)
 }
 
 pvalue_fun <- function(estimate, rankdat, test){ #Test = "twotail" or "righttail"
+  
   p.value = NULL
+  
   if(test == "twotail"){
     temp = (rank(c(estimate,rankdat))[1])/(n_boot+1) 
     if(temp < 0.5){p.value = temp}else{p.value = (1-temp)}
     
-  }else{
+  }else if(test == "righttail"){
     temp = (rank(c(estimate,rankdat))[1])/(n_boot+1) 
     p.value = 1-temp # Right-tailed
-  }
-   return(p.value)
+  
+    }else{p.value = "Invalid test entry- do you mean twotail or righttail?"}
+   
+  return(p.value)
 }

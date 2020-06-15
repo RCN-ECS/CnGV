@@ -18,8 +18,8 @@ param_list <- list(
   delta_gen = c(-1,0.01,1),
   sample_size = c(5),#c(5,10,20),#c(5,10,20), 
   n_pop = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
-  n_environments = c(10),#c(2,3,5,7,10),
-  std_dev= 0.5,#c(0.5,1), 
+  n_environments = c(3),#c(2,3,5,7,10),
+  std_dev= 1.5,#c(0.5,1), 
   interaction = 2) # Vector LENGTH not magnitude
 
 # Table of parameters
@@ -62,8 +62,8 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-args = df[90,]
-args = df[78,]
+args = df[90,] # Expect significant GxE
+args = df[78,] # Expect no GxE
 dim(df)
 
 write.csv(df,"~/Desktop/df62.csv",)

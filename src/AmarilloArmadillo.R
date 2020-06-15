@@ -406,8 +406,8 @@ GeoffTest2002 = amarillo_armadillo(gt[gt$Paper == 2002,], 100)
 GeoffTest2000 = amarillo_armadillo(gt[gt$Paper == 2000,], 100)
 
 
-Berven_size = amarillo_armadillo(size_df,100)
-Berven_time = amarillo_armadillo(days_df,100)
+Berven_size = amarillo_armadillo(size_df,1000)
+Berven_time = amarillo_armadillo(days_df,1000)
 
 
 # Plots for paper

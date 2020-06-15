@@ -28,7 +28,7 @@ ma = data.frame("data_type" = rep("raw", nrow(mm1)),
 gt = read.csv("~/Documents/GitHub/CnGV/data/GeoffMeansData.csv")
 gt$data_type = rep("means",nrow(gt))
 
-## Berven 1979
+## Berven 1979 -- Table sumthin.
 berven = data.frame("Temp" = c(18,23,28,18,23,28),
                     "Population" = c("Montane","Montane","Montane","Lowland","Lowland","Lowland"),
                     "SizeatMM" = c(3.61,1.98,3.27,4.63,2.33,2.22),
