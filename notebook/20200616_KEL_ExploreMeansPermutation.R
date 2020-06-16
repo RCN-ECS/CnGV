@@ -112,10 +112,10 @@ rank(c(mean.GxE(input_df), null))[1]/length(null+1)
 ############ A solution? #########
 ##########################################
 ##################################
-##  the null hypothesis is that the GiEj-Gimean-Ejmean=0
+##  the null hypothesis is that the GiEj=(Gimean+Ejmean) (obs)
 # so the question is how big would we expect an interaction to be 
 # by random chance given the variation we see around GiEj?
-# the answer is rnorm(GiEj, sd=se)-G1mean-E1mean
+# the answer is rnorm(G1mean+E1mean, sd=se_{GiEj})-G1mean-E1mean
 # where "se" is the SE observed around the mean of the GiEj level,
 # and although not shown, the G1means and E1means also take into
 # account the variation around their means in the calc
@@ -165,7 +165,7 @@ permutation_means_GxE <- function(input_df){
 }
 
 null2 <- replicate(1000, permutation_means_GxE(input_df))
-hist(null2, breaks=seq(0,1,0.01))
+hist(null2, breaks=seq(0,2,0.01))
 abline(v=mean.GxE(input_df), col="blue")
 (P<-1-(rank(c(mean.GxE(input_df), null2))[1]/(length(null2)+1)))
 
