@@ -58,4 +58,5 @@ Red lines drawn at 0.05 levels
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxE_pvalue.png)
 
 ### Means GxE pvalues vs. Anova Pvalue
-![image]()
+Uh oh.... 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEMeanspvalu_anova.png)
