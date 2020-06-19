@@ -26,7 +26,8 @@ Some points are stacked on eachother as evidenced by:
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovMeansRaw.png)
 
 ### Covariance Raw with Error vs Raw without Error
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovErrvsNoerror.png)
+Colored according to significance: Green = CovGE sig, red = both sig, blue = GxE sig
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovRawvsTrue.png)
 
 **Why are there some true values that equal 1?** 
 
