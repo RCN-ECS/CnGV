@@ -13,7 +13,7 @@ param_list <- list(
   interaction = 2) # Vector LENGTH not magnitude
 
 ```
-###GxE vs. Covariance
+### GxE vs. Covariance
 
 *Note* that I am using GxE with new for-loop approach based on estimated marginal means. Covariance is the new, "corrected" covariance. 
 Points colored according to significance: Blue = GxE Sig, Green = CovGE sig, Red = Both sig
