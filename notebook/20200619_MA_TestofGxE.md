@@ -36,5 +36,8 @@ This occurs when there is no interaction term (int =0) and delta_env and delta_g
 ### GxE Raw with error vs Raw without error
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxENEvsE.png)
 
-These are colored according to significance. Blue = GxE is sig, Green = Cov is sig, Red = both are sig. 
-There is discrepancy at the low GxE numbers. I believe this is an artifact of the same issue as above, but I am going to check and make sure. It is not driving bias in significance since none of the GxE = 0 values are significant
+There is discrepancy at the low GxE numbers. These are colored according to significance just to check how this discrepancy affected significance. Blue = GxE is sig, Green = Cov is sig, Red = both are sig. 
+
+Similar as covariance above, this is an artifact of the error. In this case, delta_env and delta_gen do not necessarily equal eachother, but also have an interaction of 0. The GxE in these cases is driven by standard error (when error is gone, so goes the interaction). See example plots below. Top plot is phenotype plotted *with std deviation* and the bottom plot is the same data *without standard deviation*
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEerror_phen.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEnoerror_phen.png)
