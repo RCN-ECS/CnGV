@@ -27,7 +27,7 @@ Some points are stacked on eachother as evidenced by:
 ###Covariance Raw with Error vs Raw without Error
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovErrvsNoerror.png)
 
-*Why are there some true values that seem in inaccurately equal 1?* 
+**Why are there some true values that equal 1?** 
 This occurs when there is no interaction term (int =0) and delta_env and delta_gen equal eachother and are positive. In these cases, having no error produces perfectly parallel lines, equally spaced apart that will always have covGE = 1, even though it does not reflect the actual covariance produced by the data when there is variation around the mean. 
 
 ###GxE Means vs Raw
