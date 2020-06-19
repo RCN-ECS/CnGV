@@ -32,6 +32,13 @@ Colored according to significance: Green = CovGE sig, red = both sig, blue = GxE
 **Why are there some true values that equal 1?** 
 
 This occurs in cases where there is no interaction term (int =0) and delta_env and delta_gen equal eachother and are positive. Having no error and no interaction produces perfectly parallel lines that always have covGE = 1. 
+## Phenotype Example
+This top plot has Covariance of -.79 and a pvalue of 0.06. The std. deviation is 1.5. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovSTuff.png)
+
+This plot is what those lines would look like if std deviation = 0. Note that now the covariance is listed as 1. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovNoerr.png)
+
 
 ### GxE Means vs Raw
 Looks like that observation that some commit a Type II error holds up. Doesn't look too bad though. 
@@ -45,3 +52,10 @@ There is discrepancy at the low GxE numbers. These are colored according to sign
 Similar as covariance above, this is an artifact of the std. deviation. In this GxE case, however, delta_env and delta_gen do not necessarily equal eachother, but also have an interaction of 0. The GxE in these cases is driven by standard deviation (when error is gone, so goes the interaction). See example plots below. Top plot is phenotype plotted *with std deviation* and the bottom plot is the same data *without standard deviation*
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEerror_phen.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEnoerror_phen.png)
+
+### Raw GxE pvalue vs. Anova Pvalue 
+Red lines drawn at 0.05 levels
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxE_pvalue.png)
+
+### Means GxE pvalues vs. Anova Pvalue
+![image]()
