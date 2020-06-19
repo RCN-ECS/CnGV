@@ -1,3 +1,4 @@
+# Check New GxE approach and functionality of functions
 To test the new GxE approach and broadly check if my new "functioned" code is working properly, I ran the following limited set of parameters on the cluster: 
 
 ```{r}
@@ -28,9 +29,11 @@ Some points are stacked on eachother as evidenced by:
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovErrvsNoerror.png)
 
 **Why are there some true values that equal 1?** 
-This occurs when there is no interaction term (int =0) and delta_env and delta_gen equal eachother and are positive. In these cases, having no error produces perfectly parallel lines, equally spaced apart that will always have covGE = 1, even though it does not reflect the actual covariance produced by the data when there is variation around the mean. 
+
+This occurs in cases where there is no interaction term (int =0) and delta_env and delta_gen equal eachother and are positive. Having no error and no interaction produces perfectly parallel lines that always have covGE = 1. 
 
 ### GxE Means vs Raw
+Looks like that observation that some commit a Type II error holds up. Doesn't look too bad though. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxE_meanvsRaw.png)
 
 ### GxE Raw with error vs Raw without error
@@ -38,6 +41,6 @@ This occurs when there is no interaction term (int =0) and delta_env and delta_g
 
 There is discrepancy at the low GxE numbers. These are colored according to significance just to check how this discrepancy affected significance. Blue = GxE is sig, Green = Cov is sig, Red = both are sig. 
 
-Similar as covariance above, this is an artifact of the error. In this case, delta_env and delta_gen do not necessarily equal eachother, but also have an interaction of 0. The GxE in these cases is driven by standard error (when error is gone, so goes the interaction). See example plots below. Top plot is phenotype plotted *with std deviation* and the bottom plot is the same data *without standard deviation*
+Similar as covariance above, this is an artifact of the std. deviation. In this GxE case, however, delta_env and delta_gen do not necessarily equal eachother, but also have an interaction of 0. The GxE in these cases is driven by standard deviation (when error is gone, so goes the interaction). See example plots below. Top plot is phenotype plotted *with std deviation* and the bottom plot is the same data *without standard deviation*
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEerror_phen.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEnoerror_phen.png)
