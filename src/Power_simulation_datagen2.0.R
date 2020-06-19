@@ -16,10 +16,10 @@ param_list <- list(
   reps = c(5), # or more?
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
-  sample_size = c(5),#c(5,10,20),#c(5,10,20), 
+  sample_size = c(5,10),#c(5,10,20),#c(5,10,20), 
   n_pop = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
-  n_environments = c(3),#c(2,3,5,7,10),
-  std_dev= 1.5,#c(0.5,1), 
+  n_environments = c(2,5,10),#c(2,3,5,7,10),
+  std_dev= c(0.5,1.5),#c(0.5,1), 
   interaction = 2) # Vector LENGTH not magnitude
 
 # Table of parameters
@@ -62,11 +62,11 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-args = df[84,] # Expect significant GxE
-args = df[75,] # Expect no GxE
+args = df[1012,] # Expect significant GxE
+args = df[81,] # Expect no GxE
 dim(df)
 
-write.csv(df,"~/Desktop/df62.csv",)
+write.csv(df,"~/Desktop/df.csv",)
 
 ring <- function(param_table, n_boot){
   start_time <- Sys.time()
