@@ -1,0 +1,34 @@
+Try 2. I had an entire post written and the mother fucking internet cut out and I lost the whole damn thing. ARGH. 
+
+I ran a test set of sims to ensure the new GxE code and all my functions were working. I ran the following parameters: 
+```{r}
+
+# Starting list of parameters
+param_list <- list( 
+  reps = c(5), 
+  delta_env = c(0.01,0.5,1),
+  delta_gen = c(-1,0.01,1),
+  sample_size = c(5,10),
+  n_pop = c(1), # Number of pops per environment
+  n_environments = c(2,5,10),
+  std_dev= c(0.5,1.5),
+  interaction = 2) # Vector LENGTH not magnitude
+
+```
+Cov vs. GxE
+![image]()
+
+Hex plot: 
+![image]()
+
+Cov raw vs means
+![image]()
+
+Cov raw vs. no error raw
+![image]()
+
+GxE raw vs. means
+![image]()
+
+GxE raw vs. no error raw
+![image]()

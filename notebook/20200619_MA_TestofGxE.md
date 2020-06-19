@@ -21,19 +21,19 @@ Points colored according to significance: Blue = GxE Sig, Green = CovGE sig, Red
 Some points are stacked on eachother as evidenced by: 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_Hex.png)
 
-###Covariance Means vs Raw
+### Covariance Means vs Raw
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovMeansRaw.png)
 
-###Covariance Raw with Error vs Raw without Error
+### Covariance Raw with Error vs Raw without Error
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_CovErrvsNoerror.png)
 
-*Why are there some true values that seem in inaccurately equal 1?* 
+**Why are there some true values that equal 1?** 
 This occurs when there is no interaction term (int =0) and delta_env and delta_gen equal eachother and are positive. In these cases, having no error produces perfectly parallel lines, equally spaced apart that will always have covGE = 1, even though it does not reflect the actual covariance produced by the data when there is variation around the mean. 
 
-###GxE Means vs Raw
+### GxE Means vs Raw
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxE_meanvsRaw.png)
 
-###GxE Raw with error vs Raw without error
+### GxE Raw with error vs Raw without error
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxENEvsE.png)
 
 These are colored according to significance. Blue = GxE is sig, Green = Cov is sig, Red = both are sig. 
