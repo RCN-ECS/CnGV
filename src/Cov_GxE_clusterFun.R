@@ -17,13 +17,13 @@ set.seed(86)
 # Load Parameters
 row <- as.numeric(args[1])
 replicate <- as.numeric(args[2])
-delta_env <- as.numeric(args[3])
-delta_gen <- as.numeric(args[4])
-sample_size <- as.numeric(args[5])
-n_env <- as.numeric(args[6])
-std_dev <- as.numeric(args[7])
-n_pop <- as.numeric(args[8])
-interaction <- as.numeric(args[9])
+delta_env <- 1#as.numeric(args[3])
+delta_gen <- 1#as.numeric(args[4])
+sample_size <- 10#as.numeric(args[5])
+n_env <- 2#as.numeric(args[6])
+std_dev <- 1.5#as.numeric(args[7])
+n_pop <- 2#as.numeric(args[8])
+interaction <- 0#as.numeric(args[9])
 n_boot <- 99
 
 # Output dataframes

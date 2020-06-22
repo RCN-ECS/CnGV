@@ -2,13 +2,13 @@
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(90), # or more?
+  reps = c(100), # or more?
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
   sample_size = c(5,10,20), 
-  n_pop = c(2,3,5,10,15), 
-  n_environments = NULL,
-  std_dev= c(0.5,1), 
+  n_pop = c(1), 
+  n_environments = c(2,3,5,10,15),
+  std_dev= c(0.75,1.5), 
   interaction = 5) # Vector LENGTH not magnitude
 
 # Starting list of parameters
@@ -20,7 +20,7 @@ param_list <- list(
   n_pop = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
   n_environments = c(2,5,10),#c(2,3,5,7,10),
   std_dev= c(0.5,1.5),#c(0.5,1), 
-  interaction = 2) # Vector LENGTH not magnitude
+  interaction = NULL) # Vector LENGTH not magnitude
 
 # Table of parameters
 parameter_generation <- function(param_list){
@@ -40,13 +40,13 @@ parameter_generation <- function(param_list){
   reps <- rep(c(1:param_list$reps), each = nrow(param_temp))
   param_temp2 <- data.frame("replicate" = reps, param_temp)
   
-  # Generate Interaction term - Magnitude depends on n_pop
+  # Generate Interaction term - N_levels depends on n_pop
   param_temp3 = data.frame()
   for(i in 1:length(unique(param_temp2$replicate))){
     for(j in 1:length(unique(param_temp2$n_pop))){
       sub = dplyr::filter(param_temp2,replicate==unique(param_temp2$replicate)[i])
       subsub = dplyr::filter(sub,n_pop == unique(sub$n_pop)[j])
-      interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = param_list$interaction)
+      interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = unique(subsub$n_pop))
       inter_data = merge(subsub,interaction_term)
       colnames(inter_data)[8]<- "interaction"
       param_temp3 = rbind(inter_data,param_temp3)
@@ -62,7 +62,7 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-args = df[1012,] # Expect significant GxE
+args = df[180,] # Expect significant GxE
 args = df[81,] # Expect no GxE
 dim(df)
 

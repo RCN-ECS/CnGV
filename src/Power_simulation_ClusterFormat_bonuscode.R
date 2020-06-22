@@ -1145,18 +1145,42 @@ dat_csv$coverror = abs(dat_csv$covariance_uprCI - dat_csv$covariance_lwrCI)
 dat_csv$meangxeerror = dat_csv$GxE_means_uprCI - dat_csv$GxE_means_lwrCI
 dat_csv$gxeerror = dat_csv$GxE_emm_uprCI - dat_csv$GxE_emm_lwrCI
 
-(covmeancheck = ggplot(dat_csv,aes(x = true_cov, y = true_cov_means_correct))+
+(covmeancheck = ggplot(dat_csv,aes(x = covariance, y = cov_means_correct))+
     geom_point()+theme_classic()+ylab("Covariance from Means")+xlab("Covariance from Raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red"))
-(covcheck = ggplot(dat_csv,aes(x = true_cov, y = covariance))+
-    geom_point()+theme_classic()+ylab("Covariacne")+xlab("True Covariance")+
+
+(covcheck = ggplot(dat_csv,aes(x = true_cov, y = covariance, colour = col))+ # Cov = 1 happens when delta_env = delta_gen, they are both positive, and there is no interaction
+    geom_point()+theme_classic()+ylab("Covariance")+xlab("True Covariance")+scale_color_identity()+ # In the no error scenarios, this makes perfectly parallel lines that always have true_cov = 1
     geom_abline(slope = 1, intercept = 0,colour = "red"))
-suspect = dat_csv %>%
-  filter(true_cov == 1)
+
+suspect = dat_csv %>% filter(true_cov == 1) %>% filter(covariance_pvalue <0.05)
 
 (gxemeancheck = ggplot(dat_csv,aes(x = true_GxE_emm, y = true_GxE_means))+
     geom_point()+theme_classic()+ylab("GxE from Means")+xlab("GxE from Raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red"))
+
+(gxecheck = ggplot(dat_csv,aes(x = true_GxE_emm, y = GxE_emm,colour = col))+
+    geom_point()+theme_classic()+ylab("GxE with error")+xlab("True GxE")+scale_color_identity()+
+    geom_abline(slope = 1, intercept = 0,colour = "red"))
+
+(ggplot(dat_csv,aes(x = GxE_Anova, y = GxE_emm_pvalue))+
+    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
+    geom_vline(xintercept = 0.05,colour = "red")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+(ggplot(dat_csv,aes(x = GxE_Anova, y = GxE_means_pvalue))+
+    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
+    geom_vline(xintercept = 0.05,colour = "red")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+
+suspectgxe = dat_csv %>% 
+  filter(true_GxE_emm == 0)
+View(suspectgxe[40:72])
+
+ch = dat_csv %>%
+  filter(delta_env ==1) %>%
+  filter(delta_gen == -1) %>%
+  filter(interaction == 0)
 
 (coverrorcheck = ggplot(dat_csv, aes(x = coverror,y = meancoverror)) + 
     geom_point(alpha = 0.5) + theme_classic() + ylab("Length of 95% CI for CovGE means") + xlab("Length of 95% CI for CovGE raw")+
