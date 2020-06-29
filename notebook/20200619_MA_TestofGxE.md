@@ -41,7 +41,7 @@ This plot is what those lines would look like if std deviation = 0. Note that no
 
 
 ### GxE Means vs Raw
-Looks like that observation that some commit a Type II error holds up. Doesn't look too bad though. 
+Looks like my earlier observation that some means results commit a Type II error holds up. Doesn't look too bad though. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxE_meanvsRaw.png)
 
 ### GxE Raw with error vs Raw without error
@@ -53,10 +53,10 @@ Similar as covariance above, this is an artifact of the std. deviation. In this 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEerror_phen.png)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEnoerror_phen.png)
 
-### Raw GxE pvalue vs. Anova Pvalue 
+### GxE pvalue vs. Anova Pvalue for raw data
 Red lines drawn at 0.05 levels. All instances for raw and means data in which the anova p-value is < 0.05 but permutation p-value is > 0.05 occur in n_pop = 2, interaction = 2, standard deviation = 1.5 (higher of 2 levels) scenarios. 
 
-There are 55 inconsistant pvalues (out of 1080) for the raw dataset, and 100 inconsistencies for the means dataset. I think these discrepancies are fairly mild. As shown in the second plot below, the majority of GxEmag values whos pvalues don't match are low (highest value with a pvalue discrepancy for raw data is 0.15).
+There are 55 inconsistant pvalues (out of 1080) for the raw dataset, and 100 inconsistencies for the means dataset. I think these discrepancies are fairly mild. As shown in the second plot below, the majority of GxEmag values whos pvalues don't match are reasonably low (highest GxE mag is 0.45) (highest pvalue discrepancy is < 0.15, so the difference in pvalues isn't huge).
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxE_pvalue.png)
 
