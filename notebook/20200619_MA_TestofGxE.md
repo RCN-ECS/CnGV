@@ -54,9 +54,18 @@ Similar as covariance above, this is an artifact of the std. deviation. In this 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEnoerror_phen.png)
 
 ### Raw GxE pvalue vs. Anova Pvalue 
-Red lines drawn at 0.05 levels
+Red lines drawn at 0.05 levels. All instances for raw and means data in which the anova p-value is < 0.05 but permutation p-value is > 0.05 occur in n_pop = 2, interaction = 2, standard deviation = 1.5 (higher of 2 levels) scenarios. 
+
+There are 55 inconsistant pvalues (out of 1080) for the raw dataset, and 100 inconsistencies for the means dataset. I think these discrepancies are fairly mild. As shown in the second plot below, the majority of GxEmag values whos pvalues don't match are low (highest value with a pvalue discrepancy for raw data is 0.15).
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxE_pvalue.png)
 
+### Problematic subset
+
+Here I have pulled out those 55 datapoints that have an Anova pvalue of < 0.05, but Permutation pvalue > 0.05 and colored by the magnitude of GxE (using EMMs). There are multiple points stacked on top of one another, which is why there doesn't appear to be 55 points. 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/6.29.ProblemGxEs.png)
+
 ### Means GxE pvalues vs. Anova Pvalue
-Uh oh.... 
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/619_GxEMeanspvalu_anova.png)
