@@ -66,7 +66,7 @@ args = df[180,] # Expect significant GxE
 args = df[81,] # Expect no GxE
 dim(df)
 
-write.csv(df,"~/Desktop/df.csv",)
+#write.csv(df,"~/Desktop/df.csv",)
 
 ring <- function(param_table, n_boot){
   start_time <- Sys.time()

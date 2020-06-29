@@ -6,6 +6,7 @@ library("lme4")
 library("rlist")
 library("dplyr")
 library("ggplot2")
+library("tibble")
 
 # Load functions
 source("~/Documents/GitHub/CnGV/src/Cov_GxE_functions.R")
@@ -20,10 +21,10 @@ replicate <- as.numeric(args[2])
 delta_env <- 1#as.numeric(args[3])
 delta_gen <- 1#as.numeric(args[4])
 sample_size <- 10#as.numeric(args[5])
-n_env <- 2#as.numeric(args[6])
+n_env <- 5#as.numeric(args[6])
 std_dev <- 1.5#as.numeric(args[7])
-n_pop <- 2#as.numeric(args[8])
-interaction <- 0#as.numeric(args[9])
+n_pop <- 5#as.numeric(args[8])
+interaction <- 2#as.numeric(args[9])
 n_boot <- 99
 
 # Output dataframes
@@ -276,6 +277,7 @@ GxE_means_CI = quantile(boot_df_means$GxE_means_boot, probs=c(0.025, 0.975), na.
 
 for(i in 1:n_boot){
   
+  # To ensure means and se are sampled together in permutation_means function
   seed = i
   
   # Resample Data
@@ -413,11 +415,11 @@ Covariance <- data.frame("row" = row,
                          "covariance_uprCI" = cov_corrected_CI[[2]],
                          "covariance_pvalue" = cov_corrected_pvalue,
                          
-                         "true_cov_uncorrected" = cov_est.ne, #Covariance 
-                         "cov_uncorrected" = cov_est,
-                         "cov_uncorrected_lwrCI" = cov_CI[[1]],
-                         "cov_uncorrected_uprCI" = cov_CI[[2]],
-                         "cov_uncorrected_pvalue" = cov_original_pvalue,  
+                         #"true_cov_uncorrected" = cov_est.ne, #Covariance 
+                         #"cov_uncorrected" = cov_est,
+                         #"cov_uncorrected_lwrCI" = cov_CI[[1]],
+                         #"cov_uncorrected_uprCI" = cov_CI[[2]],
+                         #"cov_uncorrected_pvalue" = cov_original_pvalue,  
                          
                          "true_cor" = cor_est.ne, #Correlation 
                          "cor" = cor_est,
@@ -431,11 +433,11 @@ Covariance <- data.frame("row" = row,
                          "cov_means_correct_uprCI" = cov_corrected_means_CI[[2]],
                          "cov_means_correct_pvalue" = cov_corrected_mean_pvalue,
                          
-                         "true_cor_means" = cor_est_means.ne, # Correlation -- means 
-                         "cor_means" = cor_est_means,
-                         "cor_means_lwrCI" = cor_means_CI[[1]],
-                         "cor_means_uprCI" = cor_means_CI[[2]],
-                         "cor_means_pvalue" = cor_mean_pvalue)
+                         #"true_cor_means" = cor_est_means.ne, # Correlation -- means 
+                         #"cor_means" = cor_est_means,
+                         #"cor_means_lwrCI" = cor_means_CI[[1]],
+                         #"cor_means_uprCI" = cor_means_CI[[2]],
+                         #"cor_means_pvalue" = cor_mean_pvalue)
 
 GxE <- data.frame("row" = row,
                   "GxE_Anova" = aov.df1[3,6],
@@ -445,11 +447,11 @@ GxE <- data.frame("row" = row,
                   "GxE_emm_uprCI" = round(GxE_emm_CI[[2]],2),
                   "GxE_emm_pvalue" = round(GxE_emm_pvalue,2),
                   
-                  "true_GxE_old" = round(GxE_emm_original.ne,2), # Emmeans GxE using original method (unused)
-                  "GxE_emm_old" = round(GxE_emm_original,2),
-                  "GxE_emm_old_lwrCI" = round(GxE_orig_CI[[1]],2),
-                  "GxE_emm_old_uprCI" = round(GxE_orig_CI[[2]],2),
-                  "GxE_emm_old_pvalue" = round(GxE_emm_orig_pvalue,2),
+                  #"true_GxE_old" = round(GxE_emm_original.ne,2), # Emmeans GxE using original method (unused)
+                  #"GxE_emm_old" = round(GxE_emm_original,2),
+                  #"GxE_emm_old_lwrCI" = round(GxE_orig_CI[[1]],2),
+                  #"GxE_emm_old_uprCI" = round(GxE_orig_CI[[2]],2),
+                  #"GxE_emm_old_pvalue" = round(GxE_emm_orig_pvalue,2),
                   
                   "true_GxE_omega" = round(omega2.ne,2), # Omega^2 
                   "GxE_omega" = round(omega2,2), 

@@ -1,5 +1,6 @@
 ###################################################################################
-##              Functions for co/counter gradient simulations                    ##  
+##              Functions for co/counter gradient simulations                    ##
+##        Authors: Molly Albecker, Geoff Trussell, Katie Lotterhos               ##
 ###################################################################################
 
 df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction){
@@ -332,14 +333,14 @@ pvalue_fun <- function(estimate, rankdat, test){ #Test = "twotail" or "righttail
   p.value = NULL
   
   if(test == "twotail"){
-    temp = (rank(c(estimate,rankdat))[1])/(n_boot+1) 
-    if(temp < 0.5){p.value = temp}else{p.value = (1-temp)}
-    
+    p.value = sum(abs(rankdat) >= abs(estimate))/(nperms+1) # Two-tailed
+
   }else if(test == "righttail"){
-    temp = (rank(c(estimate,rankdat))[1])/(n_boot+1) 
-    p.value = 1-temp # Right-tailed
+    p.value = sum(rankdat >= estimate)/(nperms+1) # Right-tailed
   
     }else{p.value = "Invalid test entry- do you mean twotail or righttail?"}
    
   return(p.value)
 }
+
+
