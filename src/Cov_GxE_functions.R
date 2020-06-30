@@ -310,12 +310,12 @@ permutation_means <- function(input_df,seed){ # means dataframe (mean_df)
   
   # Shuffle means data (same set.seed keeps phen and corresponding se matched)
   set.seed(seed)
-  null_means. <- sample(input_df$avg_phen, size = length(input_df$avg_phen), replace = FALSE)
+  null_means <- sample(input_df$avg_phen, size = length(input_df$avg_phen), replace = FALSE)
   
   set.seed(seed)
   null_se <- sample(input_df$se, size = length(input_df$se), replace = FALSE)
   
-  null_means <- rnorm(length(null_means.), mean = null_means., sd = null_se) # create replicate mean
+  #null_means <- rnorm(length(null_means.), mean = null_means., sd = null_se) # create replicate mean
   
   perm_means <- data.frame("gen_factor" = input_df$gen_factor,
                            "exp_env_factor" = input_df$exp_env_factor,
@@ -328,15 +328,15 @@ permutation_means <- function(input_df,seed){ # means dataframe (mean_df)
   return(perm_means)
 }
 
-pvalue_fun <- function(estimate, rankdat, test){ #Test = "twotail" or "righttail"
+pvalue_fun <- function(estimate, rankdat, test,n_boot){ #Test = "twotail" or "righttail"
   
   p.value = NULL
   
   if(test == "twotail"){
-    p.value = sum(abs(rankdat) >= abs(estimate))/(nperms+1) # Two-tailed
+    p.value = sum(abs(rankdat) >= abs(estimate))/(n_boot+1) # Two-tailed
 
   }else if(test == "righttail"){
-    p.value = sum(rankdat >= estimate)/(nperms+1) # Right-tailed
+    p.value = sum(rankdat >= estimate)/(n_boot+1) # Right-tailed
   
     }else{p.value = "Invalid test entry- do you mean twotail or righttail?"}
    
