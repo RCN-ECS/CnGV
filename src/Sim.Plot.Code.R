@@ -94,7 +94,6 @@ for(i in 1:nrow(dat_csv)){
 
 # Power at moderate levels of Cov and GxE
 
-# Filter and establish datasets
 covpow1 = dat_csv %>%
   filter(between(covariance, 0.4,0.6))
 gxepow1 = dat_csv %>%
@@ -250,15 +249,55 @@ ggplot(green_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_siz
   xlab("Number of Populations")+ylab("Proportion of significant CovGE)")+
   labs(colour = "Sample Size")
 
-###################
-## Sanity Checks ##
-###################
+######################################
+##          Sanity Checks           ##
+######################################
 
-# Parameter coverage - Hex plot
+# Do we have good parameter coverage? Hex plot
 
 (hexy = ggplot(dat_csv, aes(x = covariance, y = GxE_emm)) + 
   geom_hex()+ theme_classic() + xlab("Covariance Estimate") + ylab("GxE Estimate") +
   ggtitle("HexPlot") + facet_grid(sample_size~n_pop))
+
+# Do confidence intervals match with p-values? 
+dat_csv$covsig = NULL
+dat_csv$gxesig = NULL
+
+dat_csv$CovSigcorrect = NULL
+dat_csv$GxESigcorrect = NULL
+
+for(i in 1:nrow(dat_csv)){
+  
+  if(dat_csv$cov_pvalue[i] > 0.05){dat_csv$covsig[i] = "Non-significant"
+  }else{dat_csv$covsig[i] = "Significant"}
+  if(dat_csv$GxE_emm_pvalue[i] > 0.05){dat_csv$gxesig[i] = "Non-significant"
+  }else{dat_csv$gxesig[i] = "Significant"}
+}
+  
+for(i in 1:nrow(dat_csv)){
+  
+  if(dat_csv$cov_pvalue[i] > 0.05 & dat_csv$cov_lwrCI[i] < 0 | dat_csv$cov_uprCI[i] > 0){dat_csv$Covconfint[i] = "Non-Significant, Correct"
+}else if(dat_csv$cov_pvalue[i] > 0.05 & dat_csv$cov_lwrCI[i] < 0 | dat_csv$cov_uprCI[i] > 0){dat_csv$Covconfint[i] = "Non-Significant, Correct")
+{dat_csv$covsig[i] =
+  }else{dat_csv$covsig[i] = "Significant"}
+  if(dat_csv$GxE_emm_pvalue[i] > 0.05){dat_csv$gxesig[
+  }else{dat_csv$gxesig[i] = "Significant"}
+}     
+     & dat_csv$cov_lwrCI < 0 & dat_csv$cov_uprCI[i] > 0){dat_csv$Covconfint[i] = "Non-Significant, Correct"
+  }else if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$cov_lwrCI[i] > 0 & dat_csv$cov_uprCI[i] < 0){dat_csv$GxEconfint[i] = "Non-Significant, Wrong"
+  }else if(dat_csv$covariance_pvalue[i] < 0.05 & dat_csv$cov_lwrCI[i] < 0 & dat_csv$cov_uprCI[i] > 0){dat_csv$GxEconfint[i] = "Significant, Wrong"
+  }else{dat_csv$Covconfint[i] = "Significant, Correct"}
+}
+
+cov.ci.check = dat_csv %>% 
+  filter(Covconfint == "red") %>%
+  filter(covariance_lwrCI > 0 & covariance_uprCI > 0) 
+
+ggplot(dat_csv[dat_csv$replicate==1,], aes(x = row, y = covariance)) +
+  geom_point(aes(colour = factor(delta_env)))+
+  geom_errorbar(aes(ymin = covariance_lwrCI, ymax = covariance_uprCI))+
+  theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~Covconfint)
+
 
 # Do confidence intervals for each overlap with their true values? Nope. 
 dat_csv$probgxe = NULL
@@ -301,6 +340,7 @@ dat_csv$coverror = abs(dat_csv$covariance_uprCI - dat_csv$covariance_lwrCI)
 dat_csv$meangxeerror = dat_csv$GxE_means_uprCI - dat_csv$GxE_means_lwrCI
 dat_csv$gxeerror = dat_csv$GxE_emm_uprCI - dat_csv$GxE_emm_lwrCI
 
+# Covariance
 (covmeancheck = ggplot(dat_csv,aes(x = covariance, y = cov_means_correct))+
     geom_point()+theme_classic()+ylab("Covariance from Means")+xlab("Covariance from Raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red"))
@@ -309,8 +349,13 @@ dat_csv$gxeerror = dat_csv$GxE_emm_uprCI - dat_csv$GxE_emm_lwrCI
     geom_point()+theme_classic()+ylab("Covariance")+xlab("True Covariance")+scale_color_identity()+ # In the no error scenarios, this makes perfectly parallel lines that always have true_cov = 1
     geom_abline(slope = 1, intercept = 0,colour = "red"))
 
+(coverrorcheck = ggplot(dat_csv, aes(x = coverror,y = meancoverror)) + 
+    geom_point(alpha = 0.5) + theme_classic() + ylab("Length of 95% CI for CovGE means") + xlab("Length of 95% CI for CovGE raw")+
+    geom_abline(slope = 1, intercept = 0,colour = "red")+scale_colour_identity())
+
 suspect = dat_csv %>% filter(true_cov == 1) %>% filter(covariance_pvalue <0.05) # Check on those weirdos
 
+# GxE
 (gxemeancheck = ggplot(dat_csv,aes(x = true_GxE_emm, y = true_GxE_means))+
     geom_point()+theme_classic()+ylab("GxE from Means")+xlab("GxE from Raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red"))
@@ -319,7 +364,12 @@ suspect = dat_csv %>% filter(true_cov == 1) %>% filter(covariance_pvalue <0.05) 
     geom_point()+theme_classic()+ylab("GxE with error")+xlab("True GxE")+scale_color_identity()+
     geom_abline(slope = 1, intercept = 0,colour = "red"))
 
-# Do pvalues from permutation match pvalues from anova? 
+(gxeerrorcheck = ggplot(dat_csv, aes(x = gxeerror,y = meangxeerror)) + 
+    geom_point(alpha = 0.3) + theme_classic() + ylab("Length of 95% CI for GxE means") + xlab("Length of 95% CI for GxE raw")+
+    geom_abline(slope = 1, intercept = 0,colour = "red")+scale_colour_identity())
+
+
+# Do GxE pvalues from permutation match pvalues from anova? 
 
 (ggplot(dat_csv,aes(x = GxE_Anova, y = GxE_emm_pvalue,colour = GxE_emm))+ #raw data 
     geom_jitter()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
@@ -330,3 +380,22 @@ suspect = dat_csv %>% filter(true_cov == 1) %>% filter(covariance_pvalue <0.05) 
     geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
     geom_vline(xintercept = 0.05,colour = "red")+
     geom_hline(yintercept = 0.05,colour = "red"))
+
+# For those that don't match, is there any pattern ?
+
+suspect.pvals = dat_csv %>% # raw 
+  filter(GxE_emm_pvalue >= 0.05) %>%
+  filter(GxE_Anova <= 0.05)
+
+(ggplot(suspect.pvals,aes(x = GxE_Anova, y = GxE_emm_pvalue,colour = GxE_emm))+
+    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+suspect.pvals.mean = dat_csv %>% # mean
+  filter(GxE_means_pvalue >= 0.05) %>%
+  filter(GxE_Anova <= 0.05)
+
+(ggplot(suspect.pvals.mean, aes(x = GxE_means, y = GxE_emm_pvalue)) + 
+  geom_point()+theme_classic())
+
+

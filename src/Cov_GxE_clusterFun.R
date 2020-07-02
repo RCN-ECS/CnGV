@@ -13,18 +13,18 @@ source("~/Documents/GitHub/CnGV/src/Cov_GxE_functions.R")
 
 start.time <- Sys.time()
 set.seed(86)
-args = commandArgs(trailingOnly = TRUE)
+#args = commandArgs(trailingOnly = TRUE)
 
 # Load Parameters
-row <- as.numeric(args[1])
-replicate <- as.numeric(args[2])
-delta_env <- as.numeric(args[3])
-delta_gen <- as.numeric(args[4])
-sample_size <- as.numeric(args[5])
-n_env <- as.numeric(args[6])
-std_dev <- as.numeric(args[7])
-n_pop <- as.numeric(args[8])
-interaction <- as.numeric(args[9])
+row <- 107#as.numeric(args[1])
+replicate <- 5#as.numeric(args[2])
+delta_env <- 1#as.numeric(args[3])
+delta_gen <- 1#as.numeric(args[4])
+sample_size <- 5#as.numeric(args[5])
+n_env <- 10#as.numeric(args[6])
+std_dev <- 1.5#as.numeriarc(args[7])
+n_pop <- 10#as.numeric(args[8])
+interaction <- 5.55#as.numeric(args[9])
 n_boot <- 99
 
 # Output dataframes
@@ -402,6 +402,7 @@ Parameters <- data.frame("row" = row, # Original Parameters
                          "delta_env" = delta_env,
                          "delta_gen" = delta_gen,
                          "sample_size" = sample_size,
+                         "n_env" = n_env,
                          "n_pop" = n_pop,
                          "std_dev" = std_dev,
                          "interaction" = interaction,

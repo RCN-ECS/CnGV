@@ -62,7 +62,7 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-args = df[91,] # Expect significant GxE
+args = df[108,]
 args = df[81,] # Expect no GxE
 dim(df)
 
