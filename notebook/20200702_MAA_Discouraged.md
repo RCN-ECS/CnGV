@@ -5,7 +5,7 @@ The issue now is with the confidence intervals and pvalues. As you said, confide
 
 ### Covariance
 
-Shown are estimates with 95% CIs from a single replicate. 
+Shown are estimates with 95% CIs from a single replicate. Each row is a unique set of parameters
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.2.CovConfint_discrep.png)
 
 ### GxE
