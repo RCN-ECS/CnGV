@@ -262,28 +262,30 @@ dat_csv$GxEconfint = NULL
 
 for(i in 1:nrow(dat_csv)){
   
-  if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Not Significant - Correct"
-  }else if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Not Significant - Wrong"
-  }else if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Not Significant - Wrong"
-  }else if(dat_csv$covariance_pvalue[i] <= 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
-  }else if(dat_csv$covariance_pvalue[i] <= 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
-  }else{dat_csv$Covconfint[i] = "Result: Significant - Wrong"}
+  if(dat_csv$covariance_pvalue[i] > 0.025 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Not Significant - Correct"
+  }else if(dat_csv$covariance_pvalue[i] > 0.025 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Type II Error"
+  }else if(dat_csv$covariance_pvalue[i] > 0.025 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Type II Error"
+  }else if(dat_csv$covariance_pvalue[i] <= 0.025 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
+  }else if(dat_csv$covariance_pvalue[i] <= 0.025 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
+  }else{dat_csv$Covconfint[i] = "Result: Type I Error"}
   
   if(dat_csv$GxE_emm_pvalue[i] > 0.05 & dat_csv$GxE_emm_lwrCI[i] <= 0){dat_csv$GxEconfint[i] = "Result: Not Significant - Correct"
-  }else if(dat_csv$GxE_emm_pvalue[i] > 0.05 & dat_csv$GxE_emm_lwrCI[i] > 0){dat_csv$GxEconfint[i] = "Result: Not Significant - Wrong"
+  }else if(dat_csv$GxE_emm_pvalue[i] > 0.05 & dat_csv$GxE_emm_lwrCI[i] > 0){dat_csv$GxEconfint[i] = "Result: Type II Error"
   }else if(dat_csv$GxE_emm_pvalue[i] <= 0.05 & dat_csv$GxE_emm_lwrCI[i] > 0){dat_csv$GxEconfint[i] = "Result: Significant - Correct"
-  }else{dat_csv$GxEconfint[i] = "Result: Significant - Wrong"}
+  }else{dat_csv$GxEconfint[i] = "Result: Type I Error"}
   
 }
 
-(cov_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = row, y = covariance)) +
-  geom_point(alpha = 0.5)+
+(cov_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = reorder(row,covariance))) +
+  geom_point(aes(y = covariance), colour = "firebrick",alpha = 1)+
+  geom_point(aes(y = true_cov), colour = "springgreen4",alpha = 1)+
   geom_errorbar(aes(ymin = covariance_lwrCI, ymax = covariance_uprCI))+
   theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~Covconfint,ncol = 2))
 
-(gxe_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = row, y = GxE_emm)) +
-    geom_point(alpha = 0.5)+
-    geom_errorbar(aes(ymin = GxE_emm_lwrCI, ymax = GxE_omega))+
+(gxe_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = reorder(row,GxE_emm))) +
+    geom_point(aes(y = GxE_emm), colour = "firebrick",alpha = 1)+
+    geom_point(aes(y = true_GxE_emm), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes(ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI))+
     theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~GxEconfint,ncol = 2))
 
 
