@@ -1,3 +1,15 @@
+ # 7.3. Update: 
+ 
+ Here are the plots showing how bootstrap and permutation compare in terms of false positives and negatives. I've summed up the results in the below table: (Total = 3060)
+ 
+ |    | Covariance Bootstrap | Covariance Permutation | GxE Bootstrap | GxE Permutation |
+ | ---|---|---|---|---|
+ | True Positive | 2400 | 390 | 2520| 2260 | 
+ | True Negative | 80 | 20 | 70 | 540|
+ | False Positive | 0 | 0 | 470 | 0 | 
+ | False Negative | 580 | 2650 | 0| 260 | 
+
+
 
 Well, I've encountered another problem in the sims, and I'm starting to wonder how its possible to have been working on a project for over a year and still be so... wrong. Am I just going in circles? Each edit creates a new error? Am I sisyphus, doomed to my coding purgatory for all time? 
 
