@@ -24,7 +24,7 @@ dat_csv = full_join(dat_csv., Cov, by = "row")
 
 # Once code is read in, write csv to skip lengthy loading
 # write.csv(dat_csv,"~/Desktop/dat_csv.csv")
-# dat_csv <- read.csv("~/Desktop/dat_csv.csv")
+dat_csv <- read.csv("~/Desktop/dat_csv.csv")
 
 ######################
 ## Covariance x GxE ##
@@ -57,23 +57,6 @@ ggplot(dat_csv, aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha 
   theme(legend.position = "none")+
   scale_colour_identity()+
   facet_grid(sample_size~n_pop)
-
-# Tradeoff between GxE and Covariance plot
-
-sigGxE = filter(dat_csv, GxE_emm_pvalue <=0.05 | covariance_pvalue <= 0.05)
-ggplot(sigGxE, aes(x = GxE_emm, y = covtick))+
-  geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
-  xlab("Magnitude of GxE")+ylab("Proportion of significant CovGE values (p < 0.05)")+
-  theme_bw(base_size = 24, base_family = "Helvetica")+
-  theme(axis.text.x = element_text(size=16,colour = "black"),
-        axis.title.x = element_text(size=18,face="bold")) +
-  theme(axis.text.y = element_text(size=16,colour = "black"),
-        axis.title.y = element_text(size=18,face="bold")) +
-  theme(plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_rect(size = 2))
-
 
 
 #############################
@@ -190,13 +173,10 @@ for(i in unique(col_df$sample_size)){
   }
 }
 
-# Overall Patterns 
-
 (linepower =ggplot(new_df,aes(x = factor(n_pop), y = proportion, group = sample_size, fill = factor(col,levels=c("grey","dodgerblue4","darkgreen","red"))))+
   geom_bar(position = "stack", stat="identity") +
     scale_fill_identity() +
     facet_wrap(~sample_size) +theme_classic())
-
 
 red_dat = filter(new_df,col=="red")
 ggplot(red_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size), colour = factor(sample_size)))+
@@ -249,6 +229,22 @@ ggplot(green_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_siz
   xlab("Number of Populations")+ylab("Proportion of significant CovGE)")+
   labs(colour = "Sample Size")
 
+# Tradeoff between GxE and Covariance plot
+
+sigGxE = filter(dat_csv, GxE_emm_pvalue <=0.05 | covariance_pvalue <= 0.05)
+ggplot(sigGxE, aes(x = GxE_emm, y = covtick))+
+  geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
+  xlab("Magnitude of GxE")+ylab("Proportion of significant CovGE values (p < 0.05)")+
+  theme_bw(base_size = 24, base_family = "Helvetica")+
+  theme(axis.text.x = element_text(size=16,colour = "black"),
+        axis.title.x = element_text(size=18,face="bold")) +
+  theme(axis.text.y = element_text(size=16,colour = "black"),
+        axis.title.y = element_text(size=18,face="bold")) +
+  theme(plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(size = 2))
+
 ######################################
 ##          Sanity Checks           ##
 ######################################
@@ -260,43 +256,35 @@ ggplot(green_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_siz
   ggtitle("HexPlot") + facet_grid(sample_size~n_pop))
 
 # Do confidence intervals match with p-values? 
-dat_csv$covsig = NULL
-dat_csv$gxesig = NULL
 
-dat_csv$CovSigcorrect = NULL
-dat_csv$GxESigcorrect = NULL
+dat_csv$Covconfint = NULL
+dat_csv$GxEconfint = NULL
 
 for(i in 1:nrow(dat_csv)){
   
-  if(dat_csv$cov_pvalue[i] > 0.05){dat_csv$covsig[i] = "Non-significant"
-  }else{dat_csv$covsig[i] = "Significant"}
-  if(dat_csv$GxE_emm_pvalue[i] > 0.05){dat_csv$gxesig[i] = "Non-significant"
-  }else{dat_csv$gxesig[i] = "Significant"}
-}
+  if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Not Significant - Correct"
+  }else if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Not Significant - Wrong"
+  }else if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Not Significant - Wrong"
+  }else if(dat_csv$covariance_pvalue[i] <= 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
+  }else if(dat_csv$covariance_pvalue[i] <= 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
+  }else{dat_csv$Covconfint[i] = "Result: Significant - Wrong"}
   
-for(i in 1:nrow(dat_csv)){
+  if(dat_csv$GxE_emm_pvalue[i] > 0.05 & dat_csv$GxE_emm_lwrCI[i] <= 0){dat_csv$GxEconfint[i] = "Result: Not Significant - Correct"
+  }else if(dat_csv$GxE_emm_pvalue[i] > 0.05 & dat_csv$GxE_emm_lwrCI[i] > 0){dat_csv$GxEconfint[i] = "Result: Not Significant - Wrong"
+  }else if(dat_csv$GxE_emm_pvalue[i] <= 0.05 & dat_csv$GxE_emm_lwrCI[i] > 0){dat_csv$GxEconfint[i] = "Result: Significant - Correct"
+  }else{dat_csv$GxEconfint[i] = "Result: Significant - Wrong"}
   
-  if(dat_csv$cov_pvalue[i] > 0.05 & dat_csv$cov_lwrCI[i] < 0 | dat_csv$cov_uprCI[i] > 0){dat_csv$Covconfint[i] = "Non-Significant, Correct"
-}else if(dat_csv$cov_pvalue[i] > 0.05 & dat_csv$cov_lwrCI[i] < 0 | dat_csv$cov_uprCI[i] > 0){dat_csv$Covconfint[i] = "Non-Significant, Correct")
-{dat_csv$covsig[i] =
-  }else{dat_csv$covsig[i] = "Significant"}
-  if(dat_csv$GxE_emm_pvalue[i] > 0.05){dat_csv$gxesig[
-  }else{dat_csv$gxesig[i] = "Significant"}
-}     
-     & dat_csv$cov_lwrCI < 0 & dat_csv$cov_uprCI[i] > 0){dat_csv$Covconfint[i] = "Non-Significant, Correct"
-  }else if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$cov_lwrCI[i] > 0 & dat_csv$cov_uprCI[i] < 0){dat_csv$GxEconfint[i] = "Non-Significant, Wrong"
-  }else if(dat_csv$covariance_pvalue[i] < 0.05 & dat_csv$cov_lwrCI[i] < 0 & dat_csv$cov_uprCI[i] > 0){dat_csv$GxEconfint[i] = "Significant, Wrong"
-  }else{dat_csv$Covconfint[i] = "Significant, Correct"}
 }
 
-cov.ci.check = dat_csv %>% 
-  filter(Covconfint == "red") %>%
-  filter(covariance_lwrCI > 0 & covariance_uprCI > 0) 
-
-ggplot(dat_csv[dat_csv$replicate==1,], aes(x = row, y = covariance)) +
-  geom_point(aes(colour = factor(delta_env)))+
+(cov_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = row, y = covariance)) +
+  geom_point(alpha = 0.5)+
   geom_errorbar(aes(ymin = covariance_lwrCI, ymax = covariance_uprCI))+
-  theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~Covconfint)
+  theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~Covconfint,ncol = 2))
+
+(gxe_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = row, y = GxE_emm)) +
+    geom_point(alpha = 0.5)+
+    geom_errorbar(aes(ymin = GxE_emm_lwrCI, ymax = GxE_omega))+
+    theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~GxEconfint,ncol = 2))
 
 
 # Do confidence intervals for each overlap with their true values? Nope. 
@@ -320,13 +308,13 @@ cov_anom = dat_csv %>%
 dim(cov_anom)
 length(which(cov_anom$covariance_pvalue<=0.05))
 
-(overlapper_cov = ggplot(cov_anom,aes(x = row))+ theme_classic() + 
+(overlapper_cov = ggplot(cov_anom[cov_anom$replicate==1,],aes(x = row))+ theme_classic() + 
   geom_errorbar(aes(ymin = covariance_lwrCI,ymax = covariance_uprCI),color = "black")+
   geom_point(aes(y = true_cov),size = 2, color = "red",alpha = 0.5)+
     geom_point(aes(y = covariance,colour = factor(std_dev)), size =2, shape = 4)+
   xlab("Unique Parameter Set (row)") + ylab("Covariance"))
 
-(overlapper_GxE = ggplot(GxEanoms,aes(x = row))+ theme_classic() + 
+(overlapper_GxE = ggplot(GxEanoms[GxEanoms$replicate==1,],aes(x = row))+ theme_classic() + 
   geom_errorbar(aes(ymin = GxE_emm_lwrCI,ymax = GxE_emm_uprCI),color = "black")+
   geom_point(aes(y = true_GxE_emm),size = 2, color = "red",alpha = 0.5)+
   geom_point(aes(y = GxE_emm,colour = factor(std_dev)), size =2, shape = 4)+
