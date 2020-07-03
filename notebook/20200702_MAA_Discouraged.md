@@ -71,14 +71,16 @@ One clear pattern is that these occur in the n_pop = 10 scenario. But why would 
 Hi Molly, here are some thoughts:
 
 (1) I suspected that the bootstrap and permutation approach would give different insights into the significance, so there may not be a problem, just different insights that we have to interpret and clearly communicate in the paper. 
+
 *Do you have a good paper I can reference to better understand the differences in inference? I have read your notes and the section in the whitlock book but I'm not 100% on the differences here*
 
-(2) My following comments are assuming your graphs are plotting the raw data results *yes, these are raw*
+(2) My following comments are assuming your graphs are plotting the raw data results 
+
+*yes, these are raw*
 
 (3) For the Cov - I suspected the permutation approach was conservative, but the bootstrap was less conservative. If your 2x2 plot at the top is based on whether P<0.025, then what is plotted here makes sense to me. The permutation is not a conservative approach. Could you make a similar 2x2 plot, but base significance on whether or not the 95% CI overlap with 0?
- *The above approach was 95% CI. Here is the plot with values based on p <0.025. (oops)*
  
- ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.Cov_p0.025.png)
+ *The above approach was 95% CI. The Covariance plot below has been remade with values based on p <0.025. (oops)*
 
 (4) Can you send me the line of code that you use to calculate the CI? Do you use the quantile function? There are different ways to do it, which have different assumptions. Can you confirm that you use 1000 for bootstraps and permutations?
 
@@ -97,7 +99,9 @@ GxE_eta_CI = quantile(boot_df_raw$GxE_eta_boot, probs=c(0.025,0.975), type = 1)
 GxE_SSq_CI = quantile(boot_df_raw$GxE_SSq_boot, probs = c(0.025,0.975), type = 1)
 ```
 (5) Because cov(G,E) is bounded by -1 and 1, and GxE is bounded by 0 and 1, we are bound (pun intended) to see weird behavior near the boundaries
+
 *ha*
+
 (6) Can you confirm that you only implement the bootstrap once, and then use the same bootstrap for CovGE and GxE CI?
 
 *I run through the following code x number of times - meaning that the same bootstrap is used for CovGE and GxE CIs* 
@@ -145,6 +149,9 @@ for(i in 1:n_boot){
 
 *In the below plot, I've added true values with the estimated ones. True values are shown in green, estimated values are shown in red. I've ordered according to estimated covariance. I based my false negs and pos's on estimates. I actually do not bootstrap CIs around the true value - should I?*
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.CovCI_ordered.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.GxE_confint_ordered.png)
+
 
 (8) Maybe you could also organize the simulation number in a way that makes the order easier to interpret (E.g, low to high true values of Cov(G,E)) 
+
 *see above*
