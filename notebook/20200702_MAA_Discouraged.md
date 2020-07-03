@@ -64,8 +64,9 @@ One clear pattern is that these occur in the n_pop = 10 scenario. But why would 
 
 ```
 
-# Katie's comments: 
-(Molly's responses in italics)
+# Katie's comments: (7/3/2020)
+
+**(Molly's responses in italics)**
 
 Hi Molly, here are some thoughts:
 
