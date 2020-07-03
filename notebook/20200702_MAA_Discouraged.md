@@ -1,6 +1,6 @@
  # 7.3. Update: 
  
- Here are the plots showing how bootstrap and permutation compare in terms of false positives and negatives. I've summed up the results in the below table: (Total = 3060)
+ Here are the plots showing how bootstrap and permutation compare in terms of false positives and negatives. I've summed up the results in the below table: (Total For each column = 3060)
  
  |    | Covariance Bootstrap | Covariance Permutation | GxE Bootstrap | GxE Permutation |
  | ---|---|---|---|---|
@@ -9,8 +9,15 @@
  | False Positive | 0 | 0 | 470 | 0 | 
  | False Negative | 580 | 2650 | 0| 260 | 
 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.CovBootCheck.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.CovPermCheck.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.PermutationCheck.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.GxEcheck.png)
 
 
+
+
+# Previous Post from 7.1
 Well, I've encountered another problem in the sims, and I'm starting to wonder how its possible to have been working on a project for over a year and still be so... wrong. Am I just going in circles? Each edit creates a new error? Am I sisyphus, doomed to my coding purgatory for all time? 
 
 The issue now is with the confidence intervals and pvalues. As you said, confidence intervals that do not cross zero should be significant. Except we have a whole bunch that aren't significant that should be: 
