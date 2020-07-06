@@ -1,4 +1,4 @@
- # 7.3. Update: 
+ # 7.6. Update: 
  
  Here are the plots showing how bootstrap and permutation compare in terms of false positives and negatives. I've summed up the results in the below table: (Total For each column = 3060)
  
