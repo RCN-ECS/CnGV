@@ -4,19 +4,24 @@
  
  |    | Covariance Bootstrap | Covariance Permutation | GxE Bootstrap | GxE Permutation |
  | ---|---|---|---|---|
- | True Positive | 2400 | 390 | 2520| 2260 | 
- | True Negative | 80 | 20 | 70 | 540|
- | False Positive | 0 | 0 | 470 | 0 | 
- | False Negative | 580 | 2650 | 0| 260 | 
+ | True Positive | 2255 | 390 | 2520| 2260 | 
+ | True Negative | 425 | 570 | 70 | 540|
+ | False Positive | 145 | 0 | 470 | 0 | 
+ | False Negative | 235 | 2100 | 0| 260 | 
  
- Looks like our approach is pretty conservative given the high number of false negatives for permutation.... I see now what you mean by altering our inference... 
+Looks like our approach is pretty conservative given the high number of false negatives for permutation.... I see now what you mean by altering our inference... 
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.CovBootCheck.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.CovPermCheck.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.PermutationCheck.png)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.3.GxEcheck.png)
+### Covariance Bootstrap
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.6.CovarianceBootCheck.png)
 
+### Covariance Permutation
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.6.CovariancePErmutationcheck.png)
 
+### GxE Bootstrap
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.6.GxEBootstrapCheck.png)
+
+### GxE Permutation
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.6.GxEPermcheck.png)
 
 
 # Previous Post from 7.1
