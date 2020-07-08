@@ -15,6 +15,12 @@ For covariance, we found that permutation is an exceedingly conservative approac
 
 For GxE, bootstrap randomization creates levels of GxE that may not accurately represent significance of the GxE emm. Therefore for GxE, permutation may be the better approach. 
 
+### Where are false positives/negatives for the bootstrap? 
+If we use Bootstrap for the covariance, we want to know what levels of covariance are giving us false positives and negatives. Here are 2 charts showing the same info in different ways: One as a line tracking the total number of instances of each category, and the second showing the proportion of instances. **I like the line graph, i think it shows the effect more clearly**
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.7.CovarianceBoostrapLineChart.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.7.CovarianceBootstrapBarChart.png)
+
 ### Means Data Confusion Matrices :) 
 
 Thankfully, these follow the same patterns as the raw data, give or take a few. 
