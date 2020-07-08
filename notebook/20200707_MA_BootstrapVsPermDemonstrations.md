@@ -34,7 +34,7 @@ Thankfully, these follow the same patterns as the raw data, give or take a few.
 
 Some reviewers may question the decision to use permutation rather than taking the p-value from the ANOVA. The reasons for using permutation are 2-fold: 
 1. We want to be able to accurately measure covariance with means data, which does not use ANOVA. 
-2. ANOVA p-values are based on the proportion of variance explained by fixed effects (in this case, the interaction). However, as seen in the graph below, GxE EMM effect sizes do not directly scale with the proportion of variance explained. ANOVA produces a lower true GxE magnitude than EMM until high GxE values (~0.7). 
+2. ANOVA p-values are based on the proportion of variance explained by fixed effects (in this case, the interaction). However, as seen in the graph below, GxE EMM effect sizes do not directly scale with the proportion of variance explained. ANOVA produces a lower true GxE magnitude than EMM until high GxE values (~0.7). (lines are b-spline curves)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.8.TrueGxEv.Omega.png)
 
 *Below shows the original with GxE Estimate, not the true value. Retained for comparison*
