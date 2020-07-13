@@ -13,7 +13,7 @@ param_list <- list(
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(5), # or more?
+  reps = c(10), # or more?
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
   sample_size = c(5,10),#c(5,10,20),#c(5,10,20), 
@@ -46,7 +46,13 @@ parameter_generation <- function(param_list){
     for(j in 1:length(unique(param_temp2$n_pop))){
       sub = dplyr::filter(param_temp2,replicate==unique(param_temp2$replicate)[i])
       subsub = dplyr::filter(sub,n_pop == unique(sub$n_pop)[j])
+      
+      if(unique(subsub$n_pop < 5)){ # At least 5 levels of interaction
+      interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = 5)
+      }else{
       interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = unique(subsub$n_pop))
+      }
+      
       inter_data = merge(subsub,interaction_term)
       colnames(inter_data)[8]<- "interaction"
       param_temp3 = rbind(inter_data,param_temp3)
@@ -66,7 +72,7 @@ args = df[108,]
 args = df[81,] # Expect no GxE
 dim(df)
 
-#write.csv(df,"~/Desktop/df.csv",)
+write.csv(df,"~/Desktop/df.csv",)
 
 ring <- function(param_table, n_boot){
   start_time <- Sys.time()

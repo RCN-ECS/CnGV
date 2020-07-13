@@ -16,16 +16,16 @@ set.seed(86)
 #args = commandArgs(trailingOnly = TRUE)
 
 # Load Parameters
-row <- 107#as.numeric(args[1])
-replicate <- 5#as.numeric(args[2])
-delta_env <- 1#as.numeric(args[3])
-delta_gen <- 1#as.numeric(args[4])
-sample_size <- 5#as.numeric(args[5])
-n_env <- 10#as.numeric(args[6])
-std_dev <- 1.5#as.numeriarc(args[7])
-n_pop <- 10#as.numeric(args[8])
-interaction <- 5.55#as.numeric(args[9])
-n_boot <- 99
+row <- as.numeric(args[1])
+replicate <- as.numeric(args[2])
+delta_env <- as.numeric(args[3])
+delta_gen <- as.numeric(args[4])
+sample_size <- as.numeric(args[5])
+n_env <- as.numeric(args[6])
+std_dev <- as.numeric(args[7])
+n_pop <- as.numeric(args[8])
+interaction <- as.numeric(args[9])
+n_boot <- 49
 
 # Output dataframes
 output <- data.frame()
@@ -59,10 +59,10 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype (All 4 plots should look similar)
-#ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Check: Mean Phenotype 
-#ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
+ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
 
 # Check: Raw Phenotype with no error
 #ggplot(model_df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()

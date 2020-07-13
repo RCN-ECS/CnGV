@@ -21,7 +21,7 @@ n_env <- as.numeric(args[6])
 std_dev <- as.numeric(args[7])
 n_pop <- as.numeric(args[8])
 interaction <- as.numeric(args[9])
-n_boot <- 100
+n_boot <- 49
   
 # Output dataframes
 output <- data.frame()
@@ -78,10 +78,10 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
   
 # Raw Phenotype plot
-#ggplot(phen_out, aes(x = exp_env_factor, y = phen, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(phen_out, aes(x = exp_env_factor, y = phen, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Mean Phenotype plot
-#ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Anova
 test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)

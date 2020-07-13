@@ -8,6 +8,7 @@ library(ggplot2)
 library(readr)
 library(tidyverse)
 library(gridExtra)
+library(ggthemes)
 
 ## Compile Data
 
@@ -15,15 +16,16 @@ setwd("~/Desktop/power_output/")
 Param_temp <- list.files(path = "~/Desktop/power_output/",pattern= "*Parameter") 
 Cov_temp <-list.files(path = "~/Desktop/power_output/",pattern= "*Covariance") 
 GxE_temp <- list.files(path = "~/Desktop/power_output/",pattern= "*GxE") 
+
 GE = plyr::ldply(GxE_temp, read_csv)
 Cov = plyr::ldply(Cov_temp, read_csv)
 Par = plyr::ldply(Param_temp, read_csv)
 
-dat_csv. = full_join(Par, GE, by= "row")
-dat_csv = full_join(dat_csv., Cov, by = "row")
+dat_csv. = full_join(Par[,-1], GE[,-1], by= "row")
+dat_csv = full_join(dat_csv., Cov[,-1], by = "row")
 
 # Once code is read in, write csv to skip lengthy loading
-# write.csv(dat_csv,"~/Desktop/dat_csv.csv")
+#write.csv(dat_csv,"~/Desktop/dat_csv.csv")
 dat_csv <- read.csv("~/Desktop/dat_csv.csv")
 
 ######################
@@ -257,36 +259,275 @@ ggplot(sigGxE, aes(x = GxE_emm, y = covtick))+
 
 # Do confidence intervals match with p-values? 
 
-dat_csv$Covconfint = NULL
-dat_csv$GxEconfint = NULL
+# Cov Perm check
+dat_csv1 = dat_csv[dat_csv$replicate==1,] # Only need to show one replicate
+dat_csv1$Covconfintperm = rep("NA",nrow(dat_csv1))
 
-for(i in 1:nrow(dat_csv)){
+for(i in 1:nrow(dat_csv1)){
+    if(dat_csv1$true_cov[i] != 0 && dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "True Positive"
+    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "False Positive"
+    }else if(dat_csv1$true_cov[i]!= 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "False Negative"
+    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "True Negative"
+    }else{dat_csv1$Covconfintperm[i] = "None"}
+}
+
+(cov_perm = ggplot(transform(dat_csv1, Covconfintperm = factor(Covconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), colour = "firebrick",alpha = 1)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI))+ ggtitle("Covariance - Permutation Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ 
+    facet_wrap(~Covconfintperm,ncol = 2))
+
+
+# Cov Boot check
+dat_csv1$Covconfintboot = rep(NA, nrow(dat_csv1))
+
+for(i in 1:nrow(dat_csv1)){
   
-  if(dat_csv$covariance_pvalue[i] > 0.025 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Not Significant - Correct"
-  }else if(dat_csv$covariance_pvalue[i] > 0.025 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Type II Error"
-  }else if(dat_csv$covariance_pvalue[i] > 0.025 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Type II Error"
-  }else if(dat_csv$covariance_pvalue[i] <= 0.025 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
-  }else if(dat_csv$covariance_pvalue[i] <= 0.025 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$Covconfint[i] = "Result: Significant - Correct"
-  }else{dat_csv$Covconfint[i] = "Result: Type I Error"}
+  if(dat_csv1$true_cov[i] != 0 &&
+     dat_csv1$covariance_lwrCI[i] < 0 &&
+    dat_csv1$covariance_uprCI[i] < 0
+    ){dat_csv1$Covconfintboot[i] = "True Positive"
+    }else if(dat_csv1$true_cov[i] != 0 &&
+             dat_csv1$covariance_lwrCI[i] > 0 &&
+    dat_csv1$covariance_uprCI[i] > 0
+    ){dat_csv1$Covconfintboot[i] = "True Positive"
+    }else if(dat_csv1$true_cov[i] == 0 &&
+             dat_csv1$covariance_lwrCI[i] < 0 &&
+    dat_csv1$covariance_uprCI[i] < 0
+    ){dat_csv1$Covconfintboot[i] = "False Positive"
+    }else if(dat_csv1$true_cov[i] == 0 &&
+             dat_csv1$covariance_lwrCI[i] > 0 &&
+    dat_csv1$covariance_uprCI[i] > 0
+    ){dat_csv1$Covconfintboot[i] = "False Positive"
+    }else if(dat_csv1$true_cov[i] != 0 && 
+             dat_csv1$covariance_lwrCI[i] <= 0 && 
+    dat_csv1$covariance_uprCI[i] >= 0
+    ){dat_csv1$Covconfintboot[i] = "False Negative"
+    }else if(dat_csv1$true_cov[i]== 0 && 
+             dat_csv1$covariance_lwrCI[i] <= 0 && 
+    dat_csv1$covariance_uprCI[i] >= 0
+   ){dat_csv1$Covconfintboot[i] = "True Negative"
+   }else{dat_csv1$Covconfintboot[i] = "None"}
+
+  }
+
+(cov_boot = ggplot(transform(dat_csv1, Covconfintboot = factor(Covconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes(x = reorder(row,true_cov),y = covariance), colour = "firebrick",alpha = 1)+
+    geom_point(aes(x = reorder(row,true_cov),y = true_cov), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes(x = reorder(row,true_cov),ymin = covariance_lwrCI, ymax = covariance_uprCI))+ ggtitle("Covariance - Bootstrap Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank())+ 
+      facet_wrap(~Covconfintboot,ncol = 2))
+ 
+# Bin Covariance Bootstrap and See whats driving false/true pos's and neg's
+dat_csv1$binCov = "NA"#abs(round(dat_csv1$covariance,1))
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_cov[i] == 0){dat_csv$binCov[i] = 0
+  }else if(abs(dat_csv1$true_cov[i]) > 0 & abs(dat_csv1$true_cov[i]) <= 0.15){dat_csv1$binCov[i] = 0.1
+  }else if(abs(dat_csv1$true_cov[i]) > 0.15 & abs(dat_csv1$true_cov[i]) <= 0.25){dat_csv1$binCov[i] = 0.2
+  }else if(abs(dat_csv1$true_cov[i]) > 0.25 & abs(dat_csv1$true_cov[i]) <= 0.35){dat_csv1$binCov[i] = 0.3
+  }else if(abs(dat_csv1$true_cov[i]) > 0.35 & abs(dat_csv1$true_cov[i]) <= 0.45){dat_csv1$binCov[i] = 0.4
+  }else if(abs(dat_csv1$true_cov[i]) > 0.45 & abs(dat_csv1$true_cov[i]) <= 0.55){dat_csv1$binCov[i] = 0.5
+  }else if(abs(dat_csv1$true_cov[i]) > 0.55 & abs(dat_csv1$true_cov[i]) <= 0.65){dat_csv1$binCov[i] = 0.6
+  }else if(abs(dat_csv1$true_cov[i]) > 0.65 & abs(dat_csv1$true_cov[i]) <= 0.75){dat_csv1$binCov[i] = 0.7
+  }else if(abs(dat_csv1$true_cov[i]) > 0.75 & abs(dat_csv1$true_cov[i]) <= 0.85){dat_csv1$binCov[i] = 0.8
+  }else if(abs(dat_csv1$true_cov[i]) > 0.85 & abs(dat_csv1$true_cov[i]) <= 0.95){dat_csv1$binCov[i] = 0.9
+  }else{dat_csv1$binCov[i] = 1}
+}
   
-  if(dat_csv$GxE_emm_pvalue[i] > 0.05 & dat_csv$GxE_emm_lwrCI[i] <= 0){dat_csv$GxEconfint[i] = "Result: Not Significant - Correct"
-  }else if(dat_csv$GxE_emm_pvalue[i] > 0.05 & dat_csv$GxE_emm_lwrCI[i] > 0){dat_csv$GxEconfint[i] = "Result: Type II Error"
-  }else if(dat_csv$GxE_emm_pvalue[i] <= 0.05 & dat_csv$GxE_emm_lwrCI[i] > 0){dat_csv$GxEconfint[i] = "Result: Significant - Correct"
-  }else{dat_csv$GxEconfint[i] = "Result: Type I Error"}
+  
+bindf = dat_csv1 %>%
+  group_by(binCov)%>%
+  summarize("N_total" = n())
+bindf$binCov[11]<-"0"
+
+bindf2 = dat_csv1 %>%
+  group_by(binCov,Covconfintboot)%>%
+  summarize("N_category" = n())
+bindf2$binCov[17] <- "0"
+bindf3 = merge(bindf, bindf2)
+
+(PropCovBoot = ggplot(bindf3, aes(x = binCov, y = (N_category/N_total), group = Covconfintboot, fill = Covconfintboot))+
+    geom_bar(stat="identity") + theme_classic()+ labs(fill = "")+
+    scale_fill_manual(values = c("True Positive" = "coral2", "False Positive" = "darkolivegreen4","True Negative" = "darkolivegreen4" ,"False Negative" = "deepskyblue4"))+
+    labs(colour = "") +xlab("Binned Covariance")+ylab("Category")+ggtitle("Covariance Bootstrap"))
+
+(CovBoot = ggplot(bindf3, aes(x = abs(binCov), y = N_category, group = Covconfintboot, colour = Covconfintboot))+
+  geom_point() + theme_hc()+ geom_line()+
+    scale_colour_manual(values = c("True Positive" = "#992266", "False Positive" = "#009988","True Negative" = "#CC8800" ,"False Negative" = "#0000AA"))+
+  labs(colour = "") +xlab("Binned Covariance")+ylab("Category")+ggtitle("Covariance Bootstrap"))
+
+
+# GxE Perm check
+dat_csv1$GxEconfintperm = rep("NA", nrow(dat_csv1))
+
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$GxEconfintperm[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$GxEconfintperm[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$GxEconfintperm[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$GxEconfintperm[i] = "True Negative"
+  }else{dat_csv1$GxEconfintperm == "None"}
+}
+
+(gxe_perm = ggplot(transform(dat_csv1, GxEconfintperm = factor(GxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes( x = reorder(row,GxE_emm),y = GxE_emm), colour = "firebrick",alpha = 1)+
+    geom_point(aes( x = reorder(row,GxE_emm),y = true_GxE_emm), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes( x = reorder(row,GxE_emm),ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI))+ggtitle("GxE - Permutation Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ 
+    facet_wrap(~GxEconfintperm,ncol = 2))
+
+
+# GxE Boot check
+dat_csv1$GxEconfintboot = rep("NA", nrow(dat_csv1))
+
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
+  {dat_csv1$GxEconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
+  {dat_csv1$GxEconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
+  {dat_csv1$GxEconfintboot[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
+  {dat_csv1$GxEconfintboot[i] = "True Negative"
+  }else{dat_csv1$GxEconfintboot[i] = "None"}
+}
+  
+(gxe_boot = ggplot(transform(dat_csv1, GxEconfintboot = factor(GxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes(x = reorder(row,true_GxE_emm),y = GxE_emm), colour = "firebrick",alpha = 1)+
+    geom_point(aes(x = reorder(row,true_GxE_emm),y = true_GxE_emm), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm),ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI))+ggtitle("GxE - Bootstrap Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ 
+    facet_wrap(~GxEconfintboot,ncol = 2))
+
+# Cov Perm check MEANS
+dat_csv1$meansCovconfintperm = rep("NA",nrow(dat_csv1))
+
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_cov_means_correct[i] != 0 && dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "True Positive"
+  }else if(dat_csv1$true_cov_means_correct[i] == 0 & dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "False Positive"
+  }else if(dat_csv1$true_cov_means_correct[i]!= 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "False Negative"
+  }else if(dat_csv1$true_cov_means_correct[i] == 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "True Negative"
+  }else{dat_csv1$meansCovconfintperm[i] = "None"}
+}
+
+(means_cov_perm = ggplot(transform(dat_csv1, meansCovconfintperm = factor(meansCovconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes(x = reorder(row,true_cov_means_correct), y = cov_means_correct), colour = "firebrick",alpha = 1)+
+    geom_point(aes(x = reorder(row,true_cov_means_correct), y = true_cov_means_correct), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes(x = reorder(row,true_cov_means_correct), ymin = cov_means_correct_lwrCI, ymax = cov_means_correct_uprCI))+ ggtitle("Means: Covariance - Permutation Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ 
+    facet_wrap(~meansCovconfintperm,ncol = 2))
+
+# MEANS Cov Boot check
+dat_csv1$MeansCovconfintboot = rep(NA, nrow(dat_csv1))
+
+for(i in 1:nrow(dat_csv1)){
+  
+  if(dat_csv1$true_cov[i] != 0 &&
+     dat_csv1$covariance_lwrCI[i] < 0 &&
+     dat_csv1$covariance_uprCI[i] < 0
+  ){dat_csv1$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_cov[i] != 0 &&
+           dat_csv1$covariance_lwrCI[i] > 0 &&
+           dat_csv1$covariance_uprCI[i] > 0
+  ){dat_csv1$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_cov[i] == 0 &&
+           dat_csv1$covariance_lwrCI[i] < 0 &&
+           dat_csv1$covariance_uprCI[i] < 0
+  ){dat_csv1$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_cov[i] == 0 &&
+           dat_csv1$covariance_lwrCI[i] > 0 &&
+           dat_csv1$covariance_uprCI[i] > 0
+  ){dat_csv1$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_cov[i] != 0 && 
+           dat_csv1$covariance_lwrCI[i] <= 0 && 
+           dat_csv1$covariance_uprCI[i] >= 0
+  ){dat_csv1$MeansCovconfintboot[i] = "False Negative"
+  }else if(dat_csv1$true_cov[i]== 0 && 
+           dat_csv1$covariance_lwrCI[i] <= 0 && 
+           dat_csv1$covariance_uprCI[i] >= 0
+  ){dat_csv1$MeansCovconfintboot[i] = "True Negative"
+  }else{dat_csv1$MeansCovconfintboot[i] = "None"}
   
 }
 
-(cov_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = reorder(row,covariance))) +
-  geom_point(aes(y = covariance), colour = "firebrick",alpha = 1)+
-  geom_point(aes(y = true_cov), colour = "springgreen4",alpha = 1)+
-  geom_errorbar(aes(ymin = covariance_lwrCI, ymax = covariance_uprCI))+
-  theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~Covconfint,ncol = 2))
+(cov_boot = ggplot(transform(dat_csv1, MeansCovconfintboot = factor(MeansCovconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes(x = reorder(row,true_cov_means_correct), y = cov_means_correct), colour = "firebrick",alpha = 1)+
+    geom_point(aes(x = reorder(row,true_cov_means_correct), y = true_cov_means_correct), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes(x = reorder(row,true_cov_means_correct), ymin = cov_means_correct_lwrCI, ymax = cov_means_correct_uprCI))+ ggtitle("Means: Covariance - Bootstrap Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ 
+    facet_wrap(~MeansCovconfintboot,ncol = 2))
 
-(gxe_ci = ggplot(dat_csv[dat_csv$replicate==1,], aes(x = reorder(row,GxE_emm))) +
-    geom_point(aes(y = GxE_emm), colour = "firebrick",alpha = 1)+
-    geom_point(aes(y = true_GxE_emm), colour = "springgreen4",alpha = 1)+
-    geom_errorbar(aes(ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI))+
-    theme_classic() + geom_hline(aes(yintercept = 0))+facet_wrap(~GxEconfint,ncol = 2))
+# MEANS GxE Boot check
+dat_csv1$MeanGxEconfintboot = rep("NA", nrow(dat_csv1))
+
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "True Negative"
+  }else{dat_csv1$MeanGxEconfintboot[i] = "None"}
+}
+
+(mean_gxe_boot = ggplot(transform(dat_csv1, MeanGxEconfintboot = factor(MeanGxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes(x = reorder(row,true_GxE_means),y = GxE_means), colour = "firebrick",alpha = 1)+
+    geom_point(aes(x = reorder(row,true_GxE_means),y = true_GxE_means), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes(x = reorder(row,true_GxE_means),ymin = GxE_means_lwrCI, ymax = GxE_means_uprCI))+ggtitle("Means: GxE - Bootstrap Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ 
+    facet_wrap(~MeanGxEconfintboot,ncol = 2))
+  
+# MEANS GxE Perm check
+dat_csv1$meansGxEconfintperm = rep("NA", nrow(dat_csv1))
+
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$meansGxEconfintperm[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$meansGxEconfintperm[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$meansGxEconfintperm[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$meansGxEconfintperm[i] = "True Negative"
+  }else{dat_csv1$meansGxEconfintperm == "None"}
+}
+
+(means_gxe_perm = ggplot(transform(dat_csv1, meansGxEconfintperm = factor(meansGxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_point(aes( x = reorder(row,true_GxE_means),y = GxE_means), colour = "firebrick",alpha = 1)+
+    geom_point(aes( x = reorder(row,true_GxE_means),y = true_GxE_means), colour = "springgreen4",alpha = 1)+
+    geom_errorbar(aes( x = reorder(row,true_GxE_means),ymin = GxE_means_lwrCI, ymax = GxE_means_uprCI))+ggtitle("Means: GxE - Permutation Check")+
+    theme_classic() + geom_hline(aes(yintercept = 0))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ 
+    facet_wrap(~meansGxEconfintperm,ncol = 2))              
+
+# ANOVA vs. GxE_EMM comparison (to show that prop variance explained doesn't equal effect size of GxE)
+(ggplot(dat_csv, aes(x = true_GxE_emm, y = GxE_omega, group = factor(std_dev), colour = factor(std_dev))) + geom_point()+
+    geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3),se = F) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+theme_classic()+
+    scale_colour_manual(values = c("0.5" = "#6600CC", "1.5" = "#66BBAA"))+
+    xlab("True GxE - Estimated Marginal Means")+ylab("GxE - Omega Squared")+
+    labs(colour = "Standard Deviation"))
 
 
 # Do confidence intervals for each overlap with their true values? Nope. 
