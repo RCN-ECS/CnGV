@@ -1,0 +1,18 @@
+# Troubleshooting 
+
+Last week, Katie asked me if there was anythign else to do before finally setting up the BIG simulation. I ran the following limited set of parameters and got the following result: 
+
+```{params}
+# Starting list of parameters
+param_list <- list( 
+  reps = c(5), # or more?
+  delta_env = c(0.01,0.5,1),
+  delta_gen = c(-1,0.01,1),
+  sample_size = c(5,10),#c(5,10,20),#c(5,10,20), 
+  pop_per_env = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
+  n_environments = c(2,5,10),#c(2,3,5,7,10),
+  std_dev= c(1,3),#c(0.5,1), 
+  interaction = 5) # Vector LENGTH not magnitude
+
+
+```
