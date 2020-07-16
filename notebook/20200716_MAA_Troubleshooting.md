@@ -16,7 +16,7 @@ param_list <- list(
 ```
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/7.16.WonkyResult.png)
 
-# WTF. 
+![image](https://tenor.com/view/sad-face-rain-doctor-who-gif-11466849)
 
 The above plot is actually less bad than previous attempts. I had used `runif()` to choose the levels of interaction, and thought originally that the error was somewhere in my parameter generation code. But after changing several things, I have found that the wonkiness remains. So it must be something else. 
 
