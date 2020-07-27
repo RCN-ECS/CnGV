@@ -1,0 +1,10 @@
+"","row","aov_coefs"
+"(Intercept)",12446,-0.694696371143509
+"exp_env_factorE_2",12446,0.0948873562822288
+"exp_env_factorE_3",12446,0.33865108286447
+"gen_factorG_2",12446,0.579453769785893
+"gen_factorG_3",12446,0.209207777389101
+"exp_env_factorE_2:gen_factorG_2",12446,0.120074860108699
+"exp_env_factorE_3:gen_factorG_2",12446,-0.381494238834576
+"exp_env_factorE_2:gen_factorG_3",12446,2.14150937041745
+"exp_env_factorE_3:gen_factorG_3",12446,0.705577389634931

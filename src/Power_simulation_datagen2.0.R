@@ -13,13 +13,13 @@ param_list <- list(
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(10), # or more?
+  reps = c(100), # or more?
   delta_env = c(0.01,0.5,1),
   delta_gen = c(-1,0.01,1),
-  sample_size = c(5,10),#c(5,10,20),#c(5,10,20), 
-  n_pop = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
-  n_environments = c(2,5,10),#c(2,3,5,7,10),
-  std_dev= c(0.5,1.5),#c(0.5,1), 
+  sample_size = c(5,10,15), 
+  pop_per_env = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
+  n_environments = c(2,3,5,7,10),
+  std_dev= c(1.5,3),#c(0.5,1), 
   interaction = NULL) # Vector LENGTH not magnitude
 
 # Table of parameters
@@ -29,35 +29,36 @@ parameter_generation <- function(param_list){
   param_temp <- expand.grid("delta_env" = param_list$delta_env,
                             "delta_gen" = param_list$delta_gen,
                             "sample_size" = param_list$sample_size,
-                            "n_gen" = param_list$n_pop,
+                            "pop_per_env" = param_list$pop_per_env,
                             "n_env" = param_list$n_environments,
                             "std_dev" = param_list$std_dev)
   # Add genotypes
-  param_temp$n_pop = param_temp$n_gen*param_temp$n_env
-  param_temp = param_temp[,-4] # Delete n_gen
+  param_temp$n_pop = param_temp$pop_per_env*param_temp$n_env
+  param_temp = param_temp[,-4] # Deletes pop_per_env
 
   # Add replicates
   reps <- rep(c(1:param_list$reps), each = nrow(param_temp))
   param_temp2 <- data.frame("replicate" = reps, param_temp)
   
-  # Generate Interaction term - N_levels depends on n_pop
+  # Generate Interaction term 
   param_temp3 = data.frame()
+  myseed = 86
   for(i in 1:length(unique(param_temp2$replicate))){
     for(j in 1:length(unique(param_temp2$n_pop))){
-      sub = dplyr::filter(param_temp2,replicate==unique(param_temp2$replicate)[i])
-      subsub = dplyr::filter(sub,n_pop == unique(sub$n_pop)[j])
-      
-      if(unique(subsub$n_pop < 5)){ # At least 5 levels of interaction
-      interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = 5)
-      }else{
-      interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = unique(subsub$n_pop))
-      }
+      sub = dplyr::filter(param_temp2, replicate==unique(param_temp2$replicate)[i])
+      subsub = dplyr::filter(sub, n_pop == unique(sub$n_pop)[j])
+      set.seed = myseed + i + j
+      #interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = max(param_temp$n_pop))
+      interaction_term = runif(max(param_temp$n_pop), min = 0, max = unique(subsub$n_pop))
       
       inter_data = merge(subsub,interaction_term)
       colnames(inter_data)[8]<- "interaction"
       param_temp3 = rbind(inter_data,param_temp3)
     }
   }
+  
+  # Set.seed for each sim
+  param_temp3$seed = round(runif(nrow(param_temp3),min = 1, max = 100000000))
   
   # Assign Rows to dataframe
   row = seq(1:nrow(param_temp3))
@@ -68,11 +69,47 @@ parameter_generation <- function(param_list){
   
 
 df = parameter_generation(param_list) 
-args = df[108,]
-args = df[81,] # Expect no GxE
 dim(df)
 
-write.csv(df,"~/Desktop/df.csv",)
+fugit = df %>%
+  filter(replicate == 1) #%>%
+  filter(n_pop == 2) %>%
+  #filter(interaction == max(interaction)) %>%
+  filter(delta_env == 1) %>%
+  filter(delta_gen == -1) %>%
+  #filter(std_dev == min(std_dev)) %>%
+  filter(sample_size == 10)
+args = fugit
+args = df[81,] # Expect no GxE
+dim(fugit)
+
+
+df[1:5,]
+write.csv(df,"~/Desktop/full_df.csv",)
+
+
+cluster.time <- function(n_params, chunk.size, pause.time){
+  total.submissions <- n_params/chunk.size
+  total.time.secs <- total.submissions*pause.time
+  total.time.minutes <- total.time.secs/60
+  total.time.hours <- total.time.minutes/60
+  total.time.days <- total.time.hours/24
+  time_project = data.frame("days" = total.time.days,"hours" = total.time.hours, "minutes" = total.time.minutes, "jobs" = n_params, "chunk.size" = chunk.size, "sys.pause"= pause.time)
+  return(time_project)
+  }
+
+(time.check = cluster.time(n_params = 2700, chunk.size = 250, pause.time = 3600)) # Njobs = 27000
+
+check <- df %>%
+  filter(replicate == 1) %>%
+  filter(n_pop == 2)
+
+
+
+###############################
+# Old Code - Unused as of 7/1/2020
+###############################
+
 
 ring <- function(param_table, n_boot){
   start_time <- Sys.time()

@@ -3,7 +3,7 @@
 ##        Authors: Molly Albecker, Geoff Trussell, Katie Lotterhos               ##
 ###################################################################################
 
-df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction){
+df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2){
   
   # Dataframe foundations
   n_environments <- n_env 
@@ -11,9 +11,11 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   env <- rep(1:n_environments, times = n_pop, each = sample_size) 
   
   # Random Noise
+  set.seed = seed1
   noise <- rnorm(sample_size * n_pop * n_environments, 0, sd = std_dev) 
   
   # Interaction Term
+  set.seed = seed2
   int <- rep(rnorm(n_pop * n_environments, 0, sd = interaction), each = sample_size) # interaction term - one for each GE level
   
   ############################################
@@ -79,12 +81,12 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
 
 mod.GxE <- function(input_df){ # input is model_df
   
-  # Clear outputs
+  # Outputs
   allGE <- c()
   loopGxE <- c()
   
   # Anova
-  aov.test <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = input_df)
+  aov.test <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = input_df) 
   
   # Estimated Marginal Means
   emm_E = as.data.frame(emmeans(aov.test,"exp_env_factor"))
@@ -92,10 +94,10 @@ mod.GxE <- function(input_df){ # input is model_df
   emm_GxE = as.data.frame(emmeans(aov.test, ~ exp_env_factor*gen_factor))
   
   # Gmeans
-  E_means <- tapply(emm_GxE$emmean, emm_GxE$exp_env_factor, mean)
-  G_means <- tapply(emm_GxE$emmean, emm_GxE$gen_factor, mean)
-  G_matrix <- data.frame("G_means" = G_means, "gen_factor" = unique(emm_GxE$gen_factor))
-  E_matrix <- data.frame("E_means" = E_means, "exp_env_factor" = unique(emm_GxE$exp_env_factor))
+  #E_means <- tapply(emm_GxE$emmean, emm_GxE$exp_env_factor, mean)
+  #G_means <- tapply(emm_GxE$emmean, emm_GxE$gen_factor, mean)
+  G_matrix <- data.frame("G_means" = emm_G$emmean, "gen_factor" = emm_G$gen_factor)
+  E_matrix <- data.frame("E_means" = emm_E$emmean, "exp_env_factor" = emm_E$exp_env_factor)
   
   # Match Genotypes to Native Environment
   Cov_matrix = G_matrix
@@ -108,6 +110,12 @@ mod.GxE <- function(input_df){ # input is model_df
                          emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
                          mean(emm_GxE$emmean)) # Overall mean phenotype
   
+  # Output based on Stamps/Hadfield approach
+  delta_E = ((emm_GxE$emmean[3]-emm_GxE$emmean[4])+(emm_GxE$emmean[1]-emm_GxE$emmean[2]))/2 
+  delta_H = (emm_GxE$emmean[1]-emm_GxE$emmean[4])
+  aov.coefs = coef(aov.test)
+  
+  
   # Magnitude of GxE -- Loop
   allGE = c()
   loopGxE = NULL
@@ -116,9 +124,9 @@ mod.GxE <- function(input_df){ # input is model_df
       G_levels <- levels(emm_GxE$gen_factor)
       E_levels <- levels(emm_GxE$exp_env_factor)
       loopGxE <- abs(emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
-                    emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # phenotype of ith Genotype
-                    emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
-                    mean(emm_GxE$emmean)) # Overall mean
+                     emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # mean phenotype of ith Genotype
+                     emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # mean phenotype of jth Environment
+                     mean(emm_GxE$emmean)) # Overall mean
       allGE <- c(allGE, loopGxE)
     }
   }
@@ -142,10 +150,10 @@ mod.GxE <- function(input_df){ # input is model_df
   mod_df <- rownames_to_column(mod_df) 
   colnames(mod_df)[1] <- "Fixed_effect"
   
-  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df))
+  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs))
 }
 
-mean.GxE <- function(input_df,is.perm){ # input is mean_df
+mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df
   
   # Clear outputs
   allGEmeans <- c()
@@ -180,7 +188,7 @@ mean.GxE <- function(input_df,is.perm){ # input is mean_df
   #hist(allGEmeans)
   GxE_means = mean(allGEmeans)
   
-  }else{ # Below is modified code to generate null distribution for GxE
+  }else{ # Below generates null distribution for GxE means
    
     # Means of Means
     E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
@@ -204,6 +212,7 @@ mean.GxE <- function(input_df,is.perm){ # input is mean_df
         Ej_mean <- mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]])
         
         # Create a sample of the null expectation for the GiEj
+        set.seed = seed
         GiEj_null_samp <- rnorm(1, mean = (Gi_mean + Ej_mean), sd = mean(input_df$se[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]]))
         
         # Estimate 
@@ -251,7 +260,7 @@ bootstrap_raw <- function(input_df){ # input is model_df
   return(shuffle_dat)
 }
 
-bootstrap_means <- function(input_df){ # input is means_df
+bootstrap_means <- function(input_df, seedset){ # input is means_df
   
   # Clear outputs
   new_phen.<- new_phen <-NULL
@@ -268,7 +277,8 @@ bootstrap_means <- function(input_df){ # input is means_df
         filter(exp_env_factor == unique(input_df$exp_env_factor)[r])
       
       # Create new means data
-      new_phen. <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se) # generate replicate mean
+      set.seed = seedset
+      new_phen. <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se) # generate replicate means
       new_phen <- sample(new_phen., size = length(new_phen.), replace = TRUE) # shuffle
 
       # Output
@@ -302,17 +312,17 @@ permutation_raw <- function(input_df){ # input is model_df
   return(perm_dat)
 }
 
-permutation_means <- function(input_df,seed){ # means dataframe (mean_df)
+permutation_means <- function(input_df, permseed){ # means dataframe (mean_df)
   
   # Clear outputs
   perm_means <- data.frame()
   null_gen = null_env = null_means = NULL
   
   # Shuffle means data (same set.seed keeps phen and corresponding se matched)
-  set.seed(seed)
+  set.seed(permseed)
   null_means <- sample(input_df$avg_phen, size = length(input_df$avg_phen), replace = FALSE)
   
-  set.seed(seed)
+  set.seed(permseed)
   null_se <- sample(input_df$se, size = length(input_df$se), replace = FALSE)
   
   #null_means <- rnorm(length(null_means.), mean = null_means., sd = null_se) # create replicate mean
@@ -328,17 +338,17 @@ permutation_means <- function(input_df,seed){ # means dataframe (mean_df)
   return(perm_means)
 }
 
-pvalue_fun <- function(estimate, rankdat, test,n_boot){ #Test = "twotail" or "righttail"
+pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "righttail"
   
   p.value = NULL
   
   if(test == "twotail"){
     p.value = sum(abs(rankdat) >= abs(estimate))/(n_boot+1) # Two-tailed
 
-  }else if(test == "righttail"){
+  }else{
     p.value = sum(rankdat >= estimate)/(n_boot+1) # Right-tailed
   
-    }else{p.value = "Invalid test entry- do you mean twotail or righttail?"}
+    }
    
   return(p.value)
 }

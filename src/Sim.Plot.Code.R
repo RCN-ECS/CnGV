@@ -12,21 +12,19 @@ library(ggthemes)
 
 ## Compile Data
 
-setwd("~/Desktop/power_output/")
-Param_temp <- list.files(path = "~/Desktop/power_output/",pattern= "*Parameter") 
-Cov_temp <-list.files(path = "~/Desktop/power_output/",pattern= "*Covariance") 
-GxE_temp <- list.files(path = "~/Desktop/power_output/",pattern= "*GxE") 
+PL <- list.files(path = "~/Documents/GitHub/CnGV/results/SimResults_1-10/PL_output/",pattern= "*PL_") 
+Sim <- list.files(path = "~/Documents/GitHub/CnGV/results/SimResults_1-10/power_output/",pattern= "*Results_") 
 
-GE = plyr::ldply(GxE_temp, read_csv)
-Cov = plyr::ldply(Cov_temp, read_csv)
-Par = plyr::ldply(Param_temp, read_csv)
+setwd("~/Documents/GitHub/CnGV/results/SimResults_1-10/PL_output/")
+PL1 = plyr::ldply(PL, read_csv)
 
-dat_csv. = full_join(Par[,-1], GE[,-1], by= "row")
-dat_csv = full_join(dat_csv., Cov[,-1], by = "row")
+setwd("~/Documents/GitHub/CnGV/results/SimResults_1-10/power_output/")
+dat_csv = plyr::ldply(Sim, read_csv) 
 
 # Once code is read in, write csv to skip lengthy loading
-#write.csv(dat_csv,"~/Desktop/dat_csv.csv")
-dat_csv <- read.csv("~/Desktop/dat_csv.csv")
+write.csv(dat_csv,"~/Documents/GitHub/CnGV/results/SimResults_1-10/dat_csv_1to10.csv")
+write.csv(PL1, "~/Documents/GitHub/CnGV/results/SimResults_1-10/PLreps_1to10")
+#dat_csv <- read.csv("~/Desktop/dat_csv.csv")
 
 ######################
 ## Covariance x GxE ##
@@ -629,4 +627,68 @@ suspect.pvals.mean = dat_csv %>% # mean
 (ggplot(suspect.pvals.mean, aes(x = GxE_means, y = GxE_emm_pvalue)) + 
   geom_point()+theme_classic())
 
+######### Test out some GxE
+G = c(1,2)
+phen1 = 2 + (-1*G)  aov.test <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = input_df) 
+
+# Estimated Marginal Means
+emm_E = as.data.frame(emmeans(aov.test,"exp_env_factor"))
+emm_G = as.data.frame(emmeans(aov.test, "gen_factor"))
+emm_GxE = as.data.frame(emmeans(aov.test, ~ exp_env_factor*gen_factor))
+
+# Gmeans
+#E_means <- tapply(emm_GxE$emmean, emm_GxE$exp_env_factor, mean)
+#G_means <- tapply(emm_GxE$emmean, emm_GxE$gen_factor, mean)
+G_matrix <- data.frame("G_means" = emm_G$emmean, "gen_factor" = emm_G$gen_factor)
+E_matrix <- data.frame("E_means" = emm_E$emmean, "exp_env_factor" = emm_E$exp_env_factor)
+
+# Match Genotypes to Native Environment
+Cov_matrix = G_matrix
+Cov_matrix$exp_env_factor <- input_df$nat_env_factor[match(G_matrix$gen_factor,input_df$gen_factor)]
+Cov_matrix$E_means <- E_matrix$E_means[match(Cov_matrix$exp_env_factor,E_matrix$exp_env_factor)]
+
+# Magnitude of GxE -- EMMs
+GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
+                         emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                         emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
+                         mean(emm_GxE$emmean)) 
+phen2 = -2 + (1*G)
+phen3 = 0 + (0*G)
+phen = rbind (phen1, phen2, phen3)
+
+
+playdf = data.frame(gen_factor = rep(c("G_1","G_2","G_3"), each = 3),
+                    exp_env_factor = rep(c("E_1","E_2","E_3"), times = 3), 
+                    phen = c(-2,0,2,2,0,-2,0,0,0))
+playdf = data.frame(gen_factor = rep(c("G_1","G_2"), each = 2),
+                    exp_env_factor = rep(c("E_1","E_2"), times = 2), 
+                    phen = c(1,-.5,-1,0.5))
+  
+ggplot(playdf, aes(x = exp_env_factor, y = phen, group = gen_factor))+theme_hc()+ geom_line()
+
+
+aov.test <- lm(phen ~ exp_env_factor * gen_factor, data = playdf) 
+
+# Estimated Marginal Means
+emm_E = as.data.frame(emmeans(aov.test,"exp_env_factor"))
+emm_G = as.data.frame(emmeans(aov.test, "gen_factor"))
+emm_GxE = as.data.frame(emmeans(aov.test, ~ exp_env_factor*gen_factor))
+
+
+# Magnitude of GxE -- Loop
+allGE = c()
+loopGxE = NULL
+for (i in 1:nlevels(emm_GxE$gen_factor)){
+  for (j in 1:nlevels(emm_GxE$exp_env_factor)){
+    G_levels <- levels(emm_GxE$gen_factor)
+    E_levels <- levels(emm_GxE$exp_env_factor)
+    loopGxE <- abs(emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
+                     emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # mean phenotype of ith Genotype
+                     emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # mean phenotype of jth Environment
+                     mean(emm_GxE$emmean)) # Overall mean
+    allGE <- c(allGE, loopGxE)
+  }
+}
+#hist(allGE)
+(GxE_emm_loop = mean(allGE))
 
