@@ -25,7 +25,7 @@ For the second scenario, I capped the max number of populations at 10, so there 
 ### Interaction terms - 
 The number of interaction terms is the same as the number of populations (n_pop = 2 would produce 2 interaction terms, whereas n_pop = 10 produces 10 interaction terms). This gave good coverage for GxE, though it also means more datapoints in larger n_pop scenarios. 
 
-### Seeds 
+### Seeds - 
 I created a different master seed for each set of parameters. The I used the master seed with the following code to generate the 3 individual seeds and 3 sets of seeds needed for various bootstrap/permutations. Thus, all places where data are randomly generated should have an assigned seed and therefore be repeatable. 
 ```{seed}
 set.seed(seed)
