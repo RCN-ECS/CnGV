@@ -21,7 +21,7 @@ n_env <- as.numeric(args[6])
 std_dev <- as.numeric(args[7])
 n_pop <- as.numeric(args[8])
 interaction <- as.numeric(args[9])
-n_boot <- 100
+n_boot <- 49
   
 # Output dataframes
 output <- data.frame()
@@ -78,10 +78,10 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
   
 # Raw Phenotype plot
-#ggplot(phen_out, aes(x = exp_env_factor, y = phen, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(phen_out, aes(x = exp_env_factor, y = phen, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Mean Phenotype plot
-#ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
+ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth() + theme_classic()
 
 # Anova
 test_temp <- lm(phen_corrected ~ exp_env_factor * gen_factor, data = model_df)
@@ -983,15 +983,15 @@ GxE <- data.frame("row" = row,
                   ) 
 
 # Output
-write.csv(GxE,paste0("/scratch/albecker/Power_analysis/power_output/GxE_",row,"_output.csv"))
-write.csv(Covariance,paste0("/scratch/albecker/Power_analysis/power_output/Covariance_",row,"_output.csv"))
-write.csv(Parameters,paste0("/scratch/albecker/Power_analysis/power_output/Parameters_",row,"_output.csv"))
+#write.csv(GxE,paste0("/scratch/albecker/Power_analysis/power_output/GxE_",row,"_output.csv"))
+#write.csv(Covariance,paste0("/scratch/albecker/Power_analysis/power_output/Covariance_",row,"_output.csv"))
+##write.csv(Parameters,paste0("/scratch/albecker/Power_analysis/power_output/Parameters_",row,"_output.csv"))
 
-write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,"_output.csv"))
-write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,"_output.csv"))
-write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,"_output.csv"))
-write.csv(GEmeans_out,paste0("/scratch/albecker/Power_analysis/GEmeans_output/GEmeans_data",row,"_output.csv"))
-write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_info_data",row,"_output.csv"))
+#write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,"_output.csv"))
+#write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,"_output.csv"))
+#write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,"_output.csv"))
+#write.csv(GEmeans_out,paste0("/scratch/albecker/Power_analysis/GEmeans_output/GEmeans_data",row,"_output.csv"))
+#write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_info_data",row,"_output.csv"))
 
 
 #####################
@@ -1000,14 +1000,17 @@ write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model
 
 # Compile Data
 require(readr)
-#temp <- list.files(path = "~/Desktop/Simulation_output/power_output/",pattern= "*Power_data") # 9 are missing
-#setwd("~/Desktop/Simulation_output/power_output/")
-#dat_csv = plyr::ldply(temp, read_csv)
-#dat_csv1<-read.csv("~/Desktop/dat_csv.csv") 
-#dat_csv1$new_row = dat_csv1$row + 100000
-#dat_csv2<-read.csv("~/Desktop/dat_csv1.csv")
-#dat_csv2$new_row = dat_csv2$row
-#dat_csv <- rbind(dat_csv1,dat_csv2)
+Param_temp <- list.files(path = "~/Desktop/power_output/",pattern= "*Parameter") 
+Cov_temp <-list.files(path = "~/Desktop/power_output/",pattern= "*Covariance") 
+GxE_temp <- list.files(path = "~/Desktop/power_output/",pattern= "*GxE") 
+setwd("~/Desktop/power_output/")
+GE = plyr::ldply(GxE_temp, read_csv)
+Cov = plyr::ldply(Cov_temp, read_csv)
+Par = plyr::ldply(Param_temp, read_csv)
+
+dat_csv. = full_join(Par, GE, by= "row")
+dat_csv = full_join(dat_csv., Cov, by = "row")
+
 #write.csv(dat_csv,"~/Desktop/dat_csv.csv")
 dat_csv <- read.csv("~/Desktop/dat_csv.csv")
 
@@ -1015,7 +1018,7 @@ dat_csv <- read.csv("~/Desktop/dat_csv.csv")
 #setwd("~/Desktop/Simulation_output/phenotype_output/")
 #phendf = plyr::ldply(temp2, read_csv)
 #write.csv(phendf,"~/Desktop/phendf.csv")
-phendf <- read.csv("~/Desktop/phendf.csv")
+#phendf <- read.csv("~/Desktop/phendf.csv")
 
 #temp3 <- list.files(path = "~/Desktop/Power_analysis_output/GEmeans_output/",pattern= "*GEmeans_data")
 #setwd("~/Desktop/Power_analysis_output/GEmeans_output/")
@@ -1024,21 +1027,21 @@ phendf <- read.csv("~/Desktop/phendf.csv")
 dat_csv$col = NULL
 # Color assignment code
 for(i in 1:nrow(dat_csv)){
-  if(dat_csv$cov_corrected_pvalue[i] <= 0.05 & dat_csv$GxE_omega_pvalue[i] <= 0.05){dat_csv$col[i] = "red" # Both significant
-  }else if(dat_csv$cov_corrected_pvalue[i] <= 0.05 & dat_csv$GxE_omega_pvalue[i] > 0.05){dat_csv$col[i] = "darkgreen" # Cov significant
-  }else if(dat_csv$cov_corrected_pvalue[i] > 0.05 & dat_csv$GxE_omega_pvalue[i] <= 0.05){dat_csv$col[i] = "dodgerblue4" # GxE significant
+  if(dat_csv$covariance_pvalue[i] <= 0.05 & dat_csv$GxE_emm_pvalue[i] <= 0.05){dat_csv$col[i] = "red" # Both significant
+  }else if(dat_csv$covariance_pvalue[i] <= 0.05 & dat_csv$GxE_emm_pvalue[i] > 0.05){dat_csv$col[i] = "darkgreen" # Cov significant
+  }else if(dat_csv$covariance_pvalue[i] > 0.05 & dat_csv$GxE_emm_pvalue[i] <= 0.05){dat_csv$col[i] = "dodgerblue4" # GxE significant
   }else{dat_csv$col[i] = "grey"} # None significant
 }
 
 # Summarize by proportion of significant
-dat_csv$cull = NULL
+dat_csv$mod = NULL
 for(i in 1:nrow(dat_csv)){
-  if(dat_csv$cov_corrected[i] >= 0.4 & dat_csv$cov_corrected[i]<=0.6){dat_csv$cull[i] = TRUE
-  }else if(dat_csv$GxE_emm_estimate[i] >= 0.4 & dat_csv$GxE_emm_estimate[i] <= 0.6){dat_csv$cull[i] = TRUE
-    }else{dat_csv$cull[i] = FALSE}
+  if(dat_csv$covariance[i] >= 0.4 & dat_csv$covariance[i]<=0.6){dat_csv$mod[i] = TRUE
+  }else if(dat_csv$GxE_emm[i] >= 0.4 & dat_csv$GxE_emm[i] <= 0.6){dat_csv$mod[i] = TRUE
+    }else{dat_csv$mod[i] = FALSE}
 }
 col_df = dat_csv %>%
-  filter(cull == TRUE) %>%
+  filter(mod == TRUE) %>%
   group_by(n_pop,sample_size,col) %>%
   summarize(frequency = n())
 
@@ -1058,7 +1061,7 @@ ggplot(red_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size)
   geom_point(size = 4)+geom_line()+#theme_classic()+
   scale_color_brewer(palette = "Set1")+
   scale_fill_brewer(palette = "Set1")+
-  theme_bw(base_size = 24, base_family = "Helvetica")+
+  theme_bw(base_size = 20, base_family = "Times")+
   theme(axis.text.x = element_text(size=16,colour = "black"),
         axis.title.x = element_text(size=18,face="bold")) +
   theme(axis.text.y = element_text(size=16,colour = "black"),
@@ -1067,7 +1070,7 @@ ggplot(red_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size)
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_rect(size = 2))+
-  xlab("Number of Populations")+ylab("Proportion of significant CovGE and GxE (alpha = 0.05)")+
+  xlab("Number of Populations")+ylab("Proportion of significant Cov and GxE")+
   labs(colour = "Sample Size")
 
 blue_dat = filter(new_df,col=="dodgerblue4")
@@ -1075,7 +1078,7 @@ ggplot(blue_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size
   geom_point(size = 4)+geom_line()+#theme_classic()+
   scale_color_brewer(palette = "Set1")+
   scale_fill_brewer(palette = "Set1")+
-  theme_bw(base_size = 24, base_family = "Helvetica")+
+  theme_bw(base_size =20, base_family = "Times")+
   theme(axis.text.x = element_text(size=16,colour = "black"),
         axis.title.x = element_text(size=18,face="bold")) +
   theme(axis.text.y = element_text(size=16,colour = "black"),
@@ -1084,7 +1087,7 @@ ggplot(blue_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_rect(size = 2))+
-  xlab("Number of Populations")+ylab("Proportion of significant GxE (alpha = 0.05)")+
+  xlab("Number of Populations")+ylab("Proportion of significant GxE")+
   labs(colour = "Sample Size")
 
 green_dat = filter(new_df,col=="darkgreen")
@@ -1092,7 +1095,7 @@ ggplot(green_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_siz
   geom_point(size = 4)+geom_line()+#theme_classic()+
   scale_color_brewer(palette = "Set1")+
   scale_fill_brewer(palette = "Set1")+
-  theme_bw(base_size = 24, base_family = "Helvetica")+
+  theme_bw(base_size = 20, base_family = "Times")+
   theme(axis.text.x = element_text(size=16,colour = "black"),
         axis.title.x = element_text(size=18,face="bold")) +
   theme(axis.text.y = element_text(size=16,colour = "black"),
@@ -1101,10 +1104,10 @@ ggplot(green_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_siz
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_rect(size = 2))+
-  xlab("Number of Populations")+ylab("Proportion of significant CovGE (alpha = 0.05)")+
+  xlab("Number of Populations")+ylab("Proportion of significant CovGE)")+
   labs(colour = "Sample Size")
 
-## Sanity Check: Makesure CI for estimates overlaps with TruCov and TruGxE
+## Sanity Check: Make sure CI for estimates overlaps with TruCov and TruGxE
 dat_csv$probgxe = NULL
 dat_csv$probcov = NULL
 
@@ -1138,19 +1141,69 @@ overlapper_GxE
 
 ## Sanity check: Plot means against raw estimates... should fall along 1:1 line
 dat_csv$meancoverror = abs(dat_csv$cov_means_correct_uprCI - dat_csv$cov_means_correct_lwrCI)
-dat_csv$coverror = abs(dat_csv$cov_corrected_uprCI - dat_csv$cov_corrected_lwrCI)
+dat_csv$coverror = abs(dat_csv$covariance_uprCI - dat_csv$covariance_lwrCI)
 dat_csv$meangxeerror = dat_csv$GxE_means_uprCI - dat_csv$GxE_means_lwrCI
 dat_csv$gxeerror = dat_csv$GxE_emm_uprCI - dat_csv$GxE_emm_lwrCI
-(covmeancheck = ggplot(dat_csv,aes(x = true_cov_corrected, y = true_cov_means_correct))+
+
+(covmeancheck = ggplot(dat_csv,aes(x = covariance, y = cov_means_correct))+
     geom_point()+theme_classic()+ylab("Covariance from Means")+xlab("Covariance from Raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red"))
-(gxemeancheck = ggplot(dat_csv,aes(x = true_GxE, y = true_GxE_means))+
+
+(covcheck = ggplot(dat_csv,aes(x = true_cov, y = covariance, colour = col))+ # Cov = 1 happens when delta_env = delta_gen, they are both positive, and there is no interaction
+    geom_point()+theme_classic()+ylab("Covariance")+xlab("True Covariance")+scale_color_identity()+ # In the no error scenarios, this makes perfectly parallel lines that always have true_cov = 1
+    geom_abline(slope = 1, intercept = 0,colour = "red"))
+
+suspect = dat_csv %>% filter(true_cov == 1) %>% filter(covariance_pvalue <0.05)
+
+(gxemeancheck = ggplot(dat_csv,aes(x = true_GxE_emm, y = true_GxE_means))+
     geom_point()+theme_classic()+ylab("GxE from Means")+xlab("GxE from Raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red"))
-(coverrorcheck = ggplot(dat_csv, aes(x = coverror,y = meancoverror,colour = testcol)) + 
+
+(gxecheck = ggplot(dat_csv,aes(x = true_GxE_emm, y = GxE_emm,colour = col))+
+    geom_point()+theme_classic()+ylab("GxE with error")+xlab("True GxE")+scale_color_identity()+
+    geom_abline(slope = 1, intercept = 0,colour = "red"))
+
+# Compare pvalue between anova and permutation for raw data
+(ggplot(dat_csv,aes(x = GxE_Anova, y = GxE_emm_pvalue,colour = GxE_emm))+
+    geom_jitter()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
+    geom_vline(xintercept = 0.05,colour = "red")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+# Compare pvalue between anova and permutation for means data
+(ggplot(dat_csv,aes(x = GxE_Anova, y = GxE_means_pvalue))+
+    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
+    geom_vline(xintercept = 0.05,colour = "red")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+dim(suspect.pvals)
+suspect.pvals = dat_csv %>% 
+  filter(GxE_emm_pvalue >= 0.05) %>%
+  filter(GxE_Anova <= 0.05)
+
+(ggplot(suspect.pvals,aes(x = GxE_Anova, y = GxE_emm_pvalue,colour = GxE_emm))+
+    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
+    #geom_vline(xintercept = 0.05,colour = "red"))
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+ggplot(suspect.pvals, aes(x = GxE_emm_pvalue, y = GxE_Anova,colour = GxE_emm)) + 
+  geom_point()+theme_classic()
+
+suspect.pvals.mean = dat_csv %>%
+  filter(GxE_means_pvalue >= 0.05) %>%
+  filter(GxE_Anova <= 0.05)
+
+ggplot(suspect.pvals.mean, aes(x = GxE_means, y = GxE_emm_pvalue)) + 
+  geom_point()+theme_classic()
+
+ch = dat_csv %>%
+  filter(delta_env ==1) %>%
+  filter(delta_gen == -1) %>%
+  filter(interaction == 0)
+
+(coverrorcheck = ggplot(dat_csv, aes(x = coverror,y = meancoverror)) + 
     geom_point(alpha = 0.5) + theme_classic() + ylab("Length of 95% CI for CovGE means") + xlab("Length of 95% CI for CovGE raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red")+scale_colour_identity())
-(gxeerrorcheck = ggplot(dat_csv, aes(x = gxeerror,y = meangxeerror,colour = testcol)) + 
+(gxeerrorcheck = ggplot(dat_csv, aes(x = gxeerror,y = meangxeerror)) + 
     geom_point(alpha = 0.3) + theme_classic() + ylab("Length of 95% CI for GxE means") + xlab("Length of 95% CI for GxE raw")+
     geom_abline(slope = 1, intercept = 0,colour = "red")+scale_colour_identity())
 
@@ -1164,6 +1217,24 @@ for(i in 1:nrow(dat_csv)){
   }else{dat_csv$testcol[i] = "grey"} # None significant
 }
     
+## Check Confidence intervals vs pvalues. 
+dat_csv$Covconfint = NULL
+dat_csv$GxEconfint = NULL
+
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$covariance_pvalue[i] <= 0.05){dat_csv$Covconfint[i] = "red"}else{dat_csv$Covconfint[i] ="black"}
+  if(dat_csv$GxE_emm_pvalue[i] <= 0.05){dat_csv$GxEconfint[i] = "red"}else{dat_csv$GxEconfint[i] = "black"}
+}
+covcidf = dat_csv %>% 
+  filter(Covconfint == "black") %>%
+  filter(covariance_lwrCI > 0 & covariance_uprCI > 0) 
+
+ggplot(covcidf, aes(x = row[c(1:250)], y = covariance)) + 
+  geom_point(aes(colour = factor(std_dev)))+#covariance_pvalue))+
+  geom_errorbar(aes(ymin = covariance_lwrCI, ymax = covariance_uprCI))+
+  #scale_colour_identity() +
+  theme_classic() + geom_hline(aes(yintercept = 0))
+
 # Omega^2 value against significance:
 dat_csv$omega_colour = NULL
 for(i in 1:nrow(dat_csv)){
@@ -1209,8 +1280,8 @@ pop.labs <- c("5"="5 Populations", "10"="10 Populations", "20"="20 Populations")
 
 ## Corrected Covariance by GxE
 require(ggplot2)
-ggplot(dat_csv, aes(x = cov_corrected, y = GxE_emm_estimate, group = factor(n_pop), alpha = 0.1,colour = col)) + 
-  geom_point() + theme_classic() + ylim(0,3)+ xlim(-1,1)+
+ggplot(dat_csv, aes(x = covariance, y = GxE_emm, group = factor(n_pop), alpha = 0.1,colour = col)) + 
+  geom_jitter() + theme_classic() + ylim(0,1) + xlim(-1,1)+
   xlab("Covariance Estimate") + ylab("GxE Estimate") +
   theme(legend.position = "none")+
   scale_colour_identity()+
@@ -1220,7 +1291,7 @@ ggplot(dat_csv, aes(x = cov_corrected, y = GxE_emm_estimate, group = factor(n_po
 
 ## Corrected Covariance by Omege
 require(ggplot2)
-ggplot(dat_csv, aes(x = cov_corrected, y = GxE_omega_estimate  , group = factor(n_pop), alpha = 0.1,colour = col)) + 
+ggplot(dat_csv, aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha = 0.1,colour = col)) + 
   geom_point() + theme_classic() + #ylim(0,1.2)+ xlim(-1,1)+
   xlab("Covariance Estimate") + ylab("GxE Estimate (Omega^2)") +
   theme(legend.position = "none")+
@@ -1228,8 +1299,8 @@ ggplot(dat_csv, aes(x = cov_corrected, y = GxE_omega_estimate  , group = factor(
   facet_grid(sample_size~n_pop)#,
 
 ## Relationship between GxE mag and Covariance (Is there a tradeoff? Yarp.)
-sigGxE = filter(dat_csv, GxE_emm_pvalue <=0.05 | cov_corrected_pvalue <= 0.05)
-ggplot(sigGxE, aes(x = GxE_emm_estimate, y = covtick))+
+sigGxE = filter(dat_csv, GxE_emm_pvalue <=0.05 | covariance_pvalue <= 0.05)
+ggplot(sigGxE, aes(x = GxE_emm, y = covtick))+
   geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
   xlab("Magnitude of GxE")+ylab("Proportion of significant CovGE values (p < 0.05)")+
   theme_bw(base_size = 24, base_family = "Helvetica")+
@@ -1243,16 +1314,16 @@ ggplot(sigGxE, aes(x = GxE_emm_estimate, y = covtick))+
         panel.border = element_rect(size = 2))
 
 # Hex plot
-ggplot(dat_csv, aes(x = cov_corrected, y = GxE_omega_estimate)) + 
+ggplot(dat_csv, aes(x = covariance, y = GxE_emm)) + 
   geom_hex()+
-    theme_classic() + ylim(0,1.2)+ xlim(-1,1)+
+    theme_classic() +# ylim(0,1.2)+ xlim(-1,1)+
   xlab("Covariance Estimate") + ylab("GxE Estimate") +
-  ggtitle("HexPlot for Omega^2")+
+  ggtitle("HexPlot")+
   #theme(legend.position = "none")+
   #scale_colour_identity()+ 
   facet_grid(sample_size~n_pop)#,
 #labeller=labeller(sample_size = as_labeller(sample.labs),
-# n_pop = as_labeller(pop.labs)))
+#n_pop = as_labeller(pop.labs)))
 
 ## Difference in covariance measures
 dat_csv$cov_diff = dat_csv$true_cov-dat_csv$true_cov_corrected
@@ -1356,7 +1427,7 @@ mycolors <- NULL
 ## Power Analysis
 dat_csv$covtick <- NULL
 for(i in 1:nrow(dat_csv)){
-  if(dat_csv$cov_corrected_pvalue[i] > 0.05){dat_csv$covtick[i]=0}else{dat_csv$covtick[i]=1} 
+  if(dat_csv$covariance_pvalue[i] > 0.05){dat_csv$covtick[i]=0}else{dat_csv$covtick[i]=1} 
 }
 
 dat_csv$gxetick <- NULL
@@ -1423,10 +1494,10 @@ grid.arrange(gxehigh,gxelow,covhigh,covlow,ncol = 2)
 
 # Filter to just values between 0.4 and 0.6 (this window captures full power)
 covpow1 = dat_csv %>%
-  filter(between(cov_corrected, 0.4,0.6))
+  filter(between(covariance, 0.4,0.6))
 
 gxepow1 = dat_csv %>%
-  filter(between(GxE_emm_estimate,0.4,0.6))
+  filter(between(GxE_emm,0.4,0.6))
 
 covpow = covpow1 %>%
   group_by(delta_env, delta_gen, sample_size,n_pop,std_dev,interaction) %>%
@@ -1446,8 +1517,8 @@ covpow_sd.5 = covpow %>%
   group_by(sample_size, n_pop) %>%
   summarize("meancovpower" = mean(covpower))
 
-covpow_sd1 = covpow %>%
-  filter(std_dev == 1) %>%
+covpow_sd1.5 = covpow %>%
+  filter(std_dev == 1.5) %>%
   group_by(sample_size, n_pop) %>%
   summarize("meancovpower" = mean(covpower))
 
@@ -1456,15 +1527,15 @@ gxepow_sd.5 = gxepow %>%
   group_by(sample_size, n_pop) %>%
   summarize("meangxepower" = mean(gxepower))
   
-gxepow_sd1 = gxepow %>%
-  filter(std_dev == 1) %>%
+gxepow_sd1.5 = gxepow %>%
+  filter(std_dev == 1.5) %>%
   group_by(sample_size, n_pop) %>%
   summarize("meangxepower" = mean(gxepower))
 
 covpow_sd.5$pop_samp = paste(covpow_sd.5$n_pop,covpow_sd.5$sample_size)
-covpow_sd1$pop_samp = paste(covpow_sd1$n_pop,covpow_sd1$sample_size)
+covpow_sd1.5$pop_samp = paste(covpow_sd1.5$n_pop,covpow_sd1.5$sample_size)
 gxepow_sd.5$pop_samp = paste(gxepow_sd.5$n_pop,gxepow_sd.5$sample_size)
-gxepow_sd1$pop_samp = paste(gxepow_sd1$n_pop,gxepow_sd1$sample_size)
+gxepow_sd1.5$pop_samp = paste(gxepow_sd1.5$n_pop,gxepow_sd1.5$sample_size)
 
 require(gridExtra)
 csdlow = ggplot(covpow_sd.5,aes(x = factor(sample_size), y = factor(n_pop), fill = meancovpower)) + 
@@ -1472,7 +1543,7 @@ csdlow = ggplot(covpow_sd.5,aes(x = factor(sample_size), y = factor(n_pop), fill
   xlab("Sample Size") + ylab("Number of Populations")+
   labs(fill = "Power")+
   theme_classic() + ggtitle("Covariance: Standard Deviation = 1")
-csdhigh = ggplot(covpow_sd1,aes(x = factor(sample_size), y = factor(n_pop), fill = meancovpower)) + 
+csdhigh = ggplot(covpow_sd1.5,aes(x = factor(sample_size), y = factor(n_pop), fill = meancovpower)) + 
   geom_tile() + scale_fill_gradient(low="grey", high="darkgreen") +
   xlab("Sample Size") + ylab("Number of Populations")+
   labs(fill = "Power")+
@@ -1484,7 +1555,7 @@ gsdlow = ggplot(gxepow_sd.5,aes(x = factor(sample_size), y = factor(n_pop), fill
   xlab("Sample Size") + ylab("Number of Populations")+
   labs(fill = "Power")+
   theme_classic() + ggtitle("GxE: Standard Deviation = 1")
-gsdhigh = ggplot(gxepow_sd1,aes(x = factor(sample_size), y = factor(n_pop), fill = meangxepower)) + 
+gsdhigh = ggplot(gxepow_sd1.5,aes(x = factor(sample_size), y = factor(n_pop), fill = meangxepower)) + 
   geom_tile() + scale_fill_gradient(low="grey", high="dodgerblue4") +
   xlab("Sample Size") + ylab("Number of Populations")+
   labs(fill = "Power")+
