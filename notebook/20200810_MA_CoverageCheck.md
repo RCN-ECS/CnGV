@@ -62,3 +62,25 @@ This one looks a bit wonky. I'll look into why we aren't getting covGE values ne
 
 **Cov and GxE plot**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/8.10.2envCovGXE.png)
+
+
+## Checks Requested by Katie - 8/11/2020
+
+**True GxE with True covariance***
+Yes, there are zero values for each in the no error scenario, which is as expected.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/8.11TrueCovVsTrueGxE.png)
+
+**Covariance vs. True Covariance**
+Lots of spread, but this is expected with so much error. The color (though still based on permutation) follows expected patterns.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/8.11.TruCov_Cov.png)
+
+**GxE vs. True GxE**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/8.11.GxEvsTrueGxE.png)
+
+**Significance of GxE using Permutation vs. ANOVA**
+Looks like permutation is different primarily in the n_pop = 10 scenario... Im guessing this is due to the fact that ANOVA is detected how much error is explained (probably alot in the n_pop = 10) vs how great the magnitude actually is (permutation)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/8.11.GxEPErmVsAnova.png)
+
+**GxE Omega^2 vs. true GxE_EMM**
+To check that my above hypothesis is supported - I'll replot the Omega squared values. As expected from previous plots, the true GxE using estimated marginal means (which is what permutation is based on) undershoots Omega squared (which is what ANOVA is based on). This makes sense with the above plot.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/8.11.OmegaSqVSGxEEMM.png)
