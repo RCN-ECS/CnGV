@@ -1,0 +1,245 @@
+---
+title: "Untitled"
+author: "KE Lotterhos"
+date: "8/11/2020"
+output: html_document
+---
+
+I used this code to figure out what is going on with the standardization.
+The "naive" approach below is what we were doing before.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+setwd("/Users/lotterhos/Documents/GitHub/CnGV/notebook/20200528_data")
+```{r cars}
+# Load packages
+  library("emmeans")
+  library("lme4")
+  library("rlist")
+  library("dplyr")
+  
+
+beta1 = 1 # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+
+n_genotypes = 5 # the number of genotypes collected from different locations
+
+beta2 = 0 # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+
+error_var <- n_genotypes/5
+
+    #  beta1 <- 1
+    #  beta2 <- 1
+    
+    # Generate data
+    n = 5 # sample size
+    n_environments = n_genotypes # the number of common garden environments that the genotypes are grown in. Basically, genotype[i] orginates from environment[i]. This matching between genotypes and environment is important for the the cov(G,E) calculation. Here, we only consider the case of the complete reciprocal transplant experiment.
+
+    ## Create levels of genotypes and environments ####
+    G = rep(1:n_genotypes, each=n*n_genotypes) # '0' n times, '1' n times
+    E = rep(1:n_environments,times=n*n_genotypes) # '0'x50, '1'x50, '0'x50, '1'x50
+    #set.seed(97)
+    e = rnorm(n*n_genotypes*n_environments, 0, sd=error_var) # Random noise, with standard deviation of 1
+    #e = 0 # EVALUATION
+
+    ## Create interaction effect for each level of both factors ####
+    # In this case we assume the GxE interactions are a 
+    # normally distributed random variable with a mean of 0
+    # As the sd increases, so does the GxE among treatments
+    int <- 0 #rnorm(n_genotypes * n_environments, 0, sd=n_genotypes)
+    # no GxE
+    #int <- 0 # EVALUATION
+ 
+     # this sd determines the amount of GxE
+    int_df <- data.frame(expand.grid(G=1:n_genotypes, E=1:n_environments), 
+                         int)
+    
+    ### Create the model dataframe ####
+    model_df <- data.frame(G, E, e)
+     model_df <- merge(model_df, int_df)
+    model_df <- model_df[order(model_df$G, model_df$E),]
+    dim(model_df)
+    head(model_df, 30)
+    
+    # Generate phenotype data using the regression equation ####
+    model_df$phenotype_true = beta1*model_df$E + beta2*model_df$G + model_df$int
+    phenotype = beta1*model_df$E + beta2*model_df$G  + model_df$e + model_df$int
+    
+    model_df$phenotype = phenotype
+   
+    ### Standardize the phenotype by the observed data ####
+    model_df$phenotype_stn = (phenotype-mean(phenotype))/sd(phenotype)
+      # real data we would do this
+    
+    
+     ### Standardize the "true phenotype" by itself (naive) ####
+    model_df$phenotype_stn_true1 = (model_df$phenotype_true-mean(model_df$phenotype_true))/sd(model_df$phenotype_true)
+      # naive approach because the amount of sd will be less without error (true) than with error (observed)
+      # this is what we were doing before
+   
+     ### Standardize the "true phenotype" by observed (better) ####     
+    model_df$phenotype_stn_true2 = (model_df$phenotype_true-mean(model_df$phenotype))/sd(model_df$phenotype)
+    
+    ### Compare true1(naive) with true2
+    par(mfrow=c(1,1))
+    plot(model_df$phenotype_stn_true1, model_df$phenotype_stn_true2, xlim=c(-3,3), ylim=c(-3,3))
+    abline(0,1)
+    
+    model_df$GE <- paste0("G",model_df$G, "E", model_df$E)
+    ### Calculate the mean standardized phenotype for that combo of G and E ####
+    bob1 <- tapply(model_df$phenotype_stn, model_df$GE, mean)
+    GE_mean_stn <- data.frame(GE=names(bob1), GE_stn=bob1)
+    model_df <- merge(model_df, GE_mean_stn)
+    
+    ### Calculate the mean phenotype for that combo of G and E (unstd) ####
+     # we use the unstd. pattern as the "true" pattern that should be in
+     # the stnd data, if we stnd correctly
+    bob2 <- tapply(model_df$phenotype, model_df$GE, mean)
+    GE_mean <- data.frame(GE=names(bob2), GE_mean=bob2)
+    model_df <- merge(model_df, GE_mean)
+    head(model_df)
+    dim(model_df)
+    
+    
+    ### Compare the true phenotype with no error
+    ### to the GE_mean calculaed after error was added
+    ### "TRUE Pattern" (unst)
+    plot(model_df$phenotype_true, model_df$GE_mean)
+    abline(0,1)
+      # pattern we expect in standardized data
+    
+    ### Make the same plot, but for snd_1
+    # incorrect way of standardizing??
+    plot(model_df$phenotype_stn_true1, model_df$GE_stn)
+      # not on 1:1 line
+    abline(0,1)
+    summary(lm(model_df$GE_stn~model_df$phenotype_stn_true1))
+      # slope near 0
+    mean(abs(model_df$phenotype_stn_true1-model_df$GE_stn))
+      # higher residual from 1:1
+     
+    ### Make the same plot, but for snd_2
+    # better way of standardizing?? 
+    plot(model_df$phenotype_stn_true2,model_df$GE_stn)
+    abline(0,1)
+    summary(lm(model_df$GE_stn~model_df$phenotype_stn_true2))
+    # correct way of standardizing??
+    mean(abs(model_df$phenotype_stn_true2-model_df$GE_stn))
+    
+   
+
+    head(model_df)
+```
+
+```{r} 
+    ### Interactions
+    plot(model_df$GE_mean, model_df$GE_stn)
+    
+    ### Get G means and E meand for unstd data
+    G_mean = data.frame(G=1:n_genotypes, G_mean=tapply(model_df$phenotype, model_df$G, mean))
+   E_mean = data.frame(E=1:n_genotypes , E_mean=tapply(model_df$phenotype, model_df$E, mean))
+  model_df <- merge(model_df,G_mean)
+  model_df <- merge(model_df,E_mean)
+  model_df$phenotype_mean <- mean(phenotype)
+  model_df$interaction <- model_df$phenotype_mean - model_df$G_mean - model_df$E_mean + model_df$GE_mean
+  plot(model_df$interaction, model_df$int)
+   
+  ### Get G meand and E means for Stnd data
+    G_stn2 = data.frame(G=1:n_genotypes, G_stn2=tapply(model_df$phenotype_stn_true2, model_df$G, mean))
+    E_stn2 = data.frame(E=1:n_genotypes , E_stn2=tapply(model_df$phenotype_stn_true2, model_df$E, mean))
+   
+   model_df <- merge(model_df,G_stn2)
+  model_df <- merge(model_df,E_stn2)
+  model_df$phenotype_stn_true2_mean <- mean(model_df$phenotype_stn_true2)
+  model_df$interaction_stn_true2 <- model_df$phenotype_stn_true2_mean - model_df$G_stn2 - model_df$E_stn2 + model_df$GE_stn
+  
+    head(model_df)
+    plot(model_df$int, model_df$interaction_stn_true2)
+    
+```  
+  
+
+```{r}   
+   par(mfrow=c(2,1), mar=c(4,4,1,1))
+    plot(model_df$phenotype_stn~model_df$E, col=0, xlim=c(1,n_genotypes+1), ylim=c(-3,3))
+    for (m in 1:nlevels(factor(model_df$G))){
+      x <- model_df$E[model_df$G==m]+0.05*(m-1)
+      points(model_df$phenotype_stn[model_df$G==m]~x, col=m+1)
+      p_means <- tapply(model_df$phenotype_stn[model_df$G==m],model_df$E[model_df$G==m], mean)
+      points(p_means~as.numeric(names(p_means)),
+             col=m+1, type="l")
+    }
+```  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ignore all this below 
+```{r}
+model_df$E = as.factor(paste0("E",model_df$E))
+model_df$G = as.factor(paste0("G",model_df$G))
+  # Anova
+    test_temp <- lm(phenotype_stn ~ E * G, data = model_df)
+    summary(aov(test_temp))
+    
+    # Estimated Marginal Means
+    emm_options(msg.interaction = FALSE)
+    emm_E = as.data.frame(emmeans(test_temp,"E"))
+    emm_G = as.data.frame(emmeans(test_temp, "G"))
+    emm_GxE = as.data.frame(emmeans(test_temp, ~ E*G))
+    
+    # Overall plasticity
+    summary(lm(model_df$GE_mean~model_df$E))# undst
+    summary(lm(model_df$GE_stn~model_df$E))#stnd
+    lm(model_df$GE_stn~model_df$E)$coef[2]
+      # works for sims, not for real data
+      # also get a P-value from permutations?
+    
+    # Overall deviation of G_means
+    mean(abs(emm_G$emmean - mean(emm_G$emmean)))
+    
+    ## Just checking ###
+    mean(model_df$phenotype_stn)
+    # Magnitude of GxE -- EMMs
+    
+    
+    allGE <- c()
+    G_levels <- levels(model_df$G)
+    E_levels <- levels(model_df$E)
+    for (i in 1:nlevels(model_df$gen_factor)){
+      for (j in 1:nlevels(model_df$exp_env_factor)){
+        GxE_emm <- abs(mean(model_df$phenotype_stn) - 
+         # GxE (Phenotype of ith genotype in jth environment)
+                  emm_G$emmean[emm_G$G == G_levels[i]] - # phenotype of ith Genotype
+                  emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # phenotype of jth Environment
+           emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] 
+                  )
+        allGE <- c(allGE, GxE_emm)
+      }
+    }
+    hist(allGE)
+    mean(allGE)
+     
+    
+    # Magnitude of GxE -- Omega^2
+    w2_GxE = (summary(aov(test_temp))[[1]][3,2] - #(SS_effect -
+             (summary(aov(test_temp))[[1]][3,1]*summary(aov(test_temp))[[1]][4,3])) / #(Df_effect * MS_error))/
+             (sum(summary(aov(test_temp))[[1]][,2]) + # (SS_total+
+             (summary(aov(test_temp))[[1]][4,3])) # MS_error) #  = 0.807962
+    w2_GxE
+    # Magnitude of GxE -- Eta^2
+    eta2_GxE = summary(aov(test_temp))[[1]][3,2]/sum(summary(aov(test_temp))[[1]][,2]) # = 0.8260634
+    eta2_GxE
+```
