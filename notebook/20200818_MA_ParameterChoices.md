@@ -1,4 +1,4 @@
-#Candidate Parameter Sets
+# Candidate Parameter Sets
 
 | N_pop | N_Env | samplesize | Total Number of samples |
 | --- | --- | --- | --- | 
@@ -22,3 +22,21 @@
 | 4 | 4 | 16 | 256 |
 | 8 | 8 | 4 | 256 |
 | 4 | 4 | 16 | 256 |
+
+
+So, start with the following set, and cull down to just those with total sample sizes = 64, 128, or 256
+
+```{param}
+# Starting list of parameters
+param_list <- list( 
+  reps = c(10), 
+  delta_env = c(0.0,0.25,0.5,.75,1.0), 
+  delta_gen = c(-1,0.0,1),
+  sample_size = c(2,4,8,16,32), 
+  n_pop = c(2,4,8,16,32),
+  env_scenario = c(1,2),  # 1 = npop = n_env; 2 = multiple pops across 2 envs
+  std_dev= c(.5, 1), # Scale
+  interaction = NULL) # Set as function of n_pop
+
+
+```
