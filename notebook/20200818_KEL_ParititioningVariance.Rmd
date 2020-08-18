@@ -22,31 +22,30 @@ $V_E = rg\sum_{j=1}^e (\bar{y_j} - \bar{y})^2$
 
 $V_{GE} = r \sum_{i=1}^g \sum_{j=1}^e (\bar{y_{ij}} - \bar{y_i} - \bar{y_j} + \bar{y})^2$
 
-$V_{Cov_{GE}}= (g-1)er\sum_{i=1}^g\sum_{j=1}^e(\bar{y_i} - \bar{y})(\bar{y_j} - \bar{y})I$
+$V_{Cov_{GE}}= \frac{ger}{(\sum_{i=1}^g\sum_{j=1}^eI_{ij})} \sum_{i=1}^g\sum_{j=1}^e(\bar{y_i} - \bar{y})(\bar{y_j} - \bar{y})I$
 
 * I is an indicator variable that is 1 when the genotype $i$ originated from environment $j$ and 0 otherwise
 * basically, each summation needs to count the same number of times to
-be comparable as a SS on the same scale. If we have a 2x2 reciprocal transplant, we have 2 of 4 treatment combinations that count toward the sum (and 2 that should but do not). If we have a 4x4 reciprocal transplat, we have 4 of 16 reciprocal transplants that count toward the sum (and 12 that should but do not). We can get the SS to the right amount by multiplying (g-1)*e to get the same number of observations as the other SS calculations. At this point I'm only confident this will work in a reciprocal transplant case, would have to test g=4 and e=2 level cases etc.
+be comparable as a SS on the same scale. 
+* If we have a 2x2 reciprocal transplant, we have 2 of 4 treatment combinations that count toward the sum (and 2 that do not). If we have a 4x4 reciprocal transplat, we have 4 of 16 reciprocal transplants that count toward the sum (and 12 that do not). If we have 8 genotypes in 2 environments (4 from each env), then we have 4 genotypes that count toward the cov and (4 that do not). The ones that that count make this SS not 
+* We can get this SS to a comparable amount to the other SS by multiplying by the factor at the beginning of the equation.
 
 
 $V_{error} = \sum_{i=1}^g \sum_{j=1}^e \sum_{k=1}^r (y_{ijk}-\bar{y}_{ij})^2$
 
 Some evidence that this is behaving as expected:
 
-if you set beta1 = 1 and beta2 = 1 and int = 0, you get equal amounts of variance explained for G, E, and CovGE for 2 pops, but CovGE increases with more pops
+* if you set beta1 = 1 and beta2 = 1 and int = 0, with little error, you get equal amounts of variance explained for G, E, and CovGE for n pops
 
-if you set beta1 = 1 and beta2 = 0.1 and int = 0, you get more variance explained for V_E, a little bit for V_G, and a decent amount for cov_GE
+* if you set beta1 = 1 and beta2 = 0.1 and int = 0, you get more variance explained for V_E, a little bit for V_G, and a decent amount for cov_GE
 
-if you set beta1 = 0.1 and beta2 = 1 and int = 0, you get the same pattern as above but V_E and V_G switched
+* if you set beta1 = 0.1 and beta2 = 1 and int = 0, you get the same pattern as above but V_E and V_G switched
 
-if you set beta1 or beta2 negative and the other positive, you get negative covGE
+* if you set beta1 or beta2 negative and the other positive, you get negative covGE
 
-try adding noise and see if outputs make sense
-* Adding noise can sometimes "create" some CovGE when there are enough pops and beta1=0 or beta2=0
-* But for most part seems to work (?)
-
-try increasing n_pop and see if outputs make sense
-* increasing n_pop can lead to a greater amount of variance explained by CovGE and less by VG or VE
+* try adding noise and see if outputs make sense
+  * Adding noise can sometimes "create" some CovGE when there are enough pops and beta1=0 or beta2=0
+  * But for most part seems to work (?)
 
 
 
@@ -62,11 +61,11 @@ knitr::opts_chunk$set(echo = TRUE)
 # Step 1: create true phenotype data without error
 ```{r}
 
-beta1 = 10 # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+beta1 = -1 # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
 
 n_genotypes = 10 # the number of genotypes collected from different locations
 n = 10 # sample size
-beta2 = 10 # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+beta2 = 1 # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
 
 scale = 0.01 # the scale for sd_noise within pops compared to sd_means among pops
 # I'll let you explore the space, but I think the upper would be scale = 1
@@ -252,8 +251,7 @@ par(mfrow=c(2,1))
 plot(model_df$G_stn_est*model_df$I, model_df$E_stn_est*model_df$I)
 plot(model_df$G_stn_est*model_df$I, model_df$E_stn_est*model_df$I, xlim=c(-1,1), ylim=c(-1,1))
 
-V_Cov_GE <-  (nlevels(factor(model_df$G))-1)*
-  nlevels(factor(model_df$E))*
+V_Cov_GE <-  nrow(model_df)/sum(model_df$I)*
   sum((model_df$G_stn_est-model_df$mean_stn_est)*(model_df$E_stn_est-model_df$mean_stn_est)*model_df$I)
 
 SS <- round(rbind(V_G_SS, V_E_SS, V_GE_SS, V_Cov_GE, V_error),2)
