@@ -1,0 +1,318 @@
+---
+title: "New way of creating and standardizing phenotype data with variance partitioning"
+author: "KE Lotterhos"
+date: "8/18/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+$V_P = V_G + V_E + V_{GE} + Cov_{GE}$
+
+In a reciprocal transplant experiment, there are $g$ genotypes transplanted into $e$ environmental patches, for a total of $g*e = n_{GE}$ genotype-environment combinations. 
+
+$g$ is levels of genotypes for $i = 1,2... g$
+$e$ is levels of environments for $j = 1,2... e$
+
+Assuming the equal sample sizes $r$ ($1, 2, ...k$) within each genotype-environment combination, could partitioning the variance be as simple as:
+
+$V_G = re\sum_{i=1}^g (\bar{y_i} - \bar{y})^2$
+
+$V_E = rg\sum_{j=1}^e (\bar{y_j} - \bar{y})^2$
+
+$V_{GE} = r \sum_{i=1}^g \sum_{j=1}^e (\bar{y_{ij}} - \bar{y_i} - \bar{y_j} + \bar{y})^2$
+
+$V_{Cov_{GE}}= (g-1)er\sum_{i=1}^g\sum_{j=1}^e(\bar{y_i} - \bar{y})(\bar{y_j} - \bar{y})I$
+
+* I is an indicator variable that is 1 when the genotype $i$ originated from environment $j$ and 0 otherwise
+* basically, each summation needs to count the same number of times to
+be comparable as a SS on the same scale. If we have a 2x2 reciprocal transplant, we have 2 of 4 treatment combinations that count toward the sum (and 2 that should but do not). If we have a 4x4 reciprocal transplat, we have 4 of 16 reciprocal transplants that count toward the sum (and 12 that should but do not). We can get the SS to the right amount by multiplying (g-1)*e to get the same number of observations as the other SS calculations. At this point I'm only confident this will work in a reciprocal transplant case, would have to test g=4 and e=2 level cases etc.
+
+
+$V_{error} = \sum_{i=1}^g \sum_{j=1}^e \sum_{k=1}^r (y_{ijk}-\bar{y}_{ij})^2$
+
+Some evidence that this is behaving as expected:
+
+if you set beta1 = 1 and beta2 = 1 and int = 0, you get equal amounts of variance explained for G, E, and CovGE for 2 pops, but CovGE increases with more pops
+
+if you set beta1 = 1 and beta2 = 0.1 and int = 0, you get more variance explained for V_E, a little bit for V_G, and a decent amount for cov_GE
+
+if you set beta1 = 0.1 and beta2 = 1 and int = 0, you get the same pattern as above but V_E and V_G switched
+
+if you set beta1 or beta2 negative and the other positive, you get negative covGE
+
+try adding noise and see if outputs make sense
+* Adding noise can sometimes "create" some CovGE when there are enough pops and beta1=0 or beta2=0
+* But for most part seems to work (?)
+
+try increasing n_pop and see if outputs make sense
+* increasing n_pop can lead to a greater amount of variance explained by CovGE and less by VG or VE
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+  library("emmeans")
+  library("lme4")
+  library("rlist")
+  library("dplyr")
+```
+
+# Step 1: create true phenotype data without error
+```{r}
+
+beta1 = 10 # the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.
+
+n_genotypes = 10 # the number of genotypes collected from different locations
+n = 10 # sample size
+beta2 = 10 # the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.
+
+scale = 0.01 # the scale for sd_noise within pops compared to sd_means among pops
+# I'll let you explore the space, but I think the upper would be scale = 1
+# I'd start with scale = 1 and scale = 1/2 and see what that looks like
+
+sd_int = 0#n_genotypes # sd of the interaction terms that will be drawn
+    #  beta1 <- 1
+    #  beta2 <- 1
+    
+    # Generate data
+    
+    n_environments = n_genotypes # the number of common garden environments that the genotypes are grown in. Basically, genotype[i] orginates from environment[i]. This matching between genotypes and environment is important for the the cov(G,E) calculation. Here, we only consider the case of the complete reciprocal transplant experiment.
+
+    ## Create levels of genotypes and environments ####
+    G = rep(1:n_genotypes, each=n*n_genotypes) # '0' n times, '1' n times
+    E = rep(1:n_environments,times=n*n_genotypes) # '0'x50, '1'x50, '0'x50, '1'x50
+    #set.seed(97)
+    
+
+    ## Create interaction effect for each level of both factors ####
+    # In this case we assume the GxE interactions are a 
+    # normally distributed random variable with a mean of 0
+    # As the sd increases, so does the GxE among treatments
+    if(sd_int == 0){
+      int = 0
+    }else{
+    int <- rnorm(n_genotypes * n_environments, 0, sd=sd_int)
+    }
+    # no GxE
+ 
+     # this sd determines the amount of GxE
+    int_df <- data.frame(expand.grid(G=1:n_genotypes, E=1:n_environments), 
+                         int)
+    
+    ### Create the model dataframe ####
+    model_df <- data.frame(G, E)
+    model_df$GE_factor <- paste0("G",model_df$G, "E", model_df$E)
+    model_df <- merge(model_df, int_df)
+    model_df <- model_df[order(model_df$G, model_df$E),]
+    dim(model_df)
+    head(model_df, 30)
+    
+    # Generate phenotype data using the regression equation ####
+    model_df$GE_true = beta1*model_df$E + beta2*model_df$G + model_df$int
+    
+    G_true <- data.frame(G=1:n_genotypes, G_true=tapply(model_df$GE_true, model_df$G, mean))
+    E_true <- data.frame(E=1:n_genotypes , E_true=tapply(model_df$GE_true, model_df$E, mean))
+    
+    model_df1 <- merge(model_df,G_true)
+    model_df2 <- merge(model_df1,E_true)
+    model_df <- model_df2
+    
+    model_df$mean_true <- mean(model_df$GE_true)
+    
+    model_df$int_true <- model_df$mean_true + model_df$GE_true - 
+                        model_df$G_true -   model_df$E_true
+    head(model_df)
+    tail(model_df)
+    par(mfrow=c(1,1))
+    plot(model_df$int, model_df$int_true)
+    abline(0,1)
+```
+
+Note that the way we add "int" to create phenotypic variation is
+not the same way that the actual interaction is calculated from the data. Our simulations create an interaction, but as we create an interaction we also change the G-means and E-means, and so the calculated interaction is a bit different.
+
+# Step 2: standardize true phenotype data
+```{r}
+GE_true_means <- tapply(model_df$GE_true, model_df$GE_factor, mean)
+
+model_df$GE_stn_true <- (model_df$GE_true - mean(GE_true_means))/sd(GE_true_means)
+
+GE_stn_true_means <- tapply(model_df$GE_stn_true, model_df$GE_factor, mean)
+
+    G_stn_true <- data.frame(G=1:n_genotypes, G_stn_true=tapply(model_df$GE_stn_true, model_df$G, mean))
+    E_stn_true <- data.frame(E=1:n_genotypes , E_stn_true=tapply(model_df$GE_stn_true, model_df$E, mean))
+    
+    model_df1 <- merge(model_df,G_stn_true)
+    model_df2 <- merge(model_df1,E_stn_true)
+    model_df <- model_df2
+
+    model_df$mean_stn_true <- mean(model_df$GE_stn_true)
+    
+    model_df$int_stn_true <- model_df$mean_stn_true + model_df$GE_stn_true - 
+                        model_df$G_stn_true -   model_df$E_stn_true
+    head(model_df)
+    tail(model_df)
+    par(mfrow=c(1,1))
+    plot(model_df$int_true, model_df$int_stn_true)
+      # awesome
+```
+
+
+# Step 3: add error to stnd phenotype data 
+scaled to the variation in the phenotype means
+```{r}
+sd(GE_stn_true_means)
+# I guess this will always be 1 because we standardize.
+sd_noise <- sd(as.numeric(GE_stn_true_means))*scale
+model_df$e = rnorm(n*n_genotypes*n_environments, 0, sd=sd_noise) # Random noise
+
+model_df$phenotype <- model_df$GE_stn_true + model_df$e
+head(model_df)
+```
+
+# Step 4: plot the pattern so we can see what it looks like
+```{r}   
+   par(mfrow=c(1,1), mar=c(4,4,1,1))
+    plot(model_df$phenotype~model_df$E, col=0, xlim=c(1,n_genotypes+1), ylim=c(-3,3))
+    for (m in 1:n_genotypes){
+      x <- model_df$E[model_df$G==m]+0.05*(m-1)
+      points(model_df$phenotype[model_df$G==m]~x, col=m+1)
+      p_means <- tapply(model_df$phenotype[model_df$G==m],model_df$E[model_df$G==m], mean)
+      points(p_means~as.numeric(names(p_means)),
+             col=m+1, type="l")
+    }
+```
+
+
+# Step 5: pretend we start with noisy simulated data
+Go through the steps we will go through in the study
+```{r}
+# Step A: standardize by mean(GE_means) and sd(GE_means)
+phen_GE_obs_means <- tapply(model_df$phenotype, model_df$GE_factor, mean)
+
+plot(GE_stn_true_means, phen_GE_obs_means) #sanity check
+abline(0,1)
+
+model_df$phenotype_stn <- (model_df$phenotype-mean(phen_GE_obs_means))/sd(phen_GE_obs_means)
+
+plot(model_df$phenotype, model_df$phenotype_stn)
+abline(0,1)
+
+# Step B: calculate observed G_means and E_means and interaction
+    G_stn_est <- data.frame(G=1:n_genotypes, G_stn_est=tapply(model_df$phenotype_stn, model_df$G, mean))
+    E_stn_est <- data.frame(E=1:n_genotypes , E_stn_est=tapply(model_df$phenotype_stn, model_df$E, mean))
+    
+    GE_stn_est_means <- tapply(model_df$phenotype_stn, model_df$GE_factor, mean)
+    GE_stn_est_means_df <- data.frame(GE_factor=names(GE_stn_est_means) , GE_stn_est=GE_stn_est_means)
+    
+    model_df1 <- merge(model_df,G_stn_est)
+    model_df2 <- merge(model_df1,E_stn_est)
+    model_df3 <- merge(model_df2, GE_stn_est_means_df)
+    model_df <- model_df3
+    
+    plot(model_df$GE_stn_true, model_df$GE_stn_est)
+    abline(0,1) # looks good
+    
+    model_df$mean_stn_est <- mean(model_df$phenotype_stn)
+    
+    # Calculate interaction
+    model_df$int_stn_est <- model_df$mean_stn_est + model_df$GE_stn_est - 
+                        model_df$G_stn_est -   model_df$E_stn_est
+```
+
+# Step 6: Compare true values to estimated values
+```{r}
+head(model_df)
+(true_int <- mean(abs(model_df$int_stn_true)))
+
+(obs_int <- mean(abs(model_df$int_stn_est)))
+```
+
+
+# New step 6.5: make ANOVA table with CovGE
+
+Here, I didn't write loops to calculate the equations, so the code will look different from the equations.
+
+TO DO: check to code the loops as written in the equations and make sure it gives the same answer as what I calculated here
+
+```{r}
+head(model_df)
+
+V_G_SS = sum((model_df$G_stn_est-model_df$mean_stn_est)^2)
+V_E_SS = sum((model_df$E_stn_est-model_df$mean_stn_est)^2)
+V_GE_SS = sum(model_df$int_stn_est^2)
+V_error = sum((model_df$phenotype_stn - model_df$GE_stn_est)^2)
+
+model_df$I = model_df$E==model_df$G
+
+# Covariance pattern (ignore the 0,0 points)
+par(mfrow=c(2,1))
+plot(model_df$G_stn_est*model_df$I, model_df$E_stn_est*model_df$I)
+plot(model_df$G_stn_est*model_df$I, model_df$E_stn_est*model_df$I, xlim=c(-1,1), ylim=c(-1,1))
+
+V_Cov_GE <-  (nlevels(factor(model_df$G))-1)*
+  nlevels(factor(model_df$E))*
+  sum((model_df$G_stn_est-model_df$mean_stn_est)*(model_df$E_stn_est-model_df$mean_stn_est)*model_df$I)
+
+SS <- round(rbind(V_G_SS, V_E_SS, V_GE_SS, V_Cov_GE, V_error),2)
+omega2 <- round(abs(SS)/sum(abs(SS)),2)
+data.frame(SS, abs(SS), omega2)
+```
+
+
+# Step 7: pretend we start with noisy empirical data
+Let's back transform the noisy data, then go through the steps and see what happens
+```{r}
+# what we did to standardize: model_df$GE_stn_true <- (model_df$GE_true - mean(GE_true_means))/sd(GE_true_means)
+model_df2 <- model_df[,1:3]
+model_df2$phenotype2 <- model_df$phenotype*sd(GE_true_means)+mean(GE_true_means) #backtransform
+
+
+# Step A: standardize by mean(GE_means) and sd(GE_means)
+phen_GE_obs_means <- tapply(model_df2$phenotype2, model_df2$GE_factor, mean)
+
+model_df2$phenotype2_stn <- (model_df2$phenotype2-mean(phen_GE_obs_means))/sd(phen_GE_obs_means)
+
+plot(model_df2$phenotype2, model_df2$phenotype2_stn) # straight line check
+
+# Step B: calculate observed G_means and E_means and interaction
+    G_stn_est <- data.frame(G=1:n_genotypes, G_stn_est=tapply(model_df2$phenotype2_stn, model_df2$G, mean))
+    E_stn_est <- data.frame(E=1:n_genotypes , E_stn_est=tapply(model_df2$phenotype2_stn, model_df2$E, mean))
+    
+    GE_stn_est_means <- tapply(model_df2$phenotype2_stn, model_df2$GE_factor, mean)
+    GE_stn_est_means_df <- data.frame(GE_factor=names(GE_stn_est_means) , GE_stn_est=GE_stn_est_means)
+    
+    model_dfa <- merge(model_df2,G_stn_est)
+    model_dfb <- merge(model_dfa,E_stn_est)
+    model_dfc <- merge(model_dfb, GE_stn_est_means_df)
+    head(model_dfc)
+    model_df2 <- model_dfc
+    
+    plot(model_df2$phenotype2_stn, model_df2$GE_stn_est)
+    abline(0,1) # looks good
+    
+    model_df2$mean_stn_est <- mean(model_df2$phenotype2_stn)
+    
+    # Calculate interaction
+    model_df2$int_stn_est <- model_df2$mean_stn_est + model_df2$GE_stn_est - 
+                        model_df2$G_stn_est -   model_df2$E_stn_est
+    
+    
+```
+
+# Step 8: Compare true values to estimated values
+```{r}
+head(model_df)
+(true_int <- mean(abs(model_df$int_stn_true)))
+# Although we call this "true_int", when int=0 this should be 0
+# note this is a shortcut that only works with equal sample sizes
+
+(obs_int_sim <- mean(abs(model_df$int_stn_est)))
+# when int=0, this will increase as the within-population mean gets less accurate
+
+(obs_int_emp <- mean(abs(model_df2$int_stn_est)))
+```
+
+# Drop the mic.
