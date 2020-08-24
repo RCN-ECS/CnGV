@@ -7,6 +7,8 @@ output:
   html_document: default
 ---
 
+# Variance partitioning 
+
 $V_P = V_G + V_E + V_{GE} + Cov_{GE}$
 
 In a reciprocal transplant experiment, there are $g$ genotypes transplanted into $e$ environmental patches, for a total of $g*e = n_{GE}$ genotype-environment combinations. 
@@ -48,7 +50,11 @@ Some evidence that this is behaving as expected:
   * But for most part seems to work (?)
 
 
+# Effect size
 
+$Cov_{GE}= \frac{1}{\sum_{i=1}^g\sum_{j=1}^e(I)-1}\frac{\sum_{i=1}^g\sum_{j=1}^e(\bar{y}_i-\bar{y})(\bar{y}_j - \bar{y})I}{max(\sigma_{\bar{y}_i},\sigma_{\bar{y}_j})}$
+
+$G\times E = \frac{1}{ge}\sum_{i=1}^g \sum_{j=1}^e |(\bar{y_{ij}} - \bar{y_i} - \bar{y_j} + \bar{y})|$
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

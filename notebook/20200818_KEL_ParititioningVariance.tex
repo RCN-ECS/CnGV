@@ -1,0 +1,860 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={New way of creating and standardizing phenotype data with variance partitioning},
+            pdfauthor={KE Lotterhos},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+% grffile has become a legacy package: https://ctan.org/pkg/grffile
+\IfFileExists{grffile.sty}{%
+\usepackage{grffile}
+}{}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{New way of creating and standardizing phenotype data with variance
+partitioning}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{KE Lotterhos}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{8/18/2020}
+
+
+\begin{document}
+\maketitle
+
+\hypertarget{variance-partitioning}{%
+\section{Variance partitioning}\label{variance-partitioning}}
+
+\(V_P = V_G + V_E + V_{GE} + Cov_{GE}\)
+
+In a reciprocal transplant experiment, there are \(g\) genotypes
+transplanted into \(e\) environmental patches, for a total of
+\(g*e = n_{GE}\) genotype-environment combinations.
+
+\(g\) is levels of genotypes for \(i = 1,2... g\) \(e\) is levels of
+environments for \(j = 1,2... e\)
+
+Assuming the equal sample sizes \(r\) (\(1, 2, ...k\)) within each
+genotype-environment combination, could partitioning the variance be as
+simple as:
+
+\(V_G = re\sum_{i=1}^g (\bar{y_i} - \bar{y})^2\)
+
+\(V_E = rg\sum_{j=1}^e (\bar{y_j} - \bar{y})^2\)
+
+\(V_{GE} = r \sum_{i=1}^g \sum_{j=1}^e (\bar{y_{ij}} - \bar{y_i} - \bar{y_j} + \bar{y})^2\)
+
+\(V_{Cov_{GE}}= \frac{ger}{(\sum_{i=1}^g\sum_{j=1}^eI_{ij})} \sum_{i=1}^g\sum_{j=1}^e(\bar{y_i} - \bar{y})(\bar{y_j} - \bar{y})I\)
+
+\begin{itemize}
+\tightlist
+\item
+  I is an indicator variable that is 1 when the genotype \(i\)
+  originated from environment \(j\) and 0 otherwise
+\item
+  basically, each summation needs to count the same number of times to
+  be comparable as a SS on the same scale.
+\item
+  If we have a 2x2 reciprocal transplant, we have 2 of 4 treatment
+  combinations that count toward the sum (and 2 that do not). If we have
+  a 4x4 reciprocal transplat, we have 4 of 16 reciprocal transplants
+  that count toward the sum (and 12 that do not). If we have 8 genotypes
+  in 2 environments (4 from each env), then we have 4 genotypes that
+  count toward the cov and (4 that do not). The ones that that count
+  make this SS not
+\item
+  We can get this SS to a comparable amount to the other SS by
+  multiplying by the factor at the beginning of the equation.
+\end{itemize}
+
+\(V_{error} = \sum_{i=1}^g \sum_{j=1}^e \sum_{k=1}^r (y_{ijk}-\bar{y}_{ij})^2\)
+
+Some evidence that this is behaving as expected:
+
+\begin{itemize}
+\item
+  if you set beta1 = 1 and beta2 = 1 and int = 0, with little error, you
+  get equal amounts of variance explained for G, E, and CovGE for n pops
+\item
+  if you set beta1 = 1 and beta2 = 0.1 and int = 0, you get more
+  variance explained for V\_E, a little bit for V\_G, and a decent
+  amount for cov\_GE
+\item
+  if you set beta1 = 0.1 and beta2 = 1 and int = 0, you get the same
+  pattern as above but V\_E and V\_G switched
+\item
+  if you set beta1 or beta2 negative and the other positive, you get
+  negative covGE
+\item
+  try adding noise and see if outputs make sense
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Adding noise can sometimes ``create'' some CovGE when there are
+    enough pops and beta1=0 or beta2=0
+  \item
+    But for most part seems to work (?)
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{effect-size}{%
+\section{Effect size}\label{effect-size}}
+
+\(Cov_{GE}= \frac{1}{\sum_{i=1}^g\sum_{j=1}^gI-1}\frac{\sum_{i=1}^g\sum_{j=1}^e(\bar{y}_i} - \bar{y})(\bar{y}_j} - \bar{y})}{max(\sigma_{\bar{y}_i}},\sigma_{\bar{y}_j})}I\)
+
+\hypertarget{step-1-create-true-phenotype-data-without-error}{%
+\section{Step 1: create true phenotype data without
+error}\label{step-1-create-true-phenotype-data-without-error}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{beta1 =}\StringTok{ }\DecValTok{-1} \CommentTok{# the amount the phenotype changes across 1 value of the environment (i.e., the slope). This is essentially the amount/degree of phenotypic plasticity that is the same across genotypes.}
+
+\NormalTok{n_genotypes =}\StringTok{ }\DecValTok{10} \CommentTok{# the number of genotypes collected from different locations}
+\NormalTok{n =}\StringTok{ }\DecValTok{10} \CommentTok{# sample size}
+\NormalTok{beta2 =}\StringTok{ }\DecValTok{1} \CommentTok{# the amount the phenotype changes from one genotype to the next. This is essitially the increase intercept from one genotype to the next.}
+
+\NormalTok{scale =}\StringTok{ }\FloatTok{0.01} \CommentTok{# the scale for sd_noise within pops compared to sd_means among pops}
+\CommentTok{# I'll let you explore the space, but I think the upper would be scale = 1}
+\CommentTok{# I'd start with scale = 1 and scale = 1/2 and see what that looks like}
+
+\NormalTok{sd_int =}\StringTok{ }\DecValTok{0}\CommentTok{#n_genotypes # sd of the interaction terms that will be drawn}
+    \CommentTok{#  beta1 <- 1}
+    \CommentTok{#  beta2 <- 1}
+    
+    \CommentTok{# Generate data}
+    
+\NormalTok{    n_environments =}\StringTok{ }\NormalTok{n_genotypes }\CommentTok{# the number of common garden environments that the genotypes are grown in. Basically, genotype[i] orginates from environment[i]. This matching between genotypes and environment is important for the the cov(G,E) calculation. Here, we only consider the case of the complete reciprocal transplant experiment.}
+
+    \CommentTok{## Create levels of genotypes and environments ####}
+\NormalTok{    G =}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes, }\DataTypeTok{each=}\NormalTok{n}\OperatorTok{*}\NormalTok{n_genotypes) }\CommentTok{# '0' n times, '1' n times}
+\NormalTok{    E =}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{n_environments,}\DataTypeTok{times=}\NormalTok{n}\OperatorTok{*}\NormalTok{n_genotypes) }\CommentTok{# '0'x50, '1'x50, '0'x50, '1'x50}
+    \CommentTok{#set.seed(97)}
+    
+
+    \CommentTok{## Create interaction effect for each level of both factors ####}
+    \CommentTok{# In this case we assume the GxE interactions are a }
+    \CommentTok{# normally distributed random variable with a mean of 0}
+    \CommentTok{# As the sd increases, so does the GxE among treatments}
+    \ControlFlowTok{if}\NormalTok{(sd_int }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
+\NormalTok{      int =}\StringTok{ }\DecValTok{0}
+\NormalTok{    \}}\ControlFlowTok{else}\NormalTok{\{}
+\NormalTok{    int <-}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(n_genotypes }\OperatorTok{*}\StringTok{ }\NormalTok{n_environments, }\DecValTok{0}\NormalTok{, }\DataTypeTok{sd=}\NormalTok{sd_int)}
+\NormalTok{    \}}
+    \CommentTok{# no GxE}
+ 
+     \CommentTok{# this sd determines the amount of GxE}
+\NormalTok{    int_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{G=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes, }\DataTypeTok{E=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_environments), }
+\NormalTok{                         int)}
+    
+    \CommentTok{### Create the model dataframe ####}
+\NormalTok{    model_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(G, E)}
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{GE_factor <-}\StringTok{ }\KeywordTok{paste0}\NormalTok{(}\StringTok{"G"}\NormalTok{,model_df}\OperatorTok{$}\NormalTok{G, }\StringTok{"E"}\NormalTok{, model_df}\OperatorTok{$}\NormalTok{E)}
+\NormalTok{    model_df <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df, int_df)}
+\NormalTok{    model_df <-}\StringTok{ }\NormalTok{model_df[}\KeywordTok{order}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{G, model_df}\OperatorTok{$}\NormalTok{E),]}
+    \KeywordTok{dim}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1000    4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{head}\NormalTok{(model_df, }\DecValTok{30}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    G E GE_factor int
+## 1  1 1      G1E1   0
+## 2  1 1      G1E1   0
+## 3  1 1      G1E1   0
+## 4  1 1      G1E1   0
+## 5  1 1      G1E1   0
+## 6  1 1      G1E1   0
+## 7  1 1      G1E1   0
+## 8  1 1      G1E1   0
+## 9  1 1      G1E1   0
+## 10 1 1      G1E1   0
+## 21 1 2      G1E2   0
+## 22 1 2      G1E2   0
+## 23 1 2      G1E2   0
+## 24 1 2      G1E2   0
+## 25 1 2      G1E2   0
+## 26 1 2      G1E2   0
+## 27 1 2      G1E2   0
+## 28 1 2      G1E2   0
+## 29 1 2      G1E2   0
+## 30 1 2      G1E2   0
+## 31 1 3      G1E3   0
+## 32 1 3      G1E3   0
+## 33 1 3      G1E3   0
+## 34 1 3      G1E3   0
+## 35 1 3      G1E3   0
+## 36 1 3      G1E3   0
+## 37 1 3      G1E3   0
+## 38 1 3      G1E3   0
+## 39 1 3      G1E3   0
+## 40 1 3      G1E3   0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \CommentTok{# Generate phenotype data using the regression equation ####}
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{GE_true =}\StringTok{ }\NormalTok{beta1}\OperatorTok{*}\NormalTok{model_df}\OperatorTok{$}\NormalTok{E }\OperatorTok{+}\StringTok{ }\NormalTok{beta2}\OperatorTok{*}\NormalTok{model_df}\OperatorTok{$}\NormalTok{G }\OperatorTok{+}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{int}
+    
+\NormalTok{    G_true <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{G=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes, }\DataTypeTok{G_true=}\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_true, model_df}\OperatorTok{$}\NormalTok{G, mean))}
+\NormalTok{    E_true <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{E=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes , }\DataTypeTok{E_true=}\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_true, model_df}\OperatorTok{$}\NormalTok{E, mean))}
+    
+\NormalTok{    model_df1 <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df,G_true)}
+\NormalTok{    model_df2 <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df1,E_true)}
+\NormalTok{    model_df <-}\StringTok{ }\NormalTok{model_df2}
+    
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{mean_true <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_true)}
+    
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{int_true <-}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{mean_true }\OperatorTok{+}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{GE_true }\OperatorTok{-}\StringTok{ }
+\StringTok{                        }\NormalTok{model_df}\OperatorTok{$}\NormalTok{G_true }\OperatorTok{-}\StringTok{   }\NormalTok{model_df}\OperatorTok{$}\NormalTok{E_true}
+    \KeywordTok{head}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   E G GE_factor int GE_true G_true E_true mean_true int_true
+## 1 1 1      G1E1   0       0   -4.5    4.5         0        0
+## 2 1 1      G1E1   0       0   -4.5    4.5         0        0
+## 3 1 1      G1E1   0       0   -4.5    4.5         0        0
+## 4 1 1      G1E1   0       0   -4.5    4.5         0        0
+## 5 1 1      G1E1   0       0   -4.5    4.5         0        0
+## 6 1 1      G1E1   0       0   -4.5    4.5         0        0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{tail}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       E  G GE_factor int GE_true G_true E_true mean_true int_true
+## 995  10 10    G10E10   0       0    4.5   -4.5         0        0
+## 996  10 10    G10E10   0       0    4.5   -4.5         0        0
+## 997  10 10    G10E10   0       0    4.5   -4.5         0        0
+## 998  10 10    G10E10   0       0    4.5   -4.5         0        0
+## 999  10 10    G10E10   0       0    4.5   -4.5         0        0
+## 1000 10 10    G10E10   0       0    4.5   -4.5         0        0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+    \KeywordTok{plot}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{int, model_df}\OperatorTok{$}\NormalTok{int_true)}
+    \KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+Note that the way we add ``int'' to create phenotypic variation is not
+the same way that the actual interaction is calculated from the data.
+Our simulations create an interaction, but as we create an interaction
+we also change the G-means and E-means, and so the calculated
+interaction is a bit different.
+
+\hypertarget{step-2-standardize-true-phenotype-data}{%
+\section{Step 2: standardize true phenotype
+data}\label{step-2-standardize-true-phenotype-data}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{GE_true_means <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_true, model_df}\OperatorTok{$}\NormalTok{GE_factor, mean)}
+
+\NormalTok{model_df}\OperatorTok{$}\NormalTok{GE_stn_true <-}\StringTok{ }\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_true }\OperatorTok{-}\StringTok{ }\KeywordTok{mean}\NormalTok{(GE_true_means))}\OperatorTok{/}\KeywordTok{sd}\NormalTok{(GE_true_means)}
+
+\NormalTok{GE_stn_true_means <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_stn_true, model_df}\OperatorTok{$}\NormalTok{GE_factor, mean)}
+
+\NormalTok{    G_stn_true <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{G=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes, }\DataTypeTok{G_stn_true=}\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_stn_true, model_df}\OperatorTok{$}\NormalTok{G, mean))}
+\NormalTok{    E_stn_true <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{E=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes , }\DataTypeTok{E_stn_true=}\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_stn_true, model_df}\OperatorTok{$}\NormalTok{E, mean))}
+    
+\NormalTok{    model_df1 <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df,G_stn_true)}
+\NormalTok{    model_df2 <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df1,E_stn_true)}
+\NormalTok{    model_df <-}\StringTok{ }\NormalTok{model_df2}
+
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{mean_stn_true <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_stn_true)}
+    
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{int_stn_true <-}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{mean_stn_true }\OperatorTok{+}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{GE_stn_true }\OperatorTok{-}\StringTok{ }
+\StringTok{                        }\NormalTok{model_df}\OperatorTok{$}\NormalTok{G_stn_true }\OperatorTok{-}\StringTok{   }\NormalTok{model_df}\OperatorTok{$}\NormalTok{E_stn_true}
+    \KeywordTok{head}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   E G GE_factor int GE_true G_true E_true mean_true int_true GE_stn_true
+## 1 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 2 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 3 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 4 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 5 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 6 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+##   G_stn_true E_stn_true mean_stn_true int_stn_true
+## 1   -1.10227    1.10227             0            0
+## 2   -1.10227    1.10227             0            0
+## 3   -1.10227    1.10227             0            0
+## 4   -1.10227    1.10227             0            0
+## 5   -1.10227    1.10227             0            0
+## 6   -1.10227    1.10227             0            0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{tail}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       E G GE_factor int GE_true G_true E_true mean_true int_true GE_stn_true
+## 995  10 9     G9E10   0      -1    3.5   -4.5         0        0  -0.2449490
+## 996  10 7     G7E10   0      -3    1.5   -4.5         0        0  -0.7348469
+## 997  10 6     G6E10   0      -4    0.5   -4.5         0        0  -0.9797959
+## 998  10 3     G3E10   0      -7   -2.5   -4.5         0        0  -1.7146428
+## 999  10 8     G8E10   0      -2    2.5   -4.5         0        0  -0.4898979
+## 1000 10 6     G6E10   0      -4    0.5   -4.5         0        0  -0.9797959
+##      G_stn_true E_stn_true mean_stn_true int_stn_true
+## 995   0.8573214   -1.10227             0 0.000000e+00
+## 996   0.3674235   -1.10227             0 2.220446e-16
+## 997   0.1224745   -1.10227             0 0.000000e+00
+## 998  -0.6123724   -1.10227             0 0.000000e+00
+## 999   0.6123724   -1.10227             0 0.000000e+00
+## 1000  0.1224745   -1.10227             0 0.000000e+00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+    \KeywordTok{plot}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{int_true, model_df}\OperatorTok{$}\NormalTok{int_stn_true)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+      \CommentTok{# awesome}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{step-3-add-error-to-stnd-phenotype-data}{%
+\section{Step 3: add error to stnd phenotype
+data}\label{step-3-add-error-to-stnd-phenotype-data}}
+
+scaled to the variation in the phenotype means
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sd}\NormalTok{(GE_stn_true_means)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# I guess this will always be 1 because we standardize.}
+\NormalTok{sd_noise <-}\StringTok{ }\KeywordTok{sd}\NormalTok{(}\KeywordTok{as.numeric}\NormalTok{(GE_stn_true_means))}\OperatorTok{*}\NormalTok{scale}
+\NormalTok{model_df}\OperatorTok{$}\NormalTok{e =}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(n}\OperatorTok{*}\NormalTok{n_genotypes}\OperatorTok{*}\NormalTok{n_environments, }\DecValTok{0}\NormalTok{, }\DataTypeTok{sd=}\NormalTok{sd_noise) }\CommentTok{# Random noise}
+
+\NormalTok{model_df}\OperatorTok{$}\NormalTok{phenotype <-}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{GE_stn_true }\OperatorTok{+}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{e}
+\KeywordTok{head}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   E G GE_factor int GE_true G_true E_true mean_true int_true GE_stn_true
+## 1 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 2 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 3 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 4 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 5 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+## 6 1 1      G1E1   0       0   -4.5    4.5         0        0           0
+##   G_stn_true E_stn_true mean_stn_true int_stn_true             e     phenotype
+## 1   -1.10227    1.10227             0            0  0.0034127009  0.0034127009
+## 2   -1.10227    1.10227             0            0 -0.0027790453 -0.0027790453
+## 3   -1.10227    1.10227             0            0 -0.0017247534 -0.0017247534
+## 4   -1.10227    1.10227             0            0 -0.0044903729 -0.0044903729
+## 5   -1.10227    1.10227             0            0  0.0070030613  0.0070030613
+## 6   -1.10227    1.10227             0            0  0.0009617227  0.0009617227
+\end{verbatim}
+
+\hypertarget{step-4-plot-the-pattern-so-we-can-see-what-it-looks-like}{%
+\section{Step 4: plot the pattern so we can see what it looks
+like}\label{step-4-plot-the-pattern-so-we-can-see-what-it-looks-like}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+   \KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{), }\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+    \KeywordTok{plot}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype}\OperatorTok{~}\NormalTok{model_df}\OperatorTok{$}\NormalTok{E, }\DataTypeTok{col=}\DecValTok{0}\NormalTok{, }\DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,n_genotypes}\OperatorTok{+}\DecValTok{1}\NormalTok{), }\DataTypeTok{ylim=}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+    \ControlFlowTok{for}\NormalTok{ (m }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes)\{}
+\NormalTok{      x <-}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{E[model_df}\OperatorTok{$}\NormalTok{G}\OperatorTok{==}\NormalTok{m]}\OperatorTok{+}\FloatTok{0.05}\OperatorTok{*}\NormalTok{(m}\DecValTok{-1}\NormalTok{)}
+      \KeywordTok{points}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype[model_df}\OperatorTok{$}\NormalTok{G}\OperatorTok{==}\NormalTok{m]}\OperatorTok{~}\NormalTok{x, }\DataTypeTok{col=}\NormalTok{m}\OperatorTok{+}\DecValTok{1}\NormalTok{)}
+\NormalTok{      p_means <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype[model_df}\OperatorTok{$}\NormalTok{G}\OperatorTok{==}\NormalTok{m],model_df}\OperatorTok{$}\NormalTok{E[model_df}\OperatorTok{$}\NormalTok{G}\OperatorTok{==}\NormalTok{m], mean)}
+      \KeywordTok{points}\NormalTok{(p_means}\OperatorTok{~}\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{names}\NormalTok{(p_means)),}
+             \DataTypeTok{col=}\NormalTok{m}\OperatorTok{+}\DecValTok{1}\NormalTok{, }\DataTypeTok{type=}\StringTok{"l"}\NormalTok{)}
+\NormalTok{    \}}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\hypertarget{step-5-pretend-we-start-with-noisy-simulated-data}{%
+\section{Step 5: pretend we start with noisy simulated
+data}\label{step-5-pretend-we-start-with-noisy-simulated-data}}
+
+Go through the steps we will go through in the study
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Step A: standardize by mean(GE_means) and sd(GE_means)}
+\NormalTok{phen_GE_obs_means <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype, model_df}\OperatorTok{$}\NormalTok{GE_factor, mean)}
+
+\KeywordTok{plot}\NormalTok{(GE_stn_true_means, phen_GE_obs_means) }\CommentTok{#sanity check}
+\KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_df}\OperatorTok{$}\NormalTok{phenotype_stn <-}\StringTok{ }\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype}\OperatorTok{-}\KeywordTok{mean}\NormalTok{(phen_GE_obs_means))}\OperatorTok{/}\KeywordTok{sd}\NormalTok{(phen_GE_obs_means)}
+
+\KeywordTok{plot}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype, model_df}\OperatorTok{$}\NormalTok{phenotype_stn)}
+\KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Step B: calculate observed G_means and E_means and interaction}
+\NormalTok{    G_stn_est <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{G=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes, }\DataTypeTok{G_stn_est=}\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype_stn, model_df}\OperatorTok{$}\NormalTok{G, mean))}
+\NormalTok{    E_stn_est <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{E=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes , }\DataTypeTok{E_stn_est=}\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype_stn, model_df}\OperatorTok{$}\NormalTok{E, mean))}
+    
+\NormalTok{    GE_stn_est_means <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype_stn, model_df}\OperatorTok{$}\NormalTok{GE_factor, mean)}
+\NormalTok{    GE_stn_est_means_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{GE_factor=}\KeywordTok{names}\NormalTok{(GE_stn_est_means) , }\DataTypeTok{GE_stn_est=}\NormalTok{GE_stn_est_means)}
+    
+\NormalTok{    model_df1 <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df,G_stn_est)}
+\NormalTok{    model_df2 <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df1,E_stn_est)}
+\NormalTok{    model_df3 <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df2, GE_stn_est_means_df)}
+\NormalTok{    model_df <-}\StringTok{ }\NormalTok{model_df3}
+    
+    \KeywordTok{plot}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{GE_stn_true, model_df}\OperatorTok{$}\NormalTok{GE_stn_est)}
+    \KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{) }\CommentTok{# looks good}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-5-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{mean_stn_est <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{phenotype_stn)}
+    
+    \CommentTok{# Calculate interaction}
+\NormalTok{    model_df}\OperatorTok{$}\NormalTok{int_stn_est <-}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{mean_stn_est }\OperatorTok{+}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{GE_stn_est }\OperatorTok{-}\StringTok{ }
+\StringTok{                        }\NormalTok{model_df}\OperatorTok{$}\NormalTok{G_stn_est }\OperatorTok{-}\StringTok{   }\NormalTok{model_df}\OperatorTok{$}\NormalTok{E_stn_est}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{step-6-compare-true-values-to-estimated-values}{%
+\section{Step 6: Compare true values to estimated
+values}\label{step-6-compare-true-values-to-estimated-values}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   GE_factor E  G int GE_true G_true E_true mean_true int_true GE_stn_true
+## 1     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 2     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 3     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 4     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 5     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 6     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+##   G_stn_true E_stn_true mean_stn_true int_stn_true            e phenotype
+## 1    1.10227    1.10227             0            0  0.003444012  2.207985
+## 2    1.10227    1.10227             0            0  0.011321137  2.215862
+## 3    1.10227    1.10227             0            0 -0.002250266  2.202291
+## 4    1.10227    1.10227             0            0 -0.013903696  2.190637
+## 5    1.10227    1.10227             0            0  0.010758599  2.215299
+## 6    1.10227    1.10227             0            0 -0.002266453  2.202274
+##   phenotype_stn G_stn_est E_stn_est GE_stn_est  mean_stn_est  int_stn_est
+## 1      2.207582  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 2      2.215457  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 3      2.201890  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 4      2.190240  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 5      2.214895  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 6      2.201874  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(true_int <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{int_stn_true)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5.440093e-17
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(obs_int <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{int_stn_est)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.002487851
+\end{verbatim}
+
+\hypertarget{new-step-6.5-make-anova-table-with-covge}{%
+\section{New step 6.5: make ANOVA table with
+CovGE}\label{new-step-6.5-make-anova-table-with-covge}}
+
+Here, I didn't write loops to calculate the equations, so the code will
+look different from the equations.
+
+TO DO: check to code the loops as written in the equations and make sure
+it gives the same answer as what I calculated here
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   GE_factor E  G int GE_true G_true E_true mean_true int_true GE_stn_true
+## 1     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 2     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 3     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 4     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 5     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 6     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+##   G_stn_true E_stn_true mean_stn_true int_stn_true            e phenotype
+## 1    1.10227    1.10227             0            0  0.003444012  2.207985
+## 2    1.10227    1.10227             0            0  0.011321137  2.215862
+## 3    1.10227    1.10227             0            0 -0.002250266  2.202291
+## 4    1.10227    1.10227             0            0 -0.013903696  2.190637
+## 5    1.10227    1.10227             0            0  0.010758599  2.215299
+## 6    1.10227    1.10227             0            0 -0.002266453  2.202274
+##   phenotype_stn G_stn_est E_stn_est GE_stn_est  mean_stn_est  int_stn_est
+## 1      2.207582  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 2      2.215457  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 3      2.201890  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 4      2.190240  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 5      2.214895  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+## 6      2.201874  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{V_G_SS =}\StringTok{ }\KeywordTok{sum}\NormalTok{((model_df}\OperatorTok{$}\NormalTok{G_stn_est}\OperatorTok{-}\NormalTok{model_df}\OperatorTok{$}\NormalTok{mean_stn_est)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}
+\NormalTok{V_E_SS =}\StringTok{ }\KeywordTok{sum}\NormalTok{((model_df}\OperatorTok{$}\NormalTok{E_stn_est}\OperatorTok{-}\NormalTok{model_df}\OperatorTok{$}\NormalTok{mean_stn_est)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}
+\NormalTok{V_GE_SS =}\StringTok{ }\KeywordTok{sum}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{int_stn_est}\OperatorTok{^}\DecValTok{2}\NormalTok{)}
+\NormalTok{V_error =}\StringTok{ }\KeywordTok{sum}\NormalTok{((model_df}\OperatorTok{$}\NormalTok{phenotype_stn }\OperatorTok{-}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{GE_stn_est)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{model_df}\OperatorTok{$}\NormalTok{I =}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{E}\OperatorTok{==}\NormalTok{model_df}\OperatorTok{$}\NormalTok{G}
+
+\CommentTok{# Covariance pattern (ignore the 0,0 points)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{G_stn_est}\OperatorTok{*}\NormalTok{model_df}\OperatorTok{$}\NormalTok{I, model_df}\OperatorTok{$}\NormalTok{E_stn_est}\OperatorTok{*}\NormalTok{model_df}\OperatorTok{$}\NormalTok{I)}
+\KeywordTok{plot}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{G_stn_est}\OperatorTok{*}\NormalTok{model_df}\OperatorTok{$}\NormalTok{I, model_df}\OperatorTok{$}\NormalTok{E_stn_est}\OperatorTok{*}\NormalTok{model_df}\OperatorTok{$}\NormalTok{I, }\DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{), }\DataTypeTok{ylim=}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{V_Cov_GE <-}\StringTok{  }\KeywordTok{nrow}\NormalTok{(model_df)}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{I)}\OperatorTok{*}
+\StringTok{  }\KeywordTok{sum}\NormalTok{((model_df}\OperatorTok{$}\NormalTok{G_stn_est}\OperatorTok{-}\NormalTok{model_df}\OperatorTok{$}\NormalTok{mean_stn_est)}\OperatorTok{*}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{E_stn_est}\OperatorTok{-}\NormalTok{model_df}\OperatorTok{$}\NormalTok{mean_stn_est)}\OperatorTok{*}\NormalTok{model_df}\OperatorTok{$}\NormalTok{I)}
+
+\NormalTok{SS <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{rbind}\NormalTok{(V_G_SS, V_E_SS, V_GE_SS, V_Cov_GE, V_error),}\DecValTok{2}\NormalTok{)}
+\NormalTok{omega2 <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{abs}\NormalTok{(SS)}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(}\KeywordTok{abs}\NormalTok{(SS)),}\DecValTok{2}\NormalTok{)}
+\KeywordTok{data.frame}\NormalTok{(SS, }\KeywordTok{abs}\NormalTok{(SS), omega2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               SS abs.SS. omega2
+## V_G_SS    495.27  495.27   0.33
+## V_E_SS    494.72  494.72   0.33
+## V_GE_SS     0.01    0.01   0.00
+## V_Cov_GE -494.99  494.99   0.33
+## V_error     0.09    0.09   0.00
+\end{verbatim}
+
+\hypertarget{step-7-pretend-we-start-with-noisy-empirical-data}{%
+\section{Step 7: pretend we start with noisy empirical
+data}\label{step-7-pretend-we-start-with-noisy-empirical-data}}
+
+Let's back transform the noisy data, then go through the steps and see
+what happens
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# what we did to standardize: model_df$GE_stn_true <- (model_df$GE_true - mean(GE_true_means))/sd(GE_true_means)}
+\NormalTok{model_df2 <-}\StringTok{ }\NormalTok{model_df[,}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{]}
+\NormalTok{model_df2}\OperatorTok{$}\NormalTok{phenotype2 <-}\StringTok{ }\NormalTok{model_df}\OperatorTok{$}\NormalTok{phenotype}\OperatorTok{*}\KeywordTok{sd}\NormalTok{(GE_true_means)}\OperatorTok{+}\KeywordTok{mean}\NormalTok{(GE_true_means) }\CommentTok{#backtransform}
+
+
+\CommentTok{# Step A: standardize by mean(GE_means) and sd(GE_means)}
+\NormalTok{phen_GE_obs_means <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2, model_df2}\OperatorTok{$}\NormalTok{GE_factor, mean)}
+
+\NormalTok{model_df2}\OperatorTok{$}\NormalTok{phenotype2_stn <-}\StringTok{ }\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2}\OperatorTok{-}\KeywordTok{mean}\NormalTok{(phen_GE_obs_means))}\OperatorTok{/}\KeywordTok{sd}\NormalTok{(phen_GE_obs_means)}
+
+\KeywordTok{plot}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2, model_df2}\OperatorTok{$}\NormalTok{phenotype2_stn) }\CommentTok{# straight line check}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Step B: calculate observed G_means and E_means and interaction}
+\NormalTok{    G_stn_est <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{G=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes, }\DataTypeTok{G_stn_est=}\KeywordTok{tapply}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2_stn, model_df2}\OperatorTok{$}\NormalTok{G, mean))}
+\NormalTok{    E_stn_est <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{E=}\DecValTok{1}\OperatorTok{:}\NormalTok{n_genotypes , }\DataTypeTok{E_stn_est=}\KeywordTok{tapply}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2_stn, model_df2}\OperatorTok{$}\NormalTok{E, mean))}
+    
+\NormalTok{    GE_stn_est_means <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2_stn, model_df2}\OperatorTok{$}\NormalTok{GE_factor, mean)}
+\NormalTok{    GE_stn_est_means_df <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{GE_factor=}\KeywordTok{names}\NormalTok{(GE_stn_est_means) , }\DataTypeTok{GE_stn_est=}\NormalTok{GE_stn_est_means)}
+    
+\NormalTok{    model_dfa <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_df2,G_stn_est)}
+\NormalTok{    model_dfb <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_dfa,E_stn_est)}
+\NormalTok{    model_dfc <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(model_dfb, GE_stn_est_means_df)}
+    \KeywordTok{head}\NormalTok{(model_dfc)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   GE_factor E  G phenotype2 phenotype2_stn G_stn_est E_stn_est GE_stn_est
+## 1     G10E1 1 10   8.990813       2.201890  1.103228  1.102453   2.204166
+## 2     G10E1 1 10   9.014060       2.207582  1.103228  1.102453   2.204166
+## 3     G10E1 1 10   9.046218       2.215457  1.103228  1.102453   2.204166
+## 4     G10E1 1 10   8.986222       2.200766  1.103228  1.102453   2.204166
+## 5     G10E1 1 10   8.963782       2.195271  1.103228  1.102453   2.204166
+## 6     G10E1 1 10   9.004545       2.205253  1.103228  1.102453   2.204166
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{    model_df2 <-}\StringTok{ }\NormalTok{model_dfc}
+    
+    \KeywordTok{plot}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2_stn, model_df2}\OperatorTok{$}\NormalTok{GE_stn_est)}
+    \KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{) }\CommentTok{# looks good}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{20200818_KEL_ParititioningVariance_files/figure-latex/unnamed-chunk-8-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{    model_df2}\OperatorTok{$}\NormalTok{mean_stn_est <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{phenotype2_stn)}
+    
+    \CommentTok{# Calculate interaction}
+\NormalTok{    model_df2}\OperatorTok{$}\NormalTok{int_stn_est <-}\StringTok{ }\NormalTok{model_df2}\OperatorTok{$}\NormalTok{mean_stn_est }\OperatorTok{+}\StringTok{ }\NormalTok{model_df2}\OperatorTok{$}\NormalTok{GE_stn_est }\OperatorTok{-}\StringTok{ }
+\StringTok{                        }\NormalTok{model_df2}\OperatorTok{$}\NormalTok{G_stn_est }\OperatorTok{-}\StringTok{   }\NormalTok{model_df2}\OperatorTok{$}\NormalTok{E_stn_est}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{step-8-compare-true-values-to-estimated-values}{%
+\section{Step 8: Compare true values to estimated
+values}\label{step-8-compare-true-values-to-estimated-values}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(model_df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   GE_factor E  G int GE_true G_true E_true mean_true int_true GE_stn_true
+## 1     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 2     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 3     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 4     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 5     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+## 6     G10E1 1 10   0       9    4.5    4.5         0        0    2.204541
+##   G_stn_true E_stn_true mean_stn_true int_stn_true            e phenotype
+## 1    1.10227    1.10227             0            0  0.003444012  2.207985
+## 2    1.10227    1.10227             0            0  0.011321137  2.215862
+## 3    1.10227    1.10227             0            0 -0.002250266  2.202291
+## 4    1.10227    1.10227             0            0 -0.013903696  2.190637
+## 5    1.10227    1.10227             0            0  0.010758599  2.215299
+## 6    1.10227    1.10227             0            0 -0.002266453  2.202274
+##   phenotype_stn G_stn_est E_stn_est GE_stn_est  mean_stn_est  int_stn_est     I
+## 1      2.207582  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885 FALSE
+## 2      2.215457  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885 FALSE
+## 3      2.201890  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885 FALSE
+## 4      2.190240  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885 FALSE
+## 5      2.214895  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885 FALSE
+## 6      2.201874  1.103228  1.102453   2.204166 -7.496512e-18 -0.001514885 FALSE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(true_int <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{int_stn_true)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5.440093e-17
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Although we call this "true_int", when int=0 this should be 0}
+\CommentTok{# note this is a shortcut that only works with equal sample sizes}
+
+\NormalTok{(obs_int_sim <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(model_df}\OperatorTok{$}\NormalTok{int_stn_est)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.002487851
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# when int=0, this will increase as the within-population mean gets less accurate}
+
+\NormalTok{(obs_int_emp <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{abs}\NormalTok{(model_df2}\OperatorTok{$}\NormalTok{int_stn_est)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.002487851
+\end{verbatim}
+
+\hypertarget{drop-the-mic.}{%
+\section{Drop the mic.}\label{drop-the-mic.}}
+
+
+\end{document}
