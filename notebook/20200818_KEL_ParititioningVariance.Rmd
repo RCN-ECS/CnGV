@@ -52,7 +52,7 @@ Some evidence that this is behaving as expected:
 
 # Effect size
 
-$Cov_{GE}= \frac{1}{\sum_{i=1}^g\sum_{j=1}^e(I)-1}\frac{\sum_{i=1}^g\sum_{j=1}^e(\bar{y}_i-\bar{y})(\bar{y}_j - \bar{y})I}{max(\sigma_{\bar{y}_i},\sigma_{\bar{y}_j})}$
+$Cov_{GE}= \frac{1}{\sum_{i=1}^g\sum_{j=1}^e(I)-1}\frac{\sum_{i=1}^g\sum_{j=1}^e(\bar{y}_i-\bar{y})(\bar{y}_j - \bar{y})I}{max(\sigma^2_{\bar{y}_i},\sigma^2_{\bar{y}_j})}$
 
 $G\times E = \frac{1}{ge}\sum_{i=1}^g \sum_{j=1}^e |(\bar{y_{ij}} - \bar{y_i} - \bar{y_j} + \bar{y})|$
 
