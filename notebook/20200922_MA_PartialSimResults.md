@@ -7,6 +7,8 @@ I also eliminated all rows in which both delta_env and delta_gen == zero.
 
 This produced 38,080 total sims. I ran these on the short partition, submitting 1000 sims (each job separated by 5 seconds) every 8 hours. 
 
+Average time per simulation: 9min 23sec
+
 ```{params}
 param_list <- list( 
   reps = c(10), 
@@ -39,16 +41,25 @@ Something is going on with covariance here that is restricting range. Need to lo
 ## Covariance by GxE (Omega Squared)
 
 **N_env == N_gen**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovGxE_omega1.png)
 
 **N_env = 2**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovGxE_Omega2.png)
 
 ## Omega Squared vs. Estimated Marginal Means
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_AnovavsEmm.png)
 
 ## Power Analyses
+
+**N_env == N_gen**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_Power.png)
+
+**N_env = 2**
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_Power_envscenario2.png)
 
 ## Barplot
 Shows the proportion of datapoints that are each color (refers to legend above)
@@ -79,29 +90,37 @@ Shows the proportion of datapoints that are each color (refers to legend above)
 ## Confusion Matrices
 
 **Covariance Bootstrap**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovBootConfusion.png)
 
 **Covariance Permutation**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovPermConfusion.png)
 
 **GxE Bootstrap**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEBootConfusion.png)
 
 **GxE Permutation**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEPermConfusion.png)
 
 ## GxE P-Value Sanity Checks
 
 **GxE Raw**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEPvalueComparison.png)
 
 **GxE Means**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEMeans_EmmvsAnova.png)
 
 ## Parameter Coverage
 
 **N_env = N_pop**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_Hex1.png)
 
 **N_env = 2**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_Hex2.png)
