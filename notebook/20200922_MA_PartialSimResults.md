@@ -59,7 +59,7 @@ Something is going on with covariance here that is restricting range. Need to lo
 
 **N_env = 2**
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_Power_envscenario2.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_PowerStandardized2.png)
 
 ## Barplot
 Shows the proportion of datapoints that are each color (refers to legend above)
