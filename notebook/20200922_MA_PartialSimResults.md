@@ -55,7 +55,7 @@ Something is going on with covariance here that is restricting range. Need to lo
 
 **N_env == N_gen**
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_Power.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_PowerStdScale1.png)
 
 **N_env = 2**
 
