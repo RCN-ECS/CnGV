@@ -97,6 +97,11 @@ To calculate this, I filtered the data to just those values that had a significa
 
 ## Confusion Matrices
 
+Legend: 
+*Red* = Estimated value
+*Green* = True value
+Ordered according to the estimate
+
 **Covariance Bootstrap**
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovBootConfusion.png)
@@ -117,7 +122,11 @@ To calculate this, I filtered the data to just those values that had a significa
 
 **GxE Raw**
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEPvalueComparison.png)
+Legend: 
+*Purple* = True GxE value is zero
+*Orange* = True GxE value is not zero
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEAnovaVsEmm_updated.png)
 
 **GxE Means**
 
