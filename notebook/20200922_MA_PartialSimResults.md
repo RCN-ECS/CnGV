@@ -66,10 +66,18 @@ Shows the proportion of datapoints that are each color (refers to legend above)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_PowerBarplot.png)
 
 ## Tradeoff between GxE and Covariance
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovVSGxE.png)
+To calculate this, I filtered the data to just those values that had a significant GxE (EMM or Omega, depending) or significant covariance (based on CIs).
+
+**Estimated Marginal Means**
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_TradeOffUpdated.png)
+
+**Omega Squared**
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_Tradeoff_Omega.png)
 
 ## Covariance: Estimate vs. True
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovRawvsTrue.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovRawVsTrue_Updated.png)
 
 ## Covariance: Means vs. Raw 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovMeansVSRaw.png)
@@ -78,7 +86,7 @@ Shows the proportion of datapoints that are each color (refers to legend above)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovErrormeansRawComparison.png)
 
 ## GxE: Estimate vs. True
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxERawvsTrue.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxE_RawVsTrue_updated.png)
 
 ## GxE: Means vs. Raw 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEMeansvsRaw.png)
