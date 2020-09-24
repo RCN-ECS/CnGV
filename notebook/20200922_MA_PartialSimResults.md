@@ -36,7 +36,7 @@ Legend:
 
 ### KEL note: We also need to be consistent with what to call "Covariance" across the plots. Sometimes it is called CovGE. We should be consistent with the main text, for example "$Cov_{GE}$" or "Cov(G,E)". The former can be made in R, but it can be a pain. We also need to distinguish between the true measure and the estimate, for example "Cov(G,E) estimate" vs. "Cov(G,E) true value". Then we also need a term to distinguish the raw data from the means data.... Also minor but be consistent with capitalization (e.g. don't switch some graphs to "Cov(G,E) Estimate").
 
-### KEL note: It would be helpful to start to order the graphs as the way you want to present them in the results, and indicate which you want to include in the main text vs. the Supp Mat. For example, do we want to start with the comparison of bootstrap vs. permutation with the confusion matrices?
+### KEL note: It would be helpful to start to order the graphs as the way you want to present them in the results, and indicate which you want to include in the main text vs. the Supp Mat. For example, do we want to start with the comparison of bootstrap vs. permutation with the confusion matrices? If we are going to put all the means results in the Supp Mat, then let's put them together here and talk about how it would look. 
 
 **N_env == N_gen**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovGxE1.png)
@@ -131,8 +131,9 @@ To calculate this, I filtered the data to just those values that had a significa
 
 ## Confusion Matrices
 
-### KEL thoughts on presenting confusion matrix: A table like this is confusing to present with numbers, but we should report the numbers in the Supp Mat. Also I think you have a typo, since the CI and Boostrap are the same method. Could you make an additional table, but convert the numbers to percentages so that each column adds up to 100%? In addition, we'll want to calculate the false positive (FPR) and false negative _rates_ for each method. FPR = FP / (number of Cov(G,E) that are 0, or FP + TN). FNR = FN / (number of Cov(G,E) that don't equal 0, or TP + FN). 
+### KEL thoughts on presenting confusion matrix: A table like this is confusing to present with numbers, but we should report the numbers in the Supp Mat. Also I think you have a typo, since the CI and Boostrap are the same method. Could you make an additional table, but convert the numbers to percentages so that each column adds up to 100%? In addition, we'll want to calculate the false positive (FPR) and false negative _rates_ for each method. FPR = FP / (number of Cov(G,E) that are 0, or FP + TN). FNR = FN / (number of Cov(G,E) that don't equal 0, or TP + FN). In addition need confusion matrices for means data. Also need to title tables with consistent wording on what we decide for terminology.
 
+** Raw Data **
 | --- | Covariance Confidence Intervals | Covariance Bootstrap | GxE Confidence Intervals | GxE Bootstrap |
 | --- | --- | --- | --- | --- |
 | False Negative | 894 | 347 | 278 | 12 |
@@ -152,12 +153,32 @@ To calculate this, I filtered the data to just those values that had a significa
 | False Negative Rate | % | % | % | % |
 | False Positive Rate | % | % | % | % |
 
+** Means Data **
+| --- | Covariance Confidence Intervals | Covariance Bootstrap | GxE Confidence Intervals | GxE Bootstrap |
+| --- | --- | --- | --- | --- |
+| False Negative | X | X | X | X |
+| False Positive | X | X | X | X |
+| True Negative | X | X | X | X |
+| True Positive | X | X | X | X |
+
+| --- | Covariance Confidence Intervals | Covariance Bootstrap | GxE Confidence Intervals | GxE Bootstrap |
+| --- | --- | --- | --- | --- |
+| False Negative | % | % | % | % |
+| False Positive | % | % | % | % |
+| True Negative | % | % | % | % |
+| True Positive | % | % | % | % |
+
+| --- | Covariance Confidence Intervals | Covariance Bootstrap | GxE Confidence Intervals | GxE Bootstrap |
+| --- | --- | --- | --- | --- |
+| False Negative Rate | % | % | % | % |
+| False Positive Rate | % | % | % | % |
+
 Legend: 
 *Red* = Estimated value
 *Green* = True value
 Ordered according to the estimate
 
-### Notes on below graphs: Will we include them in Supp Mat? KEL kind of likes them. If we do, let's make the error bars more transparent, add a legend, and use different points for true value vs. estimate.
+### Notes on below graphs: Will we include them in Supp Mat? KEL kind of likes them. If we do, let's make the error bars more transparent, add a legend, use different points for true value vs. estimate, and overlay the points over the error bars so we can see them.
 
 **Covariance Bootstrap**
 
@@ -183,13 +204,19 @@ Legend:
 *Purple* = True GxE value is zero
 *Orange* = True GxE value is not zero
 
+### Notes for below graph: add color legend, use "P-value" instead of "Pvalue", be consistent with whatever terms we decide on for N-pop and GxE.
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEAnovaVsEmm_updated.png)
 
 **GxE Means**
 
+### Notes for below graph: Why isn't this colored like the last one? Same comments on terminology as last graph.
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_GxEMeans_EmmvsAnova.png)
 
 ## Parameter Coverage
+
+### Notes for below graph: Not for manuscript or supp mat (?) but useful for evaluation.
 
 **N_env = N_pop**
 
