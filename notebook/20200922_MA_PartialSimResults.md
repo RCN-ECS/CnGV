@@ -30,8 +30,12 @@ Legend:
 *Red* = Both GxE and Covariance significant
 *Grey* = Neither is significant
 
+### Graph note for below: change color scheme to work in B&W, use different shapes for each point, add legend
+
 **N_env == N_gen**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovGxE1.png)
+
+### Graph note for below: let's be sure to add the 2x2 case to this plot, although it is redundant with the last plot it serves as an anchor for comparison
 
 **N_env = 2**
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/923_CovGxE2.png)
