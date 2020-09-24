@@ -97,6 +97,13 @@ To calculate this, I filtered the data to just those values that had a significa
 
 ## Confusion Matrices
 
+| --- | Covariance Confidence Intervals | Covariance Bootstrap | GxE Confidence Intervals | GxE Bootstrap |
+| --- | --- | --- | --- | --- |
+| False Negative | 894 | 347 | 278 | 12 |
+| False Positive | 1 | 10 | 0 | 234 |
+| True Negative | 133 | 124 | 281 | 47 |
+| True Positive | 92 | 639 | 561 | 827 |
+
 Legend: 
 *Red* = Estimated value
 *Green* = True value
