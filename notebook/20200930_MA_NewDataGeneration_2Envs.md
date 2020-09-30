@@ -1,7 +1,62 @@
 # New Simulation approach
 
-We simulated 2 scenarios. 1 in which the number of environments matched the number of genotypes, and the second, in which there were 2 environments but multiple genotypes. 
+We simulated 2 scenarios. One in which the number of environments matched the number of genotypes, and one in which there were just 2 environments but multiple genotypes from each environment. 
 
-In the second scenario results, my covariance estimates were bound near 0.4 and -0.4 and never reached 1 or -1 as they should.
+In the results for the second scenario, my covariance estimates were bound near 0.4 and -0.4 and never reached 1 or -1 as they should.
 
-I figured out that the way we are simulating the data is confining the bounds. Specifically, delta_gen applied to each genotype, thus spacing out genotypes that shared an enviroment and limiting the ability of genotypes from the same environment to cluster together. 
+I realized that the way we are simulating the data is confining the covariance estimates. Because I applied delta_gen to each genotype independently, each genotype was spaced from the other genotype by a certain interval (delta_gen) even if they shared an enviroment. But if there is strong CovGE, one would expect genotypes to cluster more closely together when they share an environment. So by limiting the ability of genotypes from the same environment to cluster together, I was accidentally limiting the CovGE.
+
+So I came up with a new way to simulate the data for the 2 environment scenarios that allows for clustering but I would like to get the official lotterhos stamp of approval to make sure I didn't make any bad decisions. 
+
+## New Approach
+
+Overview: I simulate a single average phenotype for each genotype/environment, and use that average to anchor 
+
+First I simulate a single mean phenotype for 2 genotypes across 2 environments using the regression equation. I add the interaction term but no noise. 
+
+```{code1}
+# True mean phenotype data using regression equation
+model_df$GE_true_temp = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
+```
+
+This produces something that looks like this: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/930_2GE.png)
+
+To these means, I add deviation that represents the degree that each genotype deviates from its overall mean. The bounds of that deviation are set by delta_gen. 
+
+```{code2}
+# Deviation for each genotype 
+set.seed = seed3
+model_df$e_pop <- rep(rnorm(n_pop, 0, sd = abs(delta_gen)), each = n_env*sample_size)
+model_df$GE_true <- model_df$GE_true_temp + model_df$e_pop
+```
+
+For a 4 total genotype situation (2 genotypes per environment), this gives something like the following: 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/930_2GE_step2.png)
+
+I then standardize these means, and as a final step, I add the individual samples by generating noise around each genotype's true means.
+
+```{code3}
+ # Standardize true means 
+GE_true_means <- tapply(model_df$GE_true, model_df$GE_factor, mean)
+model_df$GE_stn_true <- (model_df$GE_true - mean(GE_true_means))/sd(GE_true_means)
+  
+# Add random noise
+set.seed = seed1
+model_df$e <- rnorm(sample_size * n_pop * n_environments, 0, sd = std_dev) 
+  
+# Phenotype with error
+model_df$phen_corrected <- model_df$GE_stn_true + model_df$e
+```
+
+To produce something like the following:
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/930_2GEstep3.png)
+
+I have run several tests with several different n_gens and delta_gens and this approach allows the genotypes to oscillate around and allows genotypes from the same environment to cluster, but generally keeps genotypes from different environments apart by delta_gen. I also get better estimates of CovGE that appear (in my estimation) to visually match the patterns displayed by reaction norms.
+
+Today I will run a replicate of the new interaction terms (finer resolution in the lower interaction terms) and 2 env_scenario on the cluster to test everything out at a larger scale. 
+
+
+
