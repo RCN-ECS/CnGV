@@ -12,9 +12,9 @@ To clarify, I only apply this new simulation approach to *JUST* the scenarios wi
 
 ## New Approach
 
-Overview: I simulate a single average phenotype for each genotype/environment, and use that average to anchor 
+I simulate a single average phenotype for each genotype/environment, and use that average as the anchor for genotypes that share a native environment. 
 
-First I simulate a single mean phenotype for 2 genotypes across 2 environments using the regression equation. I add the interaction term but no noise. The below example has interaction = 0, so there is no GxE in these plots.
+I simulate a single mean phenotype for 2 genotypes across 2 environments using the standard regression equation. I add the interaction term but no noise. The below example has interaction = 0, so there is no GxE in these example plots.
 
 ```{code1}
 # True mean phenotype data using regression equation
