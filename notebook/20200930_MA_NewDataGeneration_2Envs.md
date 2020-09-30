@@ -64,21 +64,23 @@ Today I will run a replicate of the new interaction terms (finer resolution in t
 
 
 ## Examples
+
+I limited the amount that each genotype could oscillate off the mean to 0.05. As a result they oscillate a tiny bit and thus CovGE is not perfect. But close. 
 row | replicate  | env_scenario  | delta_env |  delta_gen  | sample_size  | total_samples |  n_env  | n_pop |  std_dev |  interaction  |  true_cov | covariance 
 --- | ---  | ---  | --- |  ---  | ---  | --- |  ---  | --- |  --- |  ---  |  ---  | --- |
-1  |   1   |        1      |        2   |        1     |     -1    |         5          |    20   |    2   |    2   |      0     |      -0.96     |   -0.96 
- 2   |       1    |         2      |    1     |    -1     |       5    |         40    |  2   |   4    |    0   |     -0.98   |    -0.98 
- 3    |    1       |     2     |    1   |     -1   |        5   |         80 |    2   |  8    |   0    |       0 |  -0.98    |  -0.98  
+ 1  |  1   |    2 |    1   |    -1   | 5 | 20 |   2   |  2    |   0     |    0|  -0.96  |   -0.96 
+ 2  |   1  | 2.   |    1   |    -1   | 5 | 40 |   2   |  4    |   0     |    0| -0.98   |    -0.98 
+ 3  |   1  | 2    |    1   |    -1   | 5 | 80 |   2   |  8    |   0     |   0 |  -0.98  |  -0.98  
 
 
 **Row1**
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/930_cov-.96.png)
 
 **Row2**
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/930_CovRow2.png)
 
 **Row3**
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/930_2GERow3.png)
 
 
 
