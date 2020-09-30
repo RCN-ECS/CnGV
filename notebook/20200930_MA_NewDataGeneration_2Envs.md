@@ -4,9 +4,11 @@ We simulated 2 scenarios. One in which the number of environments matched the nu
 
 In the results for the second scenario, my covariance estimates were bound near 0.4 and -0.4 and never reached 1 or -1 as they should.
 
-I realized that the way we are simulating the data is confining the covariance estimates. Because I applied delta_gen to each genotype independently, each genotype was spaced from the other genotype by a certain interval (delta_gen) even if they shared an enviroment. But if there is strong CovGE, one would expect genotypes to cluster more closely together when they share an environment. So by limiting the ability of genotypes from the same environment to cluster together, I was accidentally limiting the CovGE.
+I realized that the way we are simulating the data is confining the covariance estimates. Because I am applying delta_gen to each genotype independently, each genotype was spaced from the other genotype by a certain interval (delta_gen) even if they shared an enviroment. But if there is strong CovGE, one would expect genotypes to cluster more closely together when they share an environment. So by limiting the ability of genotypes from the same environment to cluster together, I was accidentally limiting the CovGE.
 
 So I came up with a new way to simulate the data for the 2 environment scenarios that allows for clustering but I would like to get the official lotterhos stamp of approval to make sure I didn't make any bad decisions. 
+
+To clarify, I only apply this new simulation approach to *JUST* the scenarios with 2 env/ >2gens. I kept the same data generation approach for the scenarios where n_env = n_gen.
 
 ## New Approach
 
