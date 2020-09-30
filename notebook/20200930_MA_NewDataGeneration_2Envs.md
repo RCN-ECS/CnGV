@@ -63,4 +63,22 @@ I have run several tests with different n_gens and delta_gens and this approach 
 Today I will run a replicate of the new interaction terms (finer resolution in the lower interaction terms) and 2 env_scenario on the cluster to test everything out at a larger scale. 
 
 
+## Examples
+row | replicate  | env_scenario  | delta_env |  delta_gen  | sample_size  | total_samples |  n_env  | n_pop |  std_dev |  interaction  |  true_cov | covariance 
+--- | ---  | ---  | --- |  ---  | ---  | --- |  ---  | --- |  --- |  ---  |  ---  | --- |
+1  |   1   |        1      |        2   |        1     |     -1    |         5          |    20   |    2   |    2   |      0     |      -0.96     |   -0.96 
+ 2   |       1    |         2      |    1     |    -1     |       5    |         40    |  2   |   4    |    0   |     -0.98   |    -0.98 
+ 3    |    1       |     2     |    1   |     -1   |        5   |         80 |    2   |  8    |   0    |       0 |  -0.98    |  -0.98  
+
+
+**Row1**
+![image]()
+
+**Row2**
+![image]()
+
+**Row3**
+![image]()
+
+
 
