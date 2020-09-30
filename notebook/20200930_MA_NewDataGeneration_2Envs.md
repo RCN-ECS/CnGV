@@ -56,7 +56,9 @@ model_df$phen_corrected <- model_df$GE_stn_true + model_df$e
 To produce something like the following:
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/930_2GEstep3.png)
 
-I have run several tests with several different n_gens and delta_gens and this approach allows the genotypes to oscillate around and allows genotypes from the same environment to cluster, but generally keeps genotypes from different environments apart by delta_gen. I also get better estimates of CovGE that appear (in my estimation) to visually match the patterns displayed by reaction norms.
+This particular example gives a significant but low CNGV covariance estimate of -0.28 (true_cov = -0.23) and GxE = 0.07 (true GxE = 0), which makes sense to me based on the pattern.
+
+I have run several tests with different n_gens and delta_gens and this approach allows genotypes from the same environment to cluster, but generally keeps the genotypes from different environments apart by delta_gen. I also get better estimates of CovGE that appear (in my estimation) to visually match the patterns displayed by reaction norms.
 
 Today I will run a replicate of the new interaction terms (finer resolution in the lower interaction terms) and 2 env_scenario on the cluster to test everything out at a larger scale. 
 
