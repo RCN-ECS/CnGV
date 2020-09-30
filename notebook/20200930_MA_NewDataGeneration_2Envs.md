@@ -12,7 +12,7 @@ So I came up with a new way to simulate the data for the 2 environment scenarios
 
 Overview: I simulate a single average phenotype for each genotype/environment, and use that average to anchor 
 
-First I simulate a single mean phenotype for 2 genotypes across 2 environments using the regression equation. I add the interaction term but no noise. 
+First I simulate a single mean phenotype for 2 genotypes across 2 environments using the regression equation. I add the interaction term but no noise. The below example has interaction = 0, so there is no GxE in these plots.
 
 ```{code1}
 # True mean phenotype data using regression equation
