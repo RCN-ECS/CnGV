@@ -1,0 +1,150 @@
+---
+title: "Explore PL stat and variance partitioning data"
+author: "KE Lotterhos"
+date: "10/2/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+setwd("/Users/lotterhos/Documents/GitHub/CnGV/notebook")
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+powdf <- read.csv("../results/Power_output_results.csv")
+vardf <- read.csv("../results/Variance_output_results.csv")
+PLdf <- read.csv("../results/PL_output_results.csv")
+
+head(powdf)
+head(vardf)
+head(PLdf)
+
+dim(powdf)
+dim(vardf)
+dim(PLdf)
+
+summary(powdf$row)
+levels(as.factor(powdf$replicate))
+summary(vardf$row)
+summary(PLdf$row)
+```
+
+# Explore PL stat
+
+### subset to 2x2 cases
+```{r}
+cases <- powdf$row[powdf$n_env==2 & powdf$n_pop==2]
+length(cases)
+
+powdf2 <- powdf[powdf$row %in% cases,]
+vardf2 <- vardf[vardf$row %in% cases,]
+
+dim(powdf2)
+
+newdf <- merge(powdf2, PLdf, by = "row")
+dim(newdf)
+str(newdf)
+```
+
+```{r}
+
+## compare covariance and PL
+  plot(newdf$covariance.x, newdf$PL)
+  
+  plot(newdf$covariance.x, newdf$PL, ylim=c(-1,2))
+  abline(1,0)
+  abline(0,0)
+  abline(v=0)
+  # this tells me that their claims that counter > 1 or <0 and cogradient between 0 and 1 is correct
+
+# Compare covariance and GxE
+  plot(newdf$GxE_emm.x, newdf$PL)
+  plot(newdf$GxE_emm.x, newdf$PL, ylim=c(-1,2))
+  
+  plot(newdf$GxE_omega, newdf$PL, ylim=c(-1,2))
+  summary(newdf$GxE_omega)
+  # why are some of these less than 0?
+  
+  plot(newdf$GxE_emm.x, newdf$GxE_omega)
+  # this tells me there PL metric has no relationship
+  # with GxE
+  
+# compare dela_E and new PL  
+  plot(newdf$delta_E, newdf$PL, ylim=c(-1,2))
+  # when delta_E is large, there is plasticity
+  # when delta_E = 0, there is no plasticity or there is GxE
+  # note very useful. It shows that PL is near 0 
+  
+# compare genetic differentiation and PL
+  # denominator of PL minus the numerator is the average difference in phenotype between genotypes raised in a common environment (0.5((PAEA−PBEA)+(PAEB−PBEB))), and is therefore a measure of genetic differentiation.”
+  plot(newdf$G1Emean - newdf$G2Emean, newdf$delta_E-newdf$delta_H)
+  
+    plot(abs(newdf$G1Emean - newdf$G2Emean), abs(newdf$delta_E-newdf$delta_H))
+  
+  plot(newdf$GxE_emm.x, newdf$delta_E-newdf$delta_H)
+```
+
+## Contrasting cases for PL
+Show a case of countergradient variation with PL greater than 1, but plasticity induced response different sign as phenotypic divergence.
+Show equivalent case of countegradient variation in opposite direction but with PL less than 0.
+```{r}
+b <- which(abs(round(newdf$PL)) > 200)
+newdf[b,]
+```
+
+
+Find a case with PL about 1 but huge GxE
+```{r}
+head(newdf)
+a<- which(round(newdf$PL,1)==1.0 & newdf$GxE_omega > 0.6)
+newdf[a,]
+```
+
+## Explore variance partitioning
+```{r}
+head(powdf)
+head(vardf)
+
+# effect sizes
+plot(powdf$covariance, 
+     vardf$omega2[vardf$Variance_Component=="V_cov"],
+     pch=19, 
+     col=adjustcolor("blue",0.05))
+
+# P-values
+plot(powdf$covariance_pvalue, 
+     vardf$Pvalue[vardf$Variance_Component=="V_cov"],
+     pch=19, 
+     col=adjustcolor("blue",0.05))
+    # p-values from the variance components are not to be trusted. Need to ask molly what's being done here.
+
+plot(powdf$GxE_omega,  
+     vardf$omega2[vardf$Variance_Component=="V_gxe"],
+     pch=19, 
+     col=adjustcolor("blue",0.1))
+abline(0,1)
+  # this doesn't make sense. I would think the GxE omega from this sims would always be larger
+
+```
+
+### Propose for the example figures where we show the raw data to add an insert showing the variance partitioning
+```{r}
+cond <- vardf$row==10001
+vardf[cond,]
+colr = c(grey(0.1), grey(.3), grey(.50), grey(.70), grey(.90))
+
+barplot(vardf$omega2[cond],
+        names= vardf$Variance_Component[cond],
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2")
+
+barplot(matrix(c(vardf$omega2[cond], rep(0,5)), ncol=2),
+        xlim=c(0,2),
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2")
+legend("right",legend = rev(vardf$Variance_Component[cond]), fill=rev(colr))
+```
+
+
