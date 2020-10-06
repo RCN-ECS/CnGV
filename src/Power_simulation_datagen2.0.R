@@ -1,68 +1,192 @@
-## ForLoop for Cluster
+#######################################
+## Parameter Generation -- NO Groups ##
+#######################################
+
 
 # Starting list of parameters
 param_list <- list( 
-  reps = c(100), # or more?
-  delta_env = c(0.01,0.5,1),
-  delta_gen = c(-1,0.01,1),
-  sample_size = c(5,10,20), 
-  n_pop = c(1), 
-  n_environments = c(2,3,5,10,15),
-  std_dev= c(0.75,1.5), 
-  interaction = 5) # Vector LENGTH not magnitude
+  reps = c(10), 
+  delta_env = NULL, # runif same as interaction to avoid equally spaced covariances
+  delta_gen = c(-1,0.0,1),
+  sample_size = c(2,4,8,16), 
+  n_pop = c(2,4,8,16),
+  env_scenario = c(1,2),  # 1 = npop = n_env; 2 = multiple pops across 2 envs
+  std_dev= c(.5, 1), # Scale
+  interaction = NULL) # Set as function of n_pop
 
-# Starting list of parameters
-param_list <- list( 
-  reps = c(100), # or more?
-  delta_env = c(0.01,0.5,1),
-  delta_gen = c(-1,0.01,1),
-  sample_size = c(5,10,15), 
-  pop_per_env = c(1),#c(2,3,4,5),#c(2,3,5,10,15), 
-  n_environments = c(2,3,5,7,10),
-  std_dev= c(1.5,3),#c(0.5,1), 
-  interaction = NULL) # Vector LENGTH not magnitude
 
-# Table of parameters
+parameter_generation <- function(param_list){
+ 
+  ########### Env Scenario 1 ###########  
+  params =  expand.grid("n_pop"=param_list$n_pop,
+                        "sample_size" = param_list$sample_size,
+                        "std_dev" = param_list$std_dev)
+  params$n_env = params$n_pop
+  
+  param_table2 = data.frame()
+  
+  for(z in 1:param_list$reps){
+    
+    cat(z,"1st","\n")
+    
+    # Add delta_env, delta_gen, and interaction terms
+    param_table1 = data.frame()
+    for(i in 1:nrow(params)){
+      delta_env = runif(n = 50, min = 0, max = 1)
+      delta_gen = runif(n = 50, min = -1, max = 1)
+      
+      if(params$n_pop[i] == 2){
+        low_int = runif(50, min = 0, max = 2)
+        interaction = low_int
+      }else{
+        low_int = runif(n = 40, min = 0, max = 1.99)
+        high_int = runif(n = 10, min = 2, max = params$n_pop[i])
+        pot1 = c(low_int, high_int)
+        interaction = sample(pot1, size = 50, replace = FALSE)
+        }
+      inter_df1 = data.frame("delta_env" = delta_env, "delta_gen" = delta_gen, "interaction" = interaction)
+      inter_df = merge(params[i,],inter_df1)
+      
+      param_table1 = rbind(param_table1, inter_df)
+    }
+    param_table1$errpop = 0 
+    param_table1$replicate = rep(z, nrow(param_table1))
+    param_table1$env_scenario = rep(1, nrow(param_table1))
+    param_table2 = rbind(param_table2, param_table1)
+  }
+    
+  ########### Env Scenario 2 ########### 
+  params2 =  expand.grid("n_pop"=2*param_list$n_pop,
+                         "sample_size" = param_list$sample_size,
+                         "std_dev" = param_list$std_dev)
+    params2$n_env = 2
+    
+    param_table4 = data.frame()
+    
+    for(x in 1:param_list$reps){
+      
+      cat(x,"2nd","\n")
+      
+      # Add delta_env, delta_gen, and interaction terms
+      param_table3 = data.frame()
+      for(i in 1:nrow(params)){
+        delta_env = runif(n = 50, min = 0, max = 1)
+        delta_gen = runif(n = 50, min = -1, max = 1)
+        errpop = abs(rnorm(n = 50,  mean = 0, sd = abs(delta_gen)))
+        
+        if(params$n_pop[i] == 2){
+          low_int = runif(50, min = 0, max = 2)
+          interaction = low_int
+        }else{
+          low_int = runif(n = 35, min = 0, max = 1.99)
+          high_int = runif(n = 15, min = 2, max = params$n_pop[i])
+          pot = c(low_int, high_int)
+          interaction = sample(pot, size = 50, replace = FALSE)
+        }
+        inter_df1 = data.frame("delta_env" = delta_env, "delta_gen" = delta_gen, "interaction" = interaction, "errpop" = errpop)
+        inter_df2 = merge(params[i,],inter_df1)
+        
+        param_table3 = rbind(param_table3, inter_df2)
+      }
+      param_table3$replicate = rep(x, nrow(param_table3))
+      param_table3$env_scenario = rep(2, nrow(param_table3))
+      param_table4 = rbind(param_table4, param_table3)
+      
+    }
+    param_table = data.frame()
+    param_table = rbind(param_table2,param_table4)
+    
+    # Set.seed for each sim
+    param_table$seed = round(runif(nrow(param_table), min = 1, max = 100000000))
+    
+    # Assign Rows to dataframe
+    row = seq(1:nrow(param_table))
+    param_table = data.frame("row" = row, param_table)
+    param_table$total_samples <- param_table$n_env * param_table$n_pop * param_table$sample_size
+    
+    return(param_table)
+  }
+
+df = parameter_generation(param_list)
+dim(df)
+df1 = filter(df, total_samples < 500) 
+dim(df1)
+range(df1$row)
+write.csv(df1,"~/Desktop/df.csv")
+
+
+head(df1)
+
+##############################################
+##                 OLD METHOD               ##
+##############################################
+
 parameter_generation <- function(param_list){
   
-  # Basic parameters
-  param_temp <- expand.grid("delta_env" = param_list$delta_env,
-                            "delta_gen" = param_list$delta_gen,
-                            "sample_size" = param_list$sample_size,
-                            "pop_per_env" = param_list$pop_per_env,
-                            "n_env" = param_list$n_environments,
-                            "std_dev" = param_list$std_dev)
-  # Add genotypes
-  param_temp$n_pop = param_temp$pop_per_env*param_temp$n_env
-  param_temp = param_temp[,-4] # Deletes pop_per_env
-
-  # Add replicates
-  reps <- rep(c(1:param_list$reps), each = nrow(param_temp))
-  param_temp2 <- data.frame("replicate" = reps, param_temp)
+  # Initial Starting Point  
+  params <- expand.grid(#"delta_env" = param_list$delta_env,
+                        "delta_gen" = param_list$delta_gen,
+                        "sample_size" = param_list$sample_size,
+                        "env_scenario" = param_list$env_scenario,
+                        "std_dev" = param_list$std_dev)
   
-  # Generate Interaction term 
-  param_temp3 = data.frame()
-  myseed = 86
-  for(i in 1:length(unique(param_temp2$replicate))){
-    for(j in 1:length(unique(param_temp2$n_pop))){
-      sub = dplyr::filter(param_temp2, replicate==unique(param_temp2$replicate)[i])
-      subsub = dplyr::filter(sub, n_pop == unique(sub$n_pop)[j])
-      set.seed = myseed + i + j
-      #interaction_term = seq(from = 0, to = unique(subsub$n_pop), length.out = max(param_temp$n_pop))
-      interaction_term = runif(max(param_temp$n_pop), min = 0, max = unique(subsub$n_pop))
-      
-      inter_data = merge(subsub,interaction_term)
-      colnames(inter_data)[8]<- "interaction"
-      param_temp3 = rbind(inter_data,param_temp3)
-    }
+  # Establish range of populations and environments 
+  param_temp = data.frame()
+  for(i in 1:nrow(params)){
+    cat(i,"i","\n")
+  if(params$env_scenario[i] == 1){ # Then the number of pops = number of environments
+    envpop = data.frame("n_env" = param_list$n_pop, "n_pop" = param_list$n_pop)
+    interdf = merge(params[i,],envpop)
+    } else { # If n_pop is spread across 2 environments 
+    envpop = data.frame("n_env" = 2, "n_pop" = 2*param_list$n_pop[-4])
+    interdf = merge(params[i,],envpop)
+    } 
+    param_temp = rbind(param_temp, interdf)
   }
   
+  # Create delta_env
+  param_temp2 = data.frame()
+  for(i in 1:nrow(param_temp)){
+    if(param_temp$n_pop[i]==2 | param_temp$n_pop[i]==4){delta_env = runif(param_temp$n_pop[i]+1,min = -1,max =1)
+    inter_df2 = merge(param_temp[i,],delta_env)
+    } else {delta_env = runif(5,min = -1,max =1)
+    inter_df2 = merge(param_temp[i,],delta_env)
+    }
+    param_temp2 = rbind(inter_df2,param_temp2)
+  }
+  colnames(param_temp2)[7]<- "delta_env"
+  
+  # Generate Interaction terms 
+  param_temp3 = data.frame()
+  for(j in 1:nrow(param_temp2)){
+    
+    cat(j,"j","\n")
+    low_interaction_term <- seq(from = 0, to = 0.99,length.out = 4)
+    med_interaction_term <- seq(from = 1, to = 1.99,length.out = 3)
+    
+    if(param_temp2$n_pop[j] == 2){
+      high_interaction_term = 2
+    }else{
+      high_interaction_term <- sample(seq(from = 2, to = param_temp2$n_pop[j]),size = 3, replace = FALSE) 
+    }
+      interaction_term <- c(low_interaction_term,med_interaction_term,high_interaction_term)
+      interdf3 <- merge(param_temp2[j,],interaction_term)
+      param_temp3 <- rbind(param_temp3, interdf3)
+  }
+  colnames(param_temp3)[8]<- "interaction"
+
+  
+  # Add replicates
+  reps <- rep(c(1:param_list$reps), each = nrow(param_temp3))
+  param_temp4 <- data.frame("replicate" = reps, param_temp3)
+  
   # Set.seed for each sim
-  param_temp3$seed = round(runif(nrow(param_temp3),min = 1, max = 100000000))
+  param_temp4$seed = round(runif(nrow(param_temp4), min = 1, max = 100000000))
   
   # Assign Rows to dataframe
-  row = seq(1:nrow(param_temp3))
-  param_table = data.frame("row" = row, param_temp3)
+  row = seq(1:nrow(param_temp4))
+  param_table = data.frame("row" = row, param_temp4)
+  param_table$total_samples <- param_table$n_env * param_table$n_pop * param_table$sample_size
   
   return(param_table)
   }
@@ -71,38 +195,142 @@ parameter_generation <- function(param_list){
 df = parameter_generation(param_list) 
 dim(df)
 
-fugit = df %>%
-  filter(replicate == 1) #%>%
-  filter(n_pop == 2) %>%
-  #filter(interaction == max(interaction)) %>%
-  filter(delta_env == 1) %>%
-  filter(delta_gen == -1) %>%
-  #filter(std_dev == min(std_dev)) %>%
-  filter(sample_size == 10)
-args = fugit
-args = df[81,] # Expect no GxE
-dim(fugit)
+df1 = df %>%
+  filter(replicate %in% c(1:10)) %>%
+  filter(total_samples < 500) 
+  
+df2 = df1[!(df1[,3]==0 & df1[,4]==0),]
+dim(df2) #95,760
+ggplot(df2, aes(x = delta_gen))+geom_histogram()
 
 
-df[1:5,]
-write.csv(df,"~/Desktop/full_df.csv",)
+#write.csv(df2,"~/Desktop/df.csv",)
+x = data.frame("rep" = c(1:1000),"dist" = rchisq(1000,df=0.1))
+ggplot(x, aes(x = dist))+geom_histogram(binwidth = 0.1)
+
+# Estimate time on cluster 
+nsims = length(which(df2$replicate==1))
+pause = 8
+chunksize = 1000
+(clusterTime = (nsims/chunksize)*8)
+(Days = clusterTime/24)
 
 
-cluster.time <- function(n_params, chunk.size, pause.time){
-  total.submissions <- n_params/chunk.size
-  total.time.secs <- total.submissions*pause.time
-  total.time.minutes <- total.time.secs/60
+
+
+####### Which rows failed? #######
+forthemissing = data.frame(anti_join(df_missing, dat_csv1,by = "row")) # dat_csv from "Sim.Plot.Code.R"
+forthemissing = as.numeric(forthemissing[[1]])
+repeat_df = filter(df2, row %in% forthemissing)
+write.csv(repeat_df, "~/Desktop/repeatdf.csv")
+
+###################################################
+## Parameter Generation when Divided Into Groups ##
+###################################################
+
+
+# Starting list of parameters
+param_list <- list( 
+  reps = c(100), 
+  delta_env = c(0.0,0.25,0.5,.75,1.0), 
+  delta_gen = c(-1,0.0,1),
+  sample_size = c(2,4,8,16), 
+  n_pop = c(2,4,8,16),
+  env_scenario = c(1,2),  # 1 = npop = n_env; 2 = multiple pops across 2 envs
+  std_dev= c(.5, 1), # Scale
+  interaction = NULL) # Set as function of n_pop
+
+## Table of parameters
+
+parameter_generation <- function(param_list){
+  
+  params <- expand.grid("delta_env" = param_list$delta_env,
+                        "delta_gen" = param_list$delta_gen,
+                        "sample_size" = param_list$sample_size,
+                        "env_scenario" = param_list$env_scenario,
+                        "std_dev" = param_list$std_dev)
+  
+  # Establish range of populations and environments 
+  param_temp = data.frame()
+  for(i in 1:nrow(params)){
+    cat(i,"i","\n")
+    if(params$env_scenario[i] == 1){ # Then the number of pops = number of environments
+      envpop = data.frame("n_env" = param_list$n_pop, "n_pop" = param_list$n_pop)
+      interdf = merge(params[i,],envpop)
+    } else { # If n_pop is spread across 2 environments 
+      envpop = data.frame("n_env" = 2, "n_pop" = 2*param_list$n_pop[-4])
+      interdf = merge(params[i,],envpop)
+    } 
+    param_temp = rbind(param_temp, interdf)
+  }
+  
+  # Generate Interaction term 
+  param_temp3 = data.frame()
+  for(j in 1:nrow(param_temp)){
+    cat(j,"j","\n")
+    interaction_term <- seq(from = 0, to = param_temp$n_pop[j],length.out = param_temp$n_pop[j]) 
+    interdf2 <- merge(param_temp[j,],interaction_term)
+    param_temp3 <- rbind(param_temp3, interdf2)
+  }
+  colnames(param_temp3)[8]<- "interaction"
+  
+  # Add replicates
+  reps <- rep(c(1:param_list$reps), each = nrow(param_temp3))
+  param_temp4 <- data.frame("replicate" = reps, param_temp3)
+  
+  # Set.seed for each sim
+  param_temp4$seed = round(runif(nrow(param_temp4), min = 1, max = 100000000))
+  
+  # Assign Rows to dataframe
+  row = seq(1:nrow(param_temp4))
+  param_table = data.frame("row" = row, param_temp4)
+  param_table$total_samples <- param_table$n_env * param_table$n_pop * param_table$sample_size
+  
+  # Assign groups for Slurm
+  param_table$group = rep(1:(nrow(param_table)/5), each = 5)
+  
+  return(param_table)
+}
+
+
+df = parameter_generation(param_list) 
+dim(df)
+
+df1 = df %>%
+  filter(replicate %in% c(1:10)) %>%
+  filter(total_samples < 512) 
+
+df2 = df1[!(df1[,3]==0 & df1[,4]==0),]
+dim(df2) #38,080
+
+write.csv(df2,"~/Desktop/df.csv",)
+cluster.time <- function(n_params, chunk.size, n_rows, avg_time, allowed.jobs, pause.time){
+  chunk.submissions <- (n_params/n_rows)/chunk.size
+  timepergroup = n_rows*avg_time
+  
+  total.time.hours<- (total.submissions/allowed.jobs)*avg_time
+  #t#otal.time.hours <- total.time.minutes/60
+  total.time.days <- total.time.hours/24
+  time_project = data.frame("days" = total.time.days,"hours" = total.time.hours, "minutes" = total.time.minutes, "jobs" = n_params)
+}
+cluster.time(n_params = nrow(df1), chunk.size = 788, avg_time = 20, pause.time = 600, groupsize = 5, jobs_allowed = 72)
+
+cluster.time.nochunks <- function(n_params, avg_time, allowed.jobs){
+  total.submissions <- n_params
+  total.time.minutes <- (total.submissions/allowed.jobs)*avg_time
   total.time.hours <- total.time.minutes/60
   total.time.days <- total.time.hours/24
-  time_project = data.frame("days" = total.time.days,"hours" = total.time.hours, "minutes" = total.time.minutes, "jobs" = n_params, "chunk.size" = chunk.size, "sys.pause"= pause.time)
-  return(time_project)
-  }
+  time_project = data.frame("days" = total.time.days,"hours" = total.time.hours, "minutes" = total.time.minutes, "jobs" = n_params)
+}
+(time.check = cluster.time.nochunks(n_params = nrow(df1), avg_time=21, allowed.jobs = 72)) 
 
-(time.check = cluster.time(n_params = 2700, chunk.size = 250, pause.time = 3600)) # Njobs = 27000
+tail(df1)
+len = df[df$replicate == 1,]
+(time.check = cluster.time(n_params = nrow(df1), chunk.size = 200, pause.time = 600)) # Njobs = 27000
 
 check <- df %>%
-  filter(replicate == 1) %>%
-  filter(n_pop == 2)
+  filter(replicate %in% c(1:10)) #%>%
+  #filter(n_pop == 2)
 
 
 
