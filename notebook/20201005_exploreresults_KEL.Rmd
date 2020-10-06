@@ -125,11 +125,14 @@ plot(powdf$GxE_omega,
      pch=19, 
      col=adjustcolor("blue",0.1))
 abline(0,1)
-  # this doesn't make sense. I would think the GxE omega from this sims would always be larger
+  # Note that GxE omega that molly calculated in powdf is correct
+  # vardf$omega is actually eta
 
 ```
 
 ### Propose for the example figures where we show the raw data to add an insert showing the variance partitioning
+
+omega^2 in variance partitioning code is actually eta^2 
 ```{r}
 cond <- vardf$row==10001
 vardf[cond,]
