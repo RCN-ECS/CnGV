@@ -1,0 +1,109 @@
+---
+title: "Comment on Stamp and Hadfield 2020 Ecology Letters"
+author: "KE Lotterhos"
+date: "10/7/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Function
+```{r}
+makeplot <- function(a, letr, main){
+   plot(0:1, c(a[1:2]), ylim=c(-2,2), 
+        xaxt ="n", type="l", col="blue", xlab="", 
+        ylab="Stnd. phenotype", bty="l", 
+        main=main, lwd=2, xlim=c(0,1.5))
+  mtext("EA", side=1, line=1, adj=0, col="blue")
+  points(0:1, c(a[3:4]),  type="l", col="green", xlab="", lwd=1, lty=2)
+  mtext("EB", side=1, line=1, adj=0.66, col="green")
+
+  D_H <- a[1] - a[4]
+  (D_EA <- a[1]-a[2])
+  (D_EB <- a[3]-a[4])
+  (D_E <- mean(c(D_EA, D_EB)))
+  
+  text(1.1,a[1],"D_H", cex=0.8)
+  arrows(1.2,a[4], 1.2, a[1], length=0.1)
+  
+  text(1.4, a[1], "D_E", cex=0.8)
+  arrows(1.3, mean(c(a[2], a[4])), 
+         1.3, mean(c(a[2], a[4]))+D_E, 
+         length=0.1)
+
+  PL <- D_E/D_H
+  text(1,-1.9,paste("PL =",PL),adj=1)
+  
+  text(0,2, letr)
+  return(data.frame(D_H=D_H, D_EA = D_EA,
+                    D_EB=D_EB,D_E=D_E, PL=PL))
+}
+```
+
+## Drastically different PL for slight difference in countergradient patterns
+This shows how slight differences in the mean fitness in the home population can give unrealistically opposite values of the PL statistic.
+```{r cars}
+
+# Case 1
+case1 <- rep(NA, 4)
+names(case1) <- c("PAEA", "PAEB", "PBEA", "PBEB")
+a <- 0
+case1[1:4] <- c(a,a+1,a-1+0.01,a+0.01)
+case1
+
+
+# Case 2
+case2 <- rep(NA, 4)
+names(case2) <- names(case1)
+a <- 0
+case2[1:4] <- c(a,a+1,a-1-0.01,a-0.01)
+case2
+
+```
+
+## PL = 1 for non-perfect scenario
+```{r}
+case3 <- rep(NA, 4)
+names(case3) <- names(case1)
+case3[1:4] <- c(1,-1,0,0)
+
+case4 <- rep(NA, 4)
+names(case4) <- names(case1)
+case4[1:4] <- c(-1.2, +1.4, +0.5,  -0.3)
+```
+
+## PL = 1 for "perfect" scenario but different degrees of plasticity
+```{r}
+case5 <- rep(NA, 4)
+names(case5) <- names(case1)
+case6 <- case5
+
+case5[1:4] <- c(-0.1, 0.1, -0.15, 0.15)
+case6[1:4] <- c(-1, 1, -1.05, 1.05)
+```
+
+```{r}
+
+final_1 <- rbind(case1, case2, case3, case4, case5, case6)
+
+# Make plot
+#pdf("")
+par(mfrow=c(3,2), mar=c(3,1,1,1), oma=c(0,3,0,0))
+a <- makeplot(case1, "A", "Case 1")
+b <- makeplot(case2, "B", "Case 2")
+c <- makeplot(case3, "C", "Case 3")
+d <- makeplot(case4, "D", "Case 4")
+e <- makeplot(case5, "E", "Case 5")
+f <- makeplot(case6, "F", "Case 6")
+mtext("Standardized phenotype", side=2, 
+      outer=TRUE, line=1)
+#dev.off()
+
+final_2 <- rbind(a,b,c,d,e, f)
+
+(final <- cbind(final_1, final_2))
+```
