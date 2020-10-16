@@ -22,7 +22,7 @@ Note that some of these images are not great quality because they are saved as P
 
 
 ## Figure 4
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPlot_panel.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Confusion2Panel.png)
 
 
 ## Figure 5
@@ -38,6 +38,36 @@ Note that some of these images are not great quality because they are saved as P
 
 
 # Supplementary Materials:
+
+## Confusion Matrix 
+| | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
+| ---| ---| ---| ---| ---|
+| True Positive | 8.21% | 62.26% | 43.3 % | 94.79% |
+| True Negative | 0.71% | 0.62% | 0.74% | 0.20% |
+| False Positive | 0% | 0.09% | 0% | 0.54% |
+| False Negative | 91.1% | 37.03% | 55.96% | 4.47%|
+|---|---|---|---|---|
+| False Negative Rate | 91.73% | 37.3% | 56.38% | 4.5% |
+| False Positive Rate | 0 % | 12.68% | 0% | 72% |
+
+## Parameter Coverage
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HexPlotPanel.png)
+
+## CovGE vs. GxE
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Cov_GxE.png)
+
+## Heatmap for Std. Dev = 0.5
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HeatMap_LowStdDev.png)
+
+## Confusion Panels - Raw Data
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots.png)
+
+## Confusion Panels - Mean Data
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots_means.png)
+
+
+
+
 
 
 
