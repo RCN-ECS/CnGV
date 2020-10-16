@@ -40,6 +40,8 @@ Note that some of these images are not great quality because they are saved as P
 # Supplementary Materials:
 
 ## Confusion Matrix 
+These percents and rates are the same for the means data. 
+
 | | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
 | ---| ---| ---| ---| ---|
 | True Positive | 8.21% | 62.26% | 43.3 % | 94.79% |
