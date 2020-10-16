@@ -1,8 +1,8 @@
 #Sim Results
 
-I ran a full round (10 replicates) for the following starting parameters. [Recall I am using a different way to set up parameters](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20201006_NewParamGeneration.md)
+I ran a full round (10 replicates) for the following starting parameters. [Recall I am using a different way to set up parameters.](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20201006_NewParamGeneration.md)
 
-I have made the following plots, ordered in terms of where they will go in the paper or supplementary material. Figures 1 and 2 are handmade heuristics. They can be found [here](https://docs.google.com/document/d/1CcoJFTX6I8zPptLAzBvITiTaTkNtdgGxNNdQlrcxlSY/edit#heading=h.68abrs8dfl95)
+I have made the following plots, ordered in terms of where they will go in the paper or supplementary material. Figures 1 and 2 are handmade heuristics. They can be found [here.](https://docs.google.com/document/d/1CcoJFTX6I8zPptLAzBvITiTaTkNtdgGxNNdQlrcxlSY/edit#heading=h.68abrs8dfl95)
 ```{params}
 param_list <- list( 
   reps = c(10), 
@@ -15,4 +15,5 @@ param_list <- list(
   interaction = NULL) 
 ```
 
-##
+## Figure 3
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/PhenotypePanel.pdf)
