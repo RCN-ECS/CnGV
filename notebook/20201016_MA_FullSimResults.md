@@ -61,13 +61,20 @@ These percents and rates are the same for the means data.
 ## Heatmap for Std. Dev = 0.5
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HeatMap_LowStdDev.png)
 
+## Omega^2 vs. GxE with Estimated Marginal Means
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/OmegaVsGxE.png)
+
 ## Confusion Panels - Raw Data
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots.png)
 
 ## Confusion Panels - Mean Data
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots_means.png)
 
+## Covariance: Means Vs. Raw Checks
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Cov_MeansVsRaw_panel.png)
 
+## GxE: Means Vs. Raw Checks
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/GxE_MeansVsRaw_panel.png)
 
 
 
