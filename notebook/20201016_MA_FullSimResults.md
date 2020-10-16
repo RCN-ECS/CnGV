@@ -1,4 +1,4 @@
-#Sim Results
+# Sim Results
 
 I ran a full round (10 replicates) for the following starting parameters. [Recall I am using a different way to set up parameters.](https://github.com/RCN-ECS/CnGV/blob/master/notebook/20201006_NewParamGeneration.md)
 
@@ -15,5 +15,31 @@ param_list <- list(
   interaction = NULL) 
 ```
 
+Note that some of these images are not great quality because they are saved as PNGs from powerpoint. I have high quality pdfs that will be submitted for review. Figure legends are written in the document linked to above. 
+
 ## Figure 3
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/PhenotypePanel.pdf)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/PhenotypePanel.png)
+
+
+## Figure 4
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPlot_panel.png)
+
+
+## Figure 5
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HeatMaps.png)
+
+
+## Figure 6
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Real_DataPanel.png)
+
+
+## Figure 7
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/GxE_Cov_Tradeoff.png)
+
+
+# Supplementary Materials:
+
+
+
+
+
