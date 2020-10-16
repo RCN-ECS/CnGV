@@ -18,6 +18,9 @@ param_list <- list(
 Note that some of these images are not great quality because they are saved as PNGs from powerpoint. I have high quality pdfs that will be submitted for review. Figure legends are written in the document linked to above. 
 
 ## Figure 3
+
+KEL: change to "Non-significant GxE" and "Significant GxE"
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/PhenotypePanel.png)
 
 
@@ -26,14 +29,20 @@ Note that some of these images are not great quality because they are saved as P
 
 
 ## Figure 5
+
+I can't read the numbers on the dark blue background
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HeatMaps.png)
 
 
 ## Figure 6
+Both of these have the same COV-Ge and delta-GxE in the text
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Real_DataPanel.png)
 
 
 ## Figure 7
+What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?
+Add the nice curvy line as a 2nd panel. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/GxE_Cov_Tradeoff.png)
 
 
@@ -41,6 +50,10 @@ Note that some of these images are not great quality because they are saved as P
 
 ## Confusion Matrix 
 These percents and rates are the same for the means data. 
+
+KEL note: I think there is a mistake if this is the same for the means data.  The CI for the means data is not the same, so the percentages should be different. Also, the CovGE Bootstrap has a higher false positive rate that you reported before. Where are these false positives coming from? Is it from the 2 environment scenarios? I think we need to dig into this some more, because if the false positive rate is >5% that is higher than we would expect based on random!
+
+Also what are the counts these percentages are based on? I just want to confirm we have good coverage of the cov = 0 and gxe = 0 cases.
 
 | | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
 | ---| ---| ---| ---| ---|
@@ -56,18 +69,23 @@ These percents and rates are the same for the means data.
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HexPlotPanel.png)
 
 ## CovGE vs. GxE
+The setup here is confusing, because the actual number of total samples is very different for the top and bottom graphs. Might be easier to chat about.
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Cov_GxE.png)
 
 ## Heatmap for Std. Dev = 0.5
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HeatMap_LowStdDev.png)
 
 ## Omega^2 vs. GxE with Estimated Marginal Means
+Remove the 1:1 line. I don't think there is a reason to expect these should be related 1:1
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/OmegaVsGxE.png)
 
 ## Confusion Panels - Raw Data
+Add a legend. Also where are the false positives for bootstrap? They're in the confusion matrix. I think there's a bug in your code where the FP and FN are based on the same thing, and not the criteria in panel of the plot.
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots.png)
 
 ## Confusion Panels - Mean Data
+Add a legend
+Something weird is going on here. Why aren't the CI centered on the estimates for the CovGE?
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots_means.png)
 
 ## Covariance: Means Vs. Raw Checks
