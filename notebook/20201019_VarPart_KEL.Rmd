@@ -13,17 +13,85 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-results_folder <- 
-figures_folder <- 
+results_folder <- "/Users/lotterhos/Documents/GitHub/CnGV/results/Simulation_10.10.2020/Archive_2/"
+figures_folder <- "/Users/lotterhos/Documents/GitHub/CnGV/results/Simulation_10.10.2020/PhenotypePlots/"
 simIDs <- c(10621, 15539, 1843, 2715, 3443, 3508, 8313, 9034)
+
+vardf <- read.csv(paste0(results_folder,"Variance_output_results.csv"))
+head(vardf)
 ```
 
-## Including Plots
+## Make plot
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r makeplot}
+makeplot <- function(i, figures_folder1=figures_folder){ 
+  # i is rowID
+  colr = c(grey(0.1), grey(.3), grey(.50), grey(.70), grey(.90))
+  colr = c("#56B4E9", "#0072B2", "#009E73", "#E69F00","#000000")
+  dens = c(5,10,20,30,7)
+  ang = c(0,45,90,11,36)
+  cond <- vardf$row==i
+  
+  pdf(paste0(figures_folder1,i,"VarPlot.pdf"), width=3, height=6)
+  par(mar=c(1,3,1,1), mfrow=c(1,1))
+  barplot(matrix(c(vardf$omega2[cond], rep(0,5)), ncol=2),
+        xlim=c(0,2), ylim=c(0,1),
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2",
+        density= dens, angle=ang)
+  dev.off()
+  return(vardf[cond,])
+}
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+for (i in simIDs){
+  makeplot(i)
+}
+
+pdf(paste0(figures_folder,"0VarPlotLegend.pdf"), width=6, height=6)
+  barplot(matrix(c(vardf$omega2[cond], rep(0,5)), ncol=2),
+        xlim=c(0,5), density=c(5,10,20,30,7) , angle=c(0,45,90,11,36),
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2")
+  legend("right",legend = rev(vardf$Variance_Component[cond]), fill=rev(colr),
+        density=rev(dens) , angle=rev(ang), cex=3)
+dev.off()
+```
+
+
+A few additional graphs for Supp Mat.
+
+* A case where strong COV-GE caused by a greater G component
+* A case where strong COV-GE caused by a greater E component (8313)
+* A case with large amount of G and E, but small amounts of COV-GE and GxE
+```{r}
+library(tidyverse)
+vardf2 <- select(vardf, row, Variance_Component, omega2)
+head(vardf2)
+vardf3 <- spread(vardf2, Variance_Component, omega2)
+head(vardf3)
+
+vardf4 <- select(vardf, row, Variance_Component, SS) %>% spread(Variance_Component, SS)
+head(vardf4)
+
+# A case where strong COV-GE caused by a greater E component
+indexes <- which(vardf3$V_cov > 0.25 & vardf3$V_e > 0.25 & vardf3$V_g < 0.2 &
+      vardf3$V_gxe < 0.01 & vardf4$V_cov >0)
+head(vardf3[indexes,])
+makeplot(1630, paste0(figures_folder,"moreplots/"))
+#vardf3[vardf3$row==1630,]
+
+# A case where strong COV-GE caused by a greater G component
+indexes <- which(vardf3$V_cov > 0.25 & vardf3$V_g > 0.25 & vardf3$V_e < 0.2 &
+      vardf3$V_gxe < 0.01 & vardf4$V_cov >0)
+head(vardf3[indexes,])
+makeplot(1643, paste0(figures_folder,"moreplots/"))
+
+# A case with large amounts of G and E, but small amounts of COV-GE and GxE
+indexes <- which(vardf3$V_cov <0.1 & vardf3$V_g > 0.25 & vardf3$V_e > 0.25 &
+      vardf3$V_gxe < 0.1 & vardf4$V_cov >0)
+vardf3[indexes,]
+makeplot(23069, paste0(figures_folder,"moreplots/"))
+makeplot(26300, paste0(figures_folder,"moreplots/"))
+```
