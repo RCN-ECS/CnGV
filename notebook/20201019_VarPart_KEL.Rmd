@@ -1,0 +1,29 @@
+---
+title: "Var Partitioning Plots"
+author: "KE Lotterhos"
+date: "10/19/2020"
+output: html_document
+---
+
+setwd("/Users/lotterhos/Documents/GitHub/CnGV/notebook")
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+results_folder <- 
+figures_folder <- 
+simIDs <- c(10621, 15539, 1843, 2715, 3443, 3508, 8313, 9034)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
