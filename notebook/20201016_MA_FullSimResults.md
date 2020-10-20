@@ -19,7 +19,7 @@ Note that some of these images are not great quality because they are saved as P
 
 ## Figure 3
 
-KEL: change to "Non-significant GxE" and "Significant GxE"
+~~KEL: change to "Non-significant GxE" and "Significant GxE"~~
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/PhenotypePanel.png)
 
@@ -30,20 +30,21 @@ KEL: change to "Non-significant GxE" and "Significant GxE"
 
 ## Figure 5
 
-I can't read the numbers on the dark blue background
+~~I can't read the numbers on the dark blue background
 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HeatMaps.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Heatmap_Panel.png)
 
 
 ## Figure 6
-Both of these have the same COV-Ge and delta-GxE in the text
+~~Both of these have the same COV-Ge and delta-GxE in the text~~
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Real_DataPanel.png)
 
 
 ## Figure 7
-What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?
-Add the nice curvy line as a 2nd panel. 
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/GxE_Cov_Tradeoff.png)
+~~What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?
+Add the nice curvy line as a 2nd panel. ~~
+Filtering now set to remove all 0's, false positives, and keep only data that are significant CovGE or GxE. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/CovGxE_Tradeoff.png)
 
 
 # Supplementary Materials:
