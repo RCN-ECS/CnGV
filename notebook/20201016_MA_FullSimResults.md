@@ -25,24 +25,28 @@ Note that some of these images are not great quality because they are saved as P
 
 
 ## Figure 4
+Confusion Panel to show full extent of differences between full reciprocal transplant (RT) and paired common garden (CG)
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Confusion2Panel.png)
 
 
 ## Figure 5
 
 ~~I can't read the numbers on the dark blue background~~
-
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Heatmap_Panel.png)
+Heatmap: Top number = total samples; bottom number = Power
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Heatmap_Panel_HighStdDev.png)
 
 
 ## Figure 6
+
 ~~Both of these have the same COV-Ge and delta-GxE in the text~~
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Real_DataPanel.png)
 
 
 ## Figure 7
-~~What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?
-Add the nice curvy line as a 2nd panel. ~~
+~~What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?~~
+
+~~Add the nice curvy line as a 2nd panel~~
 
 Filtering now set to remove all 0's, false positives, and keep only data that are significant CovGE or GxE. 
 
@@ -53,7 +57,7 @@ Filtering now set to remove all 0's, false positives, and keep only data that ar
 
 ## Confusion Matrix 
 
-### Full reciprocal transplant Design (n = 10000 total) 
+### Full reciprocal transplant Design (n = 10000) 
 
 **Raw Data**
 
@@ -79,7 +83,7 @@ Filtering now set to remove all 0's, false positives, and keep only data that ar
 | False Negative Rate |0.929|0.390|0.294|0.043|
 | False Positive Rate |0|0.070|0.081|0.716|
 
-### Paired Common Garden Design (n = 10000 total) 
+### Paired Common Garden Design (n = 10000) 
 
 **Raw Data**
 
@@ -105,28 +109,44 @@ Filtering now set to remove all 0's, false positives, and keep only data that ar
 | False Negative Rate |0.947 | 0.422| 0.287| 0.045|
 | False Positive Rate |0|0.057|0.09 | 0.640|
 
+## Confusion Plots for Means Data
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Confusion2Panel_means.png)
+
 ## Parameter Coverage
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HexPlotPanel.png)
 
 ## CovGE vs. GxE
-The setup here is confusing, because the actual number of total samples is very different for the top and bottom graphs. Might be easier to chat about.
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Cov_GxE.png)
+~~The setup here is confusing, because the actual number of total samples is very different for the top and bottom graphs. Might be easier to chat about.~~
+
+![image]()
 
 ## Heatmap for Std. Dev = 0.5
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HeatMap_LowStdDev.png)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Heatmap_Panel_LowStdDev.png)
 
 ## Omega^2 vs. GxE with Estimated Marginal Means
-Remove the 1:1 line. I don't think there is a reason to expect these should be related 1:1
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/OmegaVsGxE.png)
+~~Remove the 1:1 line. I don't think there is a reason to expect these should be related 1:1~~ 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/OmegaVsEMM_10.20.2020.png)
 
 ## Confusion Panels - Raw Data
-Add a legend. Also where are the false positives for bootstrap? They're in the confusion matrix. I think there's a bug in your code where the FP and FN are based on the same thing, and not the criteria in panel of the plot.
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots.png)
+~~Add a legend.~~ Also where are the false positives for bootstrap? They're in the confusion matrix. I think there's a bug in your code where the FP and FN are based on the same thing, and not the criteria in panel of the plot.
+
+**Full Reciprocal Transplant**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/16panel_confusion_Scen1_raw.png)
+
+**Paired Common Garden**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/16panel_confusion_Scen2_raw.png)
 
 ## Confusion Panels - Mean Data
-Add a legend
+~~Add a legend~~
 Something weird is going on here. Why aren't the CI centered on the estimates for the CovGE?
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/ConfusionPanels_16Plots_means.png)
+
+**Full Reciprocal Transplant**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/16panel_confusion_Scen1_means.png)
+
+**Paired Common Garden**
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/16panel_confusion_Scen2_means.png)
+
 
 ## Covariance: Means Vs. Raw Checks
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Cov_MeansVsRaw_panel.png)
