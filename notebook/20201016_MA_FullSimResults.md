@@ -41,8 +41,8 @@ Note that some of these images are not great quality because they are saved as P
 
 
 ## Figure 7
-~~What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?~~
-~~Add the nice curvy line as a 2nd panel. ~~
+~~What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?
+Add the nice curvy line as a 2nd panel. ~~
 
 Filtering now set to remove all 0's, false positives, and keep only data that are significant CovGE or GxE. 
 
@@ -53,28 +53,57 @@ Filtering now set to remove all 0's, false positives, and keep only data that ar
 
 ## Confusion Matrix 
 
-These are just for the full reciprocal transplant experiment (n = 10000 total) 
+### Full reciprocal transplant Design (n = 10000 total) 
+
 **Raw Data**
+
 | | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
 | ---| ---| ---| ---| ---|
 | True Positive | 821, 8.21% | 6226, 62.26% | 4330, 43.3%  | 9479, 94.79% |
-| True Negative | 71, 0.0071% | 62, 0.0062 | 74, 0.0074 | 20, 0.002% |
-| False Positive | 0, 0% | 9, 0.0009% | 0, 0% | 54, 0.0054% |
-| False Negative | 9108, 91.08% | 3703, 37.03%| 5596, 56.96% | 447, 0.0447%|
+| True Negative | 71, 0.71% | 62, 0.62% | 74, 0.74% | 20, 0.2% |
+| False Positive | 0, 0% | 9, 0.09% | 0, 0% | 54, 0.54% |
+| False Negative | 9108, 91.08% | 3703, 37.03%| 5596, 56.96% | 447, 4.47%|
 |---|---|---|---|---|
-| False Negative Rate | 0.917|  0.373| 0.564| 0.045|
-| False Positive Rate | 0 | 0.1267 | 0 |0.730 |
+| False Negative Rate | 0.917 | 0.373| 0.564 | 0.045|
+| False Positive Rate | 0 | 0.127 | 0 | 0.730 |
 
 **Means Data**
+
 | | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
 | ---| ---| ---| ---| ---|
-| True Positive |821, 0.0821%|6054 , 60.54%|4330, 43.3%|9496, 94.96%|
-| True Negative |71, 0.0071%|66, 0.0066%|74, 0.0074%|21, 0.0021%|
-| False Positive |0|5, 0.0005%|0|53, 0.0053%|
-| False Negative |9108, 91.08%|3875, 38.75%|5596, 55.96%|430 0.043%|
+| True Positive |709, 7.09%|6054, 60.54% | 7006, 70.06%| 9496, 94.96%|
+| True Negative |71, 0.71%|66, 0.66%| 68, 0.68%| 21, 0.21%|
+| False Positive |0|5, 0.05% |6, 0.06%| 53, 0.53%|
+| False Negative |9220, 92.28%|3875, 38.75% |2920, 29.2% | 430, 4.3%|
 |---|---|---|---|---|
-| False Negative Rate |0.917|0.390|0.564|0.043|
-| False Positive Rate |0|0.066|0|0.716|
+| False Negative Rate |0.929|0.390|0.294|0.043|
+| False Positive Rate |0|0.070|0.081|0.716|
+
+### Paired Common Garden Design (n = 10000 total) 
+
+**Raw Data**
+
+| | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
+| ---| ---| ---| ---| ---|
+| True Positive |621,6.21% |5850, 58.5% |4460,44.6% |9436, 94.36% |
+| True Negative |87, 0.87% |79, 0.79% | 89, 0.89%|24, 0.24% |
+| False Positive | 0,0% | 8, 0.08%|0,0% |65, 0.65% |
+| False Negative |9292, 92.29%| 4063, 40.63%| 5451, 54.51%|475, 4.75% |
+|---|---|---|---|---|
+| False Negative Rate |0.937|0.41 |0.55|0.048|
+| False Positive Rate |0 |0.092|0 |0.73 |  
+
+**Means Data**
+
+| | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
+| ---| ---| ---| ---| ---|
+| True Positive |526, 5.26% |5728, 57.28% |7070, 70.7% |9469, 94.69% |
+| True Negative | 87, 0.87%| 82, 0.82%| 81, 0.81%|32, 0.32% |
+| False Positive |0, 0% |5, 0.05% |8, 0.08% |57, 0.57% |
+| False Negative | 9387, 93.87%| 4185, 41.85%| 2841, 28.41%| 442, 4.42%|
+|---|---|---|---|---|
+| False Negative Rate |0.947 | 0.422| 0.287| 0.045|
+| False Positive Rate |0|0.057|0.09 | 0.640|
 
 ## Parameter Coverage
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HexPlotPanel.png)
