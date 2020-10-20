@@ -30,7 +30,7 @@ Note that some of these images are not great quality because they are saved as P
 
 ## Figure 5
 
-~~I can't read the numbers on the dark blue background
+~~I can't read the numbers on the dark blue background~~
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/Heatmap_Panel.png)
 
@@ -41,8 +41,8 @@ Note that some of these images are not great quality because they are saved as P
 
 
 ## Figure 7
-~~What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?
-Add the nice curvy line as a 2nd panel. ~~
+~~What is the filtering on this plot? Did you exclude cases in which one or both equaled zero?~~
+~~Add the nice curvy line as a 2nd panel. ~~
 Filtering now set to remove all 0's, false positives, and keep only data that are significant CovGE or GxE. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/CovGxE_Tradeoff.png)
 
@@ -50,7 +50,8 @@ Filtering now set to remove all 0's, false positives, and keep only data that ar
 # Supplementary Materials:
 
 ## Confusion Matrix 
-These percents and rates are the same for the means data. 
+
+These are just for the full reciprocal transplant experiment (n = 10000 total) 
 
 KEL note: I think there is a mistake if this is the same for the means data.  The CI for the means data is not the same, so the percentages should be different. Also, the CovGE Bootstrap has a higher false positive rate that you reported before. Where are these false positives coming from? Is it from the 2 environment scenarios? I think we need to dig into this some more, because if the false positive rate is >5% that is higher than we would expect based on random!
 
@@ -58,13 +59,13 @@ Also what are the counts these percentages are based on? I just want to confirm 
 
 | | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
 | ---| ---| ---| ---| ---|
-| True Positive | 8.21% | 62.26% | 43.3 % | 94.79% |
-| True Negative | 0.71% | 0.62% | 0.74% | 0.20% |
-| False Positive | 0% | 0.09% | 0% | 0.54% |
-| False Negative | 91.1% | 37.03% | 55.96% | 4.47%|
+| True Positive | 821, 8.21% | 6226, 62.26% | 4330, 43.3%  | 9479, 94.79% |
+| True Negative | 71, 0.0071% | 62, 0.0062 | 74, 0.0074 | 20, 0.002% |
+| False Positive | 0, 0% | 9, 0.0009% | 0, 0% | 54, 0.0054% |
+| False Negative | 9108, 91.08% | 3703, 37.03%| 5596, 56.96% | 447, 0.0447%|
 |---|---|---|---|---|
-| False Negative Rate | 91.73% | 37.3% | 56.38% | 4.5% |
-| False Positive Rate | 0 % | 12.68% | 0% | 72% |
+| False Negative Rate | 0.917|  0.373| 0.564| 0.045|
+| False Positive Rate | 0 | 0.1267 | 0 |0.730 |
 
 ## Parameter Coverage
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Simulation_10.10.2020/HexPlotPanel.png)
