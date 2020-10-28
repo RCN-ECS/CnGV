@@ -16,8 +16,8 @@ param_list <- list(
 
 
 parameter_generation <- function(param_list){
- 
-  ########### Env Scenario 1 ###########  
+  
+  ###################### Env Scenario 1 ###################### 
   params =  expand.grid("n_pop"=param_list$n_pop,
                         "sample_size" = param_list$sample_size,
                         "std_dev" = param_list$std_dev)
@@ -32,8 +32,15 @@ parameter_generation <- function(param_list){
     # Add delta_env, delta_gen, and interaction terms
     param_table1 = data.frame()
     for(i in 1:nrow(params)){
-      delta_env = runif(n = 50, min = 0, max = 1)
-      delta_gen = runif(n = 50, min = -1, max = 1)
+      delta_env1 = runif(n = 40, min = 0, max = 1)
+      delta_env2 = rep(0,times = 10)
+      delta_env3 = c(delta_env1,delta_env2)
+      delta_env = sample(delta_env3, 50, replace = FALSE)
+      
+      delta_gen1 = runif(n = 40, min = -1, max = 1)
+      delta_gen2 = rep(0,times = 10)
+      delta_gen3 = c(delta_gen1,delta_gen2)
+      delta_gen = sample(delta_gen3, 50, replace = FALSE)
       
       if(params$n_pop[i] == 2){
         low_int = runif(50, min = 0, max = 2)
@@ -43,7 +50,7 @@ parameter_generation <- function(param_list){
         high_int = runif(n = 10, min = 2, max = params$n_pop[i])
         pot1 = c(low_int, high_int)
         interaction = sample(pot1, size = 50, replace = FALSE)
-        }
+      }
       inter_df1 = data.frame("delta_env" = delta_env, "delta_gen" = delta_gen, "interaction" = interaction)
       inter_df = merge(params[i,],inter_df1)
       
@@ -54,68 +61,74 @@ parameter_generation <- function(param_list){
     param_table1$env_scenario = rep(1, nrow(param_table1))
     param_table2 = rbind(param_table2, param_table1)
   }
-    
+  
   ########### Env Scenario 2 ########### 
-  params2 =  expand.grid("n_pop"=2*param_list$n_pop,
+  params2 =  expand.grid("n_pop"=2*param_list$n_pop[-4],
                          "sample_size" = param_list$sample_size,
                          "std_dev" = param_list$std_dev)
-    params2$n_env = 2
+  params2$n_env = 2
+  
+  param_table4 = data.frame()
+  
+  for(x in 1:param_list$reps){
     
-    param_table4 = data.frame()
+    cat(x,"2nd","\n")
     
-    for(x in 1:param_list$reps){
+    # Add delta_env, delta_gen, and interaction terms
+    param_table3 = data.frame()
+    
+    for(i in 1:nrow(params2)){
+      delta_env1 = runif(n = 40, min = 0, max = 1)
+      delta_env2 = rep(0,times = 10)
+      delta_env3 = c(delta_env1,delta_env2)
+      delta_env = sample(delta_env3, 50, replace = FALSE)
       
-      cat(x,"2nd","\n")
+      delta_gen1 = runif(n = 40, min = -1, max = 1)
+      delta_gen2 = rep(0,times = 10)
+      delta_gen3 = c(delta_gen1,delta_gen2)
+      delta_gen = sample(delta_gen3, 50, replace = FALSE)
       
-      # Add delta_env, delta_gen, and interaction terms
-      param_table3 = data.frame()
-      for(i in 1:nrow(params)){
-        delta_env = runif(n = 50, min = 0, max = 1)
-        delta_gen = runif(n = 50, min = -1, max = 1)
-        errpop = abs(rnorm(n = 50,  mean = 0, sd = abs(delta_gen)))
-        
-        if(params$n_pop[i] == 2){
-          low_int = runif(50, min = 0, max = 2)
-          interaction = low_int
-        }else{
-          low_int = runif(n = 35, min = 0, max = 1.99)
-          high_int = runif(n = 15, min = 2, max = params$n_pop[i])
-          pot = c(low_int, high_int)
-          interaction = sample(pot, size = 50, replace = FALSE)
-        }
-        inter_df1 = data.frame("delta_env" = delta_env, "delta_gen" = delta_gen, "interaction" = interaction, "errpop" = errpop)
-        inter_df2 = merge(params[i,],inter_df1)
-        
-        param_table3 = rbind(param_table3, inter_df2)
+      errpop = abs(rnorm(n = 50,  mean = 0, sd = abs(delta_gen)))
+      
+      if(params2$n_pop[i] == 2){
+        low_int = runif(50, min = 0, max = 2)
+        interaction = low_int
+      }else{
+        low_int = runif(n = 35, min = 0, max = 1.99)
+        high_int = runif(n = 15, min = 2, max = params2$n_pop[i])
+        pot = c(low_int, high_int)
+        interaction = sample(pot, size = 50, replace = FALSE)
       }
-      param_table3$replicate = rep(x, nrow(param_table3))
-      param_table3$env_scenario = rep(2, nrow(param_table3))
-      param_table4 = rbind(param_table4, param_table3)
+      inter_df1 = data.frame("delta_env" = delta_env, "delta_gen" = delta_gen, "interaction" = interaction, "errpop" = errpop)
+      inter_df2 = merge(params2[i,],inter_df1)
       
+      param_table3 = rbind(param_table3, inter_df2)
     }
-    param_table = data.frame()
-    param_table = rbind(param_table2,param_table4)
+    param_table3$replicate = rep(x, nrow(param_table3))
+    param_table3$env_scenario = rep(2, nrow(param_table3))
+    param_table4 = rbind(param_table4, param_table3)
     
-    # Set.seed for each sim
-    param_table$seed = round(runif(nrow(param_table), min = 1, max = 100000000))
-    
-    # Assign Rows to dataframe
-    row = seq(1:nrow(param_table))
-    param_table = data.frame("row" = row, param_table)
-    param_table$total_samples <- param_table$n_env * param_table$n_pop * param_table$sample_size
-    
-    return(param_table)
   }
+  param_table = data.frame()
+  param_table = rbind(param_table2,param_table4)
+  
+  # Set.seed for each sim
+  param_table$seed = round(runif(nrow(param_table), min = 1, max = 100000000))
+  
+  # Assign Rows to dataframe
+  row = seq(1:nrow(param_table))
+  param_table = data.frame("row" = row, param_table)
+  param_table$total_samples <- param_table$n_env * param_table$n_pop * param_table$sample_size
+  
+  return(param_table)
+}
 
 df = parameter_generation(param_list)
 dim(df)
 df1 = filter(df, total_samples < 500) 
 dim(df1)
-range(df1$row)
 write.csv(df1,"~/Desktop/df.csv")
 
-
-head(df1)
 
 ##############################################
 ##                 OLD METHOD               ##
@@ -125,21 +138,21 @@ parameter_generation <- function(param_list){
   
   # Initial Starting Point  
   params <- expand.grid(#"delta_env" = param_list$delta_env,
-                        "delta_gen" = param_list$delta_gen,
-                        "sample_size" = param_list$sample_size,
-                        "env_scenario" = param_list$env_scenario,
-                        "std_dev" = param_list$std_dev)
+    "delta_gen" = param_list$delta_gen,
+    "sample_size" = param_list$sample_size,
+    "env_scenario" = param_list$env_scenario,
+    "std_dev" = param_list$std_dev)
   
   # Establish range of populations and environments 
   param_temp = data.frame()
   for(i in 1:nrow(params)){
     cat(i,"i","\n")
-  if(params$env_scenario[i] == 1){ # Then the number of pops = number of environments
-    envpop = data.frame("n_env" = param_list$n_pop, "n_pop" = param_list$n_pop)
-    interdf = merge(params[i,],envpop)
+    if(params$env_scenario[i] == 1){ # Then the number of pops = number of environments
+      envpop = data.frame("n_env" = param_list$n_pop, "n_pop" = param_list$n_pop)
+      interdf = merge(params[i,],envpop)
     } else { # If n_pop is spread across 2 environments 
-    envpop = data.frame("n_env" = 2, "n_pop" = 2*param_list$n_pop[-4])
-    interdf = merge(params[i,],envpop)
+      envpop = data.frame("n_env" = 2, "n_pop" = 2*param_list$n_pop[-4])
+      interdf = merge(params[i,],envpop)
     } 
     param_temp = rbind(param_temp, interdf)
   }
@@ -169,12 +182,12 @@ parameter_generation <- function(param_list){
     }else{
       high_interaction_term <- sample(seq(from = 2, to = param_temp2$n_pop[j]),size = 3, replace = FALSE) 
     }
-      interaction_term <- c(low_interaction_term,med_interaction_term,high_interaction_term)
-      interdf3 <- merge(param_temp2[j,],interaction_term)
-      param_temp3 <- rbind(param_temp3, interdf3)
+    interaction_term <- c(low_interaction_term,med_interaction_term,high_interaction_term)
+    interdf3 <- merge(param_temp2[j,],interaction_term)
+    param_temp3 <- rbind(param_temp3, interdf3)
   }
   colnames(param_temp3)[8]<- "interaction"
-
+  
   
   # Add replicates
   reps <- rep(c(1:param_list$reps), each = nrow(param_temp3))
@@ -189,8 +202,8 @@ parameter_generation <- function(param_list){
   param_table$total_samples <- param_table$n_env * param_table$n_pop * param_table$sample_size
   
   return(param_table)
-  }
-  
+}
+
 
 df = parameter_generation(param_list) 
 dim(df)
@@ -198,7 +211,7 @@ dim(df)
 df1 = df %>%
   filter(replicate %in% c(1:10)) %>%
   filter(total_samples < 500) 
-  
+
 df2 = df1[!(df1[,3]==0 & df1[,4]==0),]
 dim(df2) #95,760
 ggplot(df2, aes(x = delta_gen))+geom_histogram()
@@ -330,7 +343,7 @@ len = df[df$replicate == 1,]
 
 check <- df %>%
   filter(replicate %in% c(1:10)) #%>%
-  #filter(n_pop == 2)
+#filter(n_pop == 2)
 
 
 
@@ -357,7 +370,7 @@ ring <- function(param_table, n_boot){
     cat(i, "\n")
     
     # For reproducibility
-   # set.seed = 999
+    # set.seed = 999
     model_df = NULL
     
     # Set Conditional Parameters
@@ -375,7 +388,7 @@ ring <- function(param_table, n_boot){
     
     # Interaction Terms
     int <- rep(rnorm(param_table$n_pop[i] * n_environments, 0, sd = param_table$interaction[i]),each = param_table$sample_size[i]) # interaction term - one for each GE level
-
+    
     # Create the model dataframe 
     model_df <- data.frame(gen, env, noise, int)
     model_df$gen_factor = factor(paste("G", model_df$gen, sep = "_"))
@@ -423,7 +436,7 @@ ring <- function(param_table, n_boot){
     # Covariance
     if(length(G_matrix[,1]) == 2){cov_est = cov(G_matrix$G_means,E_matrix$E_means)
     }else{cov_est = cor(G_matrix$G_means,E_matrix$E_means)}
-
+    
     # Magnitude of GxE using EMMs
     GxE_emm <- abs(mean(model_df$phen_corrected) - # Overall mean
                      (emm_G$emmean[emm_G$gen_factor=="G_1"])- # G
@@ -458,7 +471,7 @@ ring <- function(param_table, n_boot){
       gtemp_ne <- filter(emm_GxE_ne, gen_factor == unique(emm_GxE_ne$gen_factor)[y])
       gmean_ne <- sum(gtemp_ne[,3])/length(unique(emm_GxE_ne$gen_factor))
       tempdat_ne = data.frame("G_means" = gmean_ne,
-                           "gen_factor" = unique(emm_GxE_ne$gen_factor)[y])
+                              "gen_factor" = unique(emm_GxE_ne$gen_factor)[y])
       G_matrix_ne = rbind(G_matrix_ne,tempdat_ne)
     }
     
@@ -469,19 +482,19 @@ ring <- function(param_table, n_boot){
       etemp_ne <- filter(emm_GxE_ne, exp_env_factor == unique(emm_GxE_ne$exp_env_factor)[f])
       emean_ne <- sum(etemp_ne[,3])/n_environments
       tempdat._ne = data.frame("E_means" = emean_ne,
-                                "exp_env_factor" = unique(emm_GxE_ne$exp_env_factor)[f])
+                               "exp_env_factor" = unique(emm_GxE_ne$exp_env_factor)[f])
       E_matrix_ne = rbind(E_matrix_ne,tempdat._ne)
     }
     
     # Covariance
     if(length(G_matrix_ne[,1]) == 2){true_cov = cov(G_matrix_ne$G_means,E_matrix_ne$E_means)
     }else{true_cov = cor(G_matrix_ne$G_means,E_matrix_ne$E_means)}
-
+    
     # Magnitude of GxE with no error 
     true_GxE <- abs(mean(model_df$no_err_phen_corrected) - # Overall mean
-                     (emm_G_ne$emmean[emm_G_ne$gen_factor=="G_1"])- # G
-                     (emm_E_ne$emmean[emm_E_ne$exp_env_factor=="E_1"])+ # E
-                     (emm_GxE_ne[1,3])) # GxE
+                      (emm_G_ne$emmean[emm_G_ne$gen_factor=="G_1"])- # G
+                      (emm_E_ne$emmean[emm_E_ne$exp_env_factor=="E_1"])+ # E
+                      (emm_GxE_ne[1,3])) # GxE
     
     ###############
     ## Bootstrap ##
@@ -546,7 +559,7 @@ ring <- function(param_table, n_boot){
       Cov_matrix_boot <- cbind(G_matrix_boot,E_matrix_boot)
       if(param_table$n_pop[i]==2){cov_est_boot = cov(Cov_matrix_boot$G_means,Cov_matrix_boot$E_means)
       }else{cov_est_boot = cor(Cov_matrix_boot$G_means,Cov_matrix_boot$E_means)}
-
+      
       # Magnitude of GxE - Bootstrap
       GxE_emm_boot <- abs(mean(shuffle_dat$phen_corrected) - # Overall mean
                             (emm_G_boot$emmean[emm_G_boot$gen_factor=="G_1"])- # G
@@ -590,7 +603,7 @@ ring <- function(param_table, n_boot){
       emm_E_perm = as.data.frame(emmeans(test_perm,"exp_env_factor"))
       emm_G_perm = as.data.frame(emmeans(test_perm, "gen_factor"))
       emm_GxE_perm = as.data.frame(emmeans(test_perm, ~ exp_env_factor*gen_factor))
-       
+      
       # Gmeans - Permutation
       G_matrix_perm = data.frame()
       for(r in 1:length(unique(emm_GxE_perm$gen_factor))){
@@ -636,7 +649,7 @@ ring <- function(param_table, n_boot){
     # GxE P-value
     ptemp1 = (rank(c(GxE_emm,perm_df[,2]))[1])/(n_boot+1) 
     GxE_pvalue = 1-ptemp1 # Right-tailed
-
+    
     # Generate Outputs
     temp_out <- data.frame("row" = param_table$row[i],
                            "delta_env" = param_table$delta_env[i],
@@ -656,7 +669,7 @@ ring <- function(param_table, n_boot){
                            "GxE_uprCI" = GxE_CI[[2]],
                            "GxE_pvalue" = GxE_pvalue)
     output = rbind(output, temp_out)
-
+    
     end_time <- Sys.time()
     
     time_difference = end_time - start_time
@@ -716,7 +729,7 @@ pdata <- read.csv("~/Desktop/power_output/compiled_simdata.csv")
 
 pdata$tickmark <- NULL
 for(i in 1:nrow(pdata)){
-if(pdata$cov_pvalue[i] > 0.05){pdata$tickmark[i]=0}else{pdata$tickmark[i]=1} # do 100 replicates for this power
+  if(pdata$cov_pvalue[i] > 0.05){pdata$tickmark[i]=0}else{pdata$tickmark[i]=1} # do 100 replicates for this power
 }
 # How many times is null false? Check true covariance and true GxE when noise = 0 for null expectation. (no sense in looking at power for noise = 0)
 

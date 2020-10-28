@@ -12,7 +12,7 @@ library("tibble")
 source("Cov_GxE_functions.R")
 
 start.time <- Sys.time()
-#args = commandArgs(trailingOnly = TRUE)
+args = commandArgs(trailingOnly = TRUE)
 
 # Load Parameters
 row = as.numeric(args[1])
@@ -29,7 +29,7 @@ env_scenario = as.numeric(args[11])
 seed = as.numeric(args[12])
 
 # Bootstraps
-n_boot <- 99
+n_boot <- 999
 
 # Clear Dataframes
 Variance.partition <- data.frame()
@@ -61,7 +61,7 @@ if(env_scenario == 1){
   dfs <- df.foundations(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2)
 }else{
   dfs <- df.foundations2(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2, seed3, errpop)
-  }
+}
 
 # Working dataframes
 model_df <- dfs[[1]]     # Raw data
@@ -83,7 +83,7 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype (All 4 plots should look similar)
-ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
+# ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
 
 # Check: Mean Phenotype 
 # ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
@@ -175,7 +175,7 @@ for(i in 1:n_boot){
   omega2_boot <- m2[[5]]
   eta2_boot <- m2[[6]]
   GxE_SSq_boot <- m2[[7]] 
-
+  
   # Covariance Estimates
   cov_est_boot = cov(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
   cor_est_boot = cor(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
@@ -218,7 +218,7 @@ for(i in 1:n_boot){
   # Resample Data
   perm_dat <- permutation_raw(model_df)
   var_dat <- permutation_varpar(varpar.df)
-
+  
   # Anova model fit & GxE estimates
   m3 <- mod.GxE(perm_dat) # Insert shuffled permutation raw data frame
   
@@ -288,7 +288,7 @@ for(i in 1:length(unique(var_perm$permid))){
 }
 
 # Histograms 
-hist(Vgxe)
+# hist(Vgxe)
 
 Vg.pval <- pvalue_fun(Variance.partition1$omega2[1],Vg,"righttail",n_boot)
 Ve.pval <- pvalue_fun(Variance.partition1$omega2[2],Ve[,1],"righttail",n_boot)
@@ -338,7 +338,7 @@ for(i in 1:n_boot){
   # GxE Estimates
   Cov_mean_matrix_boot <- m5[[1]]
   GxE_means_boot <- m5[[2]]
-
+  
   # Covariance Estimates
   cov_mean_boot = cov(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
   cor_mean_boot = cor(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
@@ -500,83 +500,83 @@ perm_df$row = row
 
 # Generate Outputs
 output_data <- data.frame("row" = row, # Original Parameters
-                         "replicate" = replicate,
-                         "env_scenario" = env_scenario,
-                         "delta_env" = delta_env,
-                         "delta_gen" = delta_gen,
-                         "sample_size" = sample_size,
-                         "total_samples" = sample_size*n_pop*n_env,
-                         "n_env" = n_env,
-                         "n_pop" = n_pop,
-                         "std_dev" = std_dev,
-                         "interaction" = interaction,
-                         "Sim_time" = time.taken,
-                         
-                         "true_cov" = cov_corrected.ne, # Corrected Covariance Estimates
-                         "covariance" = cov_corrected, 
-                         "covariance_lwrCI" = cov_corrected_CI[[1]],
-                         "covariance_uprCI" = cov_corrected_CI[[2]],
-                         "covariance_pvalue" = cov_corrected_pvalue,
-                         
-                         #"true_cov_uncorrected" = cov_est.ne, #Covariance 
-                         #"cov_uncorrected" = cov_est,
-                         #"cov_uncorrected_lwrCI" = cov_CI[[1]],
-                         #"cov_uncorrected_uprCI" = cov_CI[[2]],
-                         #"cov_uncorrected_pvalue" = cov_original_pvalue,  
-                         
-                         #"true_cor" = cor_est.ne, # Correlation 
-                         #"cor" = cor_est,
-                         #"cor_lwrCI" = cor_CI[[1]],
-                         #"cor_uprCI" = cor_CI[[2]],
-                         #"cor_pvalue" = cor_pvalue,
-                         
-                         "true_cov_means" = cov_means_corrected.ne, # Corrected Covariance -- means
-                         "cov_means" = cov_means_corrected,
-                         "cov_means_lwrCI" = cov_corrected_means_CI[[1]],
-                         "cov_means_uprCI" = cov_corrected_means_CI[[2]],
-                         "cov_means_pvalue" = cov_corrected_mean_pvalue,
-                         
-                         #"true_cor_means" = cor_est_means.ne, # Correlation -- means 
-                         #"cor_means" = cor_est_means,
-                         #"cor_means_lwrCI" = cor_means_CI[[1]],
-                         #"cor_means_uprCI" = cor_means_CI[[2]],
-                         #"cor_means_pvalue" = cor_mean_pvalue)
-
-                        "GxE_Anova" = aov.df1[3,6],
-                        "true_GxE_emm" = round(GxE_emm.ne,2),# GxE Emmeans from loop
-                        "GxE_emm" = round(GxE_emm,2), 
-                        "GxE_emm_lwrCI" = round(GxE_emm_CI[[1]],2),
-                        "GxE_emm_uprCI" = round(GxE_emm_CI[[2]],2),
-                        "GxE_emm_pvalue" = round(GxE_emm_pvalue,2),
-                        
-                        #"true_GxE_old" = round(GxE_emm_original.ne,2), # Emmeans GxE using original method (unused)
-                        #"GxE_emm_old" = round(GxE_emm_original,2),
-                        #"GxE_emm_old_lwrCI" = round(GxE_orig_CI[[1]],2),
-                        #"GxE_emm_old_uprCI" = round(GxE_orig_CI[[2]],2),
-                        #"GxE_emm_old_pvalue" = round(GxE_emm_orig_pvalue,2),
-                        
-                        "true_GxE_omega" = round(omega2.ne,2), # Omega^2 
-                        "GxE_omega" = round(omega2,2), 
-                        "GxE_omega_lwrCI" = round(GxE_omega_CI[[1]],2),
-                        "GxE_omega_uprCI" = round(GxE_omega_CI[[2]],2),
-                        "GxE_omega_pvalue" = round(GxE_omega_pvalue,2), 
-                        
-                        #"true_GxE_eta" = round(eta2.ne,2), # Eta^2 
-                        #"GxE_eta" = round(eta2,2),
-                        #"GxE_eta_lwrCI" = round(GxE_eta_CI[[1]],2),
-                        #"GxE_eta_uprCI" = round(GxE_eta_CI[[2]],2),
-                        #"GxE_eta_pvalue" = round(GxE_eta_pvalue,2),
-                        
-                        "true_GxE_SSq" = round(GxE_SSq.ne,2), # Sums of Squares
-                        "GxE_SSq" = round(GxE_SSq,2),
-                        "GxE_SSq_lwrCI" = round(GxE_SSq_CI[[1]],2),
-                        "GxE_SSq_uprCI" = round(GxE_SSq_CI[[2]],2),
-      
-                        "true_GxE_means" = round(GxE_means.ne,2), # GxE on means
-                        "GxE_means" = round(GxE_means,2),
-                        "GxE_means_lwrCI" = round(GxE_means_CI[[1]],2),
-                        "GxE_means_uprCI" = round(GxE_means_CI[[2]],2),
-                        "GxE_means_pvalue" = round(GxE_mean_pvalue,2)) 
+                          "replicate" = replicate,
+                          "env_scenario" = env_scenario,
+                          "delta_env" = delta_env,
+                          "delta_gen" = delta_gen,
+                          "sample_size" = sample_size,
+                          "total_samples" = sample_size*n_pop*n_env,
+                          "n_env" = n_env,
+                          "n_pop" = n_pop,
+                          "std_dev" = std_dev,
+                          "interaction" = interaction,
+                          "Sim_time" = time.taken,
+                          
+                          "true_cov" = cov_corrected.ne, # Corrected Covariance Estimates
+                          "covariance" = cov_corrected, 
+                          "covariance_lwrCI" = cov_corrected_CI[[1]],
+                          "covariance_uprCI" = cov_corrected_CI[[2]],
+                          "covariance_pvalue" = cov_corrected_pvalue,
+                          
+                          #"true_cov_uncorrected" = cov_est.ne, #Covariance 
+                          #"cov_uncorrected" = cov_est,
+                          #"cov_uncorrected_lwrCI" = cov_CI[[1]],
+                          #"cov_uncorrected_uprCI" = cov_CI[[2]],
+                          #"cov_uncorrected_pvalue" = cov_original_pvalue,  
+                          
+                          #"true_cor" = cor_est.ne, # Correlation 
+                          #"cor" = cor_est,
+                          #"cor_lwrCI" = cor_CI[[1]],
+                          #"cor_uprCI" = cor_CI[[2]],
+                          #"cor_pvalue" = cor_pvalue,
+                          
+                          "true_cov_means" = cov_means_corrected.ne, # Corrected Covariance -- means
+                          "cov_means" = cov_means_corrected,
+                          "cov_means_lwrCI" = cov_corrected_means_CI[[1]],
+                          "cov_means_uprCI" = cov_corrected_means_CI[[2]],
+                          "cov_means_pvalue" = cov_corrected_mean_pvalue,
+                          
+                          #"true_cor_means" = cor_est_means.ne, # Correlation -- means 
+                          #"cor_means" = cor_est_means,
+                          #"cor_means_lwrCI" = cor_means_CI[[1]],
+                          #"cor_means_uprCI" = cor_means_CI[[2]],
+                          #"cor_means_pvalue" = cor_mean_pvalue)
+                          
+                          "GxE_Anova" = aov.df1[3,6],
+                          "true_GxE_emm" = round(GxE_emm.ne,2),# GxE Emmeans from loop
+                          "GxE_emm" = round(GxE_emm,2), 
+                          "GxE_emm_lwrCI" = round(GxE_emm_CI[[1]],2),
+                          "GxE_emm_uprCI" = round(GxE_emm_CI[[2]],2),
+                          "GxE_emm_pvalue" = round(GxE_emm_pvalue,2),
+                          
+                          #"true_GxE_old" = round(GxE_emm_original.ne,2), # Emmeans GxE using original method (unused)
+                          #"GxE_emm_old" = round(GxE_emm_original,2),
+                          #"GxE_emm_old_lwrCI" = round(GxE_orig_CI[[1]],2),
+                          #"GxE_emm_old_uprCI" = round(GxE_orig_CI[[2]],2),
+                          #"GxE_emm_old_pvalue" = round(GxE_emm_orig_pvalue,2),
+                          
+                          "true_GxE_omega" = round(omega2.ne,2), # Omega^2 
+                          "GxE_omega" = round(omega2,2), 
+                          "GxE_omega_lwrCI" = round(GxE_omega_CI[[1]],2),
+                          "GxE_omega_uprCI" = round(GxE_omega_CI[[2]],2),
+                          "GxE_omega_pvalue" = round(GxE_omega_pvalue,2), 
+                          
+                          #"true_GxE_eta" = round(eta2.ne,2), # Eta^2 
+                          #"GxE_eta" = round(eta2,2),
+                          #"GxE_eta_lwrCI" = round(GxE_eta_CI[[1]],2),
+                          #"GxE_eta_uprCI" = round(GxE_eta_CI[[2]],2),
+                          #"GxE_eta_pvalue" = round(GxE_eta_pvalue,2),
+                          
+                          "true_GxE_SSq" = round(GxE_SSq.ne,2), # Sums of Squares
+                          "GxE_SSq" = round(GxE_SSq,2),
+                          "GxE_SSq_lwrCI" = round(GxE_SSq_CI[[1]],2),
+                          "GxE_SSq_uprCI" = round(GxE_SSq_CI[[2]],2),
+                          
+                          "true_GxE_means" = round(GxE_means.ne,2), # GxE on means
+                          "GxE_means" = round(GxE_means,2),
+                          "GxE_means_lwrCI" = round(GxE_means_CI[[1]],2),
+                          "GxE_means_uprCI" = round(GxE_means_CI[[2]],2),
+                          "GxE_means_pvalue" = round(GxE_mean_pvalue,2)) 
 
 # Write Files
 write.csv(output_data,paste0("/scratch/albecker/Power_analysis/power_output/Results_",row,".csv"))

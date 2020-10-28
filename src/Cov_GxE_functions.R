@@ -29,7 +29,7 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   
   # True mean phenotype data using regression equation
   model_df$GE_true = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
-
+  
   # True means 
   G_true <- data.frame(G_true = tapply(model_df$GE_true, model_df$gen_factor, mean))
   G_true <- rownames_to_column(G_true, var = "gen_factor")
@@ -53,15 +53,15 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   
   # Add error to standardized phenotype
   model_df$phen_corrected <- model_df$GE_stn_true + model_df$e
-
+  
   # Chr -> Factor
   model_df$gen_factor <- as.factor(model_df$gen_factor)
   model_df$exp_env_factor <- as.factor(model_df$exp_env_factor)
   
   # Sanity plots
-  #ggplot(model_df, aes(x = exp_env_factor, y = GE_stn_true, group = gen_factor, colour = nat_env_factor))+ geom_point()+geom_line()
-  #ggplot(model_df, aes(x = exp_env_factor, y = GE_true, group = gen_factor, colour = gen_factor))+ geom_point()+geom_line()
-  #ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = gen_factor))+ geom_point()+geom_smooth(se=FALSE)
+  # ggplot(model_df, aes(x = exp_env_factor, y = GE_stn_true, group = gen_factor, colour = nat_env_factor))+ geom_point()+geom_line()
+  # ggplot(model_df, aes(x = exp_env_factor, y = GE_true, group = gen_factor, colour = gen_factor))+ geom_point()+geom_line()
+  # ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = gen_factor))+ geom_point()+geom_smooth(se=FALSE)
   
   # Generate means dataframe
   GE_means <- data.frame(avg_phen_corrected = tapply(model_df$phen, model_df$GE_factor, mean))
@@ -102,10 +102,6 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   
   # Add native environments
   mean_df_ne$nat_env_factor = df.ne$nat_env_factor[match(mean_df_ne$gen_factor,df.ne$gen_factor)]
-  
-  # No error Plots
-  #ggplot(df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = gen_factor))+geom_line()
-  #ggplot(mean_df_ne, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, colour = gen_factor))+geom_line()
   
   # Chr -> Factor
   mean_df_ne$gen_factor <- as.factor(mean_df_ne$gen_factor)
@@ -157,10 +153,10 @@ df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n
   
   # True mean phenotype data using regression equation
   model_df$GE_true_temp = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
-
+  
   set.seed = seed3
   model_df$e_pop <- rep(rnorm(n_pop, 0, sd = errpop), each = n_env*sample_size)
-
+  
   model_df$GE_true <- model_df$GE_true_temp + model_df$e_pop
   
   # Now add in actual genotypes
@@ -196,7 +192,7 @@ df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n
   
   # Phenotype with error
   model_df$phen_corrected <- model_df$GE_stn_true + model_df$e
-
+  
   # Chr -> Factor
   model_df$gen_factor <- as.factor(model_df$gen_factor)
   model_df$exp_env_factor <- as.factor(model_df$exp_env_factor)
@@ -293,7 +289,7 @@ var.partition <- function(input_df){
   
   # Variance due to error
   V_error = sum((input_df$phen_corrected - input_df$GE_stn_est)^2)
-
+  
   SS <- round(rbind(V_g, V_e, V_gxe, V_cov, V_error),4)
   omega2 <- round(abs(SS)/sum(abs(SS)),4)
   var_part = data.frame(SS, abs(SS), omega2)
@@ -321,8 +317,6 @@ mod.GxE <- function(input_df){ # input is model_df
   emm_GxE = as.data.frame(emmeans(aov.test, ~ exp_env_factor*gen_factor))
   
   # Gmeans
-  #E_means <- tapply(emm_GxE$emmean, emm_GxE$exp_env_factor, mean)
-  #G_means <- tapply(emm_GxE$emmean, emm_GxE$gen_factor, mean)
   G_matrix <- data.frame("G_means" = emm_G$emmean, "gen_factor" = emm_G$gen_factor)
   E_matrix <- data.frame("E_means" = emm_E$emmean, "exp_env_factor" = emm_E$exp_env_factor)
   
@@ -333,9 +327,9 @@ mod.GxE <- function(input_df){ # input is model_df
   
   # Magnitude of GxE -- EMMs
   GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
-                         emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
-                         emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
-                         mean(emm_GxE$emmean)) # Overall mean phenotype
+                           emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                           emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
+                           mean(emm_GxE$emmean)) # Overall mean phenotype
   
   # Output based on Stamps/Hadfield approach
   delta_E = ((emm_GxE$emmean[3]-emm_GxE$emmean[4])+(emm_GxE$emmean[1]-emm_GxE$emmean[2]))/2 
@@ -351,9 +345,9 @@ mod.GxE <- function(input_df){ # input is model_df
       G_levels <- levels(emm_GxE$gen_factor)
       E_levels <- levels(emm_GxE$exp_env_factor)
       loopGxE <- abs(emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
-                     emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # mean phenotype of ith Genotype
-                     emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # mean phenotype of jth Environment
-                     mean(emm_GxE$emmean)) # Overall mean
+                       emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # mean phenotype of ith Genotype
+                       emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # mean phenotype of jth Environment
+                       mean(emm_GxE$emmean)) # Overall mean
       allGE <- c(allGE, loopGxE)
     }
   }
@@ -362,10 +356,10 @@ mod.GxE <- function(input_df){ # input is model_df
   
   # Omega^2
   w2_GxE = (summary(aov(aov.test))[[1]][3,2] - #(SS_effect -
-           (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / #(Df_effect * MS_error))/
-           (sum(summary(aov(aov.test))[[1]][,2]) + # (SS_total+
-           (summary(aov(aov.test))[[1]][4,3])) # MS_error)
-        
+              (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / #(Df_effect * MS_error))/
+    (sum(summary(aov(aov.test))[[1]][,2]) + # (SS_total+
+       (summary(aov(aov.test))[[1]][4,3])) # MS_error)
+  
   # Eta^2 
   eta_GxE = summary(aov(aov.test))[[1]][3,2]/sum(summary(aov(aov.test))[[1]][,2])
   
@@ -388,35 +382,35 @@ mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df
   GiEj_mean = Gi_mean = Ej_mean = GiEj_null_samp = NULL
   
   if(is.perm == FALSE){
-
-  # Means of Means
-  E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
-  G_means <- tapply(input_df$avg_phen_corrected, input_df$gen_factor, mean)
-  Gmean_mat <- data.frame("G_means" = G_means, "gen_factor" = unique(input_df$gen_factor))
-  Emean_mat <- data.frame("E_means" = E_means, "exp_env_factor" = unique(input_df$exp_env_factor))
-  
-  # Match means to native
-  Cov_mean_matrix = Gmean_mat
-  Cov_mean_matrix$exp_env_factor <- input_df$nat_env_factor[match(Cov_mean_matrix$gen_factor,input_df$gen_factor)]
-  Cov_mean_matrix$E_means <- Emean_mat$E_means[match(Cov_mean_matrix$exp_env_factor,Emean_mat$exp_env_factor)]
-  
-  # Magnitude of GxE -- Loop -- Means
-  for (i in 1:nlevels(input_df$gen_factor)){
-    for (j in 1:nlevels(input_df$exp_env_factor)){
-      G_levels <- levels(input_df$gen_factor)
-      E_levels <- levels(input_df$exp_env_factor)
-      GxE_mean.temp <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
-                            mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i]])- # mean phenotype of ith Genotype
-                            mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]])+ # mean phenotype of jth Environment
-                            mean(input_df$avg_phen_corrected)) # Overall mean
-      allGEmeans <- c(allGEmeans, GxE_mean.temp)
+    
+    # Means of Means
+    E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
+    G_means <- tapply(input_df$avg_phen_corrected, input_df$gen_factor, mean)
+    Gmean_mat <- data.frame("G_means" = G_means, "gen_factor" = unique(input_df$gen_factor))
+    Emean_mat <- data.frame("E_means" = E_means, "exp_env_factor" = unique(input_df$exp_env_factor))
+    
+    # Match means to native
+    Cov_mean_matrix = Gmean_mat
+    Cov_mean_matrix$exp_env_factor <- input_df$nat_env_factor[match(Cov_mean_matrix$gen_factor,input_df$gen_factor)]
+    Cov_mean_matrix$E_means <- Emean_mat$E_means[match(Cov_mean_matrix$exp_env_factor,Emean_mat$exp_env_factor)]
+    
+    # Magnitude of GxE -- Loop -- Means
+    for (i in 1:nlevels(input_df$gen_factor)){
+      for (j in 1:nlevels(input_df$exp_env_factor)){
+        G_levels <- levels(input_df$gen_factor)
+        E_levels <- levels(input_df$exp_env_factor)
+        GxE_mean.temp <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
+                               mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i]])- # mean phenotype of ith Genotype
+                               mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]])+ # mean phenotype of jth Environment
+                               mean(input_df$avg_phen_corrected)) # Overall mean
+        allGEmeans <- c(allGEmeans, GxE_mean.temp)
+      }
     }
-  }
-  #hist(allGEmeans)
-  GxE_means = mean(allGEmeans)
-  
+    #hist(allGEmeans)
+    GxE_means = mean(allGEmeans)
+    
   }else{ # Below generates null distribution for GxE means
-   
+    
     # Means of Means
     E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
     G_means <- tapply(input_df$avg_phen_corrected, input_df$gen_factor, mean)
@@ -444,16 +438,16 @@ mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df
         
         # Estimate 
         GxE_mean.temp <- abs(GiEj_null_samp - # GxE (Phenotype of ith genotype in jth environment)
-                             Gi_mean - # mean phenotype of ith Genotype
-                             Ej_mean + # mean phenotype of jth Environment
-                             mean(input_df$avg_phen_corrected)) # Overall mean
+                               Gi_mean - # mean phenotype of ith Genotype
+                               Ej_mean + # mean phenotype of jth Environment
+                               mean(input_df$avg_phen_corrected)) # Overall mean
         allGEmeans <- c(allGEmeans, GxE_mean.temp)
       }
     }
     
     GxE_means = mean(allGEmeans)
     
-    }
+  }
   
   return(list(Cov_mean_matrix, GxE_means, allGEmeans))
 }
@@ -507,7 +501,7 @@ bootstrap_means <- function(input_df, seedset){ # input is means_df
       set.seed = seedset
       new_phen. <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se) # generate replicate means
       new_phen <- sample(new_phen., size = length(new_phen.), replace = TRUE) # shuffle
-
+      
       # Output
       new_mean_temp <- data.frame("gen_factor" = cond$gen_factor,
                                   "exp_env_factor" = cond$exp_env_factor,
@@ -653,6 +647,7 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
     ###############
     
     boot_dat_raw = boot_df_raw = data.frame()
+    
     for(i in 1:n_boot){
       
       # Shuffle Data
@@ -765,13 +760,15 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
                         "GxE Estimate" = GxE_emm,
                         "GxE Lower CI" = GxE_emm_CI[[1]],
                         "GxE Upper CI" = GxE_emm_CI[[2]],
-                        "GxE p-value" = GxE_emm_pvalue)
+                        "GxE p-value" = GxE_emm_pvalue,
+                        "seed" = NA)
     return(output)
     
-  }else{ # MEANS ------- NEEDS TO HAVE GxE AND P-VALUE CODE UPDATE? 
+  }else{ 
     
     # Establish seeds
-    #set.seed(seed)
+    seed = sample(1:15000000,1)
+    set.seed(seed)
     sim_seeds <- round(runif(4*n_boot)*1000000) # More than enough
     seed1 = sim_seeds[1] # df.foundations
     seed2 = sim_seeds[2] # df.foundations
@@ -787,6 +784,10 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
     input_df$se = input_df$phen_se
     input_df$avg_phen = (input_df$phen_data - mean(input_df$phen_data))/sd(input_df$phen_data)
     input_df$avg_phen_corrected = (input_df$phen_data - mean(input_df$phen_data))/sd(input_df$phen_data)
+    
+    # Plot 
+    # ggplot(input_df, aes(x = exp_env_factor, y = phen_data, group = gen_factor))+geom_point() + geom_smooth(method = "glm")
+    # ggplot(input_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor))+geom_point() + geom_smooth(method = "glm")
     
     # GxE estimates
     m4 <- mean.GxE(input_df,is.perm = FALSE, seed = NA) # Insert means data frame (seed not necessary if is.perm is False)
@@ -886,8 +887,8 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
     }
     
     # Check: Histogram
-    # hist(perm_df_means$GxE_means_perm)
-    # abline(v = GxE_means,col = "red")
+    perm_df_means$line = GxE_means
+    ggplot(perm_df_means, aes(x = GxE_means_perm)) + geom_histogram() + geom_vline(aes(xintercept = line),colour = "red")
     
     # Covariance P-values
     cov_original_mean_pvalue <- pvalue_fun(cov_est_means,perm_df_means$cov_means_perm,"twotail", n_boot)
@@ -905,10 +906,11 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
                         "GxE Estimate" = GxE_means,
                         "GxE Lower CI" = GxE_means_CI[[1]],
                         "GxE Upper CI" = GxE_means_CI[[2]],
-                        "GxE p-value" = GxE_mean_pvalue)
+                        "GxE p-value" = GxE_mean_pvalue,
+                        "seed" = seed)
     return(output)
   } 
-} # May need to be updated - check means code! (written 9/30/20)
+}
 rm(amarillo_armadillo)
 
 empty_as_na <- function(x){
