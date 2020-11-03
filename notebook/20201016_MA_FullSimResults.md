@@ -149,7 +149,7 @@ Filtered to remove all 0's, false positives, and keep only data that are signifi
 
 ## Covariance: Means Vs. Raw Checks - Paired Common Garden
 
-Yes I see it, No I haven't figured it out. 
+Updated 11/2/2020: Problem is in n_pop = 16 situations. This pattern is caused by the way that R handles numbers over 10. In the raw covariance matrix, gen_factor is listed in this order: "G_1","G_10","G_11" and so on. In the means covariance matrix, these are mixed up, so gen_factor is listed as: "G_1", "G_2", "G_3", which then does not correctly pair with the right environment, producing these wonky results. I've patched the issue in the code and I am re-running the 3000 affected scenarios. 
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/11.1.Cov_RawVsMeans_Env2.png)
 
