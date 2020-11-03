@@ -57,10 +57,10 @@ Filtered to remove all 0's, false positives, and keep only data that are signifi
 
 | | CovGE Permutation | CovGE Bootstrap | GxE Bootstrap | GxE Permutation |
 | ---| ---| ---| ---| ---|
-| True Positive | 560 - 5.6% | 5595 - 55.95% |  9496 - 94.96% |4730 - 47.3%|
-| True Negative | 143 - 1.43% | 127 - 1.27%|  16 - 0.16%|65 - 0.65%|
-| False Positive | 0 |  16 - 0.16%| 49 - 0.49%|0 | 
-| False Negative | 9297 - 92.97%| 4262 - 42.62% |439 - 4.39% |5205 - 52.05% | 
+| True Positive | 560 - 5.6% | 5595 - 55.95% |  9496 - 94.96% | 4730 - 47.3%|
+| True Negative | 143 - 1.43% | 127 - 1.27%|  16 - 0.16%| 65 - 0.65%|
+| False Positive | 0 |  16 - 0.16%| 49 - 0.49%| 0 | 
+| False Negative | 9297 - 92.97%| 4262 - 42.62% |439 - 4.39% | 5205 - 52.05% | 
 |---|---|---|---|---|
 | False Negative Rate | 0.943 | 0.432 |  0.044 |0.524 |
 | False Positive Rate | 0| 0.112 | 0.754 | 0 | 
@@ -104,49 +104,66 @@ Filtered to remove all 0's, false positives, and keep only data that are signifi
 | False Positive Rate |0.001 | 0.018| 0 | 1.0|
 
 ## Confusion Plots for Means Data
-![image]()
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/ConfusionPanel_means.png)
 
 ## Parameter Coverage
-![image]()
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/10.30.HexPlot_supplement.png)
 
 ## CovGE vs. GxE
-~~The setup here is confusing, because the actual number of total samples is very different for the top and bottom graphs. Might be easier to chat about.~~
 
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/CovGxE_Pyramid.png)
 
 ## Heatmap for Std. Dev = 0.5
-![image]()
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/Heatmap_Panel_lowStdDev.png)
 
 ## Omega^2 vs. GxE with Estimated Marginal Means
-~~Remove the 1:1 line. I don't think there is a reason to expect these should be related 1:1~~ 
 
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/10.30.EmmVsAnova.png)
 
 ## Confusion Panels - Raw Data
-~~Add a legend.~~ Also where are the false positives for bootstrap? They're in the confusion matrix. I think there's a bug in your code where the FP and FN are based on the same thing, and not the criteria in panel of the plot.
 
 **Full Reciprocal Transplant**
-![image]()
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/Supp_confmat_Raw1.png)
 
 **Paired Common Garden**
-![image]()
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/Supp_confmat_Raw2.png)
 
 ## Confusion Panels - Mean Data
-~~Add a legend~~
-Something weird is going on here. Why aren't the CI centered on the estimates for the CovGE?
 
 **Full Reciprocal Transplant**
-![image]()
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/Supp_confmat_Means1.png)
 
 **Paired Common Garden**
-![image]()
 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/Supp_confmat_Means2.png)
 
-## Covariance: Means Vs. Raw Checks
-![image]()
+## Covariance: Means Vs. Raw Checks - Reciprocal Transplant 
 
-## GxE: Means Vs. Raw Checks
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/11.1.Cov_RawVsMeans.png)
+
+## Covariance: Means Vs. Raw Checks - Paired Common Garden
+
+Yes I see it, No I haven't figured it out. 
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/11.1.Cov_RawVsMeans_Env2.png)
+
+## GxE: Means Vs. Raw Checks - Reciprocal Transplant
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/11.1.GxE_RawVs.Means.png)
+
+## GxE: Means Vs. Raw Checks - Common Garden
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/11.1.GxE_MeansVsRaw_Scen2.png)
+
+## GxE Permutation P-values vs. Anova P-values
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_10.30.2020/11.1.GxE_PvalComparison.png)
 
 
 
