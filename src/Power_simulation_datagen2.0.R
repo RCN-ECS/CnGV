@@ -129,7 +129,10 @@ df1 = filter(df, total_samples < 500)
 dim(df1)
 write.csv(df1,"~/Desktop/df.csv")
 
-
+## PUll out 16s for trouble shooting
+df2 = df1 %>%
+  filter(env_scenario == 2) %>%
+  filter(n_pop == 16)
 ##############################################
 ##                 OLD METHOD               ##
 ##############################################
