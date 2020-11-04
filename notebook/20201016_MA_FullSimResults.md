@@ -95,13 +95,13 @@ Filtered to remove all 0's, false positives, and keep only data that are signifi
 
 | | CovGE Permutation | CovGE Bootstrap | GxE Permutation | GxE Bootstrap |
 | ---| ---| ---| ---| ---|
-| True Positive | 637 - 5.79%|4798 - 49.3% |8873 - 80.7% | 10982 - 99.8% |
-| True Negative | 778 - 7.07%| 765 - 6.95%| 18 - 0.164%| 0|
-| False Positive |1 - 0.009% | 14 - 0.127%| 0 | 18 - 0.164%|
-| False Negative |9584 - 87.1% | 5423 - 49.3%| 2109 - 19.2%| 0|
+| True Positive | 1594 - 14.5%| 5309 - 48.3% |8873 - 80.7% | 10982 - 99.8% |
+| True Negative | 748 - 6.8%| 706 - 6.42%| 18 - 0.164%| 0|
+| False Positive | 32 - 0.291%| 74 - 0.673% | 0 | 18 - 0.164%|
+| False Negative | 8626 - 78.4%| 4911 - 44.6%| 2109 - 19.2%| 0|
 |---|---|---|---|---|
-| False Negative Rate |0.938 |0.531 |0.192 | 0|
-| False Positive Rate |0.001 | 0.018| 0 | 1.0|
+| False Negative Rate | 0.844 | 0.531 | 0.192 | 0 |
+| False Positive Rate | 0.041 | 0.018 | 0 | 1.0 |
 
 ## Confusion Plots for Means Data
 
