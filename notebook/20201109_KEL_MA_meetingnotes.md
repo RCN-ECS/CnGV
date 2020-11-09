@@ -5,7 +5,8 @@
 * Check that all approaches for raw data vs. means data are as parallel as possible 
   * Standardization by group means vs. all phenotypic means - what we had talked about back in August vs. in manuscript
   * Hypothesis test as delta-GxE=0 (raw data?) vs. delta-GxE = G+E (means data?)
-    * At one point I remember digging into the weird null distribution for GxE being created by the permutation? I thought I made a markdown for it, need to find which post this is in.
+    * At one point I remember digging into the weird null distribution for GxE being created by the permutation: https://github.com/RCN-ECS/CnGV/blob/master/notebook/20200616_KEL_ExploreMeansPermutation.R 
+    * Review this post together with Molly
   
 * Confusion matrix presentation - things to discuss and decide
   * While the "overall" confusion matrices are useful for us, I am hesitant to present them in the main text because the true positive / 
