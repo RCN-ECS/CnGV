@@ -26,6 +26,7 @@
 
 * Make a full list of all other things that we need to check and discuss - or not passing sanity checks
   * Write out our equations for the population parameter calculation vs. the sample estimates - especially for Cov-GE.
+  **MA:** *Ok. So we actually want to calculate Covariance differently for actual vs. estimated values. ACTUAL is our population sample, so we need to standardize by max of NO ERROR variance, and we want to make sure cov is NOT doing n-1 in denominator). This is important for correctly measuring error rates. Both equations are listed in the CNGV ms*. 
   * Explain the clustering approach for paired common garden sims more clearly
   * Make an outline for the discussion with Geoff
   * Make sure to have 1000 sims of CovGE = 0 for FPRs
