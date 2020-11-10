@@ -46,3 +46,33 @@
   
 * Make a new notebook post so that we have the results to compare to last post
 
+
+# 20201110 Meeting notes KEL
+
+## we talked about manuscript writing is good idea
+ * manuscript could be good without GxE, Molly definitely wants it in there
+
+
+## GxE issue
+* permutation approach is different for means data vs. raw data
+* the GxE hypothesis test that we have for the means data is specifically for the case when means and SE are provided
+* it doesn't appear that we have a function to create the null distribution for raw data
+start with one dataset - look at the null distributions for GxE hypothesis test that you're using
+choose a dataset that has a significant ANOVA P-value, but the the P-values are reall different for means vs. raw data - make sure it has a decent total sample size * what does this show? discuss check with Katie
+* use that dataset to develop and test code
+* then run a test set to see if solves the problem
+* if necessary, rerun sims
+
+## Confusion matrices
+* Come up with a way to present it for specific designs that we recommend
+* Do we have enough sims to estimate false positives? Typical sim studies recommend 1000
+* Molly thinks this should be a representation of random sampling - we discussed how to structure it so that
+* Start with Figure 5, remake with false positive and false negative rates. Specify number of sims in each cell. Then we can talk about how we want to "hone in" if we low samples for the false positive rates.
+* Are the 2x2 driving the high FPR?
+* Discussed some of the differences in the confusion matrices between the reciprocal transplant vs. common garden data, is it different in the way the parameter space is sampled or something else about the design?
+* Discussed benefit of comparing ANOVA confusion matrix to our GxE approach, in terms of convincing reviewers
+* Let's figure out how we're going to present it, then figure out what sims we would need to make that presentation, then just run those sims.
+
+## population parameter calculation vs. the sample estimates
+* Population parameter - sampled everything
+* Sample esimate - 
