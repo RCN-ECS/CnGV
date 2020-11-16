@@ -125,14 +125,33 @@ parameter_generation <- function(param_list){
 
 df = parameter_generation(param_list)
 dim(df)
-df1 = filter(df, total_samples < 500) 
+df1 = filter(df, total_samples <500) #< 513) Expands from 21k to 24k.
 dim(df1)
-write.csv(df1,"~/Desktop/df.csv")
+#write.csv(df1,"~/Desktop/df.csv")
 
-## PUll out 16s for trouble shooting
-df2 = df1 %>%
-  filter(env_scenario == 2) %>%
-  filter(n_pop == 16)
+# Pull out test scenarios
+df_sim = read.csv("~/Desktop/df.csv")
+
+# 128 total samples
+ges.448 = filter(df_sim, row == 10088)
+args = ges.448[,-1]
+filter(dat_csv, row == 10088)
+
+ges.882 = filter(df_sim, row == 146)
+args = ges.882[,-1]
+filter(dat_csv, row == 146)
+
+# 256 total samples
+ges.884 = filter(df_sim, row == 14712)
+args = ges.884[,-1]
+filter(dat_csv, row == 14712)
+
+ges.4416 = filter(df_sim, row == 7084)
+args = ges.4416[,-1]
+filter(dat_csv, row == 7084)
+
+
+
 ##############################################
 ##                 OLD METHOD               ##
 ##############################################

@@ -48,13 +48,16 @@ perm_df_means <- data.frame()
 
 # Establish seeds
 set.seed(seed)
-sim_seeds <- round(runif(4*n_boot)*1000000) # More than enough
+sim_seeds <- round(runif(10*n_boot)*1000000) # More than enough
 seed1 = sim_seeds[1] # df.foundations
 seed2 = sim_seeds[2] # df.foundations
 seed3 = sim_seeds[3] # df.foundations2 when necessary
-seed.set1 = sim_seeds[c(4:(4+n_boot))] # Bootstrap Means seeds
+seed.set1 = sim_seeds[c(4:(4+n_boot))] # Bootstrap Means 
 seed.set2 = sim_seeds[c((5+n_boot):(5+2*n_boot))] # Permutation means set 1
-seed.set3 = sim_seeds[c((6+2*n_boot):(6+3*n_boot))] # Permutation means set 1
+seed.set3 = sim_seeds[c((6+2*n_boot):(6+3*n_boot))] # Permutation means set 2
+seed.set4 = sim_seeds[c((7+3*n_boot):(7+4*n_boot))] # Bootstrap raw
+seed.set5 = sim_seeds[c((8+4*n_boot):(8+5*n_boot))] # Permutation raw
+seed.set6 = sim_seeds[c((9+5*n_boot):(9+6*n_boot))] # Permutation raw
 
 # Simulate data
 if(env_scenario == 1){
@@ -83,7 +86,7 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype (All 4 plots should look similar)
-# ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
+ ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
 
 # Check: Mean Phenotype 
 # ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
@@ -102,7 +105,7 @@ phen_out <- cbind(phen_out.,model_df)
 ###########################
 
 # Anova model fit & GxE estimates
-m1 <- mod.GxE(model_df) # Raw phenotype dataframe
+m1 <- mod.GxE(model_df, is.perm = FALSE, seed = NA) # Raw phenotype dataframe
 
 # GxE Estimates
 cov_matrix <- m1[[1]]
@@ -120,9 +123,6 @@ cov_est = cov(cov_matrix$G_means,cov_matrix$E_means)
 cor_est = cor(cov_matrix$G_means,cov_matrix$E_means)
 correction_raw = max(sd(cov_matrix$E_means),sd(cov_matrix$G_means))
 cov_corrected = round(cov(cov_matrix$G_means, cov_matrix$E_means)/(correction_raw^2),2)
-
-# Check: GxE Loop output
-# hist(GxE_loop_output)
 
 # Stamps and Hadfield Info
 if (n_pop == 2) {
@@ -159,13 +159,19 @@ cov_matrix$data.type = rep("raw",nrow(cov_matrix))
 #####  Bootstrap -- Raw Data  #####
 ###################################
 
+# Output
+boot_df_raw = data.frame()
+
 for(i in 1:n_boot){
+  
+  # Sampling seed
+  bootseed <- seed.set4[i]
   
   # Shuffle Data
   shuffle_dat <- bootstrap_raw(model_df) 
   
   # Anova model fit & GxE estimates
-  m2 <- mod.GxE(shuffle_dat) # Insert shuffled raw phenotype dataframe
+  m2 <- mod.GxE(shuffle_dat, is.perm = FALSE, seed = NA) # Insert shuffled raw phenotype dataframe
   
   # GxE Estimates
   cov_matrix_boot <- m2[[1]]
@@ -195,7 +201,7 @@ for(i in 1:n_boot){
 }
 
 # Check: Histograms of Bootstrap
-# hist(boot_df_raw$GxE_emm_boot)
+ ggplot(boot_df_raw, aes(x = GxE_emm_boot), alpha = 0.5)+geom_histogram()+geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Bootstrap: Raw Data")
 
 # Covariance Confidence Intervals 
 cov_CI = quantile(boot_df_raw$covariance, probs=c(0.025, 0.975), type=1) 
@@ -213,14 +219,21 @@ GxE_SSq_CI = quantile(boot_df_raw$GxE_SSq_boot, probs = c(0.025,0.975), type = 1
 #####   Permutation -- Raw Data   #####
 #######################################
 
+# Output
+perm_df_raw = data.frame()
+
 for(i in 1:n_boot){
   
+  # Sampling Seed
+  perm.seed = seed.set5[i]
+  perm.seed2 = seed.set6[i]
+  
   # Resample Data
-  perm_dat <- permutation_raw(model_df)
+  perm_dat <- permutation_raw(model_df, perm.seed)
   var_dat <- permutation_varpar(varpar.df)
   
   # Anova model fit & GxE estimates
-  m3 <- mod.GxE(perm_dat) # Insert shuffled permutation raw data frame
+  m3 <- mod.GxE(perm_dat, is.perm = TRUE, seed = perm.seed2) # Insert shuffled permutation raw data frame
   
   # GxE Estimates
   cov_matrix_perm <- m3[[1]]
@@ -255,11 +268,11 @@ for(i in 1:n_boot){
 }
 
 # Check: Permutation histogram
-# hist(perm_df_raw$covariance_perm)
-
+ ggplot(perm_df_raw, aes(x = GxE_emm_perm), alpha = 0.5)+geom_histogram()+xlim(0,(GxE_emm+0.1))+geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Null Histogram: Raw")
+ 
 # Covariance P-values
 cov_original_pvalue <- pvalue_fun(cov_est,perm_df_raw$covariance_perm,"twotail",n_boot)
-#cor_pvalue <- pvalue_fun(cor_est,perm_df_raw$cor_est_perm,"twotail",n_boot)
+cor_pvalue <- pvalue_fun(cor_est,perm_df_raw$cor_est_perm,"twotail",n_boot)
 cov_corrected_pvalue <- pvalue_fun(cov_corrected,perm_df_raw$cov_corrected_perm,"twotail",n_boot)
 
 # GxE P-values
@@ -287,9 +300,6 @@ for(i in 1:length(unique(var_perm$permid))){
   Verror = rbind(Verror, Verror.)
 }
 
-# Histograms 
-# hist(Vgxe)
-
 Vg.pval <- pvalue_fun(Variance.partition1$omega2[1],Vg,"righttail",n_boot)
 Ve.pval <- pvalue_fun(Variance.partition1$omega2[2],Ve[,1],"righttail",n_boot)
 Vgxe.pval <- pvalue_fun(Variance.partition1$omega2[3],Vgxe[,1],"righttail",n_boot)
@@ -305,19 +315,25 @@ Varpar.p.values = data.frame("Variance_Component" = c("V_g", "V_e", "V_gxe", "V_
 # GxE estimates
 m4 <- mean.GxE(mean_df,is.perm = FALSE, seed = NA) # Insert means data frame (seed not necessary if is.perm is False)
 
-# GxE 
+# Covariance and GxE for Means 
 Cov_mean_matrix <- m4[[1]]
+
+# Fix bookkeeping error
+if(length(Cov_mean_matrix$gen_factor) > 9){
+  Cov_mean_matrix[,2] = cov_matrix$gen_factor
+  Cov_mean_matrix[,3] = cov_matrix$exp_env_factor
+  colnames(Cov_mean_matrix)[4] <- "JustKidding"
+  Cov_mean_matrix$E_means = cov_matrix$E_means[match(cov_matrix$exp_env_factor, Cov_mean_matrix$exp_env_factor)]
+}
+
 GxE_means <- m4[[2]]
 GxE_means_loop_output <- m4[[3]]
 
 # Covariance
 cov_est_means = cov(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
-#cor_est_means = cor(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
+cor_est_means = cor(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
 means_correction = max(sd(Cov_mean_matrix$E_means),sd(Cov_mean_matrix$G_means))
 cov_means_corrected = round(cov(Cov_mean_matrix$G_means, Cov_mean_matrix$E_means)/(means_correction^2),2)
-
-# Check: GxE means Loop output
-# hist(GxE_means_loop_output)
 
 # Tracking: Covariance Matrix Output
 Cov_mean_matrix$data.type = rep("means",nrow(Cov_mean_matrix))
@@ -330,13 +346,21 @@ for(i in 1:n_boot){
   
   # Shuffle Data
   boot.seed = seed.set1
-  shuffle_means <- bootstrap_means(mean_df, boot.seed[i]) # Insert means data, Need n_boot seeds
+  shuffle_means <- bootstrap_means(mean_df) # Insert means data, Need n_boot seeds
   
   # GxE :: Covariance Matrix
   m5 <- mean.GxE(shuffle_means, is.perm = FALSE, seed = NA) # Insert shuffled up means data frame
   
   # GxE Estimates
   Cov_mean_matrix_boot <- m5[[1]]
+  
+  if(length(Cov_mean_matrix_boot$gen_factor) > 9){
+    Cov_mean_matrix_boot[,2] = cov_matrix_boot$gen_factor
+    Cov_mean_matrix_boot[,3] = cov_matrix_boot$exp_env_factor
+    colnames(Cov_mean_matrix_boot)[4] <- "JustKidding"
+    Cov_mean_matrix_boot$E_means = cov_matrix_boot$E_means[match(cov_matrix_boot$exp_env_factor, Cov_mean_matrix_boot$exp_env_factor)]
+  }
+  
   GxE_means_boot <- m5[[2]]
   
   # Covariance Estimates
@@ -353,9 +377,12 @@ for(i in 1:n_boot){
   boot_df_means <- rbind(boot_df_means,boot_dat_means)
 }
 
+# Histograms 
+ggplot(boot_df_means, aes(x = GxE_means_boot), alpha = 0.5)+geom_histogram()+xlim(0,(GxE_means+0.1))+geom_vline(aes(xintercept = GxE_means))+theme_classic()+ ggtitle("Bootstrap: Means Data")
+
 # Covariance Confidence Intervals -- Means
 cov_means_CI = quantile(boot_df_means$cov_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
-#cor_means_CI = quantile(boot_df_means$cor_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
+cor_means_CI = quantile(boot_df_means$cor_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
 cov_corrected_means_CI = quantile(boot_df_means$cov_corrected_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
 
 # GxE Confidence Intervals -- Means
@@ -379,6 +406,12 @@ for(i in 1:n_boot){
   
   # GxE Estimates
   Cov_mean_matrix_perm <- m6[[1]]
+  if(length(Cov_mean_matrix_perm$gen_factor) > 9){
+    Cov_mean_matrix_perm[,2] = cov_matrix_perm$gen_factor
+    Cov_mean_matrix_perm[,3] = cov_matrix_perm$exp_env_factor
+    colnames(Cov_mean_matrix_perm)[4] <- "JustKidding"
+    Cov_mean_matrix_perm$E_means = cov_matrix_perm$E_means[match(cov_matrix_perm$exp_env_factor, Cov_mean_matrix_perm$exp_env_factor)]
+  }
   GxE_means_perm <- m6[[2]]
   GxE_means_output_perm <- m6[[3]]
   
@@ -387,9 +420,6 @@ for(i in 1:n_boot){
   cor_mean_perm = cor(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)
   correction_mean_perm = max(sd(Cov_mean_matrix_perm$E_means),sd(Cov_mean_matrix_perm$G_means))
   cov_corrected_mean_perm = round(cov(Cov_mean_matrix_perm$G_means, Cov_mean_matrix_perm$E_means)/(correction_mean_perm^2),2)
-  
-  # Check: GxE Histogram
-  # hist(GxE_means_output_perm)
   
   # Permutation dataframe -- Means
   perm_dat_means <- data.frame("cov_means_perm" = cov_mean_perm,
@@ -400,12 +430,11 @@ for(i in 1:n_boot){
 }
 
 # Check: Histogram
-# hist(perm_df_means$GxE_means_perm)
-# abline(v = GxE_means,col = "red")
+ ggplot(perm_df_means, aes(x = GxE_means_perm), alpha = 0.5)+geom_histogram()+ geom_vline(aes(xintercept = GxE_means))+theme_classic()+ggtitle("Null Histogram: Means")
 
 # Covariance P-values
 cov_original_mean_pvalue <- pvalue_fun(cov_est_means,perm_df_means$cov_means_perm,"twotail", n_boot)
-#cor_mean_pvalue <- pvalue_fun(cor_est_means,perm_df_means$cor_mean_perm,"twotail", n_boot)
+cor_mean_pvalue <- pvalue_fun(cor_est_means,perm_df_means$cor_mean_perm,"twotail", n_boot)
 cov_corrected_mean_pvalue <- pvalue_fun(cov_means_corrected,perm_df_means$cov_corrected_mean_perm,"twotail", n_boot)
 
 # GxE P-values
@@ -416,7 +445,7 @@ GxE_mean_pvalue <- pvalue_fun(GxE_means,perm_df_means$GxE_means_perm,"righttail"
 ####################################
 
 # Anova model fit & GxE estimates
-m7 <- mod.GxE(model_df.ne) # Insert raw phenotype data frame with no error
+m7 <- mod.GxE(model_df.ne, is.perm = FALSE, seed = NA) # Insert raw phenotype data frame with no error
 
 # GxE 
 cov_matrix.ne <- m7[[1]]
@@ -430,7 +459,7 @@ aov.df1.ne <- m7[[8]] # Model output
 
 # Covariance
 cov_est.ne = cov(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
-#cor_est.ne = cor(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
+cor_est.ne = cor(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
 correction_raw.ne = max(sd(cov_matrix.ne$E_means),sd(cov_matrix.ne$G_means))
 cov_corrected.ne = round(cov(cov_matrix.ne$E_means, cov_matrix.ne$G_means)/(correction_raw.ne^2),2)
 
@@ -452,12 +481,18 @@ m8 <- mean.GxE(mean_df.ne, is.perm = FALSE, seed = NA) # Insert means data frame
 
 # GxE 
 Cov_mean_matrix.ne <- m8[[1]]
+if(length(Cov_mean_matrix.ne$gen_factor) > 9){
+  Cov_mean_matrix.ne[,2] = cov_matrix.ne$gen_factor
+  Cov_mean_matrix.ne[,3] = cov_matrix.ne$exp_env_factor
+  colnames(Cov_mean_matrix.ne)[4] <- "JustKidding"
+  Cov_mean_matrix.ne$E_means = cov_matrix.ne$E_means[match(cov_matrix.ne$exp_env_factor, Cov_mean_matrix.ne$exp_env_factor)]
+}
 GxE_means.ne <- m8[[2]]
 GxE_means_loop_output.ne <- m8[[3]]
 
 # Covariance
 cov_est_means.ne = cov(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
-#cor_est_means.ne = cor(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
+cor_est_means.ne = cor(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
 means_correction.ne = max(sd(Cov_mean_matrix.ne$E_means),sd(Cov_mean_matrix.ne$G_means))
 cov_means_corrected.ne = round(cov(Cov_mean_matrix.ne$G_means, Cov_mean_matrix.ne$E_means)/(means_correction.ne^2),2)
 
@@ -524,11 +559,11 @@ output_data <- data.frame("row" = row, # Original Parameters
                           #"cov_uncorrected_uprCI" = cov_CI[[2]],
                           #"cov_uncorrected_pvalue" = cov_original_pvalue,  
                           
-                          #"true_cor" = cor_est.ne, # Correlation 
-                          #"cor" = cor_est,
-                          #"cor_lwrCI" = cor_CI[[1]],
-                          #"cor_uprCI" = cor_CI[[2]],
-                          #"cor_pvalue" = cor_pvalue,
+                          "true_cor" = cor_est.ne, # Correlation 
+                          "cor" = cor_est,
+                          "cor_lwrCI" = cor_CI[[1]],
+                          "cor_uprCI" = cor_CI[[2]],
+                          "cor_pvalue" = cor_pvalue,
                           
                           "true_cov_means" = cov_means_corrected.ne, # Corrected Covariance -- means
                           "cov_means" = cov_means_corrected,
@@ -536,11 +571,11 @@ output_data <- data.frame("row" = row, # Original Parameters
                           "cov_means_uprCI" = cov_corrected_means_CI[[2]],
                           "cov_means_pvalue" = cov_corrected_mean_pvalue,
                           
-                          #"true_cor_means" = cor_est_means.ne, # Correlation -- means 
-                          #"cor_means" = cor_est_means,
-                          #"cor_means_lwrCI" = cor_means_CI[[1]],
-                          #"cor_means_uprCI" = cor_means_CI[[2]],
-                          #"cor_means_pvalue" = cor_mean_pvalue)
+                          "true_cor_means" = cor_est_means.ne, # Correlation -- means 
+                          "cor_means" = cor_est_means,
+                          "cor_means_lwrCI" = cor_means_CI[[1]],
+                          "cor_means_uprCI" = cor_means_CI[[2]],
+                          "cor_means_pvalue" = cor_mean_pvalue,
                           
                           "GxE_Anova" = aov.df1[3,6],
                           "true_GxE_emm" = round(GxE_emm.ne,2),# GxE Emmeans from loop
@@ -567,10 +602,10 @@ output_data <- data.frame("row" = row, # Original Parameters
                           #"GxE_eta_uprCI" = round(GxE_eta_CI[[2]],2),
                           #"GxE_eta_pvalue" = round(GxE_eta_pvalue,2),
                           
-                          "true_GxE_SSq" = round(GxE_SSq.ne,2), # Sums of Squares
-                          "GxE_SSq" = round(GxE_SSq,2),
-                          "GxE_SSq_lwrCI" = round(GxE_SSq_CI[[1]],2),
-                          "GxE_SSq_uprCI" = round(GxE_SSq_CI[[2]],2),
+                          #"true_GxE_SSq" = round(GxE_SSq.ne,2), # Sums of Squares
+                          #"GxE_SSq" = round(GxE_SSq,2),
+                          #"GxE_SSq_lwrCI" = round(GxE_SSq_CI[[1]],2),
+                          #"GxE_SSq_uprCI" = round(GxE_SSq_CI[[2]],2),
                           
                           "true_GxE_means" = round(GxE_means.ne,2), # GxE on means
                           "GxE_means" = round(GxE_means,2),

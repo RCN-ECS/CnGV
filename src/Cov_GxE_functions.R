@@ -298,7 +298,7 @@ var.partition <- function(input_df){
   return(var_part)
 }
 
-mod.GxE <- function(input_df){ # input is model_df
+mod.GxE <- function(input_df,is.perm,seed){ # input is model_df
   
   # Outputs
   allGE <- c()
@@ -325,17 +325,35 @@ mod.GxE <- function(input_df){ # input is model_df
   Cov_matrix$exp_env_factor = native_df$nat_env_factor[match(G_matrix$gen_factor,native_df$gen_factor)]
   Cov_matrix$E_means = E_matrix$E_means[match(Cov_matrix$exp_env_factor,E_matrix$exp_env_factor)]
   
-  # Magnitude of GxE -- EMMs
-  GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
-                           emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
-                           emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
-                           mean(emm_GxE$emmean)) # Overall mean phenotype
-  
   # Output based on Stamps/Hadfield approach
   delta_E = ((emm_GxE$emmean[3]-emm_GxE$emmean[4])+(emm_GxE$emmean[1]-emm_GxE$emmean[2]))/2 
   delta_H = (emm_GxE$emmean[1]-emm_GxE$emmean[4])
   aov.coefs = coef(aov.test)
   
+  # Omega^2
+  w2_GxE = (summary(aov(aov.test))[[1]][3,2] - # (SS_effect -
+           (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / # (Df_effect * MS_error))/
+           (sum(summary(aov(aov.test))[[1]][,2]) + # (SS_total+
+           (summary(aov(aov.test))[[1]][4,3])) # MS_error)
+  
+  # Eta^2 
+  eta_GxE = summary(aov(aov.test))[[1]][3,2]/sum(summary(aov(aov.test))[[1]][,2])
+  
+  # Proportion of GxE sums of squares without error
+  GxE_SumsSquares = summary(aov(aov.test))[[1]][3,2]/sum(summary(aov(aov.test))[[1]][c(1:3),2])
+  
+  # Output model data
+  mod_df <- as.data.frame(summary(aov(aov.test))[[1]])
+  mod_df <- rownames_to_column(mod_df) 
+  colnames(mod_df)[1] <- "Fixed_effect"
+  
+  if(is.perm == FALSE){ # No seed needed here
+  
+  # Magnitude of GxE -- EMMs
+  GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
+                        emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                        emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
+                        mean(emm_GxE$emmean)) # Overall mean phenotype
   
   # Magnitude of GxE -- Loop
   allGE = c()
@@ -351,26 +369,45 @@ mod.GxE <- function(input_df){ # input is model_df
       allGE <- c(allGE, loopGxE)
     }
   }
-  #hist(allGE)
-  GxE_emm_loop = mean(allGE)
+
+    GxE_emm_loop = mean(allGE)
   
-  # Omega^2
-  w2_GxE = (summary(aov(aov.test))[[1]][3,2] - #(SS_effect -
-              (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / #(Df_effect * MS_error))/
-    (sum(summary(aov(aov.test))[[1]][,2]) + # (SS_total+
-       (summary(aov(aov.test))[[1]][4,3])) # MS_error)
-  
-  # Eta^2 
-  eta_GxE = summary(aov(aov.test))[[1]][3,2]/sum(summary(aov(aov.test))[[1]][,2])
-  
-  # Proportion of GxE sums of squares without error
-  GxE_SumsSquares = summary(aov(aov.test))[[1]][3,2]/sum(summary(aov(aov.test))[[1]][c(1:3),2])
-  
-  # Output model data
-  mod_df <- as.data.frame(summary(aov(aov.test))[[1]])
-  mod_df <- rownames_to_column(mod_df) 
-  colnames(mod_df)[1] <- "Fixed_effect"
-  
+  }else{ # Below generates null distribution for null of G+E means
+    
+    allGE <- NULL
+    for (i in 1:nlevels(input_df$gen_factor)){
+      for (j in 1:nlevels(input_df$exp_env_factor)){
+        
+        G_levels <- levels(input_df$gen_factor)
+        E_levels <- levels(input_df$exp_env_factor)
+        
+        Gi_mean <- mean(sample(input_df$phen_corrected[input_df$gen_factor == G_levels[i]], 
+                               size = length(input_df$phen_corrected[input_df$gen_factor == G_levels[i]]),
+                               replace = TRUE))
+        Ej_mean <- mean(sample(input_df$phen_corrected[input_df$exp_env_factor == E_levels[j]],
+                               size = length(input_df$phen_corrected[input_df$exp_env_factor == E_levels[j]]),
+                               replace = TRUE))
+        GE_sd <- input_df %>%
+          filter(gen_factor == G_levels[i]) %>%
+          filter(exp_env_factor == E_levels[j]) %>%
+          summarize("GEsd" = mean(e))
+
+        # Create a sample of the null expectation for the Gi+Ej
+        set.seed = seed
+        GiEj_null_samp <- rnorm(1, mean = (Gi_mean + Ej_mean), sd = abs(GE_sd[[1]]))
+        
+        # Estimate 
+        GxE_mean.temp <- abs(GiEj_null_samp - # G+E (Phenotype of ith genotype in jth environment)
+                             Gi_mean - # mean phenotype of ith Genotype
+                             Ej_mean + # mean phenotype of jth Environment
+                             mean(input_df$phen_corrected)) # Overall mean
+        allGE <- c(allGE, GxE_mean.temp)
+      }
+    }
+    
+    GxE_emm_loop = mean(allGE)
+    
+  }
   return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs))
 }
 
@@ -381,7 +418,7 @@ mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df
   GxE_mean.temp <- c()
   GiEj_mean = Gi_mean = Ej_mean = GiEj_null_samp = NULL
   
-  if(is.perm == FALSE){
+  if(is.perm == FALSE){ # No seed needed here
     
     # Means of Means
     E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
@@ -406,10 +443,11 @@ mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df
         allGEmeans <- c(allGEmeans, GxE_mean.temp)
       }
     }
-    #hist(allGEmeans)
+   
+    # hist(allGEmeans)
     GxE_means = mean(allGEmeans)
     
-  }else{ # Below generates null distribution for GxE means
+  }else{ # Below generates null distribution for null of G+E means
     
     # Means of Means
     E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
@@ -481,7 +519,7 @@ bootstrap_raw <- function(input_df){ # input is model_df
   return(shuffle_dat)
 }
 
-bootstrap_means <- function(input_df, seedset){ # input is means_df
+bootstrap_means <- function(input_df){ # input is means_df
   
   # Clear outputs
   new_phen.<- new_phen <-NULL
@@ -498,52 +536,54 @@ bootstrap_means <- function(input_df, seedset){ # input is means_df
         filter(exp_env_factor == unique(input_df$exp_env_factor)[r])
       
       # Create new means data
-      set.seed = seedset
-      new_phen. <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se) # generate replicate means
-      new_phen <- sample(new_phen., size = length(new_phen.), replace = TRUE) # shuffle
+      new_phen <- rnorm(nrow(cond), mean = cond$avg_phen_corrected, sd = cond$se) # generate replicate means
+      #set.seed(bootseed2)
+      #new_phen <- sample(new_phen., size = length(new_phen.), replace = TRUE) # shuffle
       
       # Output
       new_mean_temp <- data.frame("gen_factor" = cond$gen_factor,
                                   "exp_env_factor" = cond$exp_env_factor,
                                   "nat_env_factor" = cond$nat_env_factor,
-                                  "mean_phen" = new_phen.)
+                                  "avg_phen_corrected" = new_phen)
       new_means <- rbind(new_means, new_mean_temp)
     }
   }
   
   # Standardize resampled means
-  new_means$avg_phen_corrected = (new_means$mean_phen - mean(new_means$mean_phen))/sd(new_means$mean_phen) 
+  # new_means$avg_phen_corrected = (new_means$mean_phen - mean(new_means$mean_phen))/sd(new_means$mean_phen) 
   
   return(new_means)
 }
 
-permutation_raw <- function(input_df){ # input is model_df
+permutation_raw <- function(input_df, perm.seed){ # input is model_df
   
   # Clear outputs
   perm_dat = data.frame()
   null_temp <- NULL
   
   # Shuffle raw data
+  set.seed(perm.seed)
   null_temp <- sample(input_df$phen_corrected, size=nrow(input_df), replace=FALSE)
   
   perm_dat <- data.frame("gen_factor" = input_df$gen_factor,
                          "exp_env_factor" = input_df$exp_env_factor,
                          "nat_env_factor" = input_df$nat_env_factor,
+                         "e" = input_df$e,
                          "phen_corrected" = null_temp)
   return(perm_dat)
 }
 
-permutation_means <- function(input_df, permseed){ # means dataframe (mean_df)
+permutation_means <- function(input_df, perm.seed2){ # means dataframe (mean_df)
   
   # Clear outputs
   perm_means <- data.frame()
   null_gen = null_env = null_means = NULL
   
   # Shuffle means data (same set.seed keeps phen and corresponding se matched)
-  set.seed(permseed)
-  null_means <- sample(input_df$avg_phen, size = length(input_df$avg_phen), replace = FALSE)
+  set.seed(perm.seed2)
+  null_means <- sample(input_df$avg_phen_corrected, size = length(input_df$avg_phen_corrected), replace = FALSE)
   
-  set.seed(permseed)
+  set.seed(perm.seed2)
   null_se <- sample(input_df$se, size = length(input_df$se), replace = FALSE)
   
   #null_means <- rnorm(length(null_means.), mean = null_means., sd = null_se) # create replicate mean
@@ -551,10 +591,10 @@ permutation_means <- function(input_df, permseed){ # means dataframe (mean_df)
   perm_means <- data.frame("gen_factor" = input_df$gen_factor,
                            "exp_env_factor" = input_df$exp_env_factor,
                            "nat_env_factor" = input_df$nat_env_factor,
-                           "avg_phen" = null_means,
+                           "avg_phen_corrected" = null_means,
                            "se" = null_se)
   # Restandardize
-  perm_means$avg_phen_corrected = (perm_means$avg_phen - mean(perm_means$avg_phen))/sd(perm_means$avg_phen)
+  # perm_means$avg_phen_corrected = (perm_means$avg_phen - mean(perm_means$avg_phen))/sd(perm_means$avg_phen)
   
   return(perm_means)
 }
