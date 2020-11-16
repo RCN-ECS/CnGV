@@ -638,6 +638,27 @@ pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "r
   return(p.value)
 }
 
+cov.function <- function(input_df, is.sample){ # input_df = cov_matrix of G_means and E_means
+  
+  calc2 = c()
+  if(is.sample == TRUE){
+  
+    N = length(input_df$gen_factor)-1
+    sample_mean = mean(c(input_df$G_means,input_df$E_means))
+    numerator_samp = sum((input_df$G_means - sample_mean)*(input_df$E_means - sample_mean))
+    cv = (1/N)*numerator_samp
+  
+  }else{
+    
+    N = length(input_df$gen_factor)
+    pop_mean = mean(c(input_df$G_means,input_df$E_means))
+    numerator_pop = sum((input_df$G_means - pop_mean)*(input_df$E_means - pop_mean))
+    cv = (1/N)*numerator_pop
+  }
+  
+  return(cv)
+}
+
 ########### Meta-Analysis Functions ####################
 
 amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of bootstraps, data_type = "raw" or "means"

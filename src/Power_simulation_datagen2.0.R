@@ -131,6 +131,8 @@ dim(df1)
 
 # Pull out test scenarios
 df_sim = read.csv("~/Desktop/df.csv")
+args = filter(df_sim, row == 16858)
+args = args[,-1]
 
 # 128 total samples
 ges.448 = filter(df_sim, row == 10088)
