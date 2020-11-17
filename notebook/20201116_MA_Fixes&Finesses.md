@@ -74,6 +74,8 @@ cov.function <- function(input_df, is.sample){ # input_df = cov_matrix of G_mean
 And the false negatives, and the true negatives... 
 I created these heatmaps to better delineate which designs are driving different error types to hone in our sampling a bit better. 
 
+Top number is the percent (higher percent = condition found more frequently in that group), bottom number is total sample size. 
+
 #### Raw data - Full Reciprocal Transplant 
 | --- | Covariance | GxE |
 |---|---|---|
@@ -83,5 +85,5 @@ I created these heatmaps to better delineate which designs are driving different
 #### Raw data - Paired Common Garden
 | --- | Covariance | GxE |
 |---|---|---|
-|Bootstrap|![image]()|![image]()|
-|Permutation|![image]()|![image]()|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovBootHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.gxebootHeat_dub.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovPermHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxEPermHeat_dub.png)|
