@@ -74,7 +74,10 @@ cov.function <- function(input_df, is.sample){ # input_df = cov_matrix of G_mean
 And the false negatives, and the true negatives... 
 I created these heatmaps to better delineate which designs are driving different error types to hone in our sampling a bit better. 
 
-Top number is the percent (higher percent = condition found more frequently in that group), bottom number is total sample size. 
+Top number is the percent (higher percent = condition found more frequently in that group), bottom number is total sample size. The intensity of the color is not standardized, although in general, lighter blue is a bigger percent.
+
+#### Conclusions from below plots
+It appears that when sample size is 2, predictive ability swings around wildly with lots of false negatives and positives. This is expected. I wonder if we should sample size of 2 in the simulations? 
 
 #### Raw data - Full Reciprocal Transplant 
 | --- | Covariance | GxE |
@@ -87,3 +90,16 @@ Top number is the percent (higher percent = condition found more frequently in t
 |---|---|---|
 |Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovBootHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.gxebootHeat_dub.png)|
 |Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovPermHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxEPermHeat_dub.png)|
+
+## Issue #4: Make confusion matrix for Anova -- Sanity Check for GxE
+| | Anova |
+| --- | --- |
+| False Negative | 961 - 8.6 % |
+| False Positive | 135 - 1.2% |
+| True Negative | 2670 - 23.87% |
+| True Positive | 7419 - 66.3% |
+| --- | ---| 
+|False Negative Rate | 0.11 |
+| False Positive Rate | 0.048 | 
+
+## Issue #5 
