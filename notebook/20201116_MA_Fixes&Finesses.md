@@ -70,4 +70,18 @@ cov.function <- function(input_df, is.sample){ # input_df = cov_matrix of G_mean
   return(cv)
 }
 ```
+## Issue #3: Find the False Positives! 
+And the false negatives, and the true negatives... 
+I created these heatmaps to better delineate which designs are driving different error types to hone in our sampling a bit better. 
 
+#### Raw data - Full Reciprocal Transplant 
+| --- | Covariance | GxE |
+|---|---|---|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.GxEBootHeat.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.CovPermHeat.png|![image]()|
+
+#### Raw data - Paired Common Garden
+| --- | Covariance | GxE |
+|---|---|---|
+|Bootstrap|![image]()|![image]()|
+|Permutation|![image]()|![image]()|
