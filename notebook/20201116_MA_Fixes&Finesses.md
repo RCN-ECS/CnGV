@@ -49,6 +49,8 @@ I ran a quick replicate (which wasn't at all quick, because I had to do a TON of
 #### What does this tell me: 
 In combination with the heatmaps below (See Issue #3) is that most of these weird values occur in the low sample size. As you see below, I suggest leaving that treatment out to refine false pos and negs.
 
+#### KEL note: These plots make it look to me like total sample size is driving weird patterns, could you color by total sample size to check? It would save time to remove all the sims with low sample sizes (e.g. less than 30 or something like that).
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxE.EmmvsAnova.png)
 
 To double check that the issue was with permutation and not the way we calculate error, I again compare confidence intervals. The plots look okay to me. This probably means if a problem in p-value lingers, its likely in the way we're estimating p-values, not error.  
@@ -56,6 +58,8 @@ To double check that the issue was with permutation and not the way we calculate
 
 ## Issue #2: Population vs. Sample estimates. 
 We identified an issue in our actual (i.e. population) vs. estimated (i.e., sample) covariance estimations. The function cov() in r is a sample estimator, and thus uses the denominator of n-1 to calculate covariance. 
+
+#### KEL note: Can you confirm that the input_df for the population is based on the true G_mean and E_means (without error), while the sample estimate is based on the data?
 
 I fixed this by creating my own manual function to calculate covariance for samples and for population level. I still keep the cov() as a sanity check, since my function should give the exact same Cov estimates for samples. New function below:  
 ```{function}
@@ -81,6 +85,8 @@ Top number is the percent (higher percent = condition found more frequently in t
 #### Conclusions from below plots
 It appears that when sample size is 2, predictive ability swings around wildly with lots of false negatives and positives. This is expected. I wonder if we should drop the sample size of 2 in the simulations? 
 
+#### KEL note: I agree that we should drop sample size = 2. However, I think there is a problem with the rate calculations here. There are different ways to do it, but if the question is _what are the error rates for this design?_ then the 4 rates in the same cell position should add up to 100%. What are these percentages based on?
+
 #### Raw data - Full Reciprocal Transplant 
 | --- | Covariance | GxE |
 |---|---|---|
@@ -94,6 +100,8 @@ It appears that when sample size is 2, predictive ability swings around wildly w
 |Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovPermHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxEPermHeat_dub.png)|
 
 ## Issue #4: Make confusion matrix for Anova 
+
+## KEL note: This also passes my sanity check. Keep in mind that our approach is not near the nominal rate (ANOVA has the 5% FPR, which is expected), so we can argue that this approach is conservative (a lower FPR at the expense of a higher FNR).
 
 **Sanity Check for GxE** 
 Anova continues to perform well. Looks sane to me. 
@@ -109,9 +117,12 @@ Anova continues to perform well. Looks sane to me.
 | False Positive Rate | 0.048 | 0.84 | 0.001 |
 
 ## Issue #5: Targeted sampling of parameter space
+
+## KEL note: to help with this, I need more information on what was tried previously and what your rationale is for these choices. I know we switched to the shotgun approach because the parameter space was not well sampled. The points 1 and 2 below look good, but I don't follow the rationale for 3. Is the delta_env randomly sampled? 
+
 I will generate a dataframe of starting parameters with the following per replicate (I run 10 replicates in total) 
 
-1. Cov = 0 x 100 (N = 1000 for False positive rates)
+1. Cov = 0 x 100 (N = 1000 for False positive rates) 
 2. GxE = 0 x 100 (N = 1000 for False positive rates)
 3. Scaled gradient of clustering for paired common garden design (to ensure broader CovGE's are sampled)
 
