@@ -77,7 +77,7 @@ I created these heatmaps to better delineate which designs are driving different
 Top number is the percent (higher percent = condition found more frequently in that group), bottom number is total sample size. The intensity of the color is not standardized, although in general, lighter blue is a bigger percent.
 
 #### Conclusions from below plots
-It appears that when sample size is 2, predictive ability swings around wildly with lots of false negatives and positives. This is expected. I wonder if we should sample size of 2 in the simulations? 
+It appears that when sample size is 2, predictive ability swings around wildly with lots of false negatives and positives. This is expected. I wonder if we should drop the sample size of 2 in the simulations? 
 
 #### Raw data - Full Reciprocal Transplant 
 | --- | Covariance | GxE |
@@ -106,3 +106,22 @@ Anova continues to perform well. Looks sane to me.
 | False Negative Rate | 0.11 | 0.01 | 0.34 |
 | False Positive Rate | 0.048 | 0.84 | 0.001 |
 
+## Issue #5: Targeted sampling of parameter space
+I will generate a dataframe of starting parameters with the following per replicate (I run 10 replicates in total) 
+
+1. Cov = 0 x 100 (N = 1000 for False positive rates)
+2. GxE = 0 x 100 (N = 1000 for False positive rates)
+3. Scaled gradient of clustering for paired common garden design (to ensure broader CovGE's are sampled)
+
+Otherwise: 
+```{params}
+param_list <- list( 
+  reps = c(10), 
+  delta_env = NULL, 
+  delta_gen = c(-1,0.0,1),
+  sample_size = c(4,8,16), 
+  n_pop = c(2,4,8,16),
+  env_scenario = c(1,2),  # 1 = Recip. Transplant ; 2 = Common Garden
+  std_dev= c(.5, 1),
+  interaction = NULL) 
+```
