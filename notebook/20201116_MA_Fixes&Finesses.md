@@ -45,9 +45,11 @@ This also resolves one of the other issues which is to ensure that methods for m
 ```
 
 I ran a quick replicate (which wasn't at all quick, because I had to do a TON of debugging after making these changes... ) and now get the following for the GxE: (loess fits to total sample size visualize general patterns)
-![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxE_pvalueCompare.png)
 
-Still not perfect, but a definite improvement relative to before. 
+#### What does this tell me: 
+In combination with the heatmaps below (See Issue #3) is that most of these weird values occur in the low sample size. As you see below, I suggest leaving that treatment out to refine false pos and negs.
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxE.EmmvsAnova.png)
 
 To double check that the issue was with permutation and not the way we calculate error, I again compare confidence intervals. The plots look okay to me. This probably means if a problem in p-value lingers, its likely in the way we're estimating p-values, not error.  
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxE_ConfIntervals.png)
