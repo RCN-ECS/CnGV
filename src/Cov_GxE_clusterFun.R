@@ -146,7 +146,7 @@ if (n_pop == 2) {
                       G1Emean = G1Emean, G2Emean = G2Emean, E1Gmean = E1Gmean, E2Gmean = E2Gmean, 
                       GxE_emm = GxE_emm, covariance = cov_corrected)
   
-  write.csv(PL_df,paste0("/scratch/albecker/Power_analysis/PL_output/PL_",row,".csv"))
+  #write.csv(PL_df,paste0("/scratch/albecker/Power_analysis/PL_output/PL_",row,".csv"))
 }
 
 # Variance Partitioning
@@ -559,7 +559,7 @@ output_data <- data.frame("row" = row, # Original Parameters
                           "n_env" = n_env,
                           "n_pop" = n_pop,
                           "std_dev" = std_dev,
-                          "interaction" = interaction,
+                          #"interaction" = interaction,
                           "Sim_time" = time.taken,
                           
                           "true_cov" = cov_corrected.ne, # Corrected Covariance Estimates
@@ -582,19 +582,19 @@ output_data <- data.frame("row" = row, # Original Parameters
                           "cov_means_uprCI" = cov_corrected_means_CI[[2]],
                           "cov_means_pvalue" = cov_corrected_mean_pvalue,
                           
-                          "true_cor" = cor_est.ne, # Correlation 
-                          "cor" = cor_est,
-                          "cor_lwrCI" = cor_CI[[1]],
-                          "cor_uprCI" = cor_CI[[2]],
+                          "true_cor" = round(cor_est.ne,3), # Correlation 
+                          "cor" = round(cor_est,3),
+                          "cor_lwrCI" = round(cor_CI[[1]],3),
+                          "cor_uprCI" = round(cor_CI[[2]],3),
                           "cor_pvalue" = cor_pvalue,
                           
-                          "true_cor_means" = cor_est_means.ne, # Correlation -- means 
-                          "cor_means" = cor_est_means,
-                          "cor_means_lwrCI" = cor_means_CI[[1]],
-                          "cor_means_uprCI" = cor_means_CI[[2]],
-                          "cor_means_pvalue" = cor_mean_pvalue,
+                          #"true_cor_means" = cor_est_means.ne, # Correlation -- means 
+                          #"cor_means" = cor_est_means,
+                          #"cor_means_lwrCI" = cor_means_CI[[1]],
+                          #"cor_means_uprCI" = cor_means_CI[[2]],
+                          #"cor_means_pvalue" = cor_mean_pvalue,
                           
-                          "GxE_Anova" = aov.df1[3,6],
+                          "GxE_Anova" = round(aov.df1[3,6],3),
                           "true_GxE_emm" = round(GxE_emm.ne,3),# GxE Emmeans from loop
                           "GxE_emm" = round(GxE_emm,3), 
                           "GxE_emm_lwrCI" = round(GxE_emm_CI[[1]],3),
