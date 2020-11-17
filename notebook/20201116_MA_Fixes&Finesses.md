@@ -91,15 +91,18 @@ It appears that when sample size is 2, predictive ability swings around wildly w
 |Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovBootHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.gxebootHeat_dub.png)|
 |Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovPermHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxEPermHeat_dub.png)|
 
-## Issue #4: Make confusion matrix for Anova -- Sanity Check for GxE
-| | Anova |
-| --- | --- |
-| False Negative | 961 - 8.6 % |
-| False Positive | 135 - 1.2% |
-| True Negative | 2670 - 23.87% |
-| True Positive | 7419 - 66.3% |
-| --- | ---| 
-|False Negative Rate | 0.11 |
-| False Positive Rate | 0.048 | 
+## Issue #4: Make confusion matrix for Anova 
 
-## Issue #5 
+**Sanity Check for GxE** 
+Anova continues to perform well. Looks sane to me. 
+
+| | Anova | Bootstrap | Permutation |
+| --- | --- | --- | --- |
+| False Negative | 961 - 8.6 % | 91 - 0.81% | 2859 - 25.56% |
+| False Positive | 135 - 1.2% | 2355 - 21.1% | 4 - 0.04% |
+| True Negative | 2670 - 23.87% | 450 - 3.6% | 2801 - 25.04% |
+| True Positive | 7419 - 66.3% | 8289 - 74.12% | 5521 - 49.36% |
+| --- | ---| --- | --- |
+| False Negative Rate | 0.11 | 0.01 | 0.34 |
+| False Positive Rate | 0.048 | 0.84 | 0.001 |
+
