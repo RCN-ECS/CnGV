@@ -78,7 +78,7 @@ I created these heatmaps to better delineate which designs are driving different
 | --- | Covariance | GxE |
 |---|---|---|
 |Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.GxEBootHeat.png)|
-|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.CovPermHeat.png|![image]()|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.GxEPermHeat.png)|
 
 #### Raw data - Paired Common Garden
 | --- | Covariance | GxE |
