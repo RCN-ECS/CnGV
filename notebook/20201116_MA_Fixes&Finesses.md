@@ -49,7 +49,7 @@ I ran a quick replicate (which wasn't at all quick, because I had to do a TON of
 #### What does this tell me: 
 In combination with the heatmaps below (See Issue #3) is that most of these weird values occur in the low sample size. As you see below, I suggest leaving that treatment out to refine false pos and negs.
 
-#### KEL note: These plots make it look to me like total sample size is driving weird patterns, could you color by total sample size to check? It would save time to remove all the sims with low sample sizes (e.g. less than 30 or something like that).
+~~#### KEL note: These plots make it look to me like total sample size is driving weird patterns, could you color by total sample size to check? It would save time to remove all the sims with low sample sizes (e.g. less than 30 or something like that).~~
 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxE.EmmvsAnova.png)
 
@@ -59,9 +59,11 @@ To double check that the issue was with permutation and not the way we calculate
 ## Issue #2: Population vs. Sample estimates. 
 We identified an issue in our actual (i.e. population) vs. estimated (i.e., sample) covariance estimations. The function cov() in r is a sample estimator, and thus uses the denominator of n-1 to calculate covariance. 
 
-#### KEL note: Can you confirm that the input_df for the population is based on the true G_mean and E_means (without error), while the sample estimate is based on the data?
+#### KEL note: Can you confirm that the input_df for the population is based on the true G_mean and E_means (without error), while the sample estimate is based on the data? 
+**::MA:: YES. These functions occur at separate places in the code and have different input_dfs depending on what I am measuring. The sample estimates receive a cov_matrix with e_means and g_means generated from data, while the population cov_function receives a different cov_matrix with e_means and g_means generated without error.**
 
 I fixed this by creating my own manual function to calculate covariance for samples and for population level. I still keep the cov() as a sanity check, since my function should give the exact same Cov estimates for samples. New function below:  
+
 ```{function}
 cov.function <- function(input_df, is.sample){ # input_df = cov_matrix of G_means and E_means
   N = length(input_df$gen_factor)
@@ -86,6 +88,7 @@ Top number is the percent (higher percent = condition found more frequently in t
 It appears that when sample size is 2, predictive ability swings around wildly with lots of false negatives and positives. This is expected. I wonder if we should drop the sample size of 2 in the simulations? 
 
 #### KEL note: I agree that we should drop sample size = 2. However, I think there is a problem with the rate calculations here. There are different ways to do it, but if the question is _what are the error rates for this design?_ then the 4 rates in the same cell position should add up to 100%. What are these percentages based on?
+**MA: UPDATE THESE HOMIE
 
 #### Raw data - Full Reciprocal Transplant 
 | --- | Covariance | GxE |
