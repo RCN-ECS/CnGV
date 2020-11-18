@@ -180,8 +180,8 @@ Now I have set the colors to a standard scale, so light colors = low percents
 
 | --- | Covariance | GxE |
 |---|---|---|
-|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.GxEBootHeat.png)|
-|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.GxEPermHeat.png)|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_covboot.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_gxeboot.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_covperm.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_gxeperm.png)|
 
 #### Raw data - Paired Common Garden
 | --- | Covariance | GxE |
