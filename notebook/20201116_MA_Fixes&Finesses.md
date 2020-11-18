@@ -87,8 +87,9 @@ Top number is the percent (higher percent = condition found more frequently in t
 #### Conclusions from below plots
 It appears that when sample size is 2, predictive ability swings around wildly with lots of false negatives and positives. This is expected. I wonder if we should drop the sample size of 2 in the simulations? 
 
-#### KEL note: I agree that we should drop sample size = 2. However, I think there is a problem with the rate calculations here. There are different ways to do it, but if the question is _what are the error rates for this design?_ then the 4 rates in the same cell position should add up to 100%. What are these percentages based on?
-**MA: UPDATE THESE HOMIE
+~~#### KEL note: I agree that we should drop sample size = 2. However, I think there is a problem with the rate calculations here. There are different ways to do it, but if the question is _what are the error rates for this design?_ then the 4 rates in the same cell position should add up to 100%. What are these percentages based on?~~
+
+**MA:: See Below for update, ignore these plots for now. 
 
 #### Raw data - Full Reciprocal Transplant 
 | --- | Covariance | GxE |
@@ -145,10 +146,10 @@ param_list <- list(
   interaction = NULL) 
 ```
 # Results with above implementation (single replicate). 11/18/2020
-I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I kept 2 in as a sample size just to see the impact of 0's. 
+I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the findings with and without 2 in as a sample size.  
 
 **Reciprocal Transplant with Raw data**
-| | CovGE Permutation | CovGE Bootstrap | Anova | GxE Permutation | GxE Bootstrap |
+| | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
 | --- | --- | --- | --- | --- | --- |
 | False Negative |907 - 80.4%|373 - 33.1%|310 - 27.5%|333 - 29.5%|44 - 3.9%|
 | False Positive |0|17 - 1.51%|5 - 0.44%|2 - 0.18%|113 - 10%|
@@ -157,6 +158,8 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I kept 2 in as a samp
 | --- | ---| --- | --- | --- | --- |
 | False Negative Rate |0.91|0.38|0.31|0.34|0.04|
 | False Positive Rate |0|0.12|0.04|0.01|0.84|
+| False Negative Rate -2 |0.88|0.37|0.24|0.31|0.047|
+| False Positive Rate -2|0|0.07|0.04|0|0.79|
 
 **Paired Common Garden with Raw data**
 *Ok, still a problem with GxE Bootstrap sampling. I think I have a solution, although it may not be SUPER important moving forward.* 
@@ -168,4 +171,20 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I kept 2 in as a samp
 | True Positive |92-7.14%|501-38.9%|866-67.2%|829-64.3%|0%|
 | --- | ---| --- | --- | --- | --- |
 | False Negative Rate |0.91|0.51|0.211|0.24|0|
-| False Positive Rate |0.012|0.08|0.057|0|0.15|
+| False Positive Rate |0.012|0.08|0.057|0|1.0|
+| False Negative Rate -2 |0.92|0.49|0.13|0.17|0|
+| False Positive Rate -2 |0|0.04|0.03|0|1.0|
+
+#### Raw data - Full Reciprocal Transplant 
+Now I have set the colors to a standard scale, so light colors = low percents
+
+| --- | Covariance | GxE |
+|---|---|---|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.GxEBootHeat.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.GxEPermHeat.png)|
+
+#### Raw data - Paired Common Garden
+| --- | Covariance | GxE |
+|---|---|---|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.GxEBootHeat.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.GxEPermHeat.png)|
