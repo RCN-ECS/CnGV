@@ -13,10 +13,10 @@ library("ggplot2")
 library("tibble")
 
 # Load functions
-#source("Cov_GxE_functions.R")
+source("Cov_GxE_functions.R")
 
 start.time <- Sys.time()
-#args = commandArgs(trailingOnly = TRUE)
+args = commandArgs(trailingOnly = TRUE)
 
 # Load Parameters
 row = as.numeric(args[1])
@@ -33,7 +33,7 @@ env_scenario = as.numeric(args[11])
 seed = as.numeric(args[12])
 
 # Bootstraps
-n_boot <- 99
+n_boot <- 999
 
 # Clear Dataframes
 Variance.partition <- data.frame()
@@ -90,13 +90,13 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype (All 4 plots should look similar)
- ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
+# ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
 
 # Check: Mean Phenotype 
 # ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
 
 # Check: Raw Phenotype with no error
- ggplot(model_df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
+# ggplot(model_df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
 
 # Check: Mean Phenotype with no error
 # ggplot(mean_df.ne, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
@@ -146,7 +146,7 @@ if (n_pop == 2) {
                       G1Emean = G1Emean, G2Emean = G2Emean, E1Gmean = E1Gmean, E2Gmean = E2Gmean, 
                       GxE_emm = GxE_emm, covariance = cov_corrected)
   
-  #write.csv(PL_df,paste0("/scratch/albecker/Power_analysis/PL_output/PL_",row,".csv"))
+  write.csv(PL_df,paste0("/scratch/albecker/Power_analysis/PL_output/PL_",row,".csv"))
 }
 
 # Variance Partitioning
@@ -627,13 +627,13 @@ output_data <- data.frame("row" = row, # Original Parameters
                           "GxE_means_pvalue" = round(GxE_mean_pvalue,3)) 
 
 # Write Files
-#write.csv(output_data,paste0("/scratch/albecker/Power_analysis/power_output/Results_",row,".csv"))
-#write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,".csv"))
-#write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,".csv"))
-#write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,".csv"))
-#write.csv(Cov_Matrix_Output,paste0("/scratch/albecker/Power_analysis/GEmeans_output/covmatrix_",row,".csv"))
-#write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_SSQ_data",row,".csv"))
-#write.csv(aov_coefs1,paste0("/scratch/albecker/Power_analysis/Anova_output/anova_coef_data",row,".csv"))
-#write.csv(Variance.partition, paste0("/scratch/albecker/Power_analysis/power_output/variance_",row,".csv"))
+write.csv(output_data,paste0("/scratch/albecker/Power_analysis/power_output/Results_",row,".csv"))
+write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,".csv"))
+write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,".csv"))
+write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,".csv"))
+write.csv(Cov_Matrix_Output,paste0("/scratch/albecker/Power_analysis/GEmeans_output/covmatrix_",row,".csv"))
+write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_SSQ_data",row,".csv"))
+write.csv(aov_coefs1,paste0("/scratch/albecker/Power_analysis/Anova_output/anova_coef_data",row,".csv"))
+write.csv(Variance.partition, paste0("/scratch/albecker/Power_analysis/power_output/variance_",row,".csv"))
 
 
