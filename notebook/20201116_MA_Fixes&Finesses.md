@@ -121,7 +121,10 @@ Anova continues to perform well. Looks sane to me.
 
 ## Issue #5: Targeted sampling of parameter space
 
-## KEL note: to help with this, I need more information on what was tried previously and what your rationale is for these choices. I know we switched to the shotgun approach because the parameter space was not well sampled. The points 1 and 2 below look good, but I don't follow the rationale for 3. Is the delta_env randomly sampled? 
+#### KEL note: to help with this, I need more information on what was tried previously and what your rationale is for these choices. I know we switched to the shotgun approach because the parameter space was not well sampled. The points 1 and 2 below look good, but I don't follow the rationale for 3. Is the delta_env randomly sampled?~~
+
+
+#### MA response: Rationale for 3 - you mentioned that for the paired common garden design, we lacked samples near CovGE = 1 and -1. The original scaled gradient for the clustering term was an idea to improve representation from those regions.
 
 I will generate a dataframe of starting parameters with the following per replicate (I run 10 replicates in total) 
 
@@ -135,9 +138,34 @@ param_list <- list(
   reps = c(10), 
   delta_env = NULL, 
   delta_gen = c(-1,0.0,1),
-  sample_size = c(4,8,16), 
+  sample_size = c(2,4,8,16), 
   n_pop = c(2,4,8,16),
   env_scenario = c(1,2),  # 1 = Recip. Transplant ; 2 = Common Garden
   std_dev= c(.5, 1),
   interaction = NULL) 
 ```
+# Results with above implementation (single replicate). 11/18/2020
+I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I kept 2 in as a sample size just to see the impact of 0's. 
+
+**Reciprocal Transplant with Raw data**
+| | CovGE Permutation | CovGE Bootstrap | Anova | GxE Permutation | GxE Bootstrap |
+| --- | --- | --- | --- | --- | --- |
+| False Negative |907 - 80.4%|373 - 33.1%|310 - 27.5%|333 - 29.5%|44 - 3.9%|
+| False Positive |0|17 - 1.51%|5 - 0.44%|2 - 0.18%|113 - 10%|
+| True Negative |137 - 12.1%|120 - 10.6%|130 - 11.5%|133 - 11.8%|22 - 1.95%|
+| True Positive |84 - 7.45%|618 - 54.8%|683 - 60.5%|660 - 58.5%|949 - 84.1%|
+| --- | ---| --- | --- | --- | --- |
+| False Negative Rate |0.91|0.38|0.31|0.34|0.04|
+| False Positive Rate |0|0.12|0.04|0.01|0.84|
+
+**Paired Common Garden with Raw data**
+*Ok, still a problem with GxE Bootstrap sampling. I think I have a solution, although it may not be SUPER important moving forward.* 
+| | CovGE Permutation | CovGE Bootstrap | Anova | GxE Permutation | GxE Bootstrap |
+| --- | --- | --- | --- | --- | --- |
+| False Negative |938-72.8%|529-41%|232-18%|269-20.9%|0%|
+| False Positive |3-0.23%|20-1.6%|11-0.85%|0%|191-14.8%|
+| True Negative |256-19.9%|239-18.5%|180-14%|191-14.8%|1098 - 85.2%|
+| True Positive |92-7.14%|501-38.9%|866-67.2%|829-64.3%|0%|
+| --- | ---| --- | --- | --- | --- |
+| False Negative Rate |0.91|0.51|0.211|0.24|0|
+| False Positive Rate |0.012|0.08|0.057|0|0.15|
