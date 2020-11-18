@@ -87,8 +87,9 @@ Top number is the percent (higher percent = condition found more frequently in t
 #### Conclusions from below plots
 It appears that when sample size is 2, predictive ability swings around wildly with lots of false negatives and positives. This is expected. I wonder if we should drop the sample size of 2 in the simulations? 
 
-#### KEL note: I agree that we should drop sample size = 2. However, I think there is a problem with the rate calculations here. There are different ways to do it, but if the question is _what are the error rates for this design?_ then the 4 rates in the same cell position should add up to 100%. What are these percentages based on?
-**MA: UPDATE THESE HOMIE
+~~#### KEL note: I agree that we should drop sample size = 2. However, I think there is a problem with the rate calculations here. There are different ways to do it, but if the question is _what are the error rates for this design?_ then the 4 rates in the same cell position should add up to 100%. What are these percentages based on?~~
+
+**MA:: See Below for update, ignore these plots for now. 
 
 #### Raw data - Full Reciprocal Transplant 
 | --- | Covariance | GxE |
@@ -169,3 +170,15 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I kept 2 in as a samp
 | --- | ---| --- | --- | --- | --- |
 | False Negative Rate |0.91|0.51|0.211|0.24|0|
 | False Positive Rate |0.012|0.08|0.057|0|0.15|
+
+#### Raw data - Full Reciprocal Transplant 
+| --- | Covariance | GxE |
+|---|---|---|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.GxEBootHeat.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.GxEPermHeat.png)|
+
+#### Raw data - Paired Common Garden
+| --- | Covariance | GxE |
+|---|---|---|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.GxEBootHeat.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.GxEPermHeat.png)|
