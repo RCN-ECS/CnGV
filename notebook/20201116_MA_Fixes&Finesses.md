@@ -178,12 +178,15 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the finding
 #### Raw data - Full Reciprocal Transplant 
 Now I have set the colors to a standard scale, so light colors = low percents
 
+**RATES**
 | --- | Covariance | GxE |
 |---|---|---|
 |Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_covboot.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_gxeboot.png)|
 |Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_covperm.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_gxeperm.png)|
 
 #### Raw data - Paired Common Garden
+
+**STILL PERCENTS**
 | --- | Covariance | GxE |
 |---|---|---|
 |Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.GxEBootHeat.png)|
