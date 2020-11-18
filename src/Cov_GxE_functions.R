@@ -639,14 +639,16 @@ pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "r
 }
 
 cov.function <- function(input_df, is.sample){ # input_df = cov_matrix of G_means and E_means
+  
   N = length(input_df$gen_factor)
   overallmean = mean(c(input_df$G_means,input_df$E_means))
   numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
+  correcter = max(sd(input_df$E_means),sd(input_df$G_means))
 
   if(is.sample == TRUE){
-    cv = (1/(N-1))*numerator
+    cv = (1/(N-1))*(numerator/correcter^2)
   }else{
-    cv = (1/(N))*numerator
+    cv = (1/(N))*(numerator/correcter^2)
   }
   return(cv)
 }

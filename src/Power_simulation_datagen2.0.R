@@ -164,10 +164,19 @@ parameter_generation <- function(param_list){
                            "errpop" = rep(0,100), 
                            "replicate" = rep(x, 100),
                            "env_scenario" = rep(2, 100))
+    fpr2_cluster <- data.frame("n_pop" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE),
+                           "sample_size" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE), #remove the 2, each = 34
+                           "std_dev" = rep(c(0.5,1.0), each = 50),
+                           "n_env" = rep(2, times = 100), 
+                           "delta_env" = runif(n = 100, min = -1, max = 1),
+                           "delta_gen" = runif(n = 100, min = -1, max = 1),
+                           "interaction" = rep(0, 100),
+                           "errpop" = rep(0,100), 
+                           "replicate" = rep(x, 100),
+                           "env_scenario" = rep(2, 100))
                        
     # Bind it all up! 
-    param_table4 = rbind(param_table4, param_table3,fpr2_gxe,fpr2_cov)
-    
+    param_table4 = rbind(param_table4, param_table3,fpr2_gxe,fpr2_cov,fpr2_cluster)
   }
   
   # All Replicates together
@@ -189,11 +198,15 @@ parameter_generation <- function(param_list){
 df = parameter_generation(param_list)
 dim(df)
 df1 = filter(df, total_samples <500) #< 513) Expands from 21k to 24k.
-dim(df2)
+dim(df1)
 df2 = filter(df1, replicate == 1)
 #write.csv(df2,"~/Desktop/dftest.csv")
 
 # Pull out test scenarios
+
+df1 %>% filter(env_scenario == 2) %>% filter(n_pop == 8) %>% filter(std_dev == 0.5) %>% filter(errpop == 0)
+args = df1[19328,]
+
 df_sim = read.csv("~/Desktop/df.csv")
 args = filter(df_sim, row == 16858)
 args = args[,-1]

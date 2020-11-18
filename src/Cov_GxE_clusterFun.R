@@ -90,13 +90,13 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype (All 4 plots should look similar)
-# ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
+ ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
 
 # Check: Mean Phenotype 
 # ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
 
 # Check: Raw Phenotype with no error
-# ggplot(model_df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
+ ggplot(model_df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
 
 # Check: Mean Phenotype with no error
 # ggplot(mean_df.ne, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
@@ -126,8 +126,8 @@ aov_coefs <- m1[[11]]
 cov_est = cov(cov_matrix$G_means,cov_matrix$E_means)
 cor_est = cor(cov_matrix$G_means,cov_matrix$E_means)
 correction_raw = max(sd(cov_matrix$E_means),sd(cov_matrix$G_means))
-cov_corrected_check = round(cov(cov_matrix$G_means,cov_matrix$E_means)/(correction_raw^2),3)
-cov_corrected = round(cov.function(cov_matrix,is.sample = TRUE)/(correction_raw^2),3)
+cov_corrected_check = round((cov(cov_matrix$G_means,cov_matrix$E_means)/correction_raw^2),3)
+cov_corrected = round(cov.function(cov_matrix,is.sample = TRUE),3)
 
 # Stamps and Hadfield Info
 if (n_pop == 2) {
@@ -255,7 +255,7 @@ for(i in 1:n_boot){
   cov_est_perm = cov(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
   cor_est_perm = cor(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
   correction_raw_perm = max(sd(cov_matrix_perm$E_means),sd(cov_matrix_perm$G_means))
-  cov_corrected_perm = round(cov.function(cov_matrix_perm,is.sample = TRUE)/(correction_raw_perm^2),3)
+  cov_corrected_perm = round(cov.function(cov_matrix_perm,is.sample = TRUE),3)
   
   # Variance Partitioning
   v3 <- var.partition(var_dat)
@@ -342,7 +342,7 @@ cov_est_means = cov(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
 cor_est_means = cor(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
 means_correction = max(sd(Cov_mean_matrix$E_means),sd(Cov_mean_matrix$G_means))
 cov_means_corrected_check = round(cov(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)/(means_correction^2),3)
-cov_means_corrected = round(cov.function(Cov_mean_matrix,is.sample = TRUE)/(means_correction^2),3)
+cov_means_corrected = round(cov.function(Cov_mean_matrix,is.sample = TRUE),3)
 
 # Tracking: Covariance Matrix Output
 Cov_mean_matrix$data.type = rep("means",nrow(Cov_mean_matrix))
@@ -377,7 +377,7 @@ for(i in 1:n_boot){
   cov_mean_boot = cov(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
   cor_mean_boot = cor(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
   correction_mean_boot = max(sd(Cov_mean_matrix_boot$E_means),sd(Cov_mean_matrix_boot$G_means))
-  cov_corrected_mean_boot = round(cov.function(Cov_mean_matrix_boot,is.sample = TRUE)/(correction_mean_boot^2),3)
+  cov_corrected_mean_boot = round(cov.function(Cov_mean_matrix_boot,is.sample = TRUE),3)
   
   # Bootstrap dataframe
   boot_dat_means <- data.frame("cov_means_boot" = cov_mean_boot,
@@ -430,8 +430,7 @@ for(i in 1:n_boot){
   # Covariance Estimates
   cov_mean_perm = cov(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)
   cor_mean_perm = cor(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)
-  correction_mean_perm = max(sd(Cov_mean_matrix_perm$E_means),sd(Cov_mean_matrix_perm$G_means))
-  cov_corrected_mean_perm = round(cov.function(Cov_mean_matrix_perm,is.sample = TRUE)/(correction_mean_perm^2),3)
+  cov_corrected_mean_perm = round(cov.function(Cov_mean_matrix_perm,is.sample = TRUE),3)
   
   # Permutation dataframe -- Means
   perm_dat_means <- data.frame("cov_means_perm" = cov_mean_perm,
@@ -473,8 +472,7 @@ aov.df1.ne <- m7[[8]] # Model output
 # Covariance
 cov_est.ne = cov(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
 cor_est.ne = cor(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
-correction_raw.ne = max(sd(cov_matrix.ne$E_means),sd(cov_matrix.ne$G_means))
-cov_corrected.ne = round(cov.function(cov_matrix.ne,is.sample = FALSE)/(correction_raw.ne^2),3)
+cov_corrected.ne = round(cov.function(cov_matrix.ne,is.sample = FALSE),3)
 
 # Check: GxE Loop output
 # hist(GxE_loop_output.ne)
@@ -506,9 +504,7 @@ GxE_means_loop_output.ne <- m8[[3]]
 # Covariance
 cov_est_means.ne = cov(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
 cor_est_means.ne = cor(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
-means_correction.ne = max(sd(Cov_mean_matrix.ne$E_means),sd(Cov_mean_matrix.ne$G_means))
-cov_means_corrected.ne = round(cov.function(Cov_mean_matrix.ne,is.sample = FALSE)/(means_correction.ne^2),3)
-
+cov_means_corrected.ne = round(cov.function(Cov_mean_matrix.ne,is.sample = FALSE),3)
 
 # Tracking: Covariance Matrix Output
 Cov_mean_matrix.ne$data.type <- rep("mean.ne" , nrow(Cov_mean_matrix.ne))
