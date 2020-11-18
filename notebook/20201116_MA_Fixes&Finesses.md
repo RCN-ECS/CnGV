@@ -176,6 +176,8 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the finding
 | False Positive Rate -2 |0|0.04|0.03|0|1.0|
 
 #### Raw data - Full Reciprocal Transplant 
+Now I have set the colors to a standard scale, so light colors = low percents
+
 | --- | Covariance | GxE |
 |---|---|---|
 |Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT.GxEBootHeat.png)|
