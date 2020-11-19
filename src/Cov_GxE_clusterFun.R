@@ -33,7 +33,7 @@ env_scenario = as.numeric(args[11])
 seed = as.numeric(args[12])
 
 # Bootstraps
-n_boot <- 999
+n_boot <- 99
 
 # Clear Dataframes
 Variance.partition <- data.frame()
@@ -90,7 +90,7 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype (All 4 plots should look similar)
-# ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
+ ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
 
 # Check: Mean Phenotype 
 # ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
@@ -207,7 +207,8 @@ for(i in 1:n_boot){
 }
 
 # Check: Histograms of Bootstrap
-# ggplot(boot_df_raw, aes(x = GxE_emm_boot), alpha = 0.5)+geom_histogram()+geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Bootstrap: Raw Data")
+ ggplot(boot_df_raw, aes(x = GxE_emm_boot), alpha = 0.5)+
+   geom_histogram()+ geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Bootstrap: Raw Data")
 
 # Covariance Confidence Intervals 
 cov_CI = quantile(boot_df_raw$covariance, probs=c(0.025, 0.975), type=1) 

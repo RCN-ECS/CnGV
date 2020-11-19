@@ -978,3 +978,113 @@ fun <- function(x) {
   df <- read_excel(x)
 }
 rm(fun)
+
+########### Data Summary/Plotting Functions ####################
+
+## Confusion Matrix data wrangling ##
+fpr.fnr <- function(input_df,scenario){
+  
+  is.empty <- function(x, mode=NULL){
+    if (is.null(mode)) mode <- class(x)
+    identical(vector(mode,1),c(x,vector(class(x),1)))
+  }
+  
+  df <- data.frame()
+  
+  for(i in 1:length(unique(input_df$sample_size))){
+    for(j in 1:length(unique(input_df$n_pop))){
+      
+      fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+      ss = unique(input_df$sample_size)[i]
+      np = unique(input_df$n_pop)[j]
+      
+      tempdf <- input_df %>% 
+        filter(sample_size == ss) %>% 
+        filter(n_pop == np)
+      
+      if(nrow(tempdf)==0){next}
+      
+      fn1 = tempdf$n[tempdf$name == "False Negative"]
+      fp1 = tempdf$n[tempdf$name == "False Positive"]
+      tn1 = tempdf$n[tempdf$name == "True Negative"]
+      tp1 = tempdf$n[tempdf$name == "True Positive"]
+      
+      if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+      if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+      if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+      if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+      
+      fnr = fn/(fn+tp)
+      fpr = fp/(fp+tn)
+      
+      n = c(fn, fp, tn, tp)
+      rate = c(fnr,fpr,NA,NA)
+      n_env = if(scenario == 1){n_env = unique(tempdf$n_pop)}else{n_env = 2}
+      total = sum(n)
+      percent = n/total
+      
+      df. <- data.frame("name" = c("False Negative", "False Positive", "True Negative", "True Positive"),
+                        "sample_size" = rep(ss,4),
+                        "n_pop" = rep(np,4),
+                        "totsamp" = rep(unique(tempdf$n_pop) * n_env * unique(tempdf$sample_size),4),
+                        "n" = n, 
+                        "total" = total, 
+                        "percent" = n/total,
+                        "rate" = rate)
+      df <- rbind(df,df.)
+    }
+  }
+  return(df)
+} # Result goes into heatmap_fun
+
+## Confusion Matrix Heatmaps ## 
+heatmap_fun <- function(plot_data, plot_type){ #plot_type is "percent" or "rate"
+  
+  p <- list()
+  
+  if(plot_type == "percent"){
+  for(i in 1:length(unique(plot_data$name))){
+    
+    subcat <- filter(plot_data, name == unique(plot_data$name)[i])
+    
+    p[[i]] <- ggplot(subcat,aes(x = factor(sample_size), y = factor(n_pop), fill = percent)) + 
+      geom_tile() + 
+      geom_text(aes(label= paste(round(percent,3), totsamp,sep = '\n')), size = 5) +
+      theme_classic(base_size = 12, base_family = "Times") + 
+      scale_fill_gradient2(#low="#DDDDDD", mid="#99CCEE", high="#000044", #colors in the scale
+        #                     midpoint=mean(rng.gxe2),    #same midpoint for plots (mean of the range)
+        #                     breaks=seq(0,1,0.25), #breaks in the scale bar
+        limits=c(0,1))+
+      xlab("Sample Size") + ylab("Number of Populations")+
+      #labs(fill = "Percent")+
+      theme(axis.text = element_text(colour = "black"))+
+      theme(legend.position = "none")+
+      ggtitle(unique(subcat$name))+
+      theme(plot.title = element_text(size = 16, face = "bold"))
+  }
+  }else{
+
+    for(i in 1:length(unique(plot_data$name))){
+      
+      subcat <- filter(plot_data, name == unique(plot_data$name)[i])
+      if(unique(is.na(subcat$rate))==TRUE){next}
+      
+      p[[i]] <- ggplot(subcat,aes(x = factor(sample_size), y = factor(n_pop), fill = rate)) + 
+        geom_tile() + 
+        geom_text(aes(label= paste(round(rate,3), totsamp,sep = '\n')), size = 5) +
+        theme_classic(base_size = 12, base_family = "Times")+ 
+        scale_fill_gradient2(limits=c(0,1))+
+        xlab("Sample Size") + ylab("Number of Populations")+
+        #labs(fill = "Percent")+
+        theme(axis.text = element_text(colour = "black"))+
+        theme(legend.position = "none")+
+        ggtitle(unique(subcat$name))+
+        theme(plot.title = element_text(size = 16, face = "bold"))
+      
+      
+    
+  }
+  }
+  return(do.call(grid.arrange, p))
+} 
+
