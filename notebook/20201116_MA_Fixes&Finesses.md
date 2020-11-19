@@ -91,17 +91,7 @@ It appears that when sample size is 2, predictive ability swings around wildly w
 
 **MA:: See Below for update, ignore these plots for now. 
 
-#### Raw data - Full Reciprocal Transplant 
-| --- | Covariance | GxE |
-|---|---|---|
-|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.GxEBootHeat.png)|
-|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.17.GxEPermHeat.png)|
-
-#### Raw data - Paired Common Garden
-| --- | Covariance | GxE |
-|---|---|---|
-|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovBootHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.gxebootHeat_dub.png)|
-|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.CovPermHeat_dub.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.16.GxEPermHeat_dub.png)|
+*deleted heatmaps because they are just meaningless space wasters now*
 
 ## Issue #4: Make confusion matrix for Anova 
 
@@ -186,8 +176,8 @@ Now I have set the colors to a standard scale, so light colors = low percents
 
 #### Raw data - Paired Common Garden
 
-**STILL PERCENTS**
+**RATES**
 | --- | Covariance | GxE |
 |---|---|---|
-|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.GxEBootHeat.png)|
-|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG.GxEPermHeat.png)|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_covbootrate.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_gxebootrate.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_covpermrate.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_gxepermrate.png)|
