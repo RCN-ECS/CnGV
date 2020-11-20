@@ -154,7 +154,9 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the finding
 **Reciprocal Transplant with Raw data**
 
 LARGER RESIDUAL ONLY (N = 572)
+
 SampleSize = 2 *INCLUDED*
+
 GxE - 2 decimal places
 
 | | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
@@ -184,7 +186,9 @@ GxE - 2 decimal places
 **Paired Common Garden with Raw data**
 
 LARGER RESIDUAL ONLY (N = 645)
+
 SampleSize = 2 *INCLUDED*
+
 GxE - 2 decimal places
 
 | | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
