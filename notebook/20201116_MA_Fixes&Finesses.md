@@ -204,6 +204,8 @@ GxE - 2 decimal places
 #### Raw data - Full Reciprocal Transplant 
 Now I have set the colors to a standard scale, so light colors = low percents. These plots show LARGER RESIDUAL ONLY 
 
+Each square shows the FPR or FNR for that subset of data. For example, the false positive rate for the 8 population, 4 sample size scenarios using ANOVA to measure GxE is 0.14.
+
 **RATES**
 | --- | Covariance | GxE |
 |---|---|---|
