@@ -136,7 +136,7 @@ param_list <- list(
   interaction = NULL) 
 ```
 # Results with above implementation (single replicate). 11/18/2020
-I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the findings with and without 2 in as a sample size.  
+I boosted the number of CovGE =0 and GxE = 0 to 100 each. I compare the findings with and without 2 in as a sample size.  
 
 **Reciprocal Transplant with Raw data -- BOTH RESIDUALS**
 | | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
@@ -155,7 +155,7 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the finding
 
 LARGER RESIDUAL ONLY (N = 572)
 
-SampleSize = 2 *INCLUDED*
+SampleSize = 2 is *INCLUDED*
 
 GxE - 2 decimal places
 
@@ -202,7 +202,7 @@ GxE - 2 decimal places
 | False Positive Rate |0.03|0.12|0.02|0.0|1.0|
 
 #### Raw data - Full Reciprocal Transplant 
-Now I have set the colors to a standard scale, so light colors = low percents
+Now I have set the colors to a standard scale, so light colors = low percents. These plots show LARGER RESIDUAL ONLY 
 
 **RATES**
 | --- | Covariance | GxE |
@@ -212,6 +212,7 @@ Now I have set the colors to a standard scale, so light colors = low percents
 |Anova| -- blank -- |![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.FRTGxEAnovaHeat.png)|
 
 #### Raw data - Paired Common Garden
+These plots show LARGER RESIDUAL ONLY.
 
 **RATES**
 | --- | Covariance | GxE |
