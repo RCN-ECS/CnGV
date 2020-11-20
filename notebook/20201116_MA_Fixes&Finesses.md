@@ -98,7 +98,7 @@ It appears that when sample size is 2, predictive ability swings around wildly w
 ## KEL note: This also passes my sanity check. Keep in mind that our approach is not near the nominal rate (ANOVA has the 5% FPR, which is expected), so we can argue that this approach is conservative (a lower FPR at the expense of a higher FNR).
 
 **Sanity Check for GxE** 
-Anova continues to perform well. Looks sane to me. 
+Anova continues to perform well. Looks sane to me. (Old data as of 11.18.20)
 
 | | Anova | Bootstrap | Permutation |
 | --- | --- | --- | --- |
@@ -138,7 +138,7 @@ param_list <- list(
 # Results with above implementation (single replicate). 11/18/2020
 I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the findings with and without 2 in as a sample size.  
 
-**Reciprocal Transplant with Raw data**
+**Reciprocal Transplant with Raw data -- BOTH RESIDUALS**
 | | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
 | --- | --- | --- | --- | --- | --- |
 | False Negative |907 - 80.4%|373 - 33.1%|310 - 27.5%|333 - 29.5%|44 - 3.9%|
@@ -151,8 +151,24 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the finding
 | False Negative Rate -2 |0.88|0.37|0.24|0.31|0.047|
 | False Positive Rate -2|0|0.07|0.04|0|0.79|
 
+**Reciprocal Transplant with Raw data**
+
+LARGER RESIDUAL ONLY (N = 572)
+SampleSize = 2 *INCLUDED*
+GxE - 2 decimal places
+
+| | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
+| --- | --- | --- | --- | --- | --- |
+| False Negative |460 - 80.4%|254 - 44.4%|207-36.2%|222-38.8%|21-3.67%|
+| False Positive |0|17 - 1.51%|9 - 1.57%|2-0.35%|2-0.35%|64-11.2%|
+| True Negative |74 - 12.9%|65 - 11.4%|70-12.2%|70-12.2%|8-1.4%|
+| True Positive |38 - 6.64%|244 - 42.7%|293-51.2%|278-48.6%|479-83.7%|
+| --- | ---| --- | --- | --- | --- |
+| False Negative Rate |0.92|0.51|0.41|0.44|0.04|
+| False Positive Rate |0|0.12|0.03|0.03|0.89|
+
 **Paired Common Garden with Raw data**
-*Ok, still a problem with GxE Bootstrap sampling. I think I have a solution, although it may not be SUPER important moving forward.* 
+
 | | CovGE Permutation | CovGE Bootstrap | Anova | GxE Permutation | GxE Bootstrap |
 | --- | --- | --- | --- | --- | --- |
 | False Negative |938-72.8%|529-41%|232-18%|269-20.9%|0%|
@@ -165,19 +181,37 @@ I boosted the number of CovGE =0 and GxE = 0 to 1000 each. I compare the finding
 | False Negative Rate -2 |0.92|0.49|0.13|0.17|0|
 | False Positive Rate -2 |0|0.04|0.03|0|1.0|
 
+**Paired Common Garden with Raw data**
+
+LARGER RESIDUAL ONLY (N = 645)
+SampleSize = 2 *INCLUDED*
+GxE - 2 decimal places
+
+| | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
+| --- | --- | --- | --- | --- | --- |
+| False Negative |502-77.8%|347-53.8%|163-25.3%|199-30.85%|0%|
+| False Positive |3-0.47%|12-1.86%|2-0.31%|0%|96-14.88%|
+| True Negative |100-15.5%|91-14.11%|94-14.57%|96-14.88%|0%|
+| True Positive |40-6.2%|195-30.23%|386-59.84%|350-54.26%|549-85.12%|
+| --- | ---| --- | --- | --- | --- |
+| False Negative Rate |0.93|0.64|0.3|0.36|0.0|
+| False Positive Rate |0.03|0.12|0.02|0.0|1.0|
+
 #### Raw data - Full Reciprocal Transplant 
 Now I have set the colors to a standard scale, so light colors = low percents
 
 **RATES**
 | --- | Covariance | GxE |
 |---|---|---|
-|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_covboot.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_gxeboot.png)|
-|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_covperm.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.FRT_Rate_gxeperm.png)|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.FRT.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.FRT.GxEBootHeat.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.FRT.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.FRT.GxEPermHeat.png)|
+|Anova| -- blank -- |![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.FRTGxEAnovaHeat.png)|
 
 #### Raw data - Paired Common Garden
 
 **RATES**
 | --- | Covariance | GxE |
 |---|---|---|
-|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_covbootrate.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_gxebootrate.png)|
-|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_covpermrate.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.18.CG_gxepermrate.png)|
+|Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.GxEBootHeat.png)|
+|Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.GxEPermHeat.png)|
+|Anova| -- blank -- |![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.AnovaHeat.png)|
