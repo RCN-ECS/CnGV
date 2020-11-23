@@ -138,19 +138,6 @@ param_list <- list(
 # Results with above implementation (single replicate). 11/18/2020
 I boosted the number of CovGE =0 and GxE = 0 to 100 each. I compare the findings with and without 2 in as a sample size.  
 
-**Reciprocal Transplant with Raw data -- BOTH RESIDUALS**
-| | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
-| --- | --- | --- | --- | --- | --- |
-| False Negative |907 - 80.4%|373 - 33.1%|310 - 27.5%|333 - 29.5%|44 - 3.9%|
-| False Positive |0|17 - 1.51%|5 - 0.44%|2 - 0.18%|113 - 10%|
-| True Negative |137 - 12.1%|120 - 10.6%|130 - 11.5%|133 - 11.8%|22 - 1.95%|
-| True Positive |84 - 7.45%|618 - 54.8%|683 - 60.5%|660 - 58.5%|949 - 84.1%|
-| --- | ---| --- | --- | --- | --- |
-| False Negative Rate |0.91|0.38|0.31|0.34|0.04|
-| False Positive Rate |0|0.12|0.04|0.01|0.84|
-| False Negative Rate -2 |0.88|0.37|0.24|0.31|0.047|
-| False Positive Rate -2|0|0.07|0.04|0|0.79|
-
 **Reciprocal Transplant with Raw data**
 
 LARGER RESIDUAL ONLY (N = 572)
@@ -162,26 +149,13 @@ GxE - 2 decimal places
 | | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
 | --- | --- | --- | --- | --- | --- |
 | False Negative |460 - 80.4%|254 - 44.4%|207-36.2%|222-38.8%|21-3.67%|
-| False Positive |0|17 - 1.51%|9 - 1.57%|2-0.35%|2-0.35%|64-11.2%|
+| False Positive |0|9 - 1.57%|2-0.35%|2-0.35%|64-11.2%|
 | True Negative |74 - 12.9%|65 - 11.4%|70-12.2%|70-12.2%|8-1.4%|
 | True Positive |38 - 6.64%|244 - 42.7%|293-51.2%|278-48.6%|479-83.7%|
 | --- | ---| --- | --- | --- | --- |
 | False Negative Rate |0.92|0.51|0.41|0.44|0.04|
 | False Positive Rate |0|0.12|0.03|0.03|0.89|
 
-**Paired Common Garden with Raw data**
-
-| | CovGE Permutation | CovGE Bootstrap | Anova | GxE Permutation | GxE Bootstrap |
-| --- | --- | --- | --- | --- | --- |
-| False Negative |938-72.8%|529-41%|232-18%|269-20.9%|0%|
-| False Positive |3-0.23%|20-1.6%|11-0.85%|0%|191-14.8%|
-| True Negative |256-19.9%|239-18.5%|180-14%|191-14.8%|1098 - 85.2%|
-| True Positive |92-7.14%|501-38.9%|866-67.2%|829-64.3%|0%|
-| --- | ---| --- | --- | --- | --- |
-| False Negative Rate |0.91|0.51|0.211|0.24|0|
-| False Positive Rate |0.012|0.08|0.057|0|1.0|
-| False Negative Rate -2 |0.92|0.49|0.13|0.17|0|
-| False Positive Rate -2 |0|0.04|0.03|0|1.0|
 
 **Paired Common Garden with Raw data**
 
@@ -222,3 +196,33 @@ These plots show LARGER RESIDUAL ONLY.
 |Bootstrap|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.CovBootHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.GxEBootHeat.png)|
 |Permutation|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.CovPermHeat.png)|![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.GxEPermHeat.png)|
 |Anova| -- blank -- |![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.20.CG.AnovaHeat.png)|
+
+
+
+#### Old and Irrelevant but keeping for good measure. 
+
+**Reciprocal Transplant with Raw data -- BOTH RESIDUALS**
+| | CovGE Permutation | CovGE Bootstrap |Anova | GxE Permutation | GxE Bootstrap |
+| --- | --- | --- | --- | --- | --- |
+| False Negative |907 - 80.4%|373 - 33.1%|310 - 27.5%|333 - 29.5%|44 - 3.9%|
+| False Positive |0|17 - 1.51%|5 - 0.44%|2 - 0.18%|113 - 10%|
+| True Negative |137 - 12.1%|120 - 10.6%|130 - 11.5%|133 - 11.8%|22 - 1.95%|
+| True Positive |84 - 7.45%|618 - 54.8%|683 - 60.5%|660 - 58.5%|949 - 84.1%|
+| --- | ---| --- | --- | --- | --- |
+| False Negative Rate |0.91|0.38|0.31|0.34|0.04|
+| False Positive Rate |0|0.12|0.04|0.01|0.84|
+| False Negative Rate -2 |0.88|0.37|0.24|0.31|0.047|
+| False Positive Rate -2|0|0.07|0.04|0|0.79|
+
+**Paired Common Garden with Raw data-- BOTH RESIDUALS**
+| | CovGE Permutation | CovGE Bootstrap | Anova | GxE Permutation | GxE Bootstrap |
+| --- | --- | --- | --- | --- | --- |
+| False Negative |938-72.8%|529-41%|232-18%|269-20.9%|0%|
+| False Positive |3-0.23%|20-1.6%|11-0.85%|0%|191-14.8%|
+| True Negative |256-19.9%|239-18.5%|180-14%|191-14.8%|1098 - 85.2%|
+| True Positive |92-7.14%|501-38.9%|866-67.2%|829-64.3%|0%|
+| --- | ---| --- | --- | --- | --- |
+| False Negative Rate |0.91|0.51|0.211|0.24|0|
+| False Positive Rate |0.012|0.08|0.057|0|1.0|
+| False Negative Rate -2 |0.92|0.49|0.13|0.17|0|
+| False Positive Rate -2 |0|0.04|0.03|0|1.0|
