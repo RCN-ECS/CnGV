@@ -33,7 +33,7 @@ env_scenario = as.numeric(args[11])
 seed = as.numeric(args[12])
 
 # Bootstraps
-n_boot <- 99
+n_boot <- 999
 
 # Clear Dataframes
 Variance.partition <- data.frame()
@@ -211,16 +211,16 @@ for(i in 1:n_boot){
    geom_histogram()+ geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Bootstrap: Raw Data")
 
 # Covariance Confidence Intervals 
-cov_CI = quantile(boot_df_raw$covariance, probs=c(0.025, 0.975), type=1) 
-cor_CI = quantile(boot_df_raw$cor_est_boot, probs=c(0.025, 0.975), type=1) 
-cov_corrected_CI = quantile(boot_df_raw$cov_corrected_boot, probs=c(0.025, 0.975), type=1) 
+cov_CI = quantile(boot_df_raw$covariance, probs=c(0.025, 0.975), type=8) 
+cor_CI = quantile(boot_df_raw$cor_est_boot, probs=c(0.025, 0.975), type=8) 
+cov_corrected_CI = quantile(boot_df_raw$cov_corrected_boot, probs=c(0.025, 0.975), type=8) 
 
 # GxE Confidence Intervals
-GxE_orig_CI = quantile(boot_df_raw$GxE_emm_original_boot, probs=c(0.025, 0.975), type=1) 
-GxE_emm_CI = quantile(boot_df_raw$GxE_emm_boot, probs = c(0.025, 0.975), type=1)
-GxE_omega_CI = quantile(boot_df_raw$GxE_omega_boot, probs=c(0.025, 0.975), type=1)
-GxE_eta_CI = quantile(boot_df_raw$GxE_eta_boot, probs=c(0.025,0.975), type = 1)
-GxE_SSq_CI = quantile(boot_df_raw$GxE_SSq_boot, probs = c(0.025,0.975), type = 1)
+GxE_orig_CI = quantile(boot_df_raw$GxE_emm_original_boot, probs=c(0.025, 0.975), type=8) 
+GxE_emm_CI = quantile(boot_df_raw$GxE_emm_boot, probs = c(0.025, 0.975), type = 8)
+GxE_omega_CI = quantile(boot_df_raw$GxE_omega_boot, probs=c(0.025, 0.975), type = 8)
+GxE_eta_CI = quantile(boot_df_raw$GxE_eta_boot, probs=c(0.025,0.975), type = 8)
+GxE_SSq_CI = quantile(boot_df_raw$GxE_SSq_boot, probs = c(0.025,0.975), type = 8)
 
 
 ###############################################
@@ -392,12 +392,12 @@ for(i in 1:n_boot){
 # ggplot(boot_df_means, aes(x = GxE_means_boot), alpha = 0.5)+geom_histogram()+xlim(0,(GxE_means+0.1))+geom_vline(aes(xintercept = GxE_means))+theme_classic()+ ggtitle("Bootstrap: Means Data")
 
 # Covariance Confidence Intervals -- Means
-cov_means_CI = quantile(boot_df_means$cov_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
-cor_means_CI = quantile(boot_df_means$cor_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
-cov_corrected_means_CI = quantile(boot_df_means$cov_corrected_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
+cov_means_CI = quantile(boot_df_means$cov_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=8) 
+cor_means_CI = quantile(boot_df_means$cor_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=8) 
+cov_corrected_means_CI = quantile(boot_df_means$cov_corrected_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=8) 
 
 # GxE Confidence Intervals -- Means
-GxE_means_CI = quantile(boot_df_means$GxE_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
+GxE_means_CI = quantile(boot_df_means$GxE_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=8) 
 
 
 ###############################################

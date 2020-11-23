@@ -982,7 +982,7 @@ rm(fun)
 ########### Data Summary/Plotting Functions ####################
 
 ## Confusion Matrix data wrangling ##
-fpr.fnr <- function(input_df,scenario){
+fpr.fnr <- function(input_df,divided ,scenario){
   
   is.empty <- function(x, mode=NULL){
     if (is.null(mode)) mode <- class(x)
@@ -990,7 +990,8 @@ fpr.fnr <- function(input_df,scenario){
   }
   
   df <- data.frame()
-  
+  if(divided == TRUE){
+    
   for(i in 1:length(unique(input_df$sample_size))){
     for(j in 1:length(unique(input_df$n_pop))){
       
@@ -1021,7 +1022,7 @@ fpr.fnr <- function(input_df,scenario){
       rate = c(fnr,fpr,NA,NA)
       n_env = if(scenario == 1){n_env = unique(tempdf$n_pop)}else{n_env = 2}
       total = sum(n)
-      percent = n/total
+      percent = (n/total)*100
       
       df. <- data.frame("name" = c("False Negative", "False Positive", "True Negative", "True Positive"),
                         "sample_size" = rep(ss,4),
@@ -1029,11 +1030,41 @@ fpr.fnr <- function(input_df,scenario){
                         "totsamp" = rep(unique(tempdf$n_pop) * n_env * unique(tempdf$sample_size),4),
                         "n" = n, 
                         "total" = total, 
-                        "percent" = n/total,
-                        "rate" = rate)
+                        "percent" = round(percent,2),
+                        "rate" = round(rate,2))
       df <- rbind(df,df.)
     }
   }
+      
+    }else{
+      
+      fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NA
+      
+      fn1 = input_df$n[input_df$name == "False Negative"]
+      fp1 = input_df$n[input_df$name == "False Positive"]
+      tn1 = input_df$n[input_df$name == "True Negative"]
+      tp1 = input_df$n[input_df$name == "True Positive"]
+    
+      
+      if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+      if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+      if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+      if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+      
+      fnr = fn/(fn+tp)
+      fpr = fp/(fp+tn)
+      
+      n = c(fn, fp, tn, tp)
+      rate = c(fnr,fpr,NA,NA)
+      total = sum(n)
+      percent = (n/total)*100
+      
+      df <- data.frame("name" = c("False Negative", "False Positive", "True Negative", "True Positive"),
+                       "n" = n, 
+                       "total" = total, 
+                       "percent" = round(percent,2),
+                       "rate" = round(rate,2))
+     }
   return(df)
 } # Result goes into heatmap_fun
 

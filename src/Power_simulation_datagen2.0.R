@@ -204,8 +204,8 @@ df2 = filter(df1, replicate == 1)
 
 # Pull out test scenarios
 
-df1 %>% filter(env_scenario == 2) %>% filter(n_pop == 8) %>% filter(std_dev == 0.5) %>% filter(errpop == 0)
-args = df1[19328,]
+df1 %>% filter(env_scenario == 1) %>% filter(n_pop == 8) %>% filter(std_dev ==1) %>% filter(errpop == 0)
+args = df1[940,]
 
 df_sim = read.csv("~/Desktop/df.csv")
 args = filter(df_sim, row == 16858)
