@@ -23,10 +23,16 @@ and FN + TP should add up to the same number
 
 - For publication, we need to "dig in" to the power/FN and FP rates. The "overall" tables are useful for us, but not for publication
   - Lotterhos and Whitlock 2014 - https://onlinelibrary.wiley.com/doi/epdf/10.1111/mec.12725 
+      - For example, Fig 2. This paper has been cited alot, so I must have done something right in describing the results?
+      - Happy to discuss this paper before tackling the stuff below, if it helps
   - False positive rates will be a function of sampling design and random noise
   - True positive rates (or false negative rates) will be a function of sampling design, random noise, and effect size
   - Power = 1- FNR (so don't need to present both)
+  - We need to make sure we have enough sims within a cell (e.g., high resolution) so that differences in the rates in different situations are not caused by random error
+      - for example, if there are only 20 sims within a cell, then our resolution is only 0.05
+      - 1000 is a good aim
+  - How does power to detect a specific effect increase with total sample size?
+  - How does power increase with effect size, as a function of a single total sample size?
   - Is permutation really that bad in a well designed experiment with strong covGE in the system?
-  
-  
-- 
+  - Happy to help sketch out some plots and talk about them before getting into the weeds
+   
