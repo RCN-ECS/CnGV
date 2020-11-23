@@ -9,6 +9,9 @@ and FN + TP should add up to the same number
 
 - We double checked sample CovGE and population CovGE, since we updated that code
   - looks like our sample estimate tends to overestimate CovGE, dig into why some of them are way off?
+  
+  - **MA: Looks like population number drives disparity between the CovGEs for population and sample. This makes sense to me.**
+  ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/notebook_figs/11.23.CovPopVsSamp.png)
 
 - Katie will send Molly gist on R code to put at top of scripts to automatically update packages
   - https://gist.github.com/DrK-Lo/a945a29d6606b899022d0f03109b9483 
