@@ -120,7 +120,7 @@ parameter_generation <- function(param_list){
       delta_gen = runif(n = 50, min = -1, max = 1) 
       
       # Clustering term
-      errpop = abs(rnorm(n = 50,  mean = 0, sd = abs(delta_gen)))
+      errpop = abs(rnorm(n = 50,  mean = 0, sd = abs(delta_gen))) # Set to three values (sd = 0, val1, val2) (do those get me near values I expect)
       
       if(params2$n_pop[i] == 2){
         low_int = runif(50, min = 0, max = 2)
