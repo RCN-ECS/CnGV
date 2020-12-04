@@ -977,7 +977,7 @@ rm(fun)
 ########### Data Summary/Plotting Functions ####################
 
 ## Confusion Matrix data wrangling ##
-fpr.fnr <- function(input_df,divided ,scenario){
+fpr.fnr <- function(input_df, divided, scenario){
   
   is.empty <- function(x, mode=NULL){
     if (is.null(mode)) mode <- class(x)

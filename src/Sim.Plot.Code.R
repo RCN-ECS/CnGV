@@ -4,35 +4,67 @@
 
 ## Load packages
 library(ggplot2)
+library(grid)
 library(readr)
 library(tidyverse)
 library(gridExtra)
 library(ggthemes)
 
 # Load Data compiled on cluster
-dat_csv1 = read.csv("~/Desktop/Power_output_results.csv")
-#dat_csv1 = filter(dat_csv1, row %in% c(1:31900))
+setwd("~/Documents/GitHub/CnGV/CnGV/results/Sim_12.1.20/")
+start_df = read.csv("Power_output_results.csv")
+
+# Split up into two experimental designs
+dat_csv = start_df %>% filter(env_scenario == 1) %>% droplevels() # Reciprocal Transplant
+dat_dub = start_df %>% filter(env_scenario == 2) %>% droplevels() # Common Garden
+
 ####### Check Average time for longest sims ##########
-(timecheck = dat_csv1 %>%
+(timecheck = start_df %>%
   #filter(n_pop == max(n_pop)) %>%
   #filter(std_dev == max(std_dev)) %>%
   #filter(sample_size == max(sample_size)) %>%
   summarize(average_time = mean(Sim_time)))
 
+####### Check 0s for FPR and FNR ##########
+sizecheck = dat_csv %>%
+   filter(true_cov == 0) 
+   #filter(true_GxE_emm == 0)
+dim(sizecheck) # Should be around 1000 (or 100 if 1 replicate)
+
+####### Check # for each type ##########
+(sizecheck = start_df %>%
+    filter(n_pop == min(n_pop)) %>%
+    filter(sample_size == min(sample_size)) %>%
+    #filter(n_pop == max(n_pop)) %>%
+    #filter(sample_size == max(sample_size)) %>%
+    summarize(size = n()))
+
+####### Check for missing rows ##########
+start_params = read.csv("~/Desktop/df.csv")
+(missing_rows = anti_join(start_params, start_df, by = "row"))
+#write.csv(missing_rows[,-1], "~/Desktop/missings.csv")
+
+#####################################
+##          Parameter Coverage      ##
+######################################
+
+(hexy = ggplot(dat_csv, aes(x = true_cov, y = true_GxE_emm)) + 
+   geom_hex()+ 
+   ylab(expression("Actual "*bar(Delta)*""["GxE"]))+xlab(expression("Actual Cov"["GE"]))+
+   ggtitle("Full Reciprocal Transplant") + facet_grid(sample_size~n_pop)+
+   theme_classic(base_family = "Times"))
+
+(hexy2 = ggplot(dat_dub, aes(x = true_cov, y = true_GxE_emm)) + 
+    geom_hex()+ 
+    ylab(expression("Actual "*bar(Delta)*""["GxE"]))+xlab(expression("Actual Cov"["GE"]))+
+    ggtitle("Paired Common Garden") + facet_grid(sample_size~n_pop)+
+    theme_classic(base_family = "Times"))
+
+grid.arrange(hexy,hexy2) 
+
 ######################
 ## Covariance x GxE ##
 ######################
-
-dat_csv = filter(dat_csv1, env_scenario == 1)
-dat_dub = filter(dat_csv1, env_scenario == 2)
-
-####### Check how many results per N-Pop/sample size ##########
-(sizecheck = dat_csv1 %>%
-   filter(n_pop == min(n_pop)) %>%
-   filter(sample_size == min(sample_size)) %>%
-   #filter(n_pop == max(n_pop)) %>%
-   #filter(sample_size == max(sample_size)) %>%
-   summarize(size = n()))
 
 # Assign colors for Cov (CI) x GxE (pval) plot
 dat_csv$col = NULL
@@ -57,32 +89,59 @@ for(i in 1:nrow(dat_dub)){
   }else{dat_dub$col[i] = "grey"} # None significant
 }
 
-# Cov x GxE Plot
-ggplot(dat_csv, aes(x = covariance, y = GxE_emm, group = factor(n_pop), alpha = 0.1,colour = col)) + 
-  geom_jitter() + theme_classic() + ylim(0,1) + xlim(-1,1)+
-  xlab("Covariance Estimate") + ylab("GxE Estimate") +
-  theme(legend.position = "none")+
-  scale_colour_identity()+
-  facet_grid(sample_size~n_pop)
 
- ggplot(dat_dub, aes(x = covariance, y = true_GxE_emm, group = factor(n_pop), alpha = 0.1,colour = col)) + 
-  geom_jitter() + theme_classic() + ylim(0,1) + xlim(-1,1)+
-  xlab("Covariance Estimate") + ylab("GxE Estimate") +
+# Cov x GxE Plot
+cge1 = filter(dat_csv, total_samples == 128)
+cge1$n_pop_factor = NULL
+for(i in 1:nrow(cge1)){
+  if(cge1$n_pop[i] == 4){cge1$n_pop_factor[i] = "4 Genotypes"}
+  else{cge1$n_pop_factor[i] = "8 Genotypes"}
+}
+
+(cge1_plot = ggplot(cge1, aes(x = covariance, y = GxE_emm, group = n_pop_factor, alpha = 0.1,colour = col)) + 
+  geom_point() + ylim(0,1) + xlim(-1,1)+
+  theme_classic(base_size = 24, base_family = "Times")+ 
+  ylab(expression(bar(Delta)*""["GxE"]))+xlab(expression("Cov"["GE"]))+
   theme(legend.position = "none")+
   scale_colour_identity()+
-  facet_grid(sample_size~n_pop)
+  theme(axis.text.x=element_text(colour="black"))+
+  theme(axis.text.y=element_text(colour="black"))+
+  facet_wrap(~n_pop_factor)+
+  ggtitle("Full Reciprocal Transplant Design\nTotal Samples = 128")+
+  theme(plot.title = element_text(size = 24, face = "bold")))
+
+cge2 = filter(dat_dub, total_samples == 128)
+cge2$n_pop_factor = NULL
+for(i in 1:nrow(cge2)){
+  if(cge2$n_pop[i] == 4){cge2$n_pop_factor[i] = "2 Gen. per Env."
+  }else if(cge2$n_pop[i] == 8){cge2$n_pop_factor[i] = "4 Gen. per Env."
+  }else{cge2$n_pop_factor[i] = "8 Gen. per Env."}
+}
+
+(cge2_plot = ggplot(cge2, aes(x = covariance, y = GxE_emm, group = n_pop_factor, alpha = 0.1,colour = col)) + 
+  geom_point() + ylim(0,1) + xlim(-1,1)+
+  theme_classic(base_size = 24, base_family = "Times")+ 
+  ylab(expression(bar(Delta)*""["GxE"]))+xlab(expression("Cov"["GE"]))+  theme(legend.position = "none")+
+  scale_colour_identity()+
+  theme(axis.text.x=element_text(colour="black"))+
+  theme(axis.text.y=element_text(colour="black"))+
+  facet_wrap(~n_pop_factor)+
+  ggtitle("Paired Common Garden Design\nTotal Samples = 128")+
+  theme(plot.title = element_text(size = 24, face = "bold")))
+
+grid.arrange(cge1_plot, cge2_plot)
 
 # Cov x Omega2 Plot
 
 ggplot(dat_csv, aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha = 0.1,colour = col)) + 
-  geom_jitter() + theme_classic() + 
+  geom_point() + theme_classic() + 
   xlab("Covariance Estimate") + ylab("GxE Estimate (Omega^2)") +
   theme(legend.position = "none")+
   scale_colour_identity()+
   facet_grid(sample_size~n_pop)
 
 ggplot((filter(dat_dub, sample_size != 16)), aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha = 0.1,colour = col)) + 
-  geom_jitter() + theme_classic() + 
+  geom_point() + theme_classic() + 
   xlab("Covariance Estimate") + ylab("GxE Estimate (Omega^2)") +
   theme(legend.position = "none")+
   scale_colour_identity()+
@@ -119,334 +178,1240 @@ for(i in 1:nrow(dat_dub)){
   if(dat_dub$GxE_emm_pvalue[i] > 0.05){dat_dub$gxetick[i]=0}else{dat_dub$gxetick[i]=1}
 }
 
-# Power at moderate levels of Cov and GxE -- Scenario 1
+# Power at moderate levels of Cov and GxE
 summary(abs(dat_csv$covariance))
 summary(dat_csv$GxE_emm)
-covpow1 = dat_csv %>% filter(between(abs(covariance),0.15,0.5)) #Between 1st and 3rd quartile ish
-gxepow1 = dat_csv %>% filter(between(GxE_emm,0.2,0.7)) 
+cov1pow = dat_csv %>% filter(between(abs(covariance),0.2,0.6)) #Between 1st and 3rd quartile ... ish
+gxe1pow = dat_csv %>% filter(between(GxE_emm,0.3,0.6)) 
+cov2pow = dat_dub %>% filter(between(abs(covariance),0.2,0.6))
+gxe2pow = dat_dub %>% filter(between(GxE_emm,0.3,0.6)) 
 
-covpow = covpow1 %>%
+# Estimate Power and wrangle datums
+covpow1 = cov1pow %>%
   group_by(sample_size, n_pop, std_dev) %>%
   summarize("total_tick" = n(),
             "covtick" = sum(covtick))
-covpow$covpower = covpow$covtick/covpow$total_tick
+covpow1$covpower = covpow1$covtick/covpow1$total_tick
+rng.cov1 = range(covpow1$covpower)
+covpow1$totals = covpow1$sample_size* covpow1$n_pop * covpow1$n_pop
+covpow1low = filter(covpow1,std_dev == min(covpow1$std_dev))
+covpow1hi = filter(covpow1,std_dev == max(covpow1$std_dev))
 
-gxepow = gxepow1 %>%
+gxepow1 = gxe1pow %>%
   group_by(sample_size,n_pop,std_dev) %>%
   summarize("total_tick" = n(),
             "gxetick" = sum(gxetick))
-gxepow$gxepower = gxepow$gxetick/gxepow$total_tick
+gxepow1$gxepower = gxepow1$gxetick/gxepow1$total_tick
+gxepow1$totals = gxepow1$sample_size* gxepow1$n_pop * gxepow1$n_pop
+rng.gxe1 = range(gxepow1$gxepower)
+gxepow1low = filter(gxepow1,std_dev == min(gxepow1$std_dev))
+gxepow1hi = filter(gxepow1,std_dev == max(gxepow1$std_dev))
 
-# Divide datasets according to standard deviation, take the mean power across different parameter sets
+covpow2 = cov2pow %>%
+  group_by(sample_size, n_pop, std_dev) %>%
+  summarize("total_tick" = n(),
+            "covtick" = sum(covtick))
+covpow2$covpower = covpow2$covtick/covpow2$total_tick
+covpow2$totals = covpow2$sample_size* covpow2$n_pop * 2
+rng.cov2 = range(covpow2$covpower)
+covpow2low = filter(covpow2,std_dev == min(covpow2$std_dev))
+covpow2hi = filter(covpow2,std_dev == max(covpow2$std_dev))
 
-covpow_lowsd = covpow %>%
-  filter(std_dev == min(covpow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meancovpower" = mean(covpower))
-covpow_lowsd$pop_samp = paste(covpow_lowsd$n_pop,covpow_lowsd$sample_size)
+gxepow2 = gxe2pow %>%
+  group_by(sample_size,n_pop,std_dev) %>%
+  summarize("total_tick" = n(),
+            "gxetick" = sum(gxetick))
+gxepow2$gxepower = gxepow2$gxetick/gxepow2$total_tick
+gxepow2$totals = gxepow2$sample_size* gxepow2$n_pop * 2
+rng.gxe2 = range(gxepow2$gxepower)
+gxepow2low = filter(gxepow2,std_dev == min(gxepow2$std_dev))
+gxepow2hi = filter(gxepow2,std_dev == max(gxepow2$std_dev))
 
-covpow_highsd = covpow %>%
-  filter(std_dev == max(covpow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meancovpower" = mean(covpower))
-covpow_highsd$pop_samp = paste(covpow_highsd$n_pop,covpow_highsd$sample_size)
-
-gxepow_lowsd = gxepow %>%
-  filter(std_dev == min(gxepow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meangxepower" = mean(gxepower))
-gxepow_lowsd$pop_samp = paste(gxepow_lowsd$n_pop,gxepow_lowsd$sample_size)
-
-gxepow_highsd = gxepow %>%
-  filter(std_dev == max(gxepow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meangxepower" = mean(gxepower))
-gxepow_highsd$pop_samp = paste(gxepow_highsd$n_pop,gxepow_highsd$sample_size)
-
-# Plot 
-
-# Set midrange for plotting
-rng.gxe = range(gxepow_highsd$meangxepower, gxepow_lowsd$meangxepower)
-rng.cov = range(covpow_highsd$meancovpower, covpow_lowsd$meancovpower)
-
-
-(csdlow = ggplot(covpow_lowsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meancovpower)) + 
-  geom_tile() + scale_fill_gradient2(low="lemon chiffon", mid="#00AA00", high="#003300", #colors in the scale
-                         midpoint=mean(rng.cov),    #same midpoint for plots (mean of the range)
-                         breaks=seq(0,1,0.25), #breaks in the scale bar
-                         limits=c(0,1))+
-  xlab("Sample Size") + ylab("Number of Populations")+
-  labs(fill = "Power")+
-  theme_classic() + ggtitle(paste0("Covariance: Standard Deviation = ",min(covpow$std_dev))))
-
-(csdhigh = ggplot(covpow_highsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meancovpower)) + 
-  geom_tile() + scale_fill_gradient2(low="lemon chiffon", mid="#00AA00", high="#003300", #colors in the scale
-                                    midpoint=mean(rng.cov),    #same midpoint for S (mean of the range)
+# HeatMaps - High Standard Deviation
+(covpower_high1 = ggplot(covpow1hi,aes(x = factor(sample_size), y = factor(n_pop), fill = covpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(covpow1hi$totals, round(covpow1hi$covpower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(
+    #scale_fill_gradient2(low="lemon chiffon", mid="#00AA00", high="#003300", #colors in the scale
+     #                               midpoint=mean(rng.cov1),    #same midpoint for S (mean of the range)
                                     breaks=seq(0,1,0.25), #breaks in the scale bar
                                     limits=c(0,1))+
-  xlab("Sample Size") + ylab("Number of Populations")+
+  xlab("Sample Size") + ylab("Total Number of Populations")+
   labs(fill = "Power")+
-  theme_classic()+ ggtitle(paste0("Covariance: Standard Deviation = ",max(covpow$std_dev))))
+  theme(axis.text = element_text(colour = "black"))+  
+  theme(legend.position = "none")+
+  ggtitle(expression("Cov"["GE"]*": Full Reciprocal Transplant"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
 
-(gsdlow = ggplot(gxepow_lowsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meangxepower)) + 
-  geom_tile() + scale_fill_gradient2(low="#DDDDDD", mid="#99CCEE", high="#000044", #colors in the scale
-                                     midpoint=mean(rng.gxe),    #same midpoint for plots (mean of the range)
-                                     breaks=seq(0,1,0.25), #breaks in the scale bar
-                                     limits=c(floor(rng.gxe[1]), ceiling(rng.gxe[2])))+
-  xlab("Sample Size") + ylab("Number of Populations")+
-  labs(fill = "Power")+
-  theme_classic() + ggtitle(paste0("GxE: Standard Deviation = ",min(gxepow$std_dev))))
-
-(gsdhigh = ggplot(gxepow_highsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meangxepower)) + 
-  geom_tile() + scale_fill_gradient2(low="#DDDDDD", mid="#99CCEE", high="#000044", #colors in the scale
-                                     midpoint=mean(rng.gxe),    #same midpoint for plots (mean of the range)
-                                     breaks=seq(0,1,0.25), #breaks in the scale bar
-                                     limits=c(floor(rng.gxe[1]), ceiling(rng.gxe[2])))+
-  xlab("Sample Size") + ylab("Number of Populations")+
-  labs(fill = "Power") +
-  theme_classic() + ggtitle(paste0("GxE: Standard Deviation = ",max(gxepow$std_dev))))
-
-library(gridExtra)
-grid.arrange(gsdhigh,gsdlow,csdhigh,csdlow,ncol = 2)
-
-# Power at moderate levels of Cov and GxE for Env_scenario = 2
-
-covpow1 = data.frame(dat_dub)
-gxepow1 = dat_dub %>% filter(between(GxE_emm,0,1))
-
-covpow = covpow1 %>%
-  group_by(sample_size, n_pop, std_dev) %>%
-  summarize("total_tick" = n(),
-            "covtick" = sum(covtick))
-covpow$covpower = covpow$covtick/covpow$total_tick
-
-gxepow = gxepow1 %>%
-  group_by(sample_size,n_pop,std_dev) %>%
-  summarize("total_tick" = n(),
-            "gxetick" = sum(gxetick))
-gxepow$gxepower = gxepow$gxetick/gxepow$total_tick
-
-# Divide datasets according to standard deviation, take the mean power across different parameter sets
-
-covpow_lowsd = covpow %>%
-  filter(std_dev == min(covpow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meancovpower" = mean(covpower))
-covpow_lowsd$pop_samp = paste(covpow_lowsd$n_pop,covpow_lowsd$sample_size)
-
-covpow_highsd = covpow %>%
-  filter(std_dev == max(covpow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meancovpower" = mean(covpower))
-covpow_highsd$pop_samp = paste(covpow_highsd$n_pop,covpow_highsd$sample_size)
-
-gxepow_lowsd = gxepow %>%
-  filter(std_dev == min(gxepow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meangxepower" = mean(gxepower))
-gxepow_lowsd$pop_samp = paste(gxepow_lowsd$n_pop,gxepow_lowsd$sample_size)
-
-gxepow_highsd = gxepow %>%
-  filter(std_dev == max(gxepow$std_dev)) %>%
-  group_by(sample_size, n_pop) %>%
-  summarize("meangxepower" = mean(gxepower))
-gxepow_highsd$pop_samp = paste(gxepow_highsd$n_pop,gxepow_highsd$sample_size)
-
-# Plot Power
-
-(csdlow = ggplot(covpow_lowsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meancovpower)) + 
-    geom_tile() + scale_fill_gradient2(low="lemon chiffon", mid="#00AA00", high="#003300", #colors in the scale
-                                       midpoint=mean(rng.cov),    #same midpoint for S (mean of the range)
-                                       breaks=seq(0,1,0.25), #breaks in the scale bar
-                                       limits=c(0,1))+
-    xlab("Sample Size") + ylab("Number of Populations")+
+(covpower_high2 = ggplot(covpow2hi,aes(x = factor(sample_size), y = factor(n_pop), fill = covpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(covpow2hi$totals, round(covpow2hi$covpower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    xlab("Sample Size") + ylab("Total Number of Populations")+
     labs(fill = "Power")+
-    theme_classic() + ggtitle(paste0("Covariance: Standard Deviation = ",min(covpow$std_dev))))
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle(expression("Cov"["GE"]*": Paired Common Garden"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
 
-(csdhigh = ggplot(covpow_highsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meancovpower)) + 
-    geom_tile() + scale_fill_gradient2(low="lemon chiffon", mid="#00AA00", high="#003300", #colors in the scale
-                                       midpoint=mean(rng.cov),    #same midpoint for S (mean of the range)
-                                       breaks=seq(0,1,0.25), #breaks in the scale bar
-                                       limits=c(0,1))+
-    xlab("Sample Size") + ylab("Number of Populations")+
+(gxepower_high1 = ggplot(gxepow1hi,aes(x = factor(sample_size), y = factor(n_pop), fill = gxepower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(gxepow1hi$totals, round(gxepow1hi$gxepower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    xlab("Sample Size") + ylab("Total Number of Populations")+
     labs(fill = "Power")+
-    theme_classic()+ ggtitle(paste0("Covariance: Standard Deviation = ",max(covpow$std_dev))))
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle(expression(bar(Delta)*""["GxE"]*": Full Reciprocal Transplant"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
 
-(gsdlow = ggplot(gxepow_lowsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meangxepower)) + 
-    geom_tile() + scale_fill_gradient2(low="#DDDDDD", mid="#99CCEE", high="#000044", #colors in the scale
-                                       midpoint=mean(rng.gxe),    #same midpoint for plots (mean of the range)
-                                       breaks=seq(0,1,0.25), #breaks in the scale bar
-                                       limits=c(floor(rng.gxe[1]), ceiling(rng.gxe[2])))+
-    xlab("Sample Size") + ylab("Number of Populations")+
+(gxepower_high2 = ggplot(gxepow2hi,aes(x = factor(sample_size), y = factor(n_pop), fill = gxepower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(gxepow2hi$totals, round(gxepow2hi$gxepower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(
+    #scale_fill_gradient2(low="#DDDDDD", mid="#99CCEE", high="#000044", #colors in the scale
+                        #midpoint=mean(rng.gxe2),    #same midpoint for plots (mean of the range)
+                         breaks=seq(0,1,0.25), #breaks in the scale bar
+                         limits=c(0,1))+
+    xlab("Sample Size") + ylab("Total Number of Populations")+
     labs(fill = "Power")+
-    theme_classic() + ggtitle(paste0("GxE: Standard Deviation = ",min(gxepow$std_dev))))
-
-(gsdhigh = ggplot(gxepow_highsd,aes(x = factor(sample_size), y = factor(n_pop), fill = meangxepower)) + 
-    geom_tile() + scale_fill_gradient2(low="#DDDDDD", mid="#99CCEE", high="#000044", #colors in the scale
-                                       midpoint=mean(rng.gxe),    #same midpoint for plots (mean of the range)
-                                       breaks=seq(0,1,0.25), #breaks in the scale bar
-                                       limits=c(floor(rng.gxe[1]), ceiling(rng.gxe[2])))+
-    xlab("Sample Size") + ylab("Number of Populations")+
-    labs(fill = "Power") +
-    theme_classic() + ggtitle(paste0("GxE: Standard Deviation = ",max(gxepow$std_dev))))
-
-grid.arrange(gsdhigh,gsdlow,csdhigh,csdlow,ncol = 2)
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
 
 
-# Line-style Power plots
+grid.arrange(gxepower_high1,gxepower_high2,covpower_high1,covpower_high2,ncol = 2)
 
-dat_csv$mod = NULL
+### Low Std. Deviation Heatmaps -- Supplementary Material ###
+
+(covpower_low1 = ggplot(covpow1low,aes(x = factor(sample_size), y = factor(n_pop), fill = covpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(covpow1low$totals, round(covpow1low$covpower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    xlab("Sample Size") + ylab("TotalNumber of Populations")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+  
+    theme(legend.position = "none")+
+    ggtitle(expression("Cov"["GE"]*": Full Reciprocal Transplant"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+(covpower_low2 = ggplot(covpow2low,aes(x = factor(sample_size), y = factor(n_pop), fill = covpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(covpow2low$totals, round(covpow2low$covpower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    xlab("Sample Size") + ylab("Total Number of Populations")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle(expression("Cov"["GE"]*": Paired Common Garden"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+(gxepower_low1 = ggplot(gxepow1low,aes(x = factor(sample_size), y = factor(n_pop), fill = gxepower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(gxepow1low$totals, round(gxepow1low$gxepower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    xlab("Sample Size") + ylab("Total Number of Populations")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle(expression(bar(Delta)*""["GxE"]*": Full Reciprocal Transplant"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+(gxepower_low2 = ggplot(gxepow2low,aes(x = factor(sample_size), y = factor(n_pop), fill = gxepower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(gxepow2low$totals, round(gxepow2low$gxepower,4),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    xlab("Sample Size") + ylab("Total Number of Populations")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+grid.arrange(gxepower_low1,gxepower_low2,covpower_low1,covpower_low2,ncol = 2)
+
+
+########################################################
+##          Confusion Matrices  -- Env Scenario 1     ##
+########################################################
+
+dat_csv1 <- filter(dat_csv, std_dev == 1)
+
+# Covariance Permutation check
+dat_csv1$Covconfintperm = rep("NA",nrow(dat_csv1))
+for(i in 1:nrow(dat_csv1)){
+    if(dat_csv1$true_cov[i] != 0 && dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "True Positive"
+    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "False Positive"
+    }else if(dat_csv1$true_cov[i]!= 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "False Negative"
+    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "True Negative"
+    }else{dat_csv1$Covconfintperm[i] = "None"}
+}
+
+# Cov Boot check
+dat_csv1$Covconfintboot = rep(NA, nrow(dat_csv1))
+for(i in 1:nrow(dat_csv1)){
+  
+  if(dat_csv1$true_cov[i] != 0 &&
+     dat_csv1$covariance_lwrCI[i] < 0 &&
+     dat_csv1$covariance_uprCI[i] < 0 
+  ){dat_csv1$Covconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_cov[i] != 0 &&
+           dat_csv1$covariance_lwrCI[i] > 0 &&
+           dat_csv1$covariance_uprCI[i] > 0
+  ){dat_csv1$Covconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_cov[i] == 0 &&
+           dat_csv1$covariance_lwrCI[i] < 0 &&
+           dat_csv1$covariance_uprCI[i] < 0
+  ){dat_csv1$Covconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_cov[i] == 0 &&
+           dat_csv1$covariance_lwrCI[i] > 0 &&
+           dat_csv1$covariance_uprCI[i] > 0
+  ){dat_csv1$Covconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_cov[i] != 0 && 
+           dat_csv1$covariance_lwrCI[i] <= 0 && 
+           dat_csv1$covariance_uprCI[i] >= 0
+  ){dat_csv1$Covconfintboot[i] = "False Negative"
+  }else if(dat_csv1$true_cov[i]== 0 && 
+           dat_csv1$covariance_lwrCI[i] <= 0 && 
+           dat_csv1$covariance_uprCI[i] >= 0
+  ){dat_csv1$Covconfintboot[i] = "True Negative"
+  }else{dat_csv1$Covconfintboot[i] = "None"}
+}
+
+# GxE Perm check
+dat_csv1$GxEconfintperm = rep("NA", nrow(dat_csv1))
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_pvalue[i],2) <= 0.05){dat_csv1$GxEconfintperm[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_pvalue[i],2) <= 0.05){dat_csv1$GxEconfintperm[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_pvalue[i],2) > 0.05){dat_csv1$GxEconfintperm[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_pvalue[i],2) > 0.05){dat_csv1$GxEconfintperm[i] = "True Negative"
+  }else{dat_csv1$GxEconfintperm == "None"}
+}
+
+# GxE Boot check
+dat_csv1$GxEconfintboot = rep("NA", nrow(dat_csv1))
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) > 0)
+  {dat_csv1$GxEconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) > 0)
+  {dat_csv1$GxEconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) == 0)
+  {dat_csv1$GxEconfintboot[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) == 0)
+  {dat_csv1$GxEconfintboot[i] = "True Negative"
+  }else{dat_csv1$GxEconfintboot[i] = "None"}
+}
+
+# GxE Anova check
+dat_csv1$GxEanova_conf = rep("NA", nrow(dat_csv1))
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_Anova[i],2) <= 0.05){dat_csv1$GxEanova_conf[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_Anova[i],2) <= 0.05){dat_csv1$GxEanova_conf[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_Anova[i],2) > 0.05){dat_csv1$GxEanova_conf[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_Anova[i],2) > 0.05){dat_csv1$GxEanova_conf[i] = "True Negative"
+  }else{dat_csv1$GxEanova_conf == "None"}
+}
+
+## Counts for table
+
+cov_perm_table = dat_csv1 %>%
+    group_by("name" = Covconfintperm) %>%
+    summarize("n" = n())
+fpr.fnr(cov_perm_table, divided = FALSE, scenario = 1)
+
+cov_boot_table = dat_csv1 %>%
+    group_by("name" =Covconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(cov_boot_table, divided = FALSE, scenario = 1)
+
+gxe_anova_table = dat_csv1 %>%
+  group_by("name" =GxEanova_conf) %>%
+  summarize("n" = n())
+fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 1)
+
+gxe_perm_table = dat_csv1 %>%
+    group_by("name" =GxEconfintperm) %>%
+    summarize("n" = n())
+fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 1)
+
+gxe_boot_table = dat_csv1 %>%
+  group_by("name" =GxEconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 1)
+
+## Counts for heatmaps
+(raw_confusion_hmap1 = dat_csv1 %>%
+    group_by(sample_size, n_pop, "name" =Covconfintperm) %>%
+    summarize("n" = n()))
+raw_conf1 = fpr.fnr(raw_confusion_hmap1, divided = TRUE, scenario = 1)
+raw_conf_plot1 <- heatmap_fun(raw_conf1,"rate") # Can also do "percent"
+
+(raw_confusion_hmap2 = dat_csv1 %>%
+    group_by(sample_size, n_pop, "name" =Covconfintboot) %>%
+    summarize("n" = n()))
+raw_conf2 = fpr.fnr(raw_confusion_hmap2, divided = TRUE, scenario = 1)
+raw_conf_plot2 <- heatmap_fun(raw_conf2,"rate")
+
+(raw_confusion_hmap3 = dat_csv1 %>%
+    group_by(sample_size, n_pop,"name" = GxEconfintboot) %>%
+    summarize("n" = n()))
+raw_conf3 = fpr.fnr(raw_confusion_hmap3, divided = TRUE, scenario = 1)
+raw_conf_plot3 <- heatmap_fun(raw_conf3,"rate")
+
+raw_confusion_hmap4 = dat_csv1 %>%
+    group_by(sample_size, n_pop,"name" = GxEconfintperm) %>%
+    summarize("n" = n())
+raw_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
+raw_conf_plot4 <- heatmap_fun(raw_conf4,"rate")
+
+raw_confusion_hmap5 = dat_csv1 %>%
+  group_by(sample_size, n_pop,"name" = GxEanova_conf) %>%
+  summarize("n" = n())
+raw_conf5 = fpr.fnr(raw_confusion_hmap5, divided = TRUE, scenario = 1)
+raw_conf_plot5 <- heatmap_fun(raw_conf5,"rate")
+
+# Compile FPs for plot
+raw_conf1$ID = rep("Cov_Perm", nrow(raw_conf1))
+raw_conf2$ID = rep("Cov_Boot", nrow(raw_conf2))
+raw_conf3$ID = rep("GxE_Boot", nrow(raw_conf3))
+raw_conf4$ID = rep("GxE_Perm", nrow(raw_conf4))
+raw_conf5$ID = rep("GxE_Anova", nrow(raw_conf5))
+fpdf = rbind(raw_conf1,raw_conf2,raw_conf3,raw_conf4,raw_conf5)
+fpdf = fpdf[fpdf$name == "False Positive",]
+
+############ Confusion Plots  -- Env Scenario 1 ###############
+
+## False Positive Rates
+fpdf$npop_plot = NA
+for(i in 1:nrow(fpdf)){
+  if(fpdf$n_pop[i] == 2){fpdf$npop_plot[i] = "2 Populations"
+  }else if(fpdf$n_pop[i] == 4){fpdf$npop_plot[i] = "4 Populations"
+  }else{fpdf$npop_plot[i] = "8 Populations"}
+}
+
+(falsePos = ggplot(filter(fpdf, ID %in% c("Cov_Perm","GxE_Perm","GxE_Anova")), aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+  geom_bar(position = "dodge", stat = "identity") + 
+  geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+  ylab("False Positive Rate") + xlab("")+
+  facet_wrap(~npop_plot) + 
+  labs(fill = "Sample Size")+
+  #ylim(0,0.3)+
+  scale_fill_viridis(discrete = TRUE)+
+  scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
+                            "Cov_Boot" = "Boot. \n CovGE",
+                            "GxE_Boot" = "Boot. \n GxE",
+                            "GxE_Perm" = "Perm. \n GxE",
+                            "GxE_Anova" = "ANOVA \n GxE"))+
+  theme_classic2(base_family = "Times",base_size = 16) + 
+  theme(axis.text = element_text(colour = "black")))
+
+
+## CovGE -- Permutation
+(cov_perm = ggplot(transform(dat_csv1, Covconfintperm = factor(Covconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Permutation"))+
+    ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+    facet_wrap(~Covconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text.y=element_text(colour = "black"))+
+    theme(plot.title = element_text(size = 14, face = "bold")))
+
+(cov_confusion_perm = ggplot(filter(dat_csv1, replicate == 1), aes(x = true_cov, y = covariance)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(Covconfintperm), shape = factor(Covconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]))+  
+    xlab(expression("Actual Cov"["GE"]))+
+    labs(fill = "", shape = "")+
+    ggtitle(expression("RT Design: Cov"["GE"]*" Permutation"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+
+## CovGE  -- Bootstrap
+(cov_confusion_boot = ggplot(filter(dat_csv1, replicate == 1), aes(x = true_cov, y = covariance)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(Covconfintboot), shape = factor(Covconfintboot)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]))+  
+    xlab(expression("Actual Cov"["GE"]))+
+    labs(fill = "", shape = "")+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    ggtitle(expression("RT Design: Cov"["GE"]*" Bootstrap"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+(cov_boot = ggplot(transform(dat_csv1, Covconfintboot = factor(Covconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Bootstrap"))+
+    ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+    facet_wrap(~Covconfintboot,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+## GxE -- Permutation
+(gxe_perm = ggplot(transform(dat_csv1, GxEconfintperm = factor(GxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Permutation"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~GxEconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(gxe_confusion_perm = ggplot(filter(dat_csv1, replicate == 1), aes(x = true_GxE_emm, y = GxE_emm)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(GxEconfintperm), shape = factor(GxEconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+
+    ggtitle(expression("RT Design: "*bar(Delta)*""["GxE"]*" Permutation"))+
+    theme(legend.position = "none")+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## GxE -- Bootstrap
+(gxe_boot = ggplot(transform(dat_csv1, GxEconfintboot = factor(GxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Bootstrap"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~GxEconfintboot,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(gxe_confusion_boot = ggplot(filter(dat_csv1, replicate == 1), aes(x = true_GxE_emm, y = GxE_emm)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(GxEconfintboot), shape = factor(GxEconfintboot)),size = 3) +
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+
+    ggtitle(expression("RT Design: "*bar(Delta)*""["GxE"]*" Bootstrap"))+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+
+###################################
+###  Confusion Matrix on Means  ###
+###################################
+
+# MEANS -- CovGE -- Permutation
+dat_csv$meansCovconfintperm = rep("NA",nrow(dat_csv))
 for(i in 1:nrow(dat_csv)){
-  if(dat_csv$covariance[i] >= 0.4 & dat_csv$covariance[i] <= 0.6){dat_csv$mod[i] = TRUE
-  }else if(dat_csv$GxE_emm[i] >= 0.4 & dat_csv$GxE_emm[i] <= 0.6){dat_csv$mod[i] = TRUE
-  }else{dat_csv$mod[i] = FALSE}
+  if(dat_csv$true_cov_means[i] != 0 && dat_csv$cov_means_pvalue[i] <= 0.025){dat_csv$meansCovconfintperm[i] = "True Positive"
+  }else if(dat_csv$true_cov_means[i] == 0 & dat_csv$cov_means_pvalue[i] <= 0.025){dat_csv$meansCovconfintperm[i] = "False Positive"
+  }else if(dat_csv$true_cov_means[i]!= 0 & dat_csv$cov_means_pvalue[i] > 0.025){dat_csv$meansCovconfintperm[i] = "False Negative"
+  }else if(dat_csv$true_cov_means[i] == 0 & dat_csv$cov_means_pvalue[i] > 0.025){dat_csv$meansCovconfintperm[i] = "True Negative"
+  }else{dat_csv$meansCovconfintperm[i] = "None"}
 }
 
-col_df = dat_csv %>%
-  filter(mod == TRUE) %>%
-  group_by(n_pop,sample_size,col) %>%
-  summarize(frequency = n()) 
+# MEANS CovGE -- Bootstrap
+dat_csv$MeansCovconfintboot = rep(NA, nrow(dat_csv))
 
-new_df = data.frame()
-for(i in unique(col_df$sample_size)){
-  for(j in unique(col_df$n_pop)){
-    subset = col_df[col_df$sample_size==i,]
-    subsetsubset = subset[subset$n_pop == j,]
-    colproportion = subsetsubset$frequency/sum(subsetsubset$frequency)
-    new_df. = data.frame(subsetsubset,"proportion"=colproportion)
-    new_df = rbind(new_df,new_df.)
-  }
+for(i in 1:nrow(dat_csv)){
+  
+  if(dat_csv$true_cov_means[i] != 0 &&
+     dat_csv$cov_means_lwrCI[i] < 0 &&
+     dat_csv$cov_means_uprCI[i] < 0
+  ){dat_csv$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_csv$true_cov_means[i] != 0 &&
+           dat_csv$cov_means_lwrCI[i] > 0 &&
+           dat_csv$cov_means_uprCI[i] > 0
+  ){dat_csv$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_csv$true_cov_means[i] == 0 &&
+           dat_csv$cov_means_lwrCI[i] < 0 &&
+           dat_csv$cov_means_uprCI[i] < 0
+  ){dat_csv$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_csv$true_cov_means[i] == 0 &&
+           dat_csv$cov_means_lwrCI[i] > 0 &&
+           dat_csv$cov_means_uprCI[i] > 0
+  ){dat_csv$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_csv$true_cov_means[i] != 0 && 
+           dat_csv$cov_means_lwrCI[i] <= 0 && 
+           dat_csv$cov_means_uprCI[i] >= 0
+  ){dat_csv$MeansCovconfintboot[i] = "False Negative"
+  }else if(dat_csv$true_cov_means[i]== 0 && 
+           dat_csv$cov_means_lwrCI[i] <= 0 && 
+           dat_csv$cov_means_uprCI[i] >= 0
+  ){dat_csv$MeansCovconfintboot[i] = "True Negative"
+  }else{dat_csv$MeansCovconfintboot[i] = "None"}
 }
 
-(barpower = ggplot(new_df,aes(x = factor(n_pop), y = proportion, group = sample_size, fill = factor(col,levels=c("grey","dodgerblue4","darkgreen","red"))))+
-  geom_bar(position = "stack", stat="identity", alpha = 0.9) + ylab("Proportion of simulation results")+ xlab("Number of Populations")+
-    scale_fill_identity() +
-    facet_wrap(~sample_size) + theme_classic())
+# MEANS GxE -- Bootstrap
 
-red_dat = filter(new_df,col=="red")
-ggplot(red_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size), colour = factor(sample_size)))+
-  geom_point(size = 4)+geom_line()+#theme_classic()+
-  scale_color_brewer(palette = "Set1")+
-  scale_fill_brewer(palette = "Set1")+
-  theme_bw(base_size = 20, base_family = "Times")+
-  theme(axis.text.x = element_text(size=16,colour = "black"),
-        axis.title.x = element_text(size=18,face="bold")) +
-  theme(axis.text.y = element_text(size=16,colour = "black"),
-        axis.title.y = element_text(size=18,face="bold")) +
-  theme(plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_rect(size = 2))+
-  xlab("Number of Populations")+ylab("Proportion of significant Cov and GxE")+
-  labs(colour = "Sample Size")
+dat_csv$MeanGxEconfintboot = rep("NA", nrow(dat_csv))
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$true_GxE_means[i] != 0 & round(dat_csv$GxE_means_lwrCI[i],2) > 0)
+  {dat_csv$MeanGxEconfintboot[i] = "True Positive"
+  }else if(dat_csv$true_GxE_means[i] == 0 & round(dat_csv$GxE_means_lwrCI[i],2) > 0)
+  {dat_csv$MeanGxEconfintboot[i] = "False Positive"
+  }else if(dat_csv$true_GxE_means[i] != 0 & round(dat_csv$GxE_means_lwrCI[i],2) <= 0)
+  {dat_csv$MeanGxEconfintboot[i] = "False Negative"
+  }else if(dat_csv$true_GxE_means[i] == 0 & round(dat_csv$GxE_means_lwrCI[i],2) <= 0)
+  {dat_csv$MeanGxEconfintboot[i] = "True Negative"
+  }else{dat_csv$MeanGxEconfintboot[i] = "None"}
+}
 
-blue_dat = filter(new_df,col=="dodgerblue4")
-ggplot(blue_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size), colour = factor(sample_size)))+
-  geom_point(size = 4)+geom_line()+#theme_classic()+
-  scale_color_brewer(palette = "Set1")+
-  scale_fill_brewer(palette = "Set1")+
-  theme_bw(base_size =20, base_family = "Times")+
-  theme(axis.text.x = element_text(size=16,colour = "black"),
-        axis.title.x = element_text(size=18,face="bold")) +
-  theme(axis.text.y = element_text(size=16,colour = "black"),
-        axis.title.y = element_text(size=18,face="bold")) +
-  theme(plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_rect(size = 2))+
-  xlab("Number of Populations")+ylab("Proportion of significant GxE")+
-  labs(colour = "Sample Size")
+# MEANS GxE -- Permutation
+dat_csv$meansGxEconfintperm = rep("NA", nrow(dat_csv))
 
-green_dat = filter(new_df,col=="darkgreen")
-ggplot(green_dat,aes(x = factor(n_pop), y = proportion,group = factor(sample_size), colour = factor(sample_size)))+
-  geom_point(size = 4)+geom_line()+#theme_classic()+
-  scale_color_brewer(palette = "Set1")+
-  scale_fill_brewer(palette = "Set1")+
-  theme_bw(base_size = 20, base_family = "Times")+
-  theme(axis.text.x = element_text(size=16,colour = "black"),
-        axis.title.x = element_text(size=18,face="bold")) +
-  theme(axis.text.y = element_text(size=16,colour = "black"),
-        axis.title.y = element_text(size=18,face="bold")) +
-  theme(plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_rect(size = 2))+
-  xlab("Number of Populations")+ylab("Proportion of significant CovGE)")+
-  labs(colour = "Sample Size")
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$true_GxE_means[i] != 0 & dat_csv$GxE_means_pvalue[i] <= 0.05){dat_csv$meansGxEconfintperm[i] = "True Positive"
+  }else if(dat_csv$true_GxE_means[i] == 0 & dat_csv$GxE_means_pvalue[i] <= 0.05){dat_csv$meansGxEconfintperm[i] = "False Positive"
+  }else if(dat_csv$true_GxE_means[i] != 0 & dat_csv$GxE_means_pvalue[i] > 0.05){dat_csv$meansGxEconfintperm[i] = "False Negative"
+  }else if(dat_csv$true_GxE_means[i] == 0 & dat_csv$GxE_means_pvalue[i] > 0.05){dat_csv$meansGxEconfintperm[i] = "True Negative"
+  }else{dat_csv$meansGxEconfintperm == "None"}
+}
 
-# Line-style Power plots
+# Counts for table
+cov_perm_table_mean = dat_csv %>%
+  group_by("name" = meansCovconfintperm) %>%
+  count()
+cov_perm_table_mean$percent = (cov_perm_table_mean$n/(sum(cov_perm_table_mean$n))*100)
+cov_perm_table_mean
 
-dat_dub$mod = NULL
+cov_boot_table_mean = dat_csv %>%
+    group_by("name" = MeansCovconfintboot) %>%
+    count()
+cov_boot_table_mean$percent = (cov_boot_table_mean$n/(sum(cov_boot_table_mean$n))*100)
+cov_boot_table_mean
+
+gxe_boot_table_mean = dat_csv %>%
+    group_by("name" = MeanGxEconfintboot) %>%
+    count()
+gxe_boot_table_mean$percent = (gxe_boot_table_mean$n/(sum(gxe_boot_table_mean$n))*100)
+gxe_boot_table_mean
+
+gxe_perm_table_mean = dat_csv %>%
+    group_by("name" = meansGxEconfintperm) %>%
+    count()
+gxe_perm_table_mean$percent = (gxe_perm_table_mean$n/(sum(gxe_perm_table_mean$n))*100)
+gxe_perm_table_mean
+
+
+############ Confusion Plots  -- Means -- Env Scenario 1 ###############
+
+## MEANS - CovGE -- Permutation
+(cov_perm_means = ggplot(transform(dat_csv, meansCovconfintperm = factor(meansCovconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Permutation - Means"))+
+    ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+    facet_wrap(~meansCovconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(cov_confusion_perm_means = ggplot(filter(dat_csv, replicate == 1), aes(x = true_cov_means, y = cov_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(meansCovconfintperm), shape = factor(meansCovconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]*" from group means"))+  
+    xlab(expression("Actual Cov"["GE"]*" from group means"))+
+    labs(fill = "", shape = "")+
+    ggtitle(expression("RT Design: Cov"["GE"]*" Permutation"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## MEANS - CovGE -- Bootstrap
+
+(cov_boot_means = ggplot(transform(dat_csv, MeansCovconfintboot = factor(MeansCovconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Bootstrap - Means"))+
+    ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+    facet_wrap(~MeansCovconfintboot,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(cov_confusion_boot_means = ggplot(filter(dat_csv, replicate == 1), aes(x = true_cov_means, y = cov_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(MeansCovconfintboot), shape = factor(MeansCovconfintboot)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]*" from group means"))+  
+    xlab(expression("Actual Cov"["GE"]*" from group means"))+
+    labs(fill = "", shape = "")+
+    ggtitle(expression("RT Design: Cov"["GE"]*" Bootstrap"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## MEANS - GxE -- Bootstrap
+
+(gxe_boot_means = ggplot(transform(dat_csv, MeanGxEconfintboot = factor(MeanGxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Bootstrap - Means"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~MeanGxEconfintboot,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(gxe_confusion_boot_means = ggplot(filter(dat_csv, replicate == 1), aes(x = true_GxE_means, y = GxE_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(MeanGxEconfintboot), shape = factor(MeanGxEconfintboot)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]*" from group means"))+  
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]*" from group means"))+  
+    labs(fill = "", shape = "")+
+    ggtitle(expression("RT Design: "*bar(Delta)*""["GxE"]*" Bootstrap"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## MEANS - GxE -- Permutation
+
+(means_gxe_perm = ggplot(transform(dat_csv, meansGxEconfintperm = factor(meansGxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Permutation - Means"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~meansGxEconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))  
+
+(gxe_confusion_perm_means = ggplot(filter(dat_csv, replicate == 1), aes(x = true_GxE_means, y = GxE_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(meansGxEconfintperm), shape = factor(meansGxEconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]*" from group means"))+  
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]*" from group means"))+  
+    labs(fill = "", shape = "")+
+    ggtitle(expression("RT Design: "*bar(Delta)*""["GxE"]*" Permutation"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+
+########################################################
+##          Confusion Matrices  -- Env Scenario 2     ##
+########################################################
+dat_dub1.0 = filter(dat_dub, std_dev == 1)
+dat_dub = dat_dub1.0
+
+# CovGE -- Permutation - Scenario 2
+dat_dub$Covconfintperm = rep("NA",nrow(dat_dub))
+
 for(i in 1:nrow(dat_dub)){
-  if(dat_dub$covariance[i] >= 0.4 & dat_dub$covariance[i] <= 0.6){dat_dub$mod[i] = TRUE
-  }else if(dat_dub$GxE_emm[i] >= 0.4 & dat_dub$GxE_emm[i] <= 0.6){dat_dub$mod[i] = TRUE
-  }else{dat_dub$mod[i] = FALSE}
+  if(dat_dub$true_cov[i] != 0 && dat_dub$covariance_pvalue[i] <= 0.025){dat_dub$Covconfintperm[i] = "True Positive"
+  }else if(dat_dub$true_cov[i] == 0 & dat_dub$covariance_pvalue[i] <= 0.025){dat_dub$Covconfintperm[i] = "False Positive"
+  }else if(dat_dub$true_cov[i]!= 0 & dat_dub$covariance_pvalue[i] > 0.025){dat_dub$Covconfintperm[i] = "False Negative"
+  }else if(dat_dub$true_cov[i] == 0 & dat_dub$covariance_pvalue[i] > 0.025){dat_dub$Covconfintperm[i] = "True Negative"
+  }else{dat_dub$Covconfintperm[i] = "None"}
 }
 
-col_df = dat_dub %>%
-  filter(mod == TRUE) %>%
-  group_by(n_pop,sample_size,col) %>%
-  summarize(frequency = n()) 
+# Cov Boot check
+dat_dub$Covconfintboot = rep(NA, nrow(dat_dub))
 
-new_df = data.frame()
-for(i in unique(col_df$sample_size)){
-  for(j in unique(col_df$n_pop)){
-    subset = col_df[col_df$sample_size==i,]
-    subsetsubset = subset[subset$n_pop == j,]
-    colproportion = subsetsubset$frequency/sum(subsetsubset$frequency)
-    new_df. = data.frame(subsetsubset,"proportion"=colproportion)
-    new_df = rbind(new_df,new_df.)
-  }
+for(i in 1:nrow(dat_dub)){
+  
+  if(dat_dub$true_cov[i] != 0 &&
+     dat_dub$covariance_lwrCI[i] < 0 &&
+     dat_dub$covariance_uprCI[i] < 0
+  ){dat_dub$Covconfintboot[i] = "True Positive"
+  }else if(dat_dub$true_cov[i] != 0 &&
+           dat_dub$covariance_lwrCI[i] > 0 &&
+           dat_dub$covariance_uprCI[i] > 0
+  ){dat_dub$Covconfintboot[i] = "True Positive"
+  }else if(dat_dub$true_cov[i] == 0 &&
+           dat_dub$covariance_lwrCI[i] < 0 &&
+           dat_dub$covariance_uprCI[i] < 0
+  ){dat_dub$Covconfintboot[i] = "False Positive"
+  }else if(dat_dub$true_cov[i] == 0 &&
+           dat_dub$covariance_lwrCI[i] > 0 &&
+           dat_dub$covariance_uprCI[i] > 0
+  ){dat_dub$Covconfintboot[i] = "False Positive"
+  }else if(dat_dub$true_cov[i] != 0 && 
+           dat_dub$covariance_lwrCI[i] <= 0 && 
+           dat_dub$covariance_uprCI[i] >= 0
+  ){dat_dub$Covconfintboot[i] = "False Negative"
+  }else if(dat_dub$true_cov[i]== 0 && 
+           dat_dub$covariance_lwrCI[i] <= 0 && 
+           dat_dub$covariance_uprCI[i] >= 0
+  ){dat_dub$Covconfintboot[i] = "True Negative"
+  }else{dat_dub$Covconfintboot[i] = "None"}
 }
 
-(barpower2 = ggplot(new_df,aes(x = factor(n_pop), y = proportion, group = sample_size, fill = factor(col,levels=c("grey","dodgerblue4","darkgreen","red"))))+
-    geom_bar(position = "stack", stat="identity", alpha = 0.9) + ylab("Proportion of simulation results")+ xlab("Number of Populations")+
-    scale_fill_identity() +
-    facet_wrap(~sample_size) + theme_classic())
+# GxE Anova check
+dat_dub$GxEanova_check = rep("NA", nrow(dat_dub))
 
-# Tradeoff between GxE and Covariance plot
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$true_GxE_emm[i] != 0 & round(dat_dub$GxE_Anova[i],2) <= 0.05){dat_dub$GxEanova_check[i] = "True Positive"
+  }else if(dat_dub$true_GxE_emm[i] == 0 & round(dat_dub$GxE_Anova[i],2) <= 0.05){dat_dub$GxEanova_check[i] = "False Positive"
+  }else if(dat_dub$true_GxE_emm[i] != 0 & round(dat_dub$GxE_Anova[i],2) > 0.05){dat_dub$GxEanova_check[i] = "False Negative"
+  }else if(dat_dub$true_GxE_emm[i] == 0 & round(dat_dub$GxE_Anova[i],2) > 0.05){dat_dub$GxEanova_check[i] = "True Negative"
+  }else{dat_dub$GxEanova_check == "None"}
+}
+
+# GxE Perm check
+dat_dub$GxEconfintperm = rep("NA", nrow(dat_dub))
+
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$true_GxE_emm[i] != 0 & round(dat_dub$GxE_emm_pvalue[i],2) <= 0.05){dat_dub$GxEconfintperm[i] = "True Positive"
+  }else if(dat_dub$true_GxE_emm[i] == 0 & round(dat_dub$GxE_emm_pvalue[i],2) <= 0.05){dat_dub$GxEconfintperm[i] = "False Positive"
+  }else if(dat_dub$true_GxE_emm[i] != 0 & round(dat_dub$GxE_emm_pvalue[i],2) > 0.05){dat_dub$GxEconfintperm[i] = "False Negative"
+  }else if(dat_dub$true_GxE_emm[i] == 0 & round(dat_dub$GxE_emm_pvalue[i],2) > 0.05){dat_dub$GxEconfintperm[i] = "True Negative"
+  }else{dat_dub$GxEconfintperm == "None"}
+}
+
+# GxE Boot check
+dat_dub$GxEconfintboot = rep("NA", nrow(dat_dub))
+
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$true_GxE_emm[i] != 0 & round(dat_dub$GxE_emm_lwrCI[i],2) > 0)
+  {dat_dub$GxEconfintboot[i] = "True Positive"
+  }else if(dat_dub$true_GxE_emm[i] == 0 & round(dat_dub$GxE_emm_lwrCI[i],2) > 0)
+  {dat_dub$GxEconfintboot[i] = "False Positive"
+  }else if(dat_dub$true_GxE_emm[i] != 0 & round(dat_dub$GxE_emm_lwrCI[i],2) == 0)
+  {dat_dub$GxEconfintboot[i] = "False Negative"
+  }else if(dat_dub$true_GxE_emm[i] == 0 & round(dat_dub$GxE_emm_lwrCI[i],2) == 0)
+  {dat_dub$GxEconfintboot[i] = "True Negative"
+  }else{dat_dub$GxEconfintboot[i] = "None"}
+}
+
+# Counts for table
+(cov_perm_table2 = dat_dub %>%
+    group_by("name" = Covconfintperm) %>%
+    summarize("n" = n()))
+fpr.fnr(cov_perm_table2, divided = FALSE, scenario = 2)
+
+(cov_boot_table_dub = dat_dub %>%
+    group_by("name" =Covconfintboot) %>%
+    summarize("n" = n()))
+fpr.fnr(cov_boot_table_dub, divided = FALSE, scenario = 2)
+
+(gxe_anova_table_dub = dat_dub %>%
+    group_by("name" =GxEanova_check) %>%
+    summarize("n" = n()))
+fpr.fnr(gxe_anova_table_dub, divided = FALSE, scenario = 2)
+
+(gxe_perm_table_dub = dat_dub %>%
+    group_by("name" =GxEconfintperm) %>%
+    summarize("n" = n()))
+fpr.fnr(gxe_perm_table_dub, divided = FALSE, scenario = 2)
+
+(gxe_boot_table_dub = dat_dub %>%
+    group_by("name" = GxEconfintboot) %>%
+    summarize("n" = n()))
+fpr.fnr(gxe_boot_table_dub, divided = FALSE, scenario = 2)
+
+## Counts for heatmaps - Paired common garden ##
+(raw_confusion_hmap2a = dat_dub %>%
+    group_by(sample_size, n_pop, "name" = Covconfintperm) %>%
+    summarize("n" = n()))
+raw_conf2a <- fpr.fnr(raw_confusion_hmap2a,divided = TRUE, scenario = 2)
+raw_conf_plot2a <- heatmap_fun(raw_conf2a,"rate")
+
+(raw_confusion_hmap2b = dat_dub %>%
+    group_by(sample_size, n_pop, "name" =Covconfintboot) %>%
+    summarize("n" = n()))
+raw_conf2b<- fpr.fnr(raw_confusion_hmap2b,divided = TRUE, scenario = 2)
+raw_conf_plot2b <- heatmap_fun(raw_conf2b,"rate")
+
+(raw_confusion_hmap2c = dat_dub %>%
+    group_by(sample_size, n_pop,"name" = GxEconfintboot) %>%
+    summarize("n" = n()))
+raw_conf2c<- fpr.fnr(raw_confusion_hmap2c,divided = TRUE, scenario = 2)
+raw_conf_plot2c <- heatmap_fun(raw_conf2c,"rate")
+
+(raw_confusion_hmap2d = dat_dub %>%
+    group_by(sample_size, n_pop,"name" = GxEconfintperm) %>%
+    summarize("n" = n()))
+raw_conf2d<- fpr.fnr(raw_confusion_hmap2d,divided = TRUE, scenario = 2)
+raw_conf_plot2d <- heatmap_fun(raw_conf2d,"rate")
+
+(raw_confusion_hmap2f = dat_dub %>%
+    group_by(sample_size, n_pop,"name" = GxEanova_check) %>%
+    summarize("n" = n()))
+raw_conf2f <- fpr.fnr(raw_confusion_hmap2f, divided = TRUE, scenario = 2)
+raw_conf_plot2f <- heatmap_fun(raw_conf2f,"rate")
+
+
+############ Confusion Plots -- Env Scenario 2 ###############
+
+dat_dub1 = dat_dub[dat_dub$replicate==1,] # Only need to show one replicate
+
+## CovGE -- Permutation -- Scen2
+(cov_perm_dub = ggplot(transform(dat_dub, Covconfintperm = factor(Covconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Permutation"))+
+    ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+    facet_wrap(~Covconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(cov_confusion_perm_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_cov, y = covariance)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(Covconfintperm), shape = factor(Covconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]))+  
+    xlab(expression("Actual Cov"["GE"]))+
+    labs(fill = "", shape = "")+
+    ggtitle(expression("CG Design: Cov"["GE"]*" Permutation"))+
+    theme(legend.position = "none")+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## CovGE -- Bootstrap -- Scen2
+
+(cov_confusion_boot_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_cov, y = covariance)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(Covconfintboot), shape = factor(Covconfintboot)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]))+  
+    xlab(expression("Actual Cov"["GE"]))+
+    labs(fill = "", shape = "")+
+    ggtitle(expression("CG Design: Cov"["GE"]*" Bootstrap"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+(cov_boot_dub = ggplot(transform(dat_dub, Covconfintboot = factor(Covconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Bootstrap"))+
+    ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+    facet_wrap(~Covconfintboot,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+## GxE -- Permutation -- Scen2
+
+(gxe_perm_dub = ggplot(transform(dat_dub, GxEconfintperm = factor(GxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Permutation"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~GxEconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(gxe_confusion_perm_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_GxE_emm, y = GxE_emm)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(GxEconfintperm), shape = factor(GxEconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+
+    ggtitle(expression("CG Design: "*bar(Delta)*""["GxE"]*" Permutation"))+
+    theme(legend.position = "none")+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## GxE -- Bootstrap -- Scen2
+
+(gxe_boot_dub = ggplot(transform(dat_dub, GxEconfintboot = factor(GxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Bootstrap"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~GxEconfintboot,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(gxe_confusion_boot_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_GxE_emm, y = GxE_emm)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(GxEconfintboot), shape = factor(GxEconfintboot)),size = 3) +
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+
+    ggtitle(expression("CG Design: "*bar(Delta)*""["GxE"]*" Bootstrap"))+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(legend.position = "none")+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+
+
+###############################################
+###  Confusion Matrix on Means - Env Scen 2 ###
+###############################################
+
+dat_dub$meansCovconfintperm = rep("NA",nrow(dat_dub))
+
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$true_cov_means[i] != 0 && dat_dub$cov_means_pvalue[i] <= 0.025){dat_dub$meansCovconfintperm[i] = "True Positive"
+  }else if(dat_dub$true_cov_means[i] == 0 & dat_dub$cov_means_pvalue[i] <= 0.025){dat_dub$meansCovconfintperm[i] = "False Positive"
+  }else if(dat_dub$true_cov_means[i]!= 0 & dat_dub$cov_means_pvalue[i] > 0.025){dat_dub$meansCovconfintperm[i] = "False Negative"
+  }else if(dat_dub$true_cov_means[i] == 0 & dat_dub$cov_means_pvalue[i] > 0.025){dat_dub$meansCovconfintperm[i] = "True Negative"
+  }else{dat_dub$meansCovconfintperm[i] = "None"}
+}
+
+# MEANS Cov Boot check
+dat_dub$MeansCovconfintboot = rep(NA, nrow(dat_dub))
+
+for(i in 1:nrow(dat_dub)){
+  
+  if(dat_dub$true_cov_means[i] != 0 &&
+     dat_dub$cov_means_lwrCI[i] < 0 &&
+     dat_dub$cov_means_uprCI[i] < 0
+  ){dat_dub$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_dub$true_cov_means[i] != 0 &&
+           dat_dub$cov_means_lwrCI[i] > 0 &&
+           dat_dub$cov_means_uprCI[i] > 0
+  ){dat_dub$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_dub$true_cov_means[i] == 0 &&
+           dat_dub$cov_means_lwrCI[i] < 0 &&
+           dat_dub$cov_means_uprCI[i] < 0
+  ){dat_dub$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_dub$true_cov_means[i] == 0 &&
+           dat_dub$cov_means_lwrCI[i] > 0 &&
+           dat_dub$cov_means_uprCI[i] > 0
+  ){dat_dub$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_dub$true_cov_means[i] != 0 && 
+           dat_dub$cov_means_lwrCI[i] <= 0 && 
+           dat_dub$cov_means_uprCI[i] >= 0
+  ){dat_dub$MeansCovconfintboot[i] = "False Negative"
+  }else if(dat_dub$true_cov_means[i]== 0 && 
+           dat_dub$cov_means_lwrCI[i] <= 0 && 
+           dat_dub$cov_means_uprCI[i] >= 0
+  ){dat_dub$MeansCovconfintboot[i] = "True Negative"
+  }else{dat_dub$MeansCovconfintboot[i] = "None"}
+}
+
+# MEANS -- GxE --  Bootstrap - Scen 2
+dat_dub$MeanGxEconfintboot = rep("NA", nrow(dat_dub))
+
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$true_GxE_means[i] != 0 & dat_dub$GxE_means_lwrCI[i] > 0)
+  {dat_dub$MeanGxEconfintboot[i] = "True Positive"
+  }else if(dat_dub$true_GxE_means[i] == 0 & dat_dub$GxE_means_lwrCI[i] > 0)
+  {dat_dub$MeanGxEconfintboot[i] = "False Positive"
+  }else if(dat_dub$true_GxE_means[i] != 0 & dat_dub$GxE_means_lwrCI[i] <= 0)
+  {dat_dub$MeanGxEconfintboot[i] = "False Negative"
+  }else if(dat_dub$true_GxE_means[i] == 0 & dat_dub$GxE_means_lwrCI[i] <= 0)
+  {dat_dub$MeanGxEconfintboot[i] = "True Negative"
+  }else{dat_dub$MeanGxEconfintboot[i] = "None"}
+}
+
+# MEANS GxE Perm check
+dat_dub$meansGxEconfintperm = rep("NA", nrow(dat_dub))
+
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$true_GxE_means[i] != 0 & dat_dub$GxE_means_pvalue[i] <= 0.05){dat_dub$meansGxEconfintperm[i] = "True Positive"
+  }else if(dat_dub$true_GxE_means[i] == 0 & dat_dub$GxE_means_pvalue[i] <= 0.05){dat_dub$meansGxEconfintperm[i] = "False Positive"
+  }else if(dat_dub$true_GxE_means[i] != 0 & dat_dub$GxE_means_pvalue[i] > 0.05){dat_dub$meansGxEconfintperm[i] = "False Negative"
+  }else if(dat_dub$true_GxE_means[i] == 0 & dat_dub$GxE_means_pvalue[i] > 0.05){dat_dub$meansGxEconfintperm[i] = "True Negative"
+  }else{dat_dub$meansGxEconfintperm == "None"}
+}
+
+# Counts for table
+(cov_perm_table_mean_dub = dat_dub %>%
+    group_by(meansCovconfintperm) %>%
+    count())
+cov_perm_table_mean_dub$percent = (cov_perm_table_mean_dub$n/11000)*100
+cov_perm_table_mean_dub
+
+(cov_boot_table_mean_dub = dat_dub %>%
+    group_by(MeansCovconfintboot) %>%
+    count())
+cov_boot_table_mean_dub$percent = (cov_boot_table_mean_dub$n/11000)*100
+cov_boot_table_mean_dub
+
+(gxe_boot_table_mean_dub = dat_dub %>%
+    group_by(MeanGxEconfintboot) %>%
+    count())
+gxe_boot_table_mean_dub$percent = (gxe_boot_table_mean_dub$n/11000)*100
+gxe_boot_table_mean_dub
+
+(gxe_perm_table_mean_dub = dat_dub %>%
+    group_by(meansGxEconfintperm) %>%
+    count())
+gxe_perm_table_mean_dub$percent = (gxe_perm_table_mean_dub$n/11000)*100
+gxe_perm_table_mean_dub
+
+
+############ Confusion Plots -- Env Scenario 2 -- MEANS ###############
+
+## MEANS -- CovGE -- Permutation -- Scen 2
+(cov_perm_means_dub = ggplot(transform(dat_dub, meansCovconfintperm = factor(meansCovconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+   geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+   geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+   geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+   theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Permutation - Means"))+
+   ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+   facet_wrap(~meansCovconfintperm,ncol = 2)+
+   theme_classic(base_family = "Times")+
+   theme(axis.title.x=element_blank(),
+         axis.text.x=element_blank(),
+         axis.ticks.x=element_blank()))
+
+(cov_confusion_perm_means_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_cov_means, y = cov_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(meansCovconfintperm), shape = factor(meansCovconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]*" from group means"))+  
+    xlab(expression("Actual Cov"["GE"]*" from group means"))+
+    labs(fill = "", shape = "")+
+    ggtitle(expression("CG Design: Cov"["GE"]*" Permutation"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## MEANS -- CovGE -- Bootstrap -- Scen 2
+
+(cov_boot_means_dub = ggplot(transform(dat_dub, MeansCovconfintboot = factor(MeansCovconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression("Cov"["GE"]*": Bootstrap - Means"))+
+    ylab(expression("Cov"["GE"]))+xlab(expression("Actual Cov"["GE"]))+
+    facet_wrap(~MeansCovconfintboot,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(cov_confusion_boot_means_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_cov_means, y = cov_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(MeansCovconfintboot), shape = factor(MeansCovconfintboot)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression("Cov"["GE"]*" from group means"))+  
+    xlab(expression("Actual Cov"["GE"]*" from group means"))+
+    labs(fill = "", shape = "")+
+    ggtitle(expression("CG Design: Cov"["GE"]*" Bootstrap"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+
+## MEANS -- GxE -- Bootstrap -- Scen 2
+
+(gxe_boot_means_dub = ggplot(transform(dat_dub, MeanGxEconfintboot = factor(MeanGxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Bootstrap - Means"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~GxEconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()))
+
+(gxe_confusion_boot_means_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_GxE_means, y = GxE_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(MeanGxEconfintboot), shape = factor(MeanGxEconfintboot)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]*" from group means"))+  
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]*" from group means"))+  
+    labs(fill = "", shape = "")+
+    ggtitle(expression("CG Design: "*bar(Delta)*""["GxE"]*" Bootstrap"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+## MEANS -- GxE -- Permutation -- Scen 2
+
+(means_gxe_perm_dub = ggplot(transform(dat_dub, meansGxEconfintperm = factor(meansGxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
+    geom_errorbar(aes(x = reorder(row,true_GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
+    geom_point(aes(x = reorder(row,true_GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
+    geom_hline(aes(yintercept = 0))+ ggtitle(expression(bar(Delta)*""["GxE"]*": Permutation - Means"))+
+    ylab(expression(bar(Delta)*""["GxE"]))+
+    facet_wrap(~meansGxEconfintperm,ncol = 2)+
+    theme_classic(base_family = "Times")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())) 
+
+(gxe_confusion_perm_means_dub = ggplot(filter(dat_dub, replicate == 1), aes(x = true_GxE_means, y = GxE_means)) + 
+    geom_abline(slope = 1, intercept = 0,colour = "black")+
+    geom_point(aes(fill = factor(meansGxEconfintperm), shape = factor(meansGxEconfintperm)),size = 3) +
+    theme_classic(base_size = 18,base_family = "Times")+
+    scale_shape_manual(values = c("False Negative" = 24, "True Positive"=21,"True Negative"= 22,"False Positive"=23)) +   
+    scale_fill_manual(values = c("False Negative"="#238A8DFF", "True Positive" ="#FDE725FF", "True Negative"="#481567FF","False Positive"="#55C667FF")) +
+    ylab(expression(bar(Delta)*""["GxE"]*" from group means"))+  
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]*" from group means"))+  
+    labs(fill = "", shape = "")+
+    ggtitle(expression("CG Design: "*bar(Delta)*""["GxE"]*" Permutation"))+
+    theme(plot.title = element_text(size = 18,face = "bold"))+
+    theme(legend.position = "none")+
+    theme(axis.text.y=element_text(colour = "black"))+
+    theme(axis.text.x=element_text(colour = "black")))
+
+
+
+########## Panels for Confusion Matrices for both scenarios ########## 
+
+# Confusion Plots for Raw (both scenarios)
+grid.arrange(gxe_confusion_boot,gxe_confusion_boot_dub,
+             gxe_confusion_perm,gxe_confusion_perm_dub,
+             cov_confusion_boot,cov_confusion_boot_dub,
+             cov_confusion_perm,cov_confusion_perm_dub,
+             ncol = 2)
+
+# Confusion Plots for Means (both scenarios)
+grid.arrange(gxe_confusion_boot_means,gxe_confusion_boot_means_dub,
+             gxe_confusion_perm_means,gxe_confusion_perm_means_dub,
+             cov_confusion_boot_means,cov_confusion_boot_means_dub,
+             cov_confusion_perm_means,cov_confusion_perm_means_dub,
+             ncol = 2)
+
+# 16 panel grid for Env Scenario 1
+title1=textGrob("Full Reciprocal Transplant Design", gp=gpar(font= 2))
+grid.arrange(gxe_perm,gxe_boot,cov_perm,cov_boot,top=title1)
+
+# 16 panel grid for Env Scenario 1 - Means
+title2=textGrob("Full Reciprocal Transplant Design - Means", gp=gpar(font= 2))
+grid.arrange(means_gxe_perm, gxe_boot_means,cov_perm_means, cov_boot_means,top=title2)
+
+# 16 panel grid for Env Scenario 2
+title3=textGrob("Paired Common Garden Design", gp=gpar(font= 2))
+grid.arrange(gxe_perm_dub,gxe_boot_dub,cov_perm_dub,cov_boot_dub,top = title3)
+
+# 16 panel grid for Env Scenario 2 - Means
+title4=textGrob("Paired Common Garden Design - Means", gp=gpar(font= 2))
+grid.arrange(means_gxe_perm_dub, gxe_boot_means_dub,cov_perm_means_dub, cov_boot_means_dub, top=title4)
+
+
+
+######################################
+## Tradeoff with GxE and Covariance ##
+######################################
 
 dat_csv$sig = NULL
 for(i in 1:nrow(dat_csv)){ # Use only if one or the other is significant
-if(dat_csv$GxE_emm_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$sig[i] = TRUE
-}else if(dat_csv$GxE_emm_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$sig[i] = TRUE
-}else{dat_csv$sig[i]=FALSE} 
-  }
+  if(dat_csv$GxE_emm_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$sig[i] = TRUE
+  }else if(dat_csv$GxE_emm_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$sig[i] = TRUE
+  }else{dat_csv$sig[i]=FALSE} 
+}
 
-sigGxE = filter(dat_csv, sig ==TRUE) # filter out false positives as potential solution to weed out messiness.
+sigGxE = dat_csv %>%
+  filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.
+  filter(true_GxE_emm != 0) %>%
+  filter(true_cov != 0) %>%
+  filter(Covconfintboot != "false positive") %>%
+  filter(GxEconfintperm != "false positive")
+
+(bin = ggplot(sigGxE, aes(x = true_GxE_emm, y = covtick))+
+    geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
+    geom_point()+
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+ylab(expression("Proportion of significant Cov"["GE"]))+
+    theme_bw(base_size = 18, base_family = "Times")+
+    theme(axis.text.x = element_text(colour = "black"))+
+    theme(axis.text.y = element_text(colour = "black"))+
+    theme(plot.background = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(size = 2)))
 
 
-ggplot(sigGxE, aes(x = GxE_emm, y = covtick))+
-  geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
-  geom_point()+
-  xlab("Magnitude of GxE")+ylab("Proportion of significant CovGE values")+
-  theme_bw(base_size = 18, base_family = "Times")+
-  theme(axis.text.x = element_text(size=16,colour = "black"),
-        axis.title.x = element_text(size=18,face="bold")) +
-  theme(axis.text.y = element_text(size=16,colour = "black"),
-        axis.title.y = element_text(size=18,face="bold")) +
-  theme(plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_rect(size = 2))
+(lin = ggplot(sigGxE, aes(x = true_GxE_emm, y = abs(true_cov)))+
+    geom_point(alpha = 0.15)+
+    geom_smooth(method = "glm", colour = "black", size = 1.5)+
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+ylab(expression("| Actual Cov"["GE"]*" |"))+
+    theme_bw(base_size = 18, base_family = "Times")+
+    theme(axis.text.x = element_text(colour = "black"))+
+    theme(axis.text.y = element_text(colour = "black"))+
+    theme(plot.background = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(size = 2)))
 
+grid.arrange(lin, bin)
 
-ggplot(sigGxE, aes(x = abs(true_cov), y = true_GxE_emm))+
-  #geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "red") + 
-  geom_point(alpha = 0.2)+
-  geom_smooth(method = "glm")+
-  
-  ylab("Actual GxE")+xlab(expression("True Cov"["GE"]))+
-  theme_bw(base_size = 18, base_family = "Times")+
-  theme(axis.text.x = element_text(size=16,colour = "black"),
-        axis.title.x = element_text(size=18,face="bold")) +
-  theme(axis.text.y = element_text(size=16,colour = "black"),
-        axis.title.y = element_text(size=18,face="bold")) +
-  theme(plot.background = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_rect(size = 2))
-
+### Same but with Omega^2
 dat_csv$sig = NULL
 for(i in 1:nrow(dat_csv)){ # Use only if one or the other is significant
   if(dat_csv$GxE_omega_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$sig[i] = TRUE
@@ -470,90 +1435,317 @@ ggplot(sigGxE, aes(x = GxE_omega, y = covtick))+
         panel.grid.minor = element_blank(),
         panel.border = element_rect(size = 2))
 
-######################################
-##          Sanity Checks           ##
-######################################
 
-# Do we have good parameter coverage? Hex plot
+###############################################
+###      ANOVA vs. GxE_EMM comparison       ###
+###############################################
 
-(hexy = ggplot(dat_csv, aes(x = covariance, y = GxE_emm)) + 
-  geom_hex()+ theme_classic() + xlab("Covariance Estimate") + ylab("GxE Estimate") +
-  ggtitle("HexPlot") + facet_grid(sample_size~n_pop))
+devcol = c("0.5" = "#0077CC", "1" = "#990000")
+(eff_var = ggplot(filter(dat_csv,replicate == 1), aes(x = true_GxE_emm, y = GxE_omega, group = factor(std_dev))) + 
+    geom_point(aes(shape = factor(n_pop), fill = factor(std_dev)),size = 4)+
+    scale_fill_manual(values = devcol,
+                      breaks = c("0.5", "1"))+
+    scale_shape_manual(values = c("2" = 21, "4" = 22,"8" = 23))+
+    geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3),se = F,colour = "black",size = 1.5) + 
+    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+
+    ylab(expression("Actual "*omega^2))+
+    guides(fill=guide_legend(override.aes=list(shape=21,size =6)))+
+    labs(fill = "Standard Deviation", shape = "Number of Populations")+
+    guides(shape = guide_legend(override.aes = list(size = 6)))+
+    theme_classic(base_size = 24, base_family = "Times")+
+    theme(axis.text =element_text(colour = "black")))
 
-(hexy2 = ggplot(dat_dub, aes(x = covariance, y = GxE_emm)) + 
-    geom_hex()+ theme_classic() + xlab("Covariance Estimate") + ylab("GxE Estimate") +
-    ggtitle("HexPlot") + facet_grid(sample_size~n_pop))
+# Do confidence intervals for each overlap with their true values?  
+dat_csv$probgxe = NULL
+dat_csv$probcov = NULL
 
-# Do confidence intervals match with p-values? 
-
-# Cov Perm check
-dat_csv1 = dat_csv[dat_csv$replicate==1,] # Only need to show one replicate
-dat_csv1$Covconfintperm = rep("NA",nrow(dat_csv1))
-
-for(i in 1:nrow(dat_csv1)){
-    if(dat_csv1$true_cov[i] != 0 && dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "True Positive"
-    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "False Positive"
-    }else if(dat_csv1$true_cov[i]!= 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "False Negative"
-    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "True Negative"
-    }else{dat_csv1$Covconfintperm[i] = "None"}
+for(i in 1:nrow(dat_csv)){
+  if((dat_csv$true_GxE_emm[i] < dat_csv$GxE_emm_lwrCI[i]) | (dat_csv$true_GxE_emm[i] >dat_csv$GxE_emm_uprCI[i])){dat_csv$probgxe[i] = TRUE
+  }else{dat_csv$probgxe[i] = FALSE}
+  if((dat_csv$true_cov[i] < dat_csv$covariance_lwrCI[i]) | (dat_csv$true_cov[i] >dat_csv$covariance_uprCI[i])){dat_csv$probcov[i] = TRUE
+  }else{dat_csv$probcov[i] = FALSE}
 }
 
-(cov_perm = ggplot(transform(dat_csv1, Covconfintperm = factor(Covconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
-    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
-    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
-    theme_classic() + geom_hline(aes(yintercept = 0))+ ggtitle("Covariance - Permutation Check")+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())+ 
-    facet_wrap(~Covconfintperm,ncol = 2))
+GxEanoms = dat_csv %>%
+  filter(probgxe == TRUE)
+dim(GxEanoms)
+length(which(GxEanoms$GxE_emm_pvalue<=0.05)) 
+
+cov_anom = dat_csv %>%
+  filter(probcov ==TRUE)
+dim(cov_anom)
+length(which(cov_anom$covariance_pvalue<=0.05))
+
+(overlapper_cov = ggplot(cov_anom[cov_anom$replicate==1,],aes(x = row))+ theme_classic() + 
+    geom_errorbar(aes(ymin = covariance_lwrCI,ymax = covariance_uprCI),color = "black")+
+    geom_point(aes(y = true_cov),size = 2, color = "red",alpha = 0.5)+
+    geom_point(aes(y = covariance,colour = factor(std_dev)), size =2, shape = 4)+
+    xlab("Unique Parameter Set (row)") + ylab("Covariance"))
+
+(overlapper_GxE = ggplot(GxEanoms[GxEanoms$replicate==1,],aes(x = row))+ theme_classic() + 
+    geom_errorbar(aes(ymin = GxE_emm_lwrCI,ymax = GxE_emm_uprCI),color = "black")+
+    geom_point(aes(y = true_GxE_emm),size = 2, color = "red",alpha = 0.5)+
+    geom_point(aes(y = GxE_emm,colour = factor(std_dev)), size =2, shape = 4)+
+    xlab("Unique Parameter Set (row)") + ylab("GxE - Estimated Marginal Mean"))
 
 
-# Cov Boot check
-dat_csv1$Covconfintboot = rep(NA, nrow(dat_csv1))
+# Do means estimates match raw estimates? If yes, should fall along 1:1 line
 
-for(i in 1:nrow(dat_csv1)){
+dat_csv$meancoverror = abs(dat_csv$cov_means_uprCI - dat_csv$cov_means_lwrCI)
+dat_dub$meancoverror = abs(dat_dub$cov_means_uprCI - dat_dub$cov_means_lwrCI)
+dat_csv$coverror = abs(dat_csv$covariance_uprCI - dat_csv$covariance_lwrCI)
+dat_dub$coverror = abs(dat_dub$covariance_uprCI - dat_dub$covariance_lwrCI)
+dat_csv$meangxeerror = dat_csv$GxE_means_uprCI - dat_csv$GxE_means_lwrCI
+dat_dub$meangxeerror = dat_dub$GxE_means_uprCI - dat_dub$GxE_means_lwrCI
+dat_csv$gxeerror = dat_csv$GxE_emm_uprCI - dat_csv$GxE_emm_lwrCI
+dat_dub$gxeerror = dat_dub$GxE_emm_uprCI - dat_dub$GxE_emm_lwrCI
+
+
+# Covariance
+dat_csv_2 = filter(dat_csv, sample_size != 2)
+(covpopcheck = ggplot(dat_csv_2,aes(x = abs(true_cov), y = abs(covariance)))+
+    geom_point(aes(colour = factor(n_pop)))+ylab(expression("Cov"["GE"]*": Group Means"))+xlab(expression("Cov"["GE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+(covmeancheck = ggplot(dat_csv,aes(x = covariance, y = cov_means))+
+    geom_point()+ylab(expression("Cov"["GE"]*": Group Means"))+xlab(expression("Cov"["GE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+(coverrorcheck = ggplot(dat_csv, aes(x = coverror,y = meancoverror)) + 
+    geom_point(alpha = 0.5)+ylab(expression("Length of 95% CI for Cov"["GE"]*": Group Means"))+xlab(expression("Length of 95% CI for Cov"["GE"]*": Raw data "))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(covmeancheck, coverrorcheck)
+
+# Lwr CI
+(coverrorcheck_lwr = ggplot(dat_csv, aes(x = covariance_lwrCI, y = cov_means_lwrCI)) + 
+    geom_point(alpha = 0.5)+ylab(expression("Lower limit 95% CI for Cov"["GE"]*": Group Means"))+xlab(expression("Lower Limit of 95% CI for Cov"["GE"]*": Raw data "))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+# Upr CI
+(coverrorcheck_upr = ggplot(dat_csv, aes(x = covariance_uprCI, y = cov_means_uprCI  )) + 
+    geom_point(alpha = 0.5)+ylab(expression("Upper limit 95% CI for Cov"["GE"]*": Group Means"))+xlab(expression("Upper Limit of 95% CI for Cov"["GE"]*": Raw data "))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(coverrorcheck_lwr, coverrorcheck_upr)
+
+(covmeancheck2 = ggplot(dat_dub,aes(x = covariance, y = cov_means))+
+    geom_point()+ylab(expression("Cov"["GE"]*": Group Means"))+xlab(expression("Cov"["GE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+(coverrorcheck2 = ggplot(dat_dub, aes(x = coverror,y = meancoverror)) + 
+    geom_point(alpha = 0.5)+ylab(expression("Length of 95% CI for Cov"["GE"]*": Group Means"))+xlab(expression("Length of 95% CI for Cov"["GE"]*": Raw data "))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(covmeancheck2, coverrorcheck2)
+
+# GxE
+(gxemeancheck = ggplot(dat_csv,aes(x = true_GxE_emm, y = true_GxE_means))+
+    geom_point()+ylab(expression(bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression(bar(Delta)*""["GxE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+(gxeerrorcheck = ggplot(dat_csv, aes(x = gxeerror,y = meangxeerror)) + 
+    geom_point(alpha = 0.5)+ylab(expression("Length of 95% CI for"*bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression("Length of 95% CI for"*bar(Delta)*""["GxE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(gxemeancheck, gxeerrorcheck)
+
+(gxeerrorcheck_lwr = ggplot(dat_csv, aes(x = GxE_emm_lwrCI,y = GxE_means_lwrCI)) + 
+    geom_point(alpha = 0.5)+ylab(expression("Lower limit of 95% CI for"*bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression("Lower limit of 95% CI for"*bar(Delta)*""["GxE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+(gxeerrorcheck_upr = ggplot(dat_csv, aes(x = GxE_emm_uprCI,y = GxE_means_uprCI)) + 
+    geom_point(alpha = 0.5)+ylab(expression("Upper limit of 95% CI for"*bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression("Upper limit of 95% CI for"*bar(Delta)*""["GxE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(gxeerrorcheck, gxeerrorcheck_lwr, gxeerrorcheck_upr, ncol = 1)
+
+(gxemeancheck2 = ggplot(dat_dub,aes(x = true_GxE_emm, y = true_GxE_means))+
+    geom_point()+theme_classic()+ylab(expression(bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression(bar(Delta)*""["GxE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+(gxeerrorcheck2 = ggplot(dat_dub, aes(x = gxeerror,y = meangxeerror)) + 
+    geom_point(alpha = 0.5)+ylab(expression("Length of 95% CI for"*bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression("Length of 95% CI for"*bar(Delta)*""["GxE"]*": Raw data"))+
+    geom_abline(slope = 1, intercept = 0,size = 1, colour = "red")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(gxemeancheck2, gxeerrorcheck2)
+
+# Do GxE pvalues from permutation match pvalues from anova? 
+
+(pval1 = ggplot(filter(dat_csv, replicate ==1),aes(x = GxE_Anova, y = GxE_emm_pvalue,group = factor(total_samples),colour = factor(sample_size),shape = factor(n_pop)))+ # means data
+    geom_point(size = 2, alpha = 0.75)+theme_classic(base_size = 20, base_family = "Times")+ylab("GxE EMM P-value")+xlab("GxE Anova P-value")+
+    #stat_smooth(method = "auto",se=FALSE)+
+    geom_vline(xintercept = 0.05,colour = "red")+labs(shape = "Number of Populations",colour = "Sample Size")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+(pval2 = ggplot(filter(dat_csv, replicate ==1),aes(x = GxE_Anova, y = GxE_means_pvalue,group = factor(total_samples),colour = factor(sample_size), shape = factor(n_pop)))+ # means data
+    geom_point(size = 2, alpha = 0.75)+theme_classic(base_size = 20, base_family = "Times")+ylab("GxE Means P-value")+xlab("GxE Anova P-value")+
+    #stat_smooth(method = "auto",se=FALSE)+
+    geom_vline(xintercept = 0.05,colour = "red")+labs(shape = "Number of Populations",colour = "Sample Size")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+(pval3 = ggplot(filter(dat_dub, replicate ==1),aes(x = GxE_Anova, y = GxE_emm_pvalue,colour = GxE_emm,shape = factor(n_pop)))+ # means data
+    geom_point()+theme_classic(base_size = 20, base_family = "Times")+ylab("GxE EMM P-value")+xlab("GxE Anova P-value")+
+    geom_vline(xintercept = 0.05,colour = "red")+labs(shape = "Number of Populations",colour = "Delta GxE")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+(pval4 = ggplot(filter(dat_dub, replicate ==1),aes(x = GxE_Anova, y = GxE_means_pvalue,colour = GxE_means, shape = factor(n_pop)))+ # means data
+    geom_point()+theme_classic(base_size = 20, base_family = "Times")+ylab("GxE Means P-value")+xlab("GxE Anova P-value")+
+    geom_vline(xintercept = 0.05,colour = "red")+labs(shape = "Number of Populations",colour = "Delta GxE -- Group Means")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+grid.arrange(pval1,pval2)
+grid.arrange(pval1,pval2,pval3,pval4,ncol = 2)
+
+# For those that don't match, is there any pattern ?
+
+suspect.pvals = dat_csv %>% # raw 
+  filter(GxE_emm_pvalue >= 0.05) %>%
+  filter(GxE_Anova <= 0.05)
+
+(ggplot(suspect.pvals,aes(x = GxE_Anova, y = GxE_emm_pvalue,colour = GxE_emm))+
+    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
+    geom_hline(yintercept = 0.05,colour = "red"))
+
+suspect.pvals.mean = dat_csv %>% # mean
+  filter(GxE_means_pvalue >= 0.05) %>%
+  filter(GxE_Anova <= 0.05)
+
+(ggplot(suspect.pvals.mean, aes(x = GxE_means, y = GxE_emm_pvalue)) + 
+    geom_point()+theme_classic())
+
+
+#### For Heuristic Plots in paper
+
+shape1 = c("G_1" = 24, "G_2" = 21)
+ColorFill = c("G_1" = "#002266", "G_2" = "#CC6600")
+
+
+####### Phenotype plots ##########
+(rowpicker = dat_dub %>%
+   filter(sample_size == 4)%>%
+   filter(n_pop == 8)%>%
+   filter(GxE_emm< 0.3)%>%
+   filter(covariance < -.6))
+
+phen_data = read.csv("~/Desktop/phenotype_output_results.csv")
+
+short_env = c("E_1" = "Env. 1", "E_2" = "Env. 2")
+short_gen = c("E_1" = "Gen. 1", "E_2" = "Gen. 2")
+long_env = c("E_1" = "Env. 1", "E_2" = "Env. 2","E_3" = "Env. 3", "E_4" = "Env. 4","E_5" = "Env. 5", "E_6" = "Env. 6","E_7" = "Env. 7", "E_8" = "Env. 8")
+long_gen = c("E_1" = "Gen. 1", "E_2" = "Gen. 2","E_3" = "Gen. 3", "E_4" = "Gen. 4","E_5" = "Gen. 5", "E_6" = "Gen. 6","E_7" = "Gen. 7", "E_8" = "Gen. 8")
+
+chosen_1 = c(1845, # CoGV, GxE, 2 pop
+             9844, # CnGV, GxE, 2 pop
+             15405, # CnGV, No GxE, 2 pop
+             15437, # CoGV, No GxE, 2 pop
+             
+             9914, # CoGV, No GxE, 8 pop
+             9923, # CnGV, No GxE, 8 pop
+             3532, # CnGV, GxE, 8 pop
+             9115, # CoGV, GxE, 8 pops
+             
+             15475, # CoGV, No GxE, 4 pop
+             23411, # CnGV, No GxE, 4 pop
+             5869, # CnGV, GxE, 4 pop
+             7496) # CoGV, GxE, 4 pops
+
+chosen_2 = c(22754, # CoGV, GxE, 2 pop per env
+             23356, # CnGV, GxE, 2 pop per env
+             19163, # CnGV, No GxE, 2 pop per env
+             26365, # CoGV, No GxE, 2 pop per env
+             
+             26056, # CoGV, No GxE, 8 pop
+             23411, # CnGV, No GxE, 8 pop
+             20440, # CnGV, GxE, 8 pop
+             22819) # CoGV, GxE, 8 pops
+chosen = c(chosen_1, chosen_2)
+
+phenRow = filter(start_df,row == chosen[20])
+plotdat = filter(phen_data, row == chosen[20])
+label1 = phenRow$covariance
+label2 = phenRow$GxE_emm
+
+colorpal = c("E_1" = "#404788FF", "E_2" = "#3CBB75FF")
+
+ggplot(plotdat,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor,colour = nat_env_factor))+
+  geom_point(size = 2, position=position_dodge(width = 0.15))+
+  geom_smooth(size = 2, se=FALSE)+
+  scale_x_discrete(labels = long_env)+
+  theme_classic(base_size = 20, base_family = "Times")+
+  labs(colour = "")+
+  ylab("Phenotype")+xlab("Environment")+
+  annotate("text", x = 1.25, y = 2.75, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=6, color = "black",hjust = 0,parse = T)+
+  annotate("text", x = 1.25, y = 2.25, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=6 , color = "black", hjust = 0,parse = T)+
+  theme(axis.text=element_text(colour="black"))+
+  if(phenRow$n_pop ==8){scale_colour_manual(labels = long_gen, values = colorpal)}else{scale_colour_viridis(labels = long_gen, discrete = TRUE)}
+phenRow
+
+# Check with Variance partition data frame
+vp = read.csv("~/Desktop/Variance_output_results.csv")
+
+filter(vp, row == chosen[2])
+filter(dat_csv, row == chosen[2])
+
+#model_df$phen_corrected = rep(c(-1,1,-.95,1.05),each = 5) For Vg, Ve, Vgxe
+#Otherwise use simulated data from Cov_GxE_clusterFun.R
+
+ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, shape = gen_factor, fill = gen_factor, colour = gen_factor)) + 
+  geom_point(size = 5) + geom_line(size=1,lty = "dashed") + 
+  scale_shape_manual(values = shape1,
+                     labels = c("G_1" = "Genotype 1", "G_2" = "Genotype 2"))+
+  scale_fill_manual(values = ColorFill,
+                    labels = c("G_1" = "Genotype 1", "G_2" = "Genotype 2"))+
+  scale_colour_manual(values = ColorFill,
+                      labels = c("G_1" = "Genotype 1", "G_2" = "Genotype 2"))+
+  ylab("Phenotype") + xlab(" ")+
   
-  if(dat_csv1$true_cov[i] != 0 &&
-     dat_csv1$covariance_lwrCI[i] < 0 &&
-    dat_csv1$covariance_uprCI[i] < 0
-    ){dat_csv1$Covconfintboot[i] = "True Positive"
-    }else if(dat_csv1$true_cov[i] != 0 &&
-             dat_csv1$covariance_lwrCI[i] > 0 &&
-    dat_csv1$covariance_uprCI[i] > 0
-    ){dat_csv1$Covconfintboot[i] = "True Positive"
-    }else if(dat_csv1$true_cov[i] == 0 &&
-             dat_csv1$covariance_lwrCI[i] < 0 &&
-    dat_csv1$covariance_uprCI[i] < 0
-    ){dat_csv1$Covconfintboot[i] = "False Positive"
-    }else if(dat_csv1$true_cov[i] == 0 &&
-             dat_csv1$covariance_lwrCI[i] > 0 &&
-    dat_csv1$covariance_uprCI[i] > 0
-    ){dat_csv1$Covconfintboot[i] = "False Positive"
-    }else if(dat_csv1$true_cov[i] != 0 && 
-             dat_csv1$covariance_lwrCI[i] <= 0 && 
-    dat_csv1$covariance_uprCI[i] >= 0
-    ){dat_csv1$Covconfintboot[i] = "False Negative"
-    }else if(dat_csv1$true_cov[i]== 0 && 
-             dat_csv1$covariance_lwrCI[i] <= 0 && 
-    dat_csv1$covariance_uprCI[i] >= 0
-   ){dat_csv1$Covconfintboot[i] = "True Negative"
-   }else{dat_csv1$Covconfintboot[i] = "None"}
+  theme(axis.line = element_line(colour = "black"))+
+  theme(axis.text.y = element_blank(),
+        #axis.text.x = element_blank(),
+        axis.ticks.y = element_blank())+
+  scale_x_discrete(labels=c("E_1" = "Environment 1","E_2" = "Environment 2"))+
+  #theme(axis.title.x = element_text(face = "bold", size=26))+
+  #theme(axis.title.y = element_text(face = "bold", size=26))+
+  theme(axis.text= element_text(colour = "black"))+
+  labs(colour = "Genotype",fill = "Genotype",shape = "Genotype")+
+  theme(legend.position="none")
 
-  }
 
-(cov_boot = ggplot(transform(dat_csv1, Covconfintboot = factor(Covconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_errorbar(aes(x = reorder(row,true_cov), ymin = covariance_lwrCI, ymax = covariance_uprCI),alpha = 0.5)+ 
-    geom_point(aes(x = reorder(row,true_cov), y = covariance), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
-    geom_point(aes(x = reorder(row,true_cov), y = true_cov), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+ ggtitle("Covariance - Bootstrap Check")+
-    theme_classic() + geom_hline(aes(yintercept = 0))+
-      theme(axis.title.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.ticks.x=element_blank())+ 
-      facet_wrap(~Covconfintboot,ncol = 2))
- 
+
+
+#######################################
+#########     Extra Code      #########
+#######################################
+
 # Bin Covariance Bootstrap and See whats driving false/true pos's and neg's
-dat_csv1$binCov = "NA"#abs(round(dat_csv1$covariance,1))
+dat_csv1$binCov = "NA"
 for(i in 1:nrow(dat_csv1)){
   if(dat_csv1$true_cov[i] == 0){dat_csv1$binCov[i] = 0
   }else if(abs(dat_csv1$true_cov[i]) > 0 & abs(dat_csv1$true_cov[i]) <= 0.15){dat_csv1$binCov[i] = 0.1
@@ -567,8 +1759,7 @@ for(i in 1:nrow(dat_csv1)){
   }else if(abs(dat_csv1$true_cov[i]) > 0.85 & abs(dat_csv1$true_cov[i]) <= 0.95){dat_csv1$binCov[i] = 0.9
   }else{dat_csv1$binCov[i] = 1}
 }
-  
-  
+
 bindf = dat_csv1 %>%
   group_by(binCov)%>%
   summarize("N_total" = n())
@@ -586,335 +1777,7 @@ bindf3 = merge(bindf, bindf2)
     labs(colour = "") +xlab("Binned Covariance")+ylab("Category")+ggtitle("Covariance Bootstrap"))
 
 (CovBoot = ggplot(bindf3, aes(x = abs(binCov), y = N_category, group = Covconfintboot, colour = Covconfintboot))+
-  geom_point() + theme_hc()+ geom_line()+
+    geom_point() + theme_hc()+ geom_line()+
     scale_colour_manual(values = c("True Positive" = "#992266", "False Positive" = "#009988","True Negative" = "#CC8800" ,"False Negative" = "#0000AA"))+
-  labs(colour = "") +xlab("Binned Covariance")+ylab("Category")+ggtitle("Covariance Bootstrap"))
+    labs(colour = "") +xlab("Binned Covariance")+ylab("Category")+ggtitle("Covariance Bootstrap"))
 
-
-# GxE Perm check
-dat_csv1$GxEconfintperm = rep("NA", nrow(dat_csv1))
-
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$GxEconfintperm[i] = "True Positive"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$GxEconfintperm[i] = "False Positive"
-  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$GxEconfintperm[i] = "False Negative"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$GxEconfintperm[i] = "True Negative"
-  }else{dat_csv1$GxEconfintperm == "None"}
-}
-
-(gxe_perm = ggplot(transform(dat_csv1, GxEconfintperm = factor(GxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_errorbar(aes(x = reorder(row,GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
-    geom_point(aes(x = reorder(row,GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
-    geom_point(aes(x = reorder(row,GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
-    ggtitle("GxE - Permutation Check")+
-    theme_classic() + geom_hline(aes(yintercept = 0))+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())+ 
-    facet_wrap(~GxEconfintperm,ncol = 2))
-
-
-# GxE Boot check
-dat_csv1$GxEconfintboot = rep("NA", nrow(dat_csv1))
-
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
-  {dat_csv1$GxEconfintboot[i] = "True Positive"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
-  {dat_csv1$GxEconfintboot[i] = "False Positive"
-  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
-  {dat_csv1$GxEconfintboot[i] = "False Negative"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
-  {dat_csv1$GxEconfintboot[i] = "True Negative"
-  }else{dat_csv1$GxEconfintboot[i] = "None"}
-}
-  
-(gxe_boot = ggplot(transform(dat_csv1, GxEconfintboot = factor(GxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_errorbar(aes(x = reorder(row,GxE_emm), ymin = GxE_emm_lwrCI, ymax = GxE_emm_uprCI),alpha = 0.5)+ 
-    geom_point(aes(x = reorder(row,GxE_emm), y = GxE_emm), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
-    geom_point(aes(x = reorder(row,GxE_emm), y = true_GxE_emm), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+ggtitle("GxE - Bootstrap Check")+
-    theme_classic() + geom_hline(aes(yintercept = 0))+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())+ 
-    facet_wrap(~GxEconfintboot,ncol = 2))
-
-# Cov Perm check MEANS
-dat_csv1$meansCovconfintperm = rep("NA",nrow(dat_csv1))
-
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_cov_means[i] != 0 && dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "True Positive"
-  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "False Positive"
-  }else if(dat_csv1$true_cov_means[i]!= 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "False Negative"
-  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "True Negative"
-  }else{dat_csv1$meansCovconfintperm[i] = "None"}
-}
-
-(means_cov_perm = ggplot(transform(dat_csv1, meansCovconfintperm = factor(meansCovconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_point(aes(x = reorder(row,true_cov_means), y = cov_means), colour = "firebrick",alpha = 1)+
-    geom_point(aes(x = reorder(row,true_cov_means), y = true_cov_means), colour = "springgreen4",alpha = 1)+
-    geom_errorbar(aes(x = reorder(row,true_cov_means), ymin = cov_means_lwrCI, ymax = cov_means_uprCI))+ ggtitle("Means: Covariance - Permutation Check")+
-    theme_classic() + geom_hline(aes(yintercept = 0))+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())+ 
-    facet_wrap(~meansCovconfintperm,ncol = 2))
-
-# MEANS Cov Boot check
-dat_csv1$MeansCovconfintboot = rep(NA, nrow(dat_csv1))
-
-for(i in 1:nrow(dat_csv1)){
-  
-  if(dat_csv1$true_cov[i] != 0 &&
-     dat_csv1$covariance_lwrCI[i] < 0 &&
-     dat_csv1$covariance_uprCI[i] < 0
-  ){dat_csv1$MeansCovconfintboot[i] = "True Positive"
-  }else if(dat_csv1$true_cov[i] != 0 &&
-           dat_csv1$covariance_lwrCI[i] > 0 &&
-           dat_csv1$covariance_uprCI[i] > 0
-  ){dat_csv1$MeansCovconfintboot[i] = "True Positive"
-  }else if(dat_csv1$true_cov[i] == 0 &&
-           dat_csv1$covariance_lwrCI[i] < 0 &&
-           dat_csv1$covariance_uprCI[i] < 0
-  ){dat_csv1$MeansCovconfintboot[i] = "False Positive"
-  }else if(dat_csv1$true_cov[i] == 0 &&
-           dat_csv1$covariance_lwrCI[i] > 0 &&
-           dat_csv1$covariance_uprCI[i] > 0
-  ){dat_csv1$MeansCovconfintboot[i] = "False Positive"
-  }else if(dat_csv1$true_cov[i] != 0 && 
-           dat_csv1$covariance_lwrCI[i] <= 0 && 
-           dat_csv1$covariance_uprCI[i] >= 0
-  ){dat_csv1$MeansCovconfintboot[i] = "False Negative"
-  }else if(dat_csv1$true_cov[i]== 0 && 
-           dat_csv1$covariance_lwrCI[i] <= 0 && 
-           dat_csv1$covariance_uprCI[i] >= 0
-  ){dat_csv1$MeansCovconfintboot[i] = "True Negative"
-  }else{dat_csv1$MeansCovconfintboot[i] = "None"}
-  
-}
-
-(cov_boot = ggplot(transform(dat_csv1, MeansCovconfintboot = factor(MeansCovconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_errorbar(aes(x = reorder(row,true_cov_means), ymin = cov_means_lwrCI, ymax = cov_means_uprCI),alpha = 0.5)+ 
-    geom_point(aes(x = reorder(row,true_cov_means), y = cov_means), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
-    geom_point(aes(x = reorder(row,true_cov_means), y = true_cov_means), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
-   ggtitle("Means: Covariance - Bootstrap Check")+
-    theme_classic() + geom_hline(aes(yintercept = 0))+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())+ 
-    facet_wrap(~MeansCovconfintboot,ncol = 2))
-
-# MEANS GxE Boot check
-dat_csv1$MeanGxEconfintboot = rep("NA", nrow(dat_csv1))
-
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
-  {dat_csv1$MeanGxEconfintboot[i] = "True Positive"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] > 0)
-  {dat_csv1$MeanGxEconfintboot[i] = "False Positive"
-  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
-  {dat_csv1$MeanGxEconfintboot[i] = "False Negative"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_lwrCI[i] <= 0)
-  {dat_csv1$MeanGxEconfintboot[i] = "True Negative"
-  }else{dat_csv1$MeanGxEconfintboot[i] = "None"}
-}
-
-(mean_gxe_boot = ggplot(transform(dat_csv1, MeanGxEconfintboot = factor(MeanGxEconfintboot, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_errorbar(aes(x = reorder(row,true_GxE_means), ymin = GxE_means_lwrCI, ymax = GxE_means_uprCI),alpha = 0.5)+ 
-    geom_point(aes(x = reorder(row,true_GxE_means), y = GxE_means), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
-    geom_point(aes(x = reorder(row,true_GxE_means), y = true_GxE_means), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
-    ggtitle("Means: GxE - Bootstrap Check")+
-    theme_classic() + geom_hline(aes(yintercept = 0))+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())+ 
-    facet_wrap(~MeanGxEconfintboot,ncol = 2))
-  
-# MEANS GxE Perm check
-dat_csv1$meansGxEconfintperm = rep("NA", nrow(dat_csv1))
-
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$meansGxEconfintperm[i] = "True Positive"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] <= 0.05){dat_csv1$meansGxEconfintperm[i] = "False Positive"
-  }else if(dat_csv1$true_GxE_emm[i] != 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$meansGxEconfintperm[i] = "False Negative"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & dat_csv1$GxE_emm_pvalue[i] > 0.05){dat_csv1$meansGxEconfintperm[i] = "True Negative"
-  }else{dat_csv1$meansGxEconfintperm == "None"}
-}
-
-(means_gxe_perm = ggplot(transform(dat_csv1, meansGxEconfintperm = factor(meansGxEconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
-    geom_errorbar(aes(x = reorder(row,true_GxE_means), ymin = GxE_means_lwrCI, ymax = GxE_means_uprCI),alpha = 0.5)+ 
-    geom_point(aes(x = reorder(row,true_GxE_means), y = GxE_means), shape = 24,colour = "black", fill = "#7570B3",size = 1.2)+
-    geom_point(aes(x = reorder(row,true_GxE_means), y = true_GxE_means), shape = 21, colour = "black", fill = "#E6AB02",size = 1.2)+
-    ggtitle("Means: GxE - Permutation Check")+
-    theme_classic() + geom_hline(aes(yintercept = 0))+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())+ 
-    facet_wrap(~meansGxEconfintperm,ncol = 2))              
-
-# ANOVA vs. GxE_EMM comparison (to show that prop variance explained doesn't equal effect size of GxE)
-ggplot(dat_csv1, aes(x = true_GxE_emm, y = GxE_omega, group = factor(std_dev))) + 
-    geom_point(aes(shape = factor(n_pop), fill = factor(std_dev)))+
-    
-    geom_abline(slope = 1, intercept = 0,colour = "black")+theme_classic()+
-    
-    scale_fill_manual(values = c("0.5" = "#1B9E77", "1" = "#7570B3"),
-                      breaks = c("0.5", "1"))+
-  scale_shape_manual(values = c("2" = 21, "4" = 22,"8" = 23))+
-  geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3),se = F,colour = "black") + 
-    xlab("Actual GxE - Estimated Marginal Means")+ylab("GxE - Omega Squared")+
-    labs(fill = "Standard Deviation",shape = "Number of Populations")
-
-
-# Do confidence intervals for each overlap with their true values?  
-dat_csv1$probgxe = NULL
-dat_csv1$probcov = NULL
-
-for(i in 1:nrow(dat_csv1)){
-  if((dat_csv1$true_GxE_emm[i] < dat_csv1$GxE_emm_lwrCI[i]) | (dat_csv1$true_GxE_emm[i] >dat_csv1$GxE_emm_uprCI[i])){dat_csv1$probgxe[i] = TRUE
-  }else{dat_csv1$probgxe[i] = FALSE}
-  if((dat_csv1$true_cov[i] < dat_csv1$covariance_lwrCI[i]) | (dat_csv1$true_cov[i] >dat_csv1$covariance_uprCI[i])){dat_csv1$probcov[i] = TRUE
-  }else{dat_csv1$probcov[i] = FALSE}
-}
-
-GxEanoms = dat_csv1 %>%
-  filter(probgxe == TRUE)
-dim(GxEanoms)
-length(which(GxEanoms$GxE_emm_pvalue<=0.05)) 
-
-cov_anom = dat_csv1 %>%
-  filter(probcov ==TRUE)
-dim(cov_anom)
-length(which(cov_anom$covariance_pvalue<=0.05))
-
-(overlapper_cov = ggplot(cov_anom[cov_anom$replicate==1,],aes(x = row))+ theme_classic() + 
-  geom_errorbar(aes(ymin = covariance_lwrCI,ymax = covariance_uprCI),color = "black")+
-  geom_point(aes(y = true_cov),size = 2, color = "red",alpha = 0.5)+
-    geom_point(aes(y = covariance,colour = factor(std_dev)), size =2, shape = 4)+
-  xlab("Unique Parameter Set (row)") + ylab("Covariance"))
-
-(overlapper_GxE = ggplot(GxEanoms[GxEanoms$replicate==1,],aes(x = row))+ theme_classic() + 
-  geom_errorbar(aes(ymin = GxE_emm_lwrCI,ymax = GxE_emm_uprCI),color = "black")+
-  geom_point(aes(y = true_GxE_emm),size = 2, color = "red",alpha = 0.5)+
-  geom_point(aes(y = GxE_emm,colour = factor(std_dev)), size =2, shape = 4)+
-  xlab("Unique Parameter Set (row)") + ylab("GxE - Estimated Marginal Mean"))
-
-
-# Do means estimates match raw estimates? If yes, should fall along 1:1 line
-
-dat_csv1$meancoverror = abs(dat_csv1$cov_means_uprCI - dat_csv1$cov_means_lwrCI)
-dat_csv1$coverror = abs(dat_csv1$covariance_uprCI - dat_csv1$covariance_lwrCI)
-dat_csv1$meangxeerror = dat_csv1$GxE_means_uprCI - dat_csv1$GxE_means_lwrCI
-dat_csv1$gxeerror = dat_csv1$GxE_emm_uprCI - dat_csv1$GxE_emm_lwrCI
-
-# Covariance
-(covmeancheck = ggplot(dat_csv1,aes(x = covariance, y = cov_means))+
-    geom_point()+theme_classic()+ylab("Covariance from Means")+xlab("Covariance from Raw")+
-    geom_abline(slope = 1, intercept = 0,colour = "red"))
-
-(covcheck = ggplot(dat_csv1,aes(x = true_cov, y = covariance, colour = Covconfintboot))+ # Cov = 1 happens when delta_env = delta_gen, they are both positive, and there is no interaction
-    geom_point()+theme_classic()+
-    ylab("Covariance")+xlab("True Covariance")+scale_color_viridis(discrete = TRUE)+ # In the no error scenarios, this makes perfectly parallel lines that always have true_cov = 1
-    labs(colour = "Confusion Matrix based on CIs")+geom_abline(slope = 1, intercept = 0,colour = "red"))
-
-(coverrorcheck = ggplot(dat_csv1, aes(x = coverror,y = meancoverror)) + 
-    geom_point(alpha = 0.5) + theme_classic() + ylab("Length of 95% CI for CovGE means") + xlab("Length of 95% CI for CovGE raw")+
-    geom_abline(slope = 1, intercept = 0,colour = "red")+scale_colour_identity())
-
-suspect = dat_csv %>% filter(true_cov == 1) %>% filter(covariance_pvalue <0.05) # Check on those weirdos
-
-# GxE
-(gxemeancheck = ggplot(dat_csv1,aes(x = true_GxE_emm, y = true_GxE_means))+
-    geom_point()+theme_classic()+ylab("GxE from Means")+xlab("GxE from Raw")+
-    geom_abline(slope = 1, intercept = 0,colour = "red"))
-
-(gxecheck = ggplot(dat_csv1,aes(x = true_GxE_emm, y = GxE_emm, colour = factor(GxEconfintperm)))+
-    geom_point()+#(aes(colour = col))+#geom_smooth(aes(group = n_pop,colour = "black",linetype = factor(n_pop)),se = FALSE,method = "glm")+
-    theme_classic()+ylab("GxE with error")+xlab("True GxE") +scale_color_viridis(discrete = TRUE)+
-    labs(colour = "Confusion Matrix based on p-value")+
-    geom_abline(slope = 1, intercept = 0,colour = "red"))#+facet_wrap(~n_pop)
-
-(gxeerrorcheck = ggplot(dat_csv1, aes(x = gxeerror,y = meangxeerror)) + 
-    geom_point(alpha = 0.3) + theme_classic() + ylab("Length of 95% CI for GxE means") + xlab("Length of 95% CI for GxE raw")+
-    geom_abline(slope = 1, intercept = 0,colour = "red")+scale_colour_identity())
-
-
-# Do GxE pvalues from permutation match pvalues from anova? 
-dat_csv1$sanityColor = NULL
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] == 0){dat_csv1$sanityColor[i] = "#FFBB55"}else{dat_csv1$sanityColor[i] ="#660099"}
-}
-
-
-(ggplot(dat_csv1,aes(x = GxE_Anova, y = GxE_emm_pvalue,shape = factor(n_pop), colour = sanityColor))+ #raw data 
-    geom_jitter()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
-    scale_colour_identity()+labs(shape = "Number of Populations")+
-    geom_vline(xintercept = 0.05,colour = "red")+
-    geom_hline(yintercept = 0.05,colour = "red")+labs(shape = "N_pop"))
-
-(ggplot(dat_csv1,aes(x = GxE_Anova, y = GxE_means_pvalue,colour = GxE_means,shape = factor(n_pop)))+ # means data
-    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
-    geom_vline(xintercept = 0.05,colour = "red")+
-    geom_hline(yintercept = 0.05,colour = "red"))
-
-# For those that don't match, is there any pattern ?
-
-suspect.pvals = dat_csv %>% # raw 
-  filter(GxE_emm_pvalue >= 0.05) %>%
-  filter(GxE_Anova <= 0.05)
-
-(ggplot(suspect.pvals,aes(x = GxE_Anova, y = GxE_emm_pvalue,colour = GxE_emm))+
-    geom_point()+theme_classic()+ylab("GxE EMM Pvalue")+xlab("GxE Anova Pvalue")+
-    geom_hline(yintercept = 0.05,colour = "red"))
-
-suspect.pvals.mean = dat_csv %>% # mean
-  filter(GxE_means_pvalue >= 0.05) %>%
-  filter(GxE_Anova <= 0.05)
-
-(ggplot(suspect.pvals.mean, aes(x = GxE_means, y = GxE_emm_pvalue)) + 
-  geom_point()+theme_classic())
-
-# Make Tables of Confusion Matrix
-(cov_confint = dat_csv1 %>%
-  group_by(Covconfintperm) %>%
-  summarize(frequency = n()))
-
-(cov_boot = dat_csv1 %>%
-  group_by(Covconfintboot) %>%
-  summarize(frequency = n()))
-
-(gxe_confint = dat_csv1 %>%
-  group_by(GxEconfintperm) %>%
-  summarize(frequency = n()))
-
-(GxE_boot = dat_csv1 %>%
-  group_by(GxEconfintboot) %>%
-  summarize(frequency = n()))
-
-#### For Heuristic Plots in paper
-
-shape1 = c("G_1" = 24, "G_2" = 21)
-ColorFill = c("G_1" = "#002266", "G_2" = "#CC6600")
-
-#model_df$phen_corrected = rep(c(-1,1,-.95,1.05),each = 5) For Vg, Ve, Vgxe
-# Otherwise use simulated data from Cov_GxE_clusterFun.R
-ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, shape = gen_factor, fill = gen_factor, colour = gen_factor)) + 
-  geom_point(size = 5) + geom_line(size=1,lty = "dashed") + 
-  scale_shape_manual(values = shape1,
-                     labels = c("G_1" = "Genotype 1", "G_2" = "Genotype 2"))+
-  scale_fill_manual(values = ColorFill,
-                    labels = c("G_1" = "Genotype 1", "G_2" = "Genotype 2"))+
-  scale_colour_manual(values = ColorFill,
-                      labels = c("G_1" = "Genotype 1", "G_2" = "Genotype 2"))+
-  ylab("Phenotype") + xlab(" ")+
-  theme_classic(base_size = 24, base_family = "Times")+ 
-  theme(axis.line = element_line(colour = "black"))+
-  theme(axis.text.y = element_blank(),
-        #axis.text.x = element_blank(),
-        axis.ticks.y = element_blank())+
-  scale_x_discrete(labels=c("E_1" = "Environment 1","E_2" = "Environment 2"))+
-  #theme(axis.title.x = element_text(face = "bold", size=26))+
-  #theme(axis.title.y = element_text(face = "bold", size=26))+
-  theme(axis.text= element_text(colour = "black"))+
-  labs(colour = "Genotype",fill = "Genotype",shape = "Genotype")+
-  theme(legend.position="none")
