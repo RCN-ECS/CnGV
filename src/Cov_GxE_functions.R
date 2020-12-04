@@ -133,7 +133,7 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   return(list(model_df,mean_df,df.ne,mean_df_ne,varpar.df))
 }
 
-df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2, seed3, errpop){
+df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2, seed3){
   
   # Dataframe foundations
   n_environments <- n_env 
@@ -152,12 +152,7 @@ df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n
   model_df <- data.frame(gen, env, int)
   
   # True mean phenotype data using regression equation
-  model_df$GE_true_temp = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
-  
-  set.seed = seed3
-  model_df$e_pop <- rep(rnorm(n_pop, 0, sd = errpop), each = n_env*sample_size)
-  
-  model_df$GE_true <- model_df$GE_true_temp + model_df$e_pop
+  model_df$GE_true = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
   
   # Now add in actual genotypes
   model_df$gen <- rep(1:n_pop, each = sample_size*n_env)

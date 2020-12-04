@@ -58,9 +58,6 @@ parameter_generation <- function(param_list){
       param_table1 = rbind(param_table1, inter_df)
     }
     
-    # Clustering term
-    param_table1$errpop = 0 
-    
     # Add Replicate
     param_table1$replicate = rep(z, nrow(param_table1))
     
@@ -75,7 +72,6 @@ parameter_generation <- function(param_list){
                            "delta_env" = runif(n = 100, min = 0, max = 1),
                            "delta_gen" = rep(0, 100),
                            "interaction" = rep(0, 100),
-                           "errpop" = rep(0,100), 
                            "replicate" = rep(z, 100),
                            "env_scenario" = rep(1, 100))
     fpr1_gxe$n_env = fpr1_gxe$n_pop
@@ -86,7 +82,6 @@ parameter_generation <- function(param_list){
                            "delta_env" = rep(0, 100),
                            "delta_gen" = runif(n = 100, min = -1, max = 1),
                            "interaction" = rep(0, 100),
-                           "errpop" = rep(0, 100), 
                            "replicate" = rep(z, 100),
                            "env_scenario" = rep(1, 100))
     fpr1_cov$n_env = fpr1_cov$n_pop
@@ -111,27 +106,28 @@ parameter_generation <- function(param_list){
     cat(x,"2nd","\n")
     
     param_table3 = data.frame()
+    
     for(i in 1:nrow(params2)){
       
       # Slopes
-      delta_env = runif(n = 50, min = 0, max = 1)
+      delta_env1 = rnorm(2,mean = 0.2, sd = 0.125)
+      delta_env2 = rnorm(2,mean = 0.4, sd = 0.125)
+      delta_env3 = rnorm(2,mean = 0.6, sd = 0.125)
+      delta_env4 = rnorm(2,mean = 0.8, sd = 0.125)
+      delta_env5 = c(delta_env1, delta_env2, delta_env3, delta_env4)
       
       # Intercepts
-      delta_gen = runif(n = 50, min = -1, max = 1) 
+      delta_gen1 = rnorm(2,mean = -0.5, sd = 0.5)
+      delta_gen2 = rnorm(2,mean = 0, sd = 0.5)
+      delta_gen3 = rnorm(2,mean = 0.5, sd = 0.5)
+      delta_gen5 = c(delta_gen1, delta_gen2, delta_gen3)
+
+      # Interaction term
+      int = c(0.5, params2$n_pop[i])
       
-      # Clustering term
-      errpop = abs(rnorm(n = 50,  mean = 0, sd = abs(delta_gen))) # Set to three values (sd = 0, val1, val2) (do those get me near values I expect)
-      
-      if(params2$n_pop[i] == 2){
-        low_int = runif(50, min = 0, max = 2)
-        interaction = low_int
-      }else{
-        low_int = runif(n = 35, min = 0, max = 1.99)
-        high_int = runif(n = 15, min = 2, max = params2$n_pop[i])
-        pot = c(low_int, high_int)
-        interaction = sample(pot, size = 50, replace = FALSE)
-      }
-      inter_df1 = data.frame("delta_env" = delta_env, "delta_gen" = delta_gen, "interaction" = interaction, "errpop" = errpop)
+      dat = expand.grid(delta_env5, delta_gen5,int)
+   
+      inter_df1 = data.frame("delta_env" = dat[,1], "delta_gen" = dat[,2], "interaction" = dat[,3])
       inter_df2 = merge(params2[i,],inter_df1)
       
       param_table3 = rbind(param_table3, inter_df2)
@@ -149,34 +145,22 @@ parameter_generation <- function(param_list){
                            "std_dev" = rep(c(0.5,1.0), each = 50),
                            "n_env" = rep(2, times = 100), 
                            "delta_env" = runif(n = 100, min = 0, max = 1),
-                           "delta_gen" = rep(0, 100),
-                           "interaction" = rep(0, 100),
-                           "errpop" = rep(0,100), 
+                           "delta_gen" = rep(0, 100) , # 100 at ZERO
+                           "interaction" = rep(0, 100), # 100 at ZERO
                            "replicate" = rep(x, 100),
                            "env_scenario" = rep(2, 100))
     fpr2_cov <- data.frame("n_pop" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE),
                            "sample_size" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE), #remove the 2, each = 34
                            "std_dev" = rep(c(0.5,1.0), each = 50),
                            "n_env" = rep(2, times = 100), 
-                           "delta_env" = rep(0, 100),
+                           "delta_env" = rep(0, 100), # 100 at ZERO
                            "delta_gen" = runif(n = 100, min = -1, max = 1),
                            "interaction" = rep(0, 100),
-                           "errpop" = rep(0,100), 
-                           "replicate" = rep(x, 100),
-                           "env_scenario" = rep(2, 100))
-    fpr2_cluster <- data.frame("n_pop" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE),
-                           "sample_size" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE), #remove the 2, each = 34
-                           "std_dev" = rep(c(0.5,1.0), each = 50),
-                           "n_env" = rep(2, times = 100), 
-                           "delta_env" = runif(n = 100, min = -1, max = 1),
-                           "delta_gen" = runif(n = 100, min = -1, max = 1),
-                           "interaction" = rep(0, 100),
-                           "errpop" = rep(0,100), 
                            "replicate" = rep(x, 100),
                            "env_scenario" = rep(2, 100))
                        
     # Bind it all up! 
-    param_table4 = rbind(param_table4, param_table3,fpr2_gxe,fpr2_cov,fpr2_cluster)
+    param_table4 = rbind(param_table4, param_table3,fpr2_gxe,fpr2_cov)
   }
   
   # All Replicates together
@@ -197,14 +181,14 @@ parameter_generation <- function(param_list){
 
 df = parameter_generation(param_list)
 dim(df)
-df1 = filter(df, total_samples <500) #< 513) Expands from 21k to 24k.
+df1 = filter(df, total_samples <500) 
 dim(df1)
-df2 = filter(df1, replicate == 1)
-#write.csv(df2,"~/Desktop/dftest.csv")
+df=read.csv("~/Desktop/df.csv")
+dim(df)
 
 # Pull out test scenarios
 
-df1 %>% filter(env_scenario == 1) %>% filter(n_pop == 8) %>% filter(std_dev ==1) %>% filter(errpop == 0)
+df1 %>% filter(env_scenario == 2) #%>% filter(n_pop == 8) %>% filter(std_dev ==1) %>% filter(errpop == 0)
 args = df1[940,]
 
 df_sim = read.csv("~/Desktop/df.csv")

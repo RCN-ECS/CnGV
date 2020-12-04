@@ -27,27 +27,17 @@ n_env = as.numeric(args[5])
 delta_env = as.numeric(args[6])
 delta_gen = as.numeric(args[7])
 interaction = as.numeric(args[8])
-errpop = as.numeric(args[9])
-replicate = as.numeric(args[10])
-env_scenario = as.numeric(args[11])
-seed = as.numeric(args[12])
+replicate = as.numeric(args[9])
+env_scenario = as.numeric(args[10])
+seed = as.numeric(args[11])
 
 # Bootstraps
 n_boot <- 999
 
 # Clear Dataframes
-Variance.partition <- data.frame()
-var_perm <- data.frame()
-PL_df <- data.frame()
-phen_out <- data.frame()
-Cov_Matrix_Output <- data.frame()
-output_data <- data.frame()
-output <- data.frame()
-GEmeans_out <- data.frame()
-model_out <- data.frame()
-boot_df_raw <- data.frame()
-boot_df_means <- data.frame()
-perm_df_raw <- data.frame()
+Variance.partition <- var_perm <- PL_df <- phen_out <- 
+Cov_Matrix_Output <- output_data <- output <- GEmeans_out <- 
+model_out <- boot_df_raw <- boot_df_means <- perm_df_raw <-
 perm_df_means <- data.frame()
 
 # Establish seeds
@@ -67,7 +57,7 @@ seed.set6 = sim_seeds[c((9+5*n_boot):(9+6*n_boot))] # Permutation raw
 if(env_scenario == 1){
   dfs <- df.foundations(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2)
 }else{
-  dfs <- df.foundations2(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2, seed3, errpop)
+  dfs <- df.foundations2(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2, seed3)
 }
 
 # Working dataframes
@@ -90,7 +80,7 @@ phen_out. <- data.frame("row" = rep(unique(row),nrow(model_df)),
 phen_out <- cbind(phen_out.,model_df)
 
 # Check: Raw Phenotype (All 4 plots should look similar)
- ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
+# ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_smooth(se = F) + theme_classic()
 
 # Check: Mean Phenotype 
 # ggplot(mean_df, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, fill = nat_env_factor,colour = nat_env_factor)) + geom_point() + geom_line() + theme_classic()
@@ -473,7 +463,8 @@ aov.df1.ne <- m7[[8]] # Model output
 # Covariance
 cov_est.ne = cov(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
 cor_est.ne = cor(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
-cov_corrected.ne = round(cov.function(cov_matrix.ne,is.sample = FALSE),3)
+cov_corrected.ne.pop = round(cov.function(cov_matrix.ne,is.sample = FALSE),3)
+cov_corrected.ne = round(cov.function(cov_matrix.ne,is.sample = TRUE),3)
 
 # Check: GxE Loop output
 # hist(GxE_loop_output.ne)
@@ -505,7 +496,7 @@ GxE_means_loop_output.ne <- m8[[3]]
 # Covariance
 cov_est_means.ne = cov(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
 cor_est_means.ne = cor(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
-cov_means_corrected.ne = round(cov.function(Cov_mean_matrix.ne,is.sample = FALSE),3)
+cov_means_corrected.ne = round(cov.function(Cov_mean_matrix.ne,is.sample = TRUE),3)
 
 # Tracking: Covariance Matrix Output
 Cov_mean_matrix.ne$data.type <- rep("mean.ne" , nrow(Cov_mean_matrix.ne))
@@ -556,10 +547,11 @@ output_data <- data.frame("row" = row, # Original Parameters
                           "n_env" = n_env,
                           "n_pop" = n_pop,
                           "std_dev" = std_dev,
-                          #"interaction" = interaction,
+                          "interaction" = interaction,
                           "Sim_time" = time.taken,
                           
-                          "true_cov" = cov_corrected.ne, # Corrected Covariance Estimates
+                          "pop_cov" = cov_corrected.ne.pop, # Corrected Covariance Estimates
+                          "true_cov" = cov_corrected.ne,
                           "cov_R" = cov_corrected_check,
                           "covariance" = cov_corrected, 
                           "covariance_lwrCI" = cov_corrected_CI[[1]],
