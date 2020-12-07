@@ -237,7 +237,7 @@ gxepow2hi = filter(gxepow2,std_dev == max(gxepow2$std_dev))
      #                               midpoint=mean(rng.cov1),    #same midpoint for S (mean of the range)
                                     breaks=seq(0,1,0.25), #breaks in the scale bar
                                     limits=c(0,1))+
-  xlab("Sample Size") + ylab("Total Number of Populations")+
+  xlab("Sample Size") + ylab("Number of Genotypes")+
   labs(fill = "Power")+
   theme(axis.text = element_text(colour = "black"))+  
   theme(legend.position = "none")+
@@ -250,7 +250,7 @@ gxepow2hi = filter(gxepow2,std_dev == max(gxepow2$std_dev))
     theme_classic(base_size = 24, base_family = "Times")+ 
     scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
                        limits=c(0,1))+
-    xlab("Sample Size") + ylab("Total Number of Populations")+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
@@ -263,7 +263,7 @@ gxepow2hi = filter(gxepow2,std_dev == max(gxepow2$std_dev))
     theme_classic(base_size = 24, base_family = "Times")+ 
     scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
                        limits=c(0,1))+
-    xlab("Sample Size") + ylab("Total Number of Populations")+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
@@ -279,7 +279,7 @@ gxepow2hi = filter(gxepow2,std_dev == max(gxepow2$std_dev))
                         #midpoint=mean(rng.gxe2),    #same midpoint for plots (mean of the range)
                          breaks=seq(0,1,0.25), #breaks in the scale bar
                          limits=c(0,1))+
-    xlab("Sample Size") + ylab("Total Number of Populations")+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
@@ -297,7 +297,7 @@ grid.arrange(gxepower_high1,gxepower_high2,covpower_high1,covpower_high2,ncol = 
     theme_classic(base_size = 24, base_family = "Times")+ 
     scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
                        limits=c(0,1))+
-    xlab("Sample Size") + ylab("TotalNumber of Populations")+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+  
     theme(legend.position = "none")+
@@ -310,7 +310,7 @@ grid.arrange(gxepower_high1,gxepower_high2,covpower_high1,covpower_high2,ncol = 
     theme_classic(base_size = 24, base_family = "Times")+ 
     scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
                        limits=c(0,1))+
-    xlab("Sample Size") + ylab("Total Number of Populations")+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
@@ -323,7 +323,7 @@ grid.arrange(gxepower_high1,gxepower_high2,covpower_high1,covpower_high2,ncol = 
     theme_classic(base_size = 24, base_family = "Times")+ 
     scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
                        limits=c(0,1))+
-    xlab("Sample Size") + ylab("Total Number of Populations")+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
@@ -336,7 +336,7 @@ grid.arrange(gxepower_high1,gxepower_high2,covpower_high1,covpower_high2,ncol = 
     theme_classic(base_size = 24, base_family = "Times")+ 
     scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
                        limits=c(0,1))+
-    xlab("Sample Size") + ylab("Total Number of Populations")+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
@@ -494,8 +494,6 @@ raw_conf5$ID = rep("GxE_Anova", nrow(raw_conf5))
 fpdf = rbind(raw_conf1,raw_conf2,raw_conf3,raw_conf4,raw_conf5)
 fpdf = fpdf[fpdf$name == "False Positive",]
 
-############ Confusion Plots  -- Env Scenario 1 ###############
-
 ## False Positive Rates
 fpdf$npop_plot = NA
 for(i in 1:nrow(fpdf)){
@@ -504,7 +502,12 @@ for(i in 1:nrow(fpdf)){
   }else{fpdf$npop_plot[i] = "8 Populations"}
 }
 
-(falsePos = ggplot(filter(fpdf, ID %in% c("Cov_Perm","GxE_Perm","GxE_Anova")), aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+############ Confusion Plots  -- Env Scenario 1 ###############
+
+## False Positive Rates 
+
+#(falsePos = ggplot(filter(fpdf, ID %in% c("Cov_Perm","GxE_Perm","GxE_Anova")), aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+(falsePos = ggplot(fpdf, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
   geom_bar(position = "dodge", stat = "identity") + 
   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
   ylab("False Positive Rate") + xlab("")+
@@ -640,100 +643,156 @@ for(i in 1:nrow(fpdf)){
 ###################################
 
 # MEANS -- CovGE -- Permutation
-dat_csv$meansCovconfintperm = rep("NA",nrow(dat_csv))
-for(i in 1:nrow(dat_csv)){
-  if(dat_csv$true_cov_means[i] != 0 && dat_csv$cov_means_pvalue[i] <= 0.025){dat_csv$meansCovconfintperm[i] = "True Positive"
-  }else if(dat_csv$true_cov_means[i] == 0 & dat_csv$cov_means_pvalue[i] <= 0.025){dat_csv$meansCovconfintperm[i] = "False Positive"
-  }else if(dat_csv$true_cov_means[i]!= 0 & dat_csv$cov_means_pvalue[i] > 0.025){dat_csv$meansCovconfintperm[i] = "False Negative"
-  }else if(dat_csv$true_cov_means[i] == 0 & dat_csv$cov_means_pvalue[i] > 0.025){dat_csv$meansCovconfintperm[i] = "True Negative"
-  }else{dat_csv$meansCovconfintperm[i] = "None"}
+dat_csv1$meansCovconfintperm = rep("NA",nrow(dat_csv1))
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_cov_means[i] != 0 && dat_csv1$cov_means_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "True Positive"
+  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$cov_means_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "False Positive"
+  }else if(dat_csv1$true_cov_means[i]!= 0 & dat_csv1$cov_means_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "False Negative"
+  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$cov_means_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "True Negative"
+  }else{dat_csv1$meansCovconfintperm[i] = "None"}
 }
 
 # MEANS CovGE -- Bootstrap
-dat_csv$MeansCovconfintboot = rep(NA, nrow(dat_csv))
+dat_csv1$MeansCovconfintboot = rep(NA, nrow(dat_csv1))
 
-for(i in 1:nrow(dat_csv)){
+for(i in 1:nrow(dat_csv1)){
   
-  if(dat_csv$true_cov_means[i] != 0 &&
-     dat_csv$cov_means_lwrCI[i] < 0 &&
-     dat_csv$cov_means_uprCI[i] < 0
-  ){dat_csv$MeansCovconfintboot[i] = "True Positive"
-  }else if(dat_csv$true_cov_means[i] != 0 &&
-           dat_csv$cov_means_lwrCI[i] > 0 &&
-           dat_csv$cov_means_uprCI[i] > 0
-  ){dat_csv$MeansCovconfintboot[i] = "True Positive"
-  }else if(dat_csv$true_cov_means[i] == 0 &&
-           dat_csv$cov_means_lwrCI[i] < 0 &&
-           dat_csv$cov_means_uprCI[i] < 0
-  ){dat_csv$MeansCovconfintboot[i] = "False Positive"
-  }else if(dat_csv$true_cov_means[i] == 0 &&
-           dat_csv$cov_means_lwrCI[i] > 0 &&
-           dat_csv$cov_means_uprCI[i] > 0
-  ){dat_csv$MeansCovconfintboot[i] = "False Positive"
-  }else if(dat_csv$true_cov_means[i] != 0 && 
-           dat_csv$cov_means_lwrCI[i] <= 0 && 
-           dat_csv$cov_means_uprCI[i] >= 0
-  ){dat_csv$MeansCovconfintboot[i] = "False Negative"
-  }else if(dat_csv$true_cov_means[i]== 0 && 
-           dat_csv$cov_means_lwrCI[i] <= 0 && 
-           dat_csv$cov_means_uprCI[i] >= 0
-  ){dat_csv$MeansCovconfintboot[i] = "True Negative"
-  }else{dat_csv$MeansCovconfintboot[i] = "None"}
+  if(dat_csv1$true_cov_means[i] != 0 &&
+     dat_csv1$cov_means_lwrCI[i] < 0 &&
+     dat_csv1$cov_means_uprCI[i] < 0
+  ){dat_csv1$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_cov_means[i] != 0 &&
+           dat_csv1$cov_means_lwrCI[i] > 0 &&
+           dat_csv1$cov_means_uprCI[i] > 0
+  ){dat_csv1$MeansCovconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_cov_means[i] == 0 &&
+           dat_csv1$cov_means_lwrCI[i] < 0 &&
+           dat_csv1$cov_means_uprCI[i] < 0
+  ){dat_csv1$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_cov_means[i] == 0 &&
+           dat_csv1$cov_means_lwrCI[i] > 0 &&
+           dat_csv1$cov_means_uprCI[i] > 0
+  ){dat_csv1$MeansCovconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_cov_means[i] != 0 && 
+           dat_csv1$cov_means_lwrCI[i] <= 0 && 
+           dat_csv1$cov_means_uprCI[i] >= 0
+  ){dat_csv1$MeansCovconfintboot[i] = "False Negative"
+  }else if(dat_csv1$true_cov_means[i]== 0 && 
+           dat_csv1$cov_means_lwrCI[i] <= 0 && 
+           dat_csv1$cov_means_uprCI[i] >= 0
+  ){dat_csv1$MeansCovconfintboot[i] = "True Negative"
+  }else{dat_csv1$MeansCovconfintboot[i] = "None"}
 }
 
 # MEANS GxE -- Bootstrap
 
-dat_csv$MeanGxEconfintboot = rep("NA", nrow(dat_csv))
-for(i in 1:nrow(dat_csv)){
-  if(dat_csv$true_GxE_means[i] != 0 & round(dat_csv$GxE_means_lwrCI[i],2) > 0)
-  {dat_csv$MeanGxEconfintboot[i] = "True Positive"
-  }else if(dat_csv$true_GxE_means[i] == 0 & round(dat_csv$GxE_means_lwrCI[i],2) > 0)
-  {dat_csv$MeanGxEconfintboot[i] = "False Positive"
-  }else if(dat_csv$true_GxE_means[i] != 0 & round(dat_csv$GxE_means_lwrCI[i],2) <= 0)
-  {dat_csv$MeanGxEconfintboot[i] = "False Negative"
-  }else if(dat_csv$true_GxE_means[i] == 0 & round(dat_csv$GxE_means_lwrCI[i],2) <= 0)
-  {dat_csv$MeanGxEconfintboot[i] = "True Negative"
-  }else{dat_csv$MeanGxEconfintboot[i] = "None"}
+dat_csv1$MeanGxEconfintboot = rep("NA", nrow(dat_csv1))
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_means[i] != 0 & round(dat_csv1$GxE_means_lwrCI[i],2) > 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_means[i] == 0 & round(dat_csv1$GxE_means_lwrCI[i],2) > 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_means[i] != 0 & round(dat_csv1$GxE_means_lwrCI[i],2) <= 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_means[i] == 0 & round(dat_csv1$GxE_means_lwrCI[i],2) <= 0)
+  {dat_csv1$MeanGxEconfintboot[i] = "True Negative"
+  }else{dat_csv1$MeanGxEconfintboot[i] = "None"}
 }
 
 # MEANS GxE -- Permutation
-dat_csv$meansGxEconfintperm = rep("NA", nrow(dat_csv))
+dat_csv1$meansGxEconfintperm = rep("NA", nrow(dat_csv1))
 
-for(i in 1:nrow(dat_csv)){
-  if(dat_csv$true_GxE_means[i] != 0 & dat_csv$GxE_means_pvalue[i] <= 0.05){dat_csv$meansGxEconfintperm[i] = "True Positive"
-  }else if(dat_csv$true_GxE_means[i] == 0 & dat_csv$GxE_means_pvalue[i] <= 0.05){dat_csv$meansGxEconfintperm[i] = "False Positive"
-  }else if(dat_csv$true_GxE_means[i] != 0 & dat_csv$GxE_means_pvalue[i] > 0.05){dat_csv$meansGxEconfintperm[i] = "False Negative"
-  }else if(dat_csv$true_GxE_means[i] == 0 & dat_csv$GxE_means_pvalue[i] > 0.05){dat_csv$meansGxEconfintperm[i] = "True Negative"
-  }else{dat_csv$meansGxEconfintperm == "None"}
+for(i in 1:nrow(dat_csv1)){
+  if(dat_csv1$true_GxE_means[i] != 0 & dat_csv1$GxE_means_pvalue[i] <= 0.05){dat_csv1$meansGxEconfintperm[i] = "True Positive"
+  }else if(dat_csv1$true_GxE_means[i] == 0 & dat_csv1$GxE_means_pvalue[i] <= 0.05){dat_csv1$meansGxEconfintperm[i] = "False Positive"
+  }else if(dat_csv1$true_GxE_means[i] != 0 & dat_csv1$GxE_means_pvalue[i] > 0.05){dat_csv1$meansGxEconfintperm[i] = "False Negative"
+  }else if(dat_csv1$true_GxE_means[i] == 0 & dat_csv1$GxE_means_pvalue[i] > 0.05){dat_csv1$meansGxEconfintperm[i] = "True Negative"
+  }else{dat_csv1$meansGxEconfintperm == "None"}
 }
 
-# Counts for table
-cov_perm_table_mean = dat_csv %>%
+## Counts for table
+
+means_cov_perm_table = dat_csv1 %>%
   group_by("name" = meansCovconfintperm) %>%
-  count()
-cov_perm_table_mean$percent = (cov_perm_table_mean$n/(sum(cov_perm_table_mean$n))*100)
-cov_perm_table_mean
+  summarize("n" = n())
+fpr.fnr(means_cov_perm_table, divided = FALSE, scenario = 1)
 
-cov_boot_table_mean = dat_csv %>%
-    group_by("name" = MeansCovconfintboot) %>%
-    count()
-cov_boot_table_mean$percent = (cov_boot_table_mean$n/(sum(cov_boot_table_mean$n))*100)
-cov_boot_table_mean
+means_cov_boot_table = dat_csv1 %>%
+  group_by("name" =MeansCovconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(means_cov_boot_table, divided = FALSE, scenario = 1)
 
-gxe_boot_table_mean = dat_csv %>%
-    group_by("name" = MeanGxEconfintboot) %>%
-    count()
-gxe_boot_table_mean$percent = (gxe_boot_table_mean$n/(sum(gxe_boot_table_mean$n))*100)
-gxe_boot_table_mean
+means_gxe_boot_table = dat_csv1 %>%
+  group_by("name" =MeanGxEconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(means_gxe_boot_table, divided = FALSE, scenario = 1)
 
-gxe_perm_table_mean = dat_csv %>%
-    group_by("name" = meansGxEconfintperm) %>%
-    count()
-gxe_perm_table_mean$percent = (gxe_perm_table_mean$n/(sum(gxe_perm_table_mean$n))*100)
-gxe_perm_table_mean
+means_gxe_perm_table = dat_csv1 %>%
+  group_by("name" =meansGxEconfintperm) %>%
+  summarize("n" = n())
+fpr.fnr(means_gxe_perm_table, divided = FALSE, scenario = 1)
 
+## Counts for heatmaps
+(means_confusion_hmap1 = dat_csv1 %>%
+    group_by(sample_size, n_pop, "name" =meansCovconfintperm) %>%
+    summarize("n" = n()))
+means_conf1 = fpr.fnr(means_confusion_hmap1, divided = TRUE, scenario = 1)
+means_conf_plot1 <- heatmap_fun(means_conf1,"rate") # Can also do "percent"
+
+(means_confusion_hmap2 = dat_csv1 %>%
+    group_by(sample_size, n_pop, "name" =MeansCovconfintboot) %>%
+    summarize("n" = n()))
+means_conf2 = fpr.fnr(means_confusion_hmap2, divided = TRUE, scenario = 1)
+means_conf_plot2 <- heatmap_fun(means_conf2,"rate")
+
+(means_confusion_hmap3 = dat_csv1 %>%
+    group_by(sample_size, n_pop,"name" = MeanGxEconfintboot) %>%
+    summarize("n" = n()))
+means_conf3 = fpr.fnr(means_confusion_hmap3, divided = TRUE, scenario = 1)
+means_conf_plot3 <- heatmap_fun(means_conf3,"rate")
+
+means_confusion_hmap4 = dat_csv1 %>%
+  group_by(sample_size, n_pop,"name" = meansGxEconfintperm) %>%
+  summarize("n" = n())
+means_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
+means_conf_plot4 <- heatmap_fun(means_conf4,"rate")
+
+# Compile FPs for plot
+means_conf1$ID = rep("Cov_Perm", nrow(means_conf1))
+means_conf2$ID = rep("Cov_Boot", nrow(means_conf2))
+means_conf3$ID = rep("GxE_Boot", nrow(means_conf3))
+means_conf4$ID = rep("GxE_Perm", nrow(means_conf4))
+fpdf_means = rbind(means_conf1,means_conf2,means_conf3,means_conf4)
+fpdf_means = fpdf_means[fpdf_means$name == "False Positive",]
+
+## False Positive Rates
+fpdf_means$npop_plot = NA
+for(i in 1:nrow(fpdf_means)){
+  if(fpdf_means$n_pop[i] == 2){fpdf_means$npop_plot[i] = "2 Populations"
+  }else if(fpdf_means$n_pop[i] == 4){fpdf_means$npop_plot[i] = "4 Populations"
+  }else{fpdf_means$npop_plot[i] = "8 Populations"}
+}
 
 ############ Confusion Plots  -- Means -- Env Scenario 1 ###############
+
+## False Positive Rates 
+
+#(falsePos = ggplot(filter(fpdf, ID %in% c("Cov_Perm","GxE_Perm","GxE_Anova")), aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+(means_falsePos = ggplot(fpdf_means, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+   geom_bar(position = "dodge", stat = "identity") + 
+   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+   ylab("False Positive Rate") + xlab("")+
+   facet_wrap(~npop_plot) + 
+   labs(fill = "Sample Size")+
+   #ylim(0,0.3)+
+   scale_fill_viridis(discrete = TRUE)+
+   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
+                             "Cov_Boot" = "Boot. \n CovGE",
+                             "GxE_Boot" = "Boot. \n GxE",
+                             "GxE_Perm" = "Perm. \n GxE"))+
+   theme_classic2(base_family = "Times",base_size = 16) + 
+   theme(axis.text = element_text(colour = "black")))
+
 
 ## MEANS - CovGE -- Permutation
 (cov_perm_means = ggplot(transform(dat_csv, meansCovconfintperm = factor(meansCovconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
@@ -854,6 +913,7 @@ gxe_perm_table_mean
 ########################################################
 ##          Confusion Matrices  -- Env Scenario 2     ##
 ########################################################
+
 dat_dub1.0 = filter(dat_dub, std_dev == 1)
 dat_dub = dat_dub1.0
 
@@ -937,67 +997,101 @@ for(i in 1:nrow(dat_dub)){
   }else{dat_dub$GxEconfintboot[i] = "None"}
 }
 
-# Counts for table
-(cov_perm_table2 = dat_dub %>%
-    group_by("name" = Covconfintperm) %>%
-    summarize("n" = n()))
-fpr.fnr(cov_perm_table2, divided = FALSE, scenario = 2)
+## Counts for table
 
-(cov_boot_table_dub = dat_dub %>%
-    group_by("name" =Covconfintboot) %>%
-    summarize("n" = n()))
-fpr.fnr(cov_boot_table_dub, divided = FALSE, scenario = 2)
+cov_perm_table = dat_dub %>%
+  group_by("name" = Covconfintperm) %>%
+  summarize("n" = n())
+fpr.fnr(cov_perm_table, divided = FALSE, scenario = 1)
 
-(gxe_anova_table_dub = dat_dub %>%
-    group_by("name" =GxEanova_check) %>%
-    summarize("n" = n()))
-fpr.fnr(gxe_anova_table_dub, divided = FALSE, scenario = 2)
+cov_boot_table = dat_dub %>%
+  group_by("name" =Covconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(cov_boot_table, divided = FALSE, scenario = 1)
 
-(gxe_perm_table_dub = dat_dub %>%
-    group_by("name" =GxEconfintperm) %>%
-    summarize("n" = n()))
-fpr.fnr(gxe_perm_table_dub, divided = FALSE, scenario = 2)
+gxe_anova_table = dat_dub %>%
+  group_by("name" =GxEanova_conf) %>%
+  summarize("n" = n())
+fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 1)
 
-(gxe_boot_table_dub = dat_dub %>%
-    group_by("name" = GxEconfintboot) %>%
-    summarize("n" = n()))
-fpr.fnr(gxe_boot_table_dub, divided = FALSE, scenario = 2)
+gxe_perm_table = dat_dub %>%
+  group_by("name" =GxEconfintperm) %>%
+  summarize("n" = n())
+fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 1)
 
-## Counts for heatmaps - Paired common garden ##
-(raw_confusion_hmap2a = dat_dub %>%
-    group_by(sample_size, n_pop, "name" = Covconfintperm) %>%
-    summarize("n" = n()))
-raw_conf2a <- fpr.fnr(raw_confusion_hmap2a,divided = TRUE, scenario = 2)
-raw_conf_plot2a <- heatmap_fun(raw_conf2a,"rate")
+gxe_boot_table = dat_dub %>%
+  group_by("name" =GxEconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 1)
 
-(raw_confusion_hmap2b = dat_dub %>%
+## Counts for heatmaps
+(raw_confusion_hmap1 = dat_dub %>%
+    group_by(sample_size, n_pop, "name" =Covconfintperm) %>%
+    summarize("n" = n()))
+dub_raw_conf1 = fpr.fnr(raw_confusion_hmap1, divided = TRUE, scenario = 1)
+raw_conf_plot1 <- heatmap_fun(dub_raw_conf1,"rate") # Can also do "percent"
+
+(raw_confusion_hmap2 = dat_dub %>%
     group_by(sample_size, n_pop, "name" =Covconfintboot) %>%
     summarize("n" = n()))
-raw_conf2b<- fpr.fnr(raw_confusion_hmap2b,divided = TRUE, scenario = 2)
-raw_conf_plot2b <- heatmap_fun(raw_conf2b,"rate")
+dub_raw_conf2 = fpr.fnr(raw_confusion_hmap2, divided = TRUE, scenario = 1)
+raw_conf_plot2 <- heatmap_fun(dub_raw_conf2,"rate")
 
-(raw_confusion_hmap2c = dat_dub %>%
+(raw_confusion_hmap3 = dat_dub %>%
     group_by(sample_size, n_pop,"name" = GxEconfintboot) %>%
     summarize("n" = n()))
-raw_conf2c<- fpr.fnr(raw_confusion_hmap2c,divided = TRUE, scenario = 2)
-raw_conf_plot2c <- heatmap_fun(raw_conf2c,"rate")
+dub_raw_conf3 = fpr.fnr(raw_confusion_hmap3, divided = TRUE, scenario = 1)
+raw_conf_plot3 <- heatmap_fun(dub_raw_conf3,"rate")
 
-(raw_confusion_hmap2d = dat_dub %>%
-    group_by(sample_size, n_pop,"name" = GxEconfintperm) %>%
-    summarize("n" = n()))
-raw_conf2d<- fpr.fnr(raw_confusion_hmap2d,divided = TRUE, scenario = 2)
-raw_conf_plot2d <- heatmap_fun(raw_conf2d,"rate")
+raw_confusion_hmap4 = dat_dub %>%
+  group_by(sample_size, n_pop,"name" = GxEconfintperm) %>%
+  summarize("n" = n())
+dub_raw_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
+raw_conf_plot4 <- heatmap_fun(dub_raw_conf4,"rate")
 
-(raw_confusion_hmap2f = dat_dub %>%
-    group_by(sample_size, n_pop,"name" = GxEanova_check) %>%
-    summarize("n" = n()))
-raw_conf2f <- fpr.fnr(raw_confusion_hmap2f, divided = TRUE, scenario = 2)
-raw_conf_plot2f <- heatmap_fun(raw_conf2f,"rate")
+raw_confusion_hmap5 = dat_dub %>%
+  group_by(sample_size, n_pop,"name" = GxEanova_conf) %>%
+  summarize("n" = n())
+dub_raw_conf5 = fpr.fnr(raw_confusion_hmap5, divided = TRUE, scenario = 1)
+raw_conf_plot5 <- heatmap_fun(dub_raw_conf5,"rate")
 
+# Compile FPs for plot
+dub_raw_conf1$ID = rep("Cov_Perm", nrow(dub_raw_conf1))
+dub_raw_conf2$ID = rep("Cov_Boot", nrow(dub_raw_conf2))
+dub_raw_conf3$ID = rep("GxE_Boot", nrow(dub_raw_conf3))
+dub_raw_conf4$ID = rep("GxE_Perm", nrow(dub_raw_conf4))
+dub_raw_conf5$ID = rep("GxE_Anova", nrow(dub_raw_conf5))
+dub_fpdf = rbind(dub_raw_conf1,dub_raw_conf2,dub_raw_conf3,dub_raw_conf4,dub_raw_conf5)
+dub_fpdf = dub_fpdf[dub_fpdf$name == "False Positive",]
+
+## False Positive Rates
+dub_fpdf$npop_plot = NA
+for(i in 1:nrow(dub_fpdf)){
+  if(dub_fpdf$n_pop[i] == 2){dub_fpdf$npop_plot[i] = "2 Populations"
+  }else if(dub_fpdf$n_pop[i] == 4){dub_fpdf$npop_plot[i] = "4 Populations"
+  }else{dub_fpdf$npop_plot[i] = "8 Populations"}
+}
 
 ############ Confusion Plots -- Env Scenario 2 ###############
 
-dat_dub1 = dat_dub[dat_dub$replicate==1,] # Only need to show one replicate
+## False Positive Rates 
+
+#(falsePos = ggplot(filter(fpdf, ID %in% c("Cov_Perm","GxE_Perm","GxE_Anova")), aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+(falsePos = ggplot(dub_fpdf, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+   geom_bar(position = "dodge", stat = "identity") + 
+   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+   ylab("False Positive Rate") + xlab("")+
+   facet_wrap(~npop_plot) + 
+   labs(fill = "Sample Size")+
+   #ylim(0,0.3)+
+   scale_fill_viridis(discrete = TRUE)+
+   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
+                             "Cov_Boot" = "Boot. \n CovGE",
+                             "GxE_Boot" = "Boot. \n GxE",
+                             "GxE_Perm" = "Perm. \n GxE",
+                             "GxE_Anova" = "ANOVA \n GxE"))+
+   theme_classic2(base_family = "Times",base_size = 16) + 
+   theme(axis.text = element_text(colour = "black")))
 
 ## CovGE -- Permutation -- Scen2
 (cov_perm_dub = ggplot(transform(dat_dub, Covconfintperm = factor(Covconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
