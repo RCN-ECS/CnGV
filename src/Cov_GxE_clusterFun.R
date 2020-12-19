@@ -182,7 +182,7 @@ for(i in 1:n_boot){
   cov_est_boot = cov(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
   cor_est_boot = cor(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
   correction_raw_boot = max(sd(cov_matrix_boot$E_means),sd(cov_matrix_boot$G_means))
-  cov_corrected_boot = round(cov.function(cov_matrix_boot,is.sample = TRUE)/(correction_raw_boot^2),3)
+  cov_corrected_boot = round(cov.function(cov_matrix_boot,is.sample = TRUE),3)
 
   # Bootstrap dataframe
   boot_dat_raw <- data.frame("covariance" = cov_est_boot,
@@ -197,8 +197,8 @@ for(i in 1:n_boot){
 }
 
 # Check: Histograms of Bootstrap
- ggplot(boot_df_raw, aes(x = GxE_emm_boot), alpha = 0.5)+
-   geom_histogram()+ geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Bootstrap: Raw Data")
+# ggplot(boot_df_raw, aes(x = cov_corrected_boot), alpha = 0.5)+
+#   geom_histogram()+ geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Bootstrap: Raw Data")
 
 # Covariance Confidence Intervals 
 cov_CI = quantile(boot_df_raw$covariance, probs=c(0.025, 0.975), type=8) 
@@ -388,7 +388,6 @@ cov_corrected_means_CI = quantile(boot_df_means$cov_corrected_mean_boot, probs=c
 
 # GxE Confidence Intervals -- Means
 GxE_means_CI = quantile(boot_df_means$GxE_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=8) 
-
 
 ###############################################
 #####      Permutation -- Means Data      #####

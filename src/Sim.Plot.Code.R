@@ -9,10 +9,11 @@ library(readr)
 library(tidyverse)
 library(gridExtra)
 library(ggthemes)
+library(viridis)
 
 # Load Data compiled on cluster
-setwd("~/Documents/GitHub/CnGV/CnGV/results/Sim_12.1.20/")
-start_df = read.csv("Power_output_results.csv")
+setwd("~/Documents/GitHub/CnGV/CnGV/results/Sim_12.15.20/")
+start_df = read.csv("Power_output_results.csv") 
 
 # Split up into two experimental designs
 dat_csv = start_df %>% filter(env_scenario == 1) %>% droplevels() # Reciprocal Transplant
@@ -26,9 +27,9 @@ dat_dub = start_df %>% filter(env_scenario == 2) %>% droplevels() # Common Garde
   summarize(average_time = mean(Sim_time)))
 
 ####### Check 0s for FPR and FNR ##########
-sizecheck = dat_csv %>%
+sizecheck = dat_dub %>%
    filter(true_cov == 0) 
-   #filter(true_GxE_emm == 0)
+  # filter(true_GxE_emm == 0)
 dim(sizecheck) # Should be around 1000 (or 100 if 1 replicate)
 
 ####### Check # for each type ##########
@@ -40,9 +41,15 @@ dim(sizecheck) # Should be around 1000 (or 100 if 1 replicate)
     summarize(size = n()))
 
 ####### Check for missing rows ##########
+`%notin%` <- Negate(`%in%`)
 start_params = read.csv("~/Desktop/df.csv")
-(missing_rows = anti_join(start_params, start_df, by = "row"))
-#write.csv(missing_rows[,-1], "~/Desktop/missings.csv")
+start_params2 = read.csv("~/Desktop/df2pop.csv")
+(missing_rows = anti_join(start_df, start_params, by = "row"))
+start_df = filter(start_df, row %notin% missing_rows$row)
+#write.csv(start_df1[,-1], "~/Desktop/rerun.csv")
+range(start_df$row)
+args = filter(start_params, row == 1824)
+args = args[,-1]
 
 #####################################
 ##          Parameter Coverage      ##
@@ -194,8 +201,12 @@ covpow1 = cov1pow %>%
 covpow1$covpower = covpow1$covtick/covpow1$total_tick
 rng.cov1 = range(covpow1$covpower)
 covpow1$totals = covpow1$sample_size* covpow1$n_pop * covpow1$n_pop
-covpow1low = filter(covpow1,std_dev == min(covpow1$std_dev))
-covpow1hi = filter(covpow1,std_dev == max(covpow1$std_dev))
+covpow1low = covpow1 %>%
+  filter(std_dev == min(covpow1$std_dev))%>%
+  filter(totals > 17)
+covpow1hi = covpow1 %>%
+  filter(std_dev == max(covpow1$std_dev))%>%
+  filter(totals > 17)
 
 gxepow1 = gxe1pow %>%
   group_by(sample_size,n_pop,std_dev) %>%
@@ -204,8 +215,12 @@ gxepow1 = gxe1pow %>%
 gxepow1$gxepower = gxepow1$gxetick/gxepow1$total_tick
 gxepow1$totals = gxepow1$sample_size* gxepow1$n_pop * gxepow1$n_pop
 rng.gxe1 = range(gxepow1$gxepower)
-gxepow1low = filter(gxepow1,std_dev == min(gxepow1$std_dev))
-gxepow1hi = filter(gxepow1,std_dev == max(gxepow1$std_dev))
+gxepow1low = gxepow1 %>%
+  filter(std_dev == min(gxepow1$std_dev))%>%
+  filter(totals > 17)
+gxepow1hi = gxepow1%>%
+  filter(std_dev == max(gxepow1$std_dev))%>%
+  filter(totals > 17)
 
 covpow2 = cov2pow %>%
   group_by(sample_size, n_pop, std_dev) %>%
@@ -214,8 +229,12 @@ covpow2 = cov2pow %>%
 covpow2$covpower = covpow2$covtick/covpow2$total_tick
 covpow2$totals = covpow2$sample_size* covpow2$n_pop * 2
 rng.cov2 = range(covpow2$covpower)
-covpow2low = filter(covpow2,std_dev == min(covpow2$std_dev))
-covpow2hi = filter(covpow2,std_dev == max(covpow2$std_dev))
+covpow2low = covpow2 %>% 
+  filter(std_dev == min(covpow2$std_dev))%>%
+  filter(totals > 17)
+covpow2hi = covpow2 %>%
+  filter(std_dev == max(covpow2$std_dev))%>%
+  filter(totals > 17)
 
 gxepow2 = gxe2pow %>%
   group_by(sample_size,n_pop,std_dev) %>%
@@ -224,8 +243,12 @@ gxepow2 = gxe2pow %>%
 gxepow2$gxepower = gxepow2$gxetick/gxepow2$total_tick
 gxepow2$totals = gxepow2$sample_size* gxepow2$n_pop * 2
 rng.gxe2 = range(gxepow2$gxepower)
-gxepow2low = filter(gxepow2,std_dev == min(gxepow2$std_dev))
-gxepow2hi = filter(gxepow2,std_dev == max(gxepow2$std_dev))
+gxepow2low = gxepow2 %>%
+  filter(std_dev == min(gxepow2$std_dev))%>%
+  filter(totals > 17)
+gxepow2hi = gxepow2 %>%
+  filter(std_dev == max(gxepow2$std_dev))%>%
+  filter(totals > 17)
 
 # HeatMaps - High Standard Deviation
 (covpower_high1 = ggplot(covpow1hi,aes(x = factor(sample_size), y = factor(n_pop), fill = covpower)) + 
@@ -285,7 +308,6 @@ gxepow2hi = filter(gxepow2,std_dev == max(gxepow2$std_dev))
     theme(legend.position = "none")+
     ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
     theme(plot.title = element_text(size = 24, face = "bold")))
-
 
 grid.arrange(gxepower_high1,gxepower_high2,covpower_high1,covpower_high2,ncol = 2)
 
@@ -350,84 +372,86 @@ grid.arrange(gxepower_low1,gxepower_low2,covpower_low1,covpower_low2,ncol = 2)
 ##          Confusion Matrices  -- Env Scenario 1     ##
 ########################################################
 
-dat_csv1 <- filter(dat_csv, std_dev == 1)
-
 # Covariance Permutation check
-dat_csv1$Covconfintperm = rep("NA",nrow(dat_csv1))
-for(i in 1:nrow(dat_csv1)){
-    if(dat_csv1$true_cov[i] != 0 && dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "True Positive"
-    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] <= 0.025){dat_csv1$Covconfintperm[i] = "False Positive"
-    }else if(dat_csv1$true_cov[i]!= 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "False Negative"
-    }else if(dat_csv1$true_cov[i] == 0 & dat_csv1$covariance_pvalue[i] > 0.025){dat_csv1$Covconfintperm[i] = "True Negative"
-    }else{dat_csv1$Covconfintperm[i] = "None"}
+dat_csv$Covconfintperm = rep("NA",nrow(dat_csv))
+for(i in 1:nrow(dat_csv)){
+    if(dat_csv$true_cov[i] != 0 && dat_csv$covariance_pvalue[i] <= 0.025){dat_csv$Covconfintperm[i] = "True Positive"
+    }else if(dat_csv$true_cov[i] == 0 & dat_csv$covariance_pvalue[i] <= 0.025){dat_csv$Covconfintperm[i] = "False Positive"
+    }else if(dat_csv$true_cov[i]!= 0 & dat_csv$covariance_pvalue[i] > 0.025){dat_csv$Covconfintperm[i] = "False Negative"
+    }else if(dat_csv$true_cov[i] == 0 & dat_csv$covariance_pvalue[i] > 0.025){dat_csv$Covconfintperm[i] = "True Negative"
+    }else{dat_csv$Covconfintperm[i] = "None"}
 }
 
 # Cov Boot check
-dat_csv1$Covconfintboot = rep(NA, nrow(dat_csv1))
-for(i in 1:nrow(dat_csv1)){
+dat_csv$Covconfintboot = rep(NA, nrow(dat_csv))
+for(i in 1:nrow(dat_csv)){
   
-  if(dat_csv1$true_cov[i] != 0 &&
-     dat_csv1$covariance_lwrCI[i] < 0 &&
-     dat_csv1$covariance_uprCI[i] < 0 
-  ){dat_csv1$Covconfintboot[i] = "True Positive"
-  }else if(dat_csv1$true_cov[i] != 0 &&
-           dat_csv1$covariance_lwrCI[i] > 0 &&
-           dat_csv1$covariance_uprCI[i] > 0
-  ){dat_csv1$Covconfintboot[i] = "True Positive"
-  }else if(dat_csv1$true_cov[i] == 0 &&
-           dat_csv1$covariance_lwrCI[i] < 0 &&
-           dat_csv1$covariance_uprCI[i] < 0
-  ){dat_csv1$Covconfintboot[i] = "False Positive"
-  }else if(dat_csv1$true_cov[i] == 0 &&
-           dat_csv1$covariance_lwrCI[i] > 0 &&
-           dat_csv1$covariance_uprCI[i] > 0
-  ){dat_csv1$Covconfintboot[i] = "False Positive"
-  }else if(dat_csv1$true_cov[i] != 0 && 
-           dat_csv1$covariance_lwrCI[i] <= 0 && 
-           dat_csv1$covariance_uprCI[i] >= 0
-  ){dat_csv1$Covconfintboot[i] = "False Negative"
-  }else if(dat_csv1$true_cov[i]== 0 && 
-           dat_csv1$covariance_lwrCI[i] <= 0 && 
-           dat_csv1$covariance_uprCI[i] >= 0
-  ){dat_csv1$Covconfintboot[i] = "True Negative"
-  }else{dat_csv1$Covconfintboot[i] = "None"}
+  if(dat_csv$true_cov[i] != 0 &&
+     dat_csv$covariance_lwrCI[i] < 0 &&
+     dat_csv$covariance_uprCI[i] < 0 
+  ){dat_csv$Covconfintboot[i] = "True Positive"
+  }else if(dat_csv$true_cov[i] != 0 &&
+           dat_csv$covariance_lwrCI[i] > 0 &&
+           dat_csv$covariance_uprCI[i] > 0
+  ){dat_csv$Covconfintboot[i] = "True Positive"
+  }else if(dat_csv$true_cov[i] == 0 &&
+           dat_csv$covariance_lwrCI[i] < 0 &&
+           dat_csv$covariance_uprCI[i] < 0
+  ){dat_csv$Covconfintboot[i] = "False Positive"
+  }else if(dat_csv$true_cov[i] == 0 &&
+           dat_csv$covariance_lwrCI[i] > 0 &&
+           dat_csv$covariance_uprCI[i] > 0
+  ){dat_csv$Covconfintboot[i] = "False Positive"
+  }else if(dat_csv$true_cov[i] != 0 && 
+           dat_csv$covariance_lwrCI[i] <= 0 && 
+           dat_csv$covariance_uprCI[i] >= 0
+  ){dat_csv$Covconfintboot[i] = "False Negative"
+  }else if(dat_csv$true_cov[i]== 0 && 
+           dat_csv$covariance_lwrCI[i] <= 0 && 
+           dat_csv$covariance_uprCI[i] >= 0
+  ){dat_csv$Covconfintboot[i] = "True Negative"
+  }else{dat_csv$Covconfintboot[i] = "None"}
 }
 
 # GxE Perm check
-dat_csv1$GxEconfintperm = rep("NA", nrow(dat_csv1))
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_pvalue[i],2) <= 0.05){dat_csv1$GxEconfintperm[i] = "True Positive"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_pvalue[i],2) <= 0.05){dat_csv1$GxEconfintperm[i] = "False Positive"
-  }else if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_pvalue[i],2) > 0.05){dat_csv1$GxEconfintperm[i] = "False Negative"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_pvalue[i],2) > 0.05){dat_csv1$GxEconfintperm[i] = "True Negative"
-  }else{dat_csv1$GxEconfintperm == "None"}
+dat_csv$GxEconfintperm = rep("NA", nrow(dat_csv))
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$true_GxE_emm[i] != 0 & round(dat_csv$GxE_emm_pvalue[i],2) <= 0.05){dat_csv$GxEconfintperm[i] = "True Positive"
+  }else if(dat_csv$true_GxE_emm[i] == 0 & round(dat_csv$GxE_emm_pvalue[i],2) <= 0.05){dat_csv$GxEconfintperm[i] = "False Positive"
+  }else if(dat_csv$true_GxE_emm[i] != 0 & round(dat_csv$GxE_emm_pvalue[i],2) > 0.05){dat_csv$GxEconfintperm[i] = "False Negative"
+  }else if(dat_csv$true_GxE_emm[i] == 0 & round(dat_csv$GxE_emm_pvalue[i],2) > 0.05){dat_csv$GxEconfintperm[i] = "True Negative"
+  }else{dat_csv$GxEconfintperm == "None"}
 }
 
 # GxE Boot check
-dat_csv1$GxEconfintboot = rep("NA", nrow(dat_csv1))
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) > 0)
-  {dat_csv1$GxEconfintboot[i] = "True Positive"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) > 0)
-  {dat_csv1$GxEconfintboot[i] = "False Positive"
-  }else if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) == 0)
-  {dat_csv1$GxEconfintboot[i] = "False Negative"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_emm_lwrCI[i],2) == 0)
-  {dat_csv1$GxEconfintboot[i] = "True Negative"
-  }else{dat_csv1$GxEconfintboot[i] = "None"}
+dat_csv$GxEconfintboot = rep("NA", nrow(dat_csv))
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$true_GxE_emm[i] != 0 & round(dat_csv$GxE_emm_lwrCI[i],2) > 0)
+  {dat_csv$GxEconfintboot[i] = "True Positive"
+  }else if(dat_csv$true_GxE_emm[i] == 0 & round(dat_csv$GxE_emm_lwrCI[i],2) > 0)
+  {dat_csv$GxEconfintboot[i] = "False Positive"
+  }else if(dat_csv$true_GxE_emm[i] != 0 & round(dat_csv$GxE_emm_lwrCI[i],2) == 0)
+  {dat_csv$GxEconfintboot[i] = "False Negative"
+  }else if(dat_csv$true_GxE_emm[i] == 0 & round(dat_csv$GxE_emm_lwrCI[i],2) == 0)
+  {dat_csv$GxEconfintboot[i] = "True Negative"
+  }else{dat_csv$GxEconfintboot[i] = "None"}
 }
 
 # GxE Anova check
-dat_csv1$GxEanova_conf = rep("NA", nrow(dat_csv1))
-for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_Anova[i],2) <= 0.05){dat_csv1$GxEanova_conf[i] = "True Positive"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_Anova[i],2) <= 0.05){dat_csv1$GxEanova_conf[i] = "False Positive"
-  }else if(dat_csv1$true_GxE_emm[i] != 0 & round(dat_csv1$GxE_Anova[i],2) > 0.05){dat_csv1$GxEanova_conf[i] = "False Negative"
-  }else if(dat_csv1$true_GxE_emm[i] == 0 & round(dat_csv1$GxE_Anova[i],2) > 0.05){dat_csv1$GxEanova_conf[i] = "True Negative"
-  }else{dat_csv1$GxEanova_conf == "None"}
+dat_csv$GxEanova_conf = rep("NA", nrow(dat_csv))
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$true_GxE_emm[i] != 0 & round(dat_csv$GxE_Anova[i],2) <= 0.05){dat_csv$GxEanova_conf[i] = "True Positive"
+  }else if(dat_csv$true_GxE_emm[i] == 0 & round(dat_csv$GxE_Anova[i],2) <= 0.05){dat_csv$GxEanova_conf[i] = "False Positive"
+  }else if(dat_csv$true_GxE_emm[i] != 0 & round(dat_csv$GxE_Anova[i],2) > 0.05){dat_csv$GxEanova_conf[i] = "False Negative"
+  }else if(dat_csv$true_GxE_emm[i] == 0 & round(dat_csv$GxE_Anova[i],2) > 0.05){dat_csv$GxEanova_conf[i] = "True Negative"
+  }else{dat_csv$GxEanova_conf == "None"}
 }
 
 ## Counts for table
+
+dat_csv1 <- dat_csv %>% 
+  filter(std_dev == 1) %>%
+  filter(total_samples == 128)
 
 cov_perm_table = dat_csv1 %>%
     group_by("name" = Covconfintperm) %>%
@@ -435,7 +459,7 @@ cov_perm_table = dat_csv1 %>%
 fpr.fnr(cov_perm_table, divided = FALSE, scenario = 1)
 
 cov_boot_table = dat_csv1 %>%
-    group_by("name" =Covconfintboot) %>%
+    group_by("name" = Covconfintboot) %>%
   summarize("n" = n())
 fpr.fnr(cov_boot_table, divided = FALSE, scenario = 1)
 
@@ -492,7 +516,6 @@ raw_conf3$ID = rep("GxE_Boot", nrow(raw_conf3))
 raw_conf4$ID = rep("GxE_Perm", nrow(raw_conf4))
 raw_conf5$ID = rep("GxE_Anova", nrow(raw_conf5))
 fpdf = rbind(raw_conf1,raw_conf2,raw_conf3,raw_conf4,raw_conf5)
-fpdf = fpdf[fpdf$name == "False Positive",]
 
 ## False Positive Rates
 fpdf$npop_plot = NA
@@ -501,27 +524,84 @@ for(i in 1:nrow(fpdf)){
   }else if(fpdf$n_pop[i] == 4){fpdf$npop_plot[i] = "4 Populations"
   }else{fpdf$npop_plot[i] = "8 Populations"}
 }
+fpdf = fpdf[fpdf$name == "False Positive",]
+
+## False Negative Rates
+dat_csv$binCov = "NA"
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$true_cov[i] == 0){dat_csv$binCov[i] = 0
+  }else if(abs(dat_csv$true_cov[i]) > 0 & abs(dat_csv$true_cov[i]) <= 0.15){dat_csv$binCov[i] = 0.1
+  }else if(abs(dat_csv$true_cov[i]) > 0.15 & abs(dat_csv$true_cov[i]) <= 0.25){dat_csv$binCov[i] = 0.2
+  }else if(abs(dat_csv$true_cov[i]) > 0.25 & abs(dat_csv$true_cov[i]) <= 0.35){dat_csv$binCov[i] = 0.3
+  }else if(abs(dat_csv$true_cov[i]) > 0.35 & abs(dat_csv$true_cov[i]) <= 0.45){dat_csv$binCov[i] = 0.4
+  }else if(abs(dat_csv$true_cov[i]) > 0.45 & abs(dat_csv$true_cov[i]) <= 0.55){dat_csv$binCov[i] = 0.5
+  }else if(abs(dat_csv$true_cov[i]) > 0.55 & abs(dat_csv$true_cov[i]) <= 0.65){dat_csv$binCov[i] = 0.6
+  }else if(abs(dat_csv$true_cov[i]) > 0.65 & abs(dat_csv$true_cov[i]) <= 0.75){dat_csv$binCov[i] = 0.7
+  }else if(abs(dat_csv$true_cov[i]) > 0.75 & abs(dat_csv$true_cov[i]) <= 0.85){dat_csv$binCov[i] = 0.8
+  }else if(abs(dat_csv$true_cov[i]) > 0.85 & abs(dat_csv$true_cov[i]) <= 0.95){dat_csv$binCov[i] = 0.9
+  }else{dat_csv$binCov[i] = 1}
+}
+
+fn.bin = function(df){
+  
+  CovPerm = dat_csv %>%
+    group_by(binCov, Covconfintperm, sample_size, n_pop) %>%
+    summarize(N = n())
+  
+  for(i in 1:unique(CovPerm$sample_size)){
+    for(j in 1:unique(CovPerm$n_pop)){
+      for(k in 1:unique(Cov_Perm$binCov)){
+      
+      temp = CovPerm %>%
+        filter(sample_size == unique(CovPerm$sample_size)[i]) %>%
+        filter(n_pop == unique(CovPerm$n_pop)[j]) %>%
+        filter(binCov == unique(CovPerm$binCov)[k])
+  
+      
+      }
+    }
+  }
+  # For i in --- calculate false pos and neg for every bin size
+
+}
+fn = 
+Covconfintperm,Covconfintboot,GxEconfintperm,GxEconfintboot,GxEanova_conf,
 
 ############ Confusion Plots  -- Env Scenario 1 ###############
 
 ## False Positive Rates 
-
-#(falsePos = ggplot(filter(fpdf, ID %in% c("Cov_Perm","GxE_Perm","GxE_Anova")), aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
 (falsePos = ggplot(fpdf, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
   geom_bar(position = "dodge", stat = "identity") + 
   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
   ylab("False Positive Rate") + xlab("")+
+   ggtitle("Full Reciprocal Transplant")+
   facet_wrap(~npop_plot) + 
   labs(fill = "Sample Size")+
-  #ylim(0,0.3)+
   scale_fill_viridis(discrete = TRUE)+
   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
                             "Cov_Boot" = "Boot. \n CovGE",
                             "GxE_Boot" = "Boot. \n GxE",
                             "GxE_Perm" = "Perm. \n GxE",
                             "GxE_Anova" = "ANOVA \n GxE"))+
-  theme_classic2(base_family = "Times",base_size = 16) + 
+  theme_classic(base_family = "Times",base_size = 16) + 
   theme(axis.text = element_text(colour = "black")))
+
+## False Negative Rates 
+(falseNeg = ggplot(fpdf2, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+    geom_bar(position = "dodge", stat = "identity") + 
+    geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+    ylab("False Negative Rate") + xlab("")+
+    ggtitle("Full Reciprocal Transplant")+
+    facet_wrap(~npop_plot) + 
+    labs(fill = "Sample Size")+
+    scale_fill_viridis(discrete = TRUE)+
+    scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
+                              "Cov_Boot" = "Boot. \n CovGE",
+                              "GxE_Boot" = "Boot. \n GxE",
+                              "GxE_Perm" = "Perm. \n GxE",
+                              "GxE_Anova" = "ANOVA \n GxE"))+
+    theme_classic(base_family = "Times",base_size = 16) + 
+    theme(axis.text = element_text(colour = "black")))
 
 
 ## CovGE -- Permutation
@@ -914,9 +994,6 @@ for(i in 1:nrow(fpdf_means)){
 ##          Confusion Matrices  -- Env Scenario 2     ##
 ########################################################
 
-dat_dub1.0 = filter(dat_dub, std_dev == 1)
-dat_dub = dat_dub1.0
-
 # CovGE -- Permutation - Scenario 2
 dat_dub$Covconfintperm = rep("NA",nrow(dat_dub))
 
@@ -998,61 +1075,69 @@ for(i in 1:nrow(dat_dub)){
 }
 
 ## Counts for table
+dat_dub1 <- dat_dub %>% 
+  filter(std_dev == 1) %>%
+  #filter(between(abs(covariance),0.2,0.6))%>%
+  filter(total_samples > 17)
+dat_dub2 <- dat_dub %>% 
+  filter(std_dev == 1) %>%
+ # filter(between(GxE_emm,0.3,0.6)) %>%
+  filter(total_samples > 17)
 
-cov_perm_table = dat_dub %>%
+cov_perm_table = dat_dub1 %>%
   group_by("name" = Covconfintperm) %>%
   summarize("n" = n())
-fpr.fnr(cov_perm_table, divided = FALSE, scenario = 1)
+fpr.fnr(cov_perm_table, divided = FALSE, scenario = 2)
 
-cov_boot_table = dat_dub %>%
+cov_boot_table = dat_dub1 %>%
   group_by("name" =Covconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(cov_boot_table, divided = FALSE, scenario = 1)
+fpr.fnr(cov_boot_table, divided = FALSE, scenario = 2)
 
-gxe_anova_table = dat_dub %>%
+gxe_anova_table = dat_dub2 %>%
   group_by("name" =GxEanova_conf) %>%
   summarize("n" = n())
-fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 1)
+fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 2)
 
-gxe_perm_table = dat_dub %>%
+gxe_perm_table = dat_dub2 %>%
   group_by("name" =GxEconfintperm) %>%
   summarize("n" = n())
-fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 1)
+fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 2)
 
-gxe_boot_table = dat_dub %>%
+gxe_boot_table = dat_dub2 %>%
   group_by("name" =GxEconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 1)
+fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 2)
 
 ## Counts for heatmaps
-(raw_confusion_hmap1 = dat_dub %>%
+(raw_confusion_hmap1 = dat_dub1 %>%
     group_by(sample_size, n_pop, "name" =Covconfintperm) %>%
     summarize("n" = n()))
-dub_raw_conf1 = fpr.fnr(raw_confusion_hmap1, divided = TRUE, scenario = 1)
+dub_raw_conf1 = fpr.fnr(raw_confusion_hmap1, divided = TRUE, scenario = 2)
 raw_conf_plot1 <- heatmap_fun(dub_raw_conf1,"rate") # Can also do "percent"
 
-(raw_confusion_hmap2 = dat_dub %>%
+(raw_confusion_hmap2 = dat_dub1 %>%
     group_by(sample_size, n_pop, "name" =Covconfintboot) %>%
     summarize("n" = n()))
-dub_raw_conf2 = fpr.fnr(raw_confusion_hmap2, divided = TRUE, scenario = 1)
+dub_raw_conf2 = fpr.fnr(raw_confusion_hmap2, divided = TRUE, scenario = 2)
 raw_conf_plot2 <- heatmap_fun(dub_raw_conf2,"rate")
 
-(raw_confusion_hmap3 = dat_dub %>%
+(raw_confusion_hmap3 = dat_dub2 %>%
     group_by(sample_size, n_pop,"name" = GxEconfintboot) %>%
     summarize("n" = n()))
-dub_raw_conf3 = fpr.fnr(raw_confusion_hmap3, divided = TRUE, scenario = 1)
+dub_raw_conf3 = fpr.fnr(raw_confusion_hmap3, divided = TRUE, scenario = 2)
 raw_conf_plot3 <- heatmap_fun(dub_raw_conf3,"rate")
 
-raw_confusion_hmap4 = dat_dub %>%
+raw_confusion_hmap4 = dat_dub2 %>%
   group_by(sample_size, n_pop,"name" = GxEconfintperm) %>%
   summarize("n" = n())
-dub_raw_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
+dub_raw_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 2)
 raw_conf_plot4 <- heatmap_fun(dub_raw_conf4,"rate")
 
-raw_confusion_hmap5 = dat_dub %>%
+raw_confusion_hmap5 = dat_dub2 %>%
   group_by(sample_size, n_pop,"name" = GxEanova_conf) %>%
   summarize("n" = n())
-dub_raw_conf5 = fpr.fnr(raw_confusion_hmap5, divided = TRUE, scenario = 1)
+dub_raw_conf5 = fpr.fnr(raw_confusion_hmap5, divided = TRUE, scenario = 2)
 raw_conf_plot5 <- heatmap_fun(dub_raw_conf5,"rate")
 
 # Compile FPs for plot
@@ -1280,33 +1365,86 @@ for(i in 1:nrow(dat_dub)){
   }else{dat_dub$meansGxEconfintperm == "None"}
 }
 
-# Counts for table
-(cov_perm_table_mean_dub = dat_dub %>%
-    group_by(meansCovconfintperm) %>%
-    count())
-cov_perm_table_mean_dub$percent = (cov_perm_table_mean_dub$n/11000)*100
-cov_perm_table_mean_dub
+## Counts for table
 
-(cov_boot_table_mean_dub = dat_dub %>%
-    group_by(MeansCovconfintboot) %>%
-    count())
-cov_boot_table_mean_dub$percent = (cov_boot_table_mean_dub$n/11000)*100
-cov_boot_table_mean_dub
+means_cov_perm_table = dat_dub %>%
+  group_by("name" = meansCovconfintperm) %>%
+  summarize("n" = n())
+fpr.fnr(means_cov_perm_table, divided = FALSE, scenario = 1)
 
-(gxe_boot_table_mean_dub = dat_dub %>%
-    group_by(MeanGxEconfintboot) %>%
-    count())
-gxe_boot_table_mean_dub$percent = (gxe_boot_table_mean_dub$n/11000)*100
-gxe_boot_table_mean_dub
+means_cov_boot_table = dat_dub %>%
+  group_by("name" =MeansCovconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(means_cov_boot_table, divided = FALSE, scenario = 1)
 
-(gxe_perm_table_mean_dub = dat_dub %>%
-    group_by(meansGxEconfintperm) %>%
-    count())
-gxe_perm_table_mean_dub$percent = (gxe_perm_table_mean_dub$n/11000)*100
-gxe_perm_table_mean_dub
+means_gxe_boot_table = dat_dub %>%
+  group_by("name" =MeanGxEconfintboot) %>%
+  summarize("n" = n())
+fpr.fnr(means_gxe_boot_table, divided = FALSE, scenario = 1)
 
+means_gxe_perm_table = dat_dub %>%
+  group_by("name" =meansGxEconfintperm) %>%
+  summarize("n" = n())
+fpr.fnr(means_gxe_perm_table, divided = FALSE, scenario = 1)
+
+## Counts for heatmaps
+(means_confusion_hmap1 = dat_dub %>%
+    group_by(sample_size, n_pop, "name" =meansCovconfintperm) %>%
+    summarize("n" = n()))
+dub_means_conf1 = fpr.fnr(means_confusion_hmap1, divided = TRUE, scenario = 1)
+means_conf_plot1 <- heatmap_fun(dub_means_conf1,"rate") # Can also do "percent"
+
+(means_confusion_hmap2 = dat_dub %>%
+    group_by(sample_size, n_pop, "name" =MeansCovconfintboot) %>%
+    summarize("n" = n()))
+dub_means_conf2 = fpr.fnr(means_confusion_hmap2, divided = TRUE, scenario = 1)
+means_conf_plot2 <- heatmap_fun(dub_means_conf2,"rate")
+
+(means_confusion_hmap3 = dat_dub %>%
+    group_by(sample_size, n_pop,"name" = MeanGxEconfintboot) %>%
+    summarize("n" = n()))
+dub_means_conf3 = fpr.fnr(means_confusion_hmap3, divided = TRUE, scenario = 1)
+means_conf_plot3 <- heatmap_fun(dub_means_conf3,"rate")
+
+means_confusion_hmap4 = dat_dub %>%
+  group_by(sample_size, n_pop,"name" = meansGxEconfintperm) %>%
+  summarize("n" = n())
+dub_means_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
+means_conf_plot4 <- heatmap_fun(dub_means_conf4,"rate")
+
+# Compile FPs for plot
+dub_means_conf1$ID = rep("Cov_Perm", nrow(dub_means_conf1))
+dub_means_conf2$ID = rep("Cov_Boot", nrow(dub_means_conf2))
+dub_means_conf3$ID = rep("GxE_Boot", nrow(dub_means_conf3))
+dub_means_conf4$ID = rep("GxE_Perm", nrow(dub_means_conf4))
+dub_fpdf_means = rbind(dub_means_conf1,dub_means_conf2,dub_means_conf3,dub_means_conf4)
+dub_fpdf_means = dub_fpdf_means[dub_fpdf_means$name == "False Positive",]
+
+## False Positive Rates
+dub_fpdf_means$npop_plot = NA
+for(i in 1:nrow(dub_fpdf_means)){
+  if(dub_fpdf_means$n_pop[i] == 2){dub_fpdf_means$npop_plot[i] = "2 Populations"
+  }else if(dub_fpdf_means$n_pop[i] == 4){dub_fpdf_means$npop_plot[i] = "4 Populations"
+  }else{dub_fpdf_means$npop_plot[i] = "8 Populations"}
+}
 
 ############ Confusion Plots -- Env Scenario 2 -- MEANS ###############
+
+# False Positive Rates 
+(dub_means_falsePos = ggplot(fpdf_means, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+   geom_bar(position = "dodge", stat = "identity") + 
+   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+   ylab("False Positive Rate") + xlab("")+
+   facet_wrap(~npop_plot) + 
+   labs(fill = "Sample Size")+
+   #ylim(0,0.3)+
+   scale_fill_viridis(discrete = TRUE)+
+   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
+                             "Cov_Boot" = "Boot. \n CovGE",
+                             "GxE_Boot" = "Boot. \n GxE",
+                             "GxE_Perm" = "Perm. \n GxE"))+
+   theme_classic2(base_family = "Times",base_size = 16) + 
+   theme(axis.text = element_text(colour = "black")))
 
 ## MEANS -- CovGE -- Permutation -- Scen 2
 (cov_perm_means_dub = ggplot(transform(dat_dub, meansCovconfintperm = factor(meansCovconfintperm, levels = c("True Positive", "True Negative", "False Positive", "False Negative")))) +
@@ -1471,7 +1609,7 @@ for(i in 1:nrow(dat_csv)){ # Use only if one or the other is significant
   }else{dat_csv$sig[i]=FALSE} 
 }
 
-sigGxE = dat_csv %>%
+sigGxE = dat_csv %>% # NEED TO CHANGE CONF MATRIX TO FILTER TO STD.DEV AFTER LABELD
   filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.
   filter(true_GxE_emm != 0) %>%
   filter(true_cov != 0) %>%
@@ -1582,8 +1720,9 @@ length(which(cov_anom$covariance_pvalue<=0.05))
     geom_point(aes(y = GxE_emm,colour = factor(std_dev)), size =2, shape = 4)+
     xlab("Unique Parameter Set (row)") + ylab("GxE - Estimated Marginal Mean"))
 
-
-# Do means estimates match raw estimates? If yes, should fall along 1:1 line
+#############################
+##    Means vs. Raw       ###
+#############################
 
 dat_csv$meancoverror = abs(dat_csv$cov_means_uprCI - dat_csv$cov_means_lwrCI)
 dat_dub$meancoverror = abs(dat_dub$cov_means_uprCI - dat_dub$cov_means_lwrCI)
@@ -1694,13 +1833,11 @@ grid.arrange(gxemeancheck2, gxeerrorcheck2)
 
 (pval1 = ggplot(filter(dat_csv, replicate ==1),aes(x = GxE_Anova, y = GxE_emm_pvalue,group = factor(total_samples),colour = factor(sample_size),shape = factor(n_pop)))+ # means data
     geom_point(size = 2, alpha = 0.75)+theme_classic(base_size = 20, base_family = "Times")+ylab("GxE EMM P-value")+xlab("GxE Anova P-value")+
-    #stat_smooth(method = "auto",se=FALSE)+
     geom_vline(xintercept = 0.05,colour = "red")+labs(shape = "Number of Populations",colour = "Sample Size")+
     geom_hline(yintercept = 0.05,colour = "red"))
 
 (pval2 = ggplot(filter(dat_csv, replicate ==1),aes(x = GxE_Anova, y = GxE_means_pvalue,group = factor(total_samples),colour = factor(sample_size), shape = factor(n_pop)))+ # means data
     geom_point(size = 2, alpha = 0.75)+theme_classic(base_size = 20, base_family = "Times")+ylab("GxE Means P-value")+xlab("GxE Anova P-value")+
-    #stat_smooth(method = "auto",se=FALSE)+
     geom_vline(xintercept = 0.05,colour = "red")+labs(shape = "Number of Populations",colour = "Sample Size")+
     geom_hline(yintercept = 0.05,colour = "red"))
 
@@ -1734,71 +1871,80 @@ suspect.pvals.mean = dat_csv %>% # mean
 (ggplot(suspect.pvals.mean, aes(x = GxE_means, y = GxE_emm_pvalue)) + 
     geom_point()+theme_classic())
 
-
-#### For Heuristic Plots in paper
-
-shape1 = c("G_1" = 24, "G_2" = 21)
-ColorFill = c("G_1" = "#002266", "G_2" = "#CC6600")
-
-
 ####### Phenotype plots ##########
-(rowpicker = dat_dub %>%
-   filter(sample_size == 4)%>%
-   filter(n_pop == 8)%>%
-   filter(GxE_emm< 0.3)%>%
-   filter(covariance < -.6))
 
 phen_data = read.csv("~/Desktop/phenotype_output_results.csv")
 
+# To find examples  
+(rowpicker = dat_dub %>%
+    filter(sample_size == 4)%>%
+    filter(n_pop == 16)%>%
+    #filter(GxE_emm < 0.3)%>% #No GxE
+    filter(GxE_emm > 0.55)%>% # GxE
+    # filter(covariance < -.65)) # CnGV
+    filter(covariance > .55)) # CoGV
+
+chosen_1 = c(2005, # CoGV, GxE, 2 pop #
+             16449, # CnGV, GxE, 2 pop #
+             1034  , # CnGV, No GxE, 2 pop #
+             16424, # CoGV, No GxE, 2 pop #
+             
+             11134, # CoGV, No GxE, 8 pop #
+             11148, # CnGV, No GxE, 8 pop #
+             13739, # CnGV, GxE, 8 pop #
+             16523, # CoGV, GxE, 8 pops #
+             
+             1076, # CoGV, No GxE, 4 pop #
+             1088, # CnGV, No GxE, 4 pop #
+             6467, # CnGV, GxE, 4 pop #
+             1076) # CoGV, GxE, 4 pops #
+
+chosen_2 = c(30880, # CoGV, GxE, 2 pop per env #
+             38334, # CnGV, GxE, 2 pop per env #
+             40853, # CnGV, No GxE, 2 pop per env #
+             33355, # CoGV, No GxE, 2 pop per env #
+             
+             33549, # CoGV, No GxE, 8 pop #
+             19639, # CnGV, No GxE, 8 pop #
+             24678, # CnGV, GxE, 8 pop #
+             24678) # CoGV, GxE, 8 pops #
+
+chosen = c(chosen_1, chosen_2)
+
+# Plotting Specs
 short_env = c("E_1" = "Env. 1", "E_2" = "Env. 2")
 short_gen = c("E_1" = "Gen. 1", "E_2" = "Gen. 2")
 long_env = c("E_1" = "Env. 1", "E_2" = "Env. 2","E_3" = "Env. 3", "E_4" = "Env. 4","E_5" = "Env. 5", "E_6" = "Env. 6","E_7" = "Env. 7", "E_8" = "Env. 8")
 long_gen = c("E_1" = "Gen. 1", "E_2" = "Gen. 2","E_3" = "Gen. 3", "E_4" = "Gen. 4","E_5" = "Gen. 5", "E_6" = "Gen. 6","E_7" = "Gen. 7", "E_8" = "Gen. 8")
 
-chosen_1 = c(1845, # CoGV, GxE, 2 pop
-             9844, # CnGV, GxE, 2 pop
-             15405, # CnGV, No GxE, 2 pop
-             15437, # CoGV, No GxE, 2 pop
-             
-             9914, # CoGV, No GxE, 8 pop
-             9923, # CnGV, No GxE, 8 pop
-             3532, # CnGV, GxE, 8 pop
-             9115, # CoGV, GxE, 8 pops
-             
-             15475, # CoGV, No GxE, 4 pop
-             23411, # CnGV, No GxE, 4 pop
-             5869, # CnGV, GxE, 4 pop
-             7496) # CoGV, GxE, 4 pops
 
-chosen_2 = c(22754, # CoGV, GxE, 2 pop per env
-             23356, # CnGV, GxE, 2 pop per env
-             19163, # CnGV, No GxE, 2 pop per env
-             26365, # CoGV, No GxE, 2 pop per env
-             
-             26056, # CoGV, No GxE, 8 pop
-             23411, # CnGV, No GxE, 8 pop
-             20440, # CnGV, GxE, 8 pop
-             22819) # CoGV, GxE, 8 pops
-chosen = c(chosen_1, chosen_2)
+for(i in 1:length(chosen)){
 
-phenRow = filter(start_df,row == chosen[20])
-plotdat = filter(phen_data, row == chosen[20])
-label1 = phenRow$covariance
-label2 = phenRow$GxE_emm
+phenRow = filter(start_df,row == chosen[i])
+plotdat = filter(phen_data, row == chosen[i])
+label1 = paste0(phenRow$covariance,"; P = ",phenRow$covariance_pvalue)
+label2 = paste0(phenRow$GxE_emm,"; P = ",phenRow$GxE_emm_pvalue)
 
-colorpal = c("E_1" = "#404788FF", "E_2" = "#3CBB75FF")
-
-ggplot(plotdat,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor,colour = nat_env_factor))+
+p = ggplot(plotdat,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor,colour = nat_env_factor))+
   geom_point(size = 2, position=position_dodge(width = 0.15))+
   geom_smooth(size = 2, se=FALSE)+
-  scale_x_discrete(labels = long_env)+
-  theme_classic(base_size = 20, base_family = "Times")+
+  theme_classic(base_size = 24, base_family = "Times")+
   labs(colour = "")+
   ylab("Phenotype")+xlab("Environment")+
-  annotate("text", x = 1.25, y = 2.75, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=6, color = "black",hjust = 0,parse = T)+
-  annotate("text", x = 1.25, y = 2.25, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=6 , color = "black", hjust = 0,parse = T)+
-  theme(axis.text=element_text(colour="black"))+
-  if(phenRow$n_pop ==8){scale_colour_manual(labels = long_gen, values = colorpal)}else{scale_colour_viridis(labels = long_gen, discrete = TRUE)}
+  annotate("text", x = 1, y = 2.75, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=8, color = "black",hjust = 0,parse = T)+
+  annotate("text", x = 1, y = 2.25, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=8 , color = "black", hjust = 0,parse = T)+
+  theme(axis.text=element_text(colour="black"))
+p1 = p + if(phenRow$n_pop == 2){scale_x_discrete(labels = short_env)
+  }else if(phenRow$env_scenario == 2){scale_x_discrete(labels = short_env)
+  }else{scale_x_discrete(labels = long_env)} 
+p2 = p1 + if(phenRow$n_pop == 2){scale_colour_manual(labels = short_gen, values = colorpal)
+}else if(phenRow$env_scenario == 2){scale_colour_manual(values = colorpal)
+}else{scale_colour_viridis(discrete = TRUE)}
+
+pdf(paste("Row_", phenRow$row, ".pdf", sep = ""), width=11, height=8.5) # start export
+print(p2) 
+dev.off() # finish export
+}
 phenRow
 
 # Check with Variance partition data frame

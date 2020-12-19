@@ -8,8 +8,8 @@ param_list <- list(
   reps = c(10), 
   delta_env = NULL, 
   delta_gen = c(-1,0.0,1),
-  sample_size = c(2,4,8,16), 
-  n_pop = c(2,4,8,16),
+  sample_size = c(4,8,16), 
+  n_pop = c(2),
   env_scenario = c(1,2),  # 1 = Recip. Transplant ; 2 = Common Garden
   std_dev= c(.5, 1),
   interaction = NULL) 
@@ -43,15 +43,15 @@ parameter_generation <- function(param_list){
       # Intercepts
       delta_gen = runif(n = 50, min = -1, max = 1) 
       
-      if(params$n_pop[i] == 2){
-        low_int = runif(50, min = 0, max = 2)
-        interaction = low_int
-      }else{
+      #if(params$n_pop[i] == 2){
+      #  low_int = runif(50, min = 0, max = 2)
+      #  interaction = low_int
+     # }else{
         low_int = runif(n = 35, min = 0, max = 1.99)
         high_int = runif(n = 15, min = 2, max = params$n_pop[i])
         pot1 = c(low_int, high_int)
         interaction = sample(pot1, size = 50, replace = FALSE)
-      }
+      #}
       inter_df1 = data.frame("delta_env" = delta_env, "delta_gen" = delta_gen, "interaction" = interaction)
       inter_df = merge(params[i,],inter_df1)
       
@@ -66,7 +66,7 @@ parameter_generation <- function(param_list){
     
     # Add rows to ensure false positives and negatives
     fpr1_gxe <- data.frame("n_pop" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE),
-                           "sample_size" = sample(rep(c(2, 4,8,16),each = 25), 100, replace = FALSE), # remove the 2, each = 34
+                           "sample_size" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE), # remove the 2, each = 34
                            "std_dev" = rep(c(0.5,1.0), each = 50),
                            "n_env" = NA, 
                            "delta_env" = runif(n = 100, min = 0, max = 1),
@@ -76,7 +76,7 @@ parameter_generation <- function(param_list){
                            "env_scenario" = rep(1, 100))
     fpr1_gxe$n_env = fpr1_gxe$n_pop
     fpr1_cov <- data.frame("n_pop" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE),
-                           "sample_size" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE), # remove the 2, each = 34
+                           "sample_size" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE), # remove the 2, each = 34
                            "std_dev" = rep(c(0.5,1.0), each = 50),
                            "n_env" = NA, 
                            "delta_env" = rep(0, 100),
@@ -140,8 +140,8 @@ parameter_generation <- function(param_list){
     param_table3$env_scenario = rep(2, nrow(param_table3))
     
     # Add rows to ensure false positives and negatives
-    fpr2_gxe <- data.frame("n_pop" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE),
-                           "sample_size" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE), #remove the 2, each = 34
+    fpr2_gxe <- data.frame("n_pop" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE),
+                           "sample_size" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE), #remove the 2, each = 34
                            "std_dev" = rep(c(0.5,1.0), each = 50),
                            "n_env" = rep(2, times = 100), 
                            "delta_env" = runif(n = 100, min = 0, max = 1),
@@ -149,8 +149,8 @@ parameter_generation <- function(param_list){
                            "interaction" = rep(0, 100), # 100 at ZERO
                            "replicate" = rep(x, 100),
                            "env_scenario" = rep(2, 100))
-    fpr2_cov <- data.frame("n_pop" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE),
-                           "sample_size" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE), #remove the 2, each = 34
+    fpr2_cov <- data.frame("n_pop" = sample(rep(c(2,4,8,16),each = 25), 100, replace = FALSE),
+                           "sample_size" = sample(rep(c(4,8,16),each = 34), 100, replace = FALSE), #remove the 2, each = 34
                            "std_dev" = rep(c(0.5,1.0), each = 50),
                            "n_env" = rep(2, times = 100), 
                            "delta_env" = rep(0, 100), # 100 at ZERO
@@ -181,12 +181,16 @@ parameter_generation <- function(param_list){
 
 df = parameter_generation(param_list)
 dim(df)
-df1 = filter(df, total_samples <500) 
-dim(df1)
+df2 = filter(df, total_samples < 500) 
+dim(df2)
+df2$row = 44000+df2$row 
+write.csv(df2, "~/Desktop/df2pop.csv")
 
 setwd("~/Documents/GitHub/CnGV/CnGV/results/Sim_12.1.20/")
 df=read.csv("df.csv")
 dim(df)
+args = filter(df, row == 1824)
+args = args[,-1]
 
 # Pull out test scenarios
 
