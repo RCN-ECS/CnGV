@@ -789,3 +789,232 @@ heatmap_fun <- function(plot_data, plot_type){ #plot_type is "percent" or "rate"
   return(do.call(grid.arrange, p))
 } 
 
+## Calculate Power and False Negative rates
+fnr.effsize <- function(x, metric, analysis, scenario = 1){ # metric = Cov or GxE; analysis is perm or boot or anova
+
+  output = data.frame()
+  #for(i in 1:nrow(dat_csv1)){
+  #  if(dat_csv1$true_cov[i] == 0){dat_csv1$binCov[i] = 0
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0 & abs(dat_csv1$true_cov[i]) <= 0.15){dat_csv1$binCov[i] = 0.1
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.15 & abs(dat_csv1$true_cov[i]) <= 0.25){dat_csv1$binCov[i] = 0.2
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.25 & abs(dat_csv1$true_cov[i]) <= 0.35){dat_csv1$binCov[i] = 0.3
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.35 & abs(dat_csv1$true_cov[i]) <= 0.45){dat_csv1$binCov[i] = 0.4
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.45 & abs(dat_csv1$true_cov[i]) <= 0.55){dat_csv1$binCov[i] = 0.5
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.55 & abs(dat_csv1$true_cov[i]) <= 0.65){dat_csv1$binCov[i] = 0.6
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.65 & abs(dat_csv1$true_cov[i]) <= 0.75){dat_csv1$binCov[i] = 0.7
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.75 & abs(dat_csv1$true_cov[i]) <= 0.85){dat_csv1$binCov[i] = 0.8
+  #  }else if(abs(dat_csv1$true_cov[i]) > 0.85 & abs(dat_csv1$true_cov[i]) <= 0.95){dat_csv1$binCov[i] = 0.9
+  #  }else{dat_csv1$binCov[i] = 1}
+  #}
+
+  if(metric == "Cov"){
+    
+      x$binCov = "NA"
+      for(i in 1:nrow(x)){
+        if(abs(x$true_cov[i]) > 0 & abs(x$true_cov[i]) <= 0.25){x$binCov[i] = 0.25
+        }else if(abs(x$true_cov[i]) > 0.25 & abs(x$true_cov[i]) <= 0.5){x$binCov[i] = 0.5
+        }else if(abs(x$true_cov[i]) > 0.5 & abs(x$true_cov[i]) <= 0.75){x$binCov[i] = 0.75
+        }else{x$binCov[i] = 1}
+      }
+      
+      for(i in 1:length(unique(x$sample_size))){
+        for(j in 1:length(unique(x$n_pop))){
+          for(k in 1:length(unique(x$binCov))){
+            
+            fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+            ss = unique(x$sample_size)[i]
+            np = unique(x$n_pop)[j]
+            bc = unique(x$binCov)[k]
+            
+            if(analysis == "perm"){
+            
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = Covconfintperm,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+            
+              }else{
+              
+                tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = Covconfintboot,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+                
+                if(nrow(tempdf)==0){next}
+                
+                fn1 = tempdf$n[tempdf$name == "False Negative"]
+                fp1 = tempdf$n[tempdf$name == "False Positive"]
+                tn1 = tempdf$n[tempdf$name == "True Negative"]
+                tp1 = tempdf$n[tempdf$name == "True Positive"]
+                
+                if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                
+                fnr = fn/(fn+tp)
+                
+                output1 = data.frame(sample_size = ss, 
+                                     n_pop = np, 
+                                     bin = bc,
+                                     fnr = fnr,
+                                     power = 1-fnr)
+                output = rbind(output, output1)
+              }
+          }
+        }
+      }
+          }else{
+            x$binGxE = "NA"
+            for(i in 1:nrow(x)){
+              if(abs(x$true_GxE_emm[i]) > 0 & abs(x$true_GxE_emm[i]) <= 0.25){x$binGxE[i] = 0.25
+              }else if(abs(x$true_GxE_emm[i]) > 0.25 & abs(x$true_GxE_emm[i]) <= 0.5){x$binGxE[i] = 0.5
+              }else if(abs(x$true_GxE_emm[i]) > 0.5 & abs(x$true_GxE_emm[i]) <= 0.75){x$binGxE[i] = 0.75
+              }else{x$binGxE[i] = 1}
+            }
+            
+            for(i in 1:length(unique(x$sample_size))){
+              for(j in 1:length(unique(x$n_pop))){
+                for(k in 1:length(unique(x$binGxE))){
+                  
+                  fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+                  ss = unique(x$sample_size)[i]
+                  np = unique(x$n_pop)[j]
+                  bc = unique(x$binGxE)[k]
+                  
+                  if(analysis == "perm"){
+                    
+                    tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEconfintperm,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    
+                    if(nrow(tempdf)==0){next}
+                    
+                    fn1 = tempdf$n[tempdf$name == "False Negative"]
+                    fp1 = tempdf$n[tempdf$name == "False Positive"]
+                    tn1 = tempdf$n[tempdf$name == "True Negative"]
+                    tp1 = tempdf$n[tempdf$name == "True Positive"]
+                    
+                    if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                    if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                    if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                    if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                    
+                    fnr = fn/(fn+tp)
+                    
+                    output1 = data.frame(sample_size = ss, 
+                                         n_pop = np, 
+                                         bin = bc,
+                                         fnr = fnr,
+                                         power = 1-fnr)
+                    output = rbind(output, output1)
+                    
+                  }else if(analysis == "boot"){
+                    
+                    tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEconfintboot,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    
+                    if(nrow(tempdf)==0){next}
+                    
+                    fn1 = tempdf$n[tempdf$name == "False Negative"]
+                    fp1 = tempdf$n[tempdf$name == "False Positive"]
+                    tn1 = tempdf$n[tempdf$name == "True Negative"]
+                    tp1 = tempdf$n[tempdf$name == "True Positive"]
+                    
+                    if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                    if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                    if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                    if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                    
+                    fnr = fn/(fn+tp)
+                    
+                    output1 = data.frame(sample_size = ss, 
+                                         n_pop = np, 
+                                         bin = bc,
+                                         fnr = fnr,
+                                         power = 1-fnr)
+                    output = rbind(output, output1)
+                    
+                  }else{
+                    
+                    if(scenario == 1){
+                    tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEanova_conf,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    }else{
+                    
+                    tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEanova_check,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    }
+                  
+                    
+                    if(nrow(tempdf)==0){next}
+                    
+                    fn1 = tempdf$n[tempdf$name == "False Negative"]
+                    fp1 = tempdf$n[tempdf$name == "False Positive"]
+                    tn1 = tempdf$n[tempdf$name == "True Negative"]
+                    tp1 = tempdf$n[tempdf$name == "True Positive"]
+                    
+                    if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                    if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                    if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                    if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                    
+                    fnr = fn/(fn+tp)
+                    
+                    output1 = data.frame(sample_size = ss, 
+                                         n_pop = np, 
+                                         bin = bc,
+                                         fnr = fnr,
+                                         power = 1-fnr)
+                    output = rbind(output, output1)
+                  }
+                }
+              }
+            }
+            }
+  return(output)
+}
+
+             
+      
+  
