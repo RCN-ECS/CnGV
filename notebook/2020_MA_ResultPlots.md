@@ -26,7 +26,7 @@ Molly and Geoff Data
 ## Supplemental Figures 
 
 ### Supplemental Figure 1
-Hex plot demonstrating coverage 
+Hex plot demonstrating coverage of sampling space. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.Hex.ParameterCoverage.png)
 
 ### Supplemental Figure 2
