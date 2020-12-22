@@ -9,19 +9,19 @@ Phenotype Panel
 
 ## Figure 4
 False Positive rates 
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.FPR_panel.png)
 
 ## Figure 5
 Power Heatmap
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.HeatmapPanel.png)
 
 ## Figure 6
 Molly and Geoff Data
 ![image]()
 
 ## Figure 7
- GxE/Covariance Tradeoff panel
-![image]()
+GxE/Covariance Tradeoff panel
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.Cov_GxE_tradeoff_panel.png)
 
 ## Supplemental Figures 
 
@@ -30,13 +30,13 @@ Hex plot demonstrating coverage of sampling space.
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.Hex.ParameterCoverage.png)
 
 ### Supplemental Figure 2
-False Negative rates broken down by effect size (Both scenarios, means and raw)
-![image]()
+False Negative rates broken down by effect size 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.FalseNeg.FullPanel_effectSizes.png)
 
 ### Supplemental Figure 3
-Omega vs. GxE (shape by pval?) (both scenarios)
-![image]()
+Omega vs. GxE 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.OmegaVsGxE_panel.png)
 
 ### Supplemental Figure 4
 Means vs. Raw panels
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.MeansVsRaw_panel.png)
