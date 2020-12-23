@@ -650,6 +650,10 @@ cov.function <- function(input_df, is.sample = TRUE){ # input_df = cov_matrix of
 }
 
 ########### Simulation Summary/Plotting Functions ####################
+is.empty <- function(x, mode=NULL){
+  if (is.null(mode)) mode <- class(x)
+  identical(vector(mode,1),c(x,vector(class(x),1)))
+}
 
 ## Confusion Matrix data wrangling ##
 fpr.fnr <- function(input_df, divided, scenario){
@@ -790,25 +794,18 @@ heatmap_fun <- function(plot_data, plot_type){ #plot_type is "percent" or "rate"
 } 
 
 ## Calculate Power and False Negative rates
-fnr.effsize <- function(x, metric, analysis, scenario = 1){ # metric = Cov or GxE; analysis is perm or boot or anova
-
+fnr.effsize <- function(x, metric, analysis, scenario = 1, resolution){ # metric = Cov or GxE; analysis is perm or boot or anova
+   # metric = "Cov" or "GxE"
+   # analysis = "perm" or "boot"
+   # scenario = 1 or 2
+   # resolution = "fine" (for heatmaps) or "course" (for barplots)
+  
   output = data.frame()
-  #for(i in 1:nrow(dat_csv1)){
-  #  if(dat_csv1$true_cov[i] == 0){dat_csv1$binCov[i] = 0
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0 & abs(dat_csv1$true_cov[i]) <= 0.15){dat_csv1$binCov[i] = 0.1
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.15 & abs(dat_csv1$true_cov[i]) <= 0.25){dat_csv1$binCov[i] = 0.2
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.25 & abs(dat_csv1$true_cov[i]) <= 0.35){dat_csv1$binCov[i] = 0.3
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.35 & abs(dat_csv1$true_cov[i]) <= 0.45){dat_csv1$binCov[i] = 0.4
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.45 & abs(dat_csv1$true_cov[i]) <= 0.55){dat_csv1$binCov[i] = 0.5
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.55 & abs(dat_csv1$true_cov[i]) <= 0.65){dat_csv1$binCov[i] = 0.6
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.65 & abs(dat_csv1$true_cov[i]) <= 0.75){dat_csv1$binCov[i] = 0.7
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.75 & abs(dat_csv1$true_cov[i]) <= 0.85){dat_csv1$binCov[i] = 0.8
-  #  }else if(abs(dat_csv1$true_cov[i]) > 0.85 & abs(dat_csv1$true_cov[i]) <= 0.95){dat_csv1$binCov[i] = 0.9
-  #  }else{dat_csv1$binCov[i] = 1}
-  #}
+  
 
   if(metric == "Cov"){
     
+    if(resolution == "course"){
       x$binCov = "NA"
       for(i in 1:nrow(x)){
         if(abs(x$true_cov[i]) > 0 & abs(x$true_cov[i]) <= 0.25){x$binCov[i] = 0.25
@@ -816,6 +813,23 @@ fnr.effsize <- function(x, metric, analysis, scenario = 1){ # metric = Cov or Gx
         }else if(abs(x$true_cov[i]) > 0.5 & abs(x$true_cov[i]) <= 0.75){x$binCov[i] = 0.75
         }else{x$binCov[i] = 1}
       }
+    }else{
+      x$binCov = "NA"
+      for(i in 1:nrow(x)){
+        if(x$true_cov[i] == 0){x$binCov[i] = 0
+        }else if(abs(x$true_cov[i]) > 0 & abs(x$true_cov[i]) <= 0.15){x$binCov[i] = 0.1
+        }else if(abs(x$true_cov[i]) > 0.15 & abs(x$true_cov[i]) <= 0.25){x$binCov[i] = 0.2
+        }else if(abs(x$true_cov[i]) > 0.25 & abs(x$true_cov[i]) <= 0.35){x$binCov[i] = 0.3
+        }else if(abs(x$true_cov[i]) > 0.35 & abs(x$true_cov[i]) <= 0.45){x$binCov[i] = 0.4
+        }else if(abs(x$true_cov[i]) > 0.45 & abs(x$true_cov[i]) <= 0.55){x$binCov[i] = 0.5
+        }else if(abs(x$true_cov[i]) > 0.55 & abs(x$true_cov[i]) <= 0.65){x$binCov[i] = 0.6
+        }else if(abs(x$true_cov[i]) > 0.65 & abs(x$true_cov[i]) <= 0.75){x$binCov[i] = 0.7
+        }else if(abs(x$true_cov[i]) > 0.75 & abs(x$true_cov[i]) <= 0.85){x$binCov[i] = 0.8
+        }else if(abs(x$true_cov[i]) > 0.85 & abs(x$true_cov[i]) <= 0.95){x$binCov[i] = 0.9
+        }else{x$binCov[i] = 1}
+      }
+      
+    }
       
       for(i in 1:length(unique(x$sample_size))){
         for(j in 1:length(unique(x$n_pop))){
@@ -890,12 +904,32 @@ fnr.effsize <- function(x, metric, analysis, scenario = 1){ # metric = Cov or Gx
         }
       }
           }else{
+            
+            if(resolution == "course"){
             x$binGxE = "NA"
             for(i in 1:nrow(x)){
               if(abs(x$true_GxE_emm[i]) > 0 & abs(x$true_GxE_emm[i]) <= 0.25){x$binGxE[i] = 0.25
               }else if(abs(x$true_GxE_emm[i]) > 0.25 & abs(x$true_GxE_emm[i]) <= 0.5){x$binGxE[i] = 0.5
               }else if(abs(x$true_GxE_emm[i]) > 0.5 & abs(x$true_GxE_emm[i]) <= 0.75){x$binGxE[i] = 0.75
               }else{x$binGxE[i] = 1}
+            }
+            
+            }else{
+              x$binGxE = "NA"
+              for(i in 1:nrow(x)){
+                if(x$true_GxE_emm[i] == 0){x$binGxE[i] = 0
+                }else if(abs(x$true_GxE_emm[i]) > 0 & abs(x$true_GxE_emm[i]) <= 0.15){x$binGxE[i] = 0.1
+                }else if(abs(x$true_GxE_emm[i]) > 0.15 & abs(x$true_GxE_emm[i]) <= 0.25){x$binGxE[i] = 0.2
+                }else if(abs(x$true_GxE_emm[i]) > 0.25 & abs(x$true_GxE_emm[i]) <= 0.35){x$binGxE[i] = 0.3
+                }else if(abs(x$true_GxE_emm[i]) > 0.35 & abs(x$true_GxE_emm[i]) <= 0.45){x$binGxE[i] = 0.4
+                }else if(abs(x$true_GxE_emm[i]) > 0.45 & abs(x$true_GxE_emm[i]) <= 0.55){x$binGxE[i] = 0.5
+                }else if(abs(x$true_GxE_emm[i]) > 0.55 & abs(x$true_GxE_emm[i]) <= 0.65){x$binGxE[i] = 0.6
+                }else if(abs(x$true_GxE_emm[i]) > 0.65 & abs(x$true_GxE_emm[i]) <= 0.75){x$binGxE[i] = 0.7
+                }else if(abs(x$true_GxE_emm[i]) > 0.75 & abs(x$true_GxE_emm[i]) <= 0.85){x$binGxE[i] = 0.8
+                }else if(abs(x$true_GxE_emm[i]) > 0.85 & abs(x$true_GxE_emm[i]) <= 0.95){x$binGxE[i] = 0.9
+                }else{x$binGxE[i] = 1}
+              }
+              
             }
             
             for(i in 1:length(unique(x$sample_size))){
