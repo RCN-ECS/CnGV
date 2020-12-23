@@ -5,7 +5,7 @@ Supplementary materials are located below the main 7 plots.
 
 ## Figure 3
 Phenotype Panel 
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/PhenotypePlotPanel.png)
 
 ## Figure 4
 False Positive rates 
@@ -17,7 +17,7 @@ Power Heatmap
 
 ## Figure 6
 Molly and Geoff Data
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.RealData.panel.png)
 
 ## Figure 7
 GxE/Covariance Tradeoff panel
