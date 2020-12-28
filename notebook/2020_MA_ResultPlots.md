@@ -12,8 +12,8 @@ Supplementary materials are located below the main 7 plots.
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.FPR_panel.png)
 
 ## Figure 5
-Remaking (12/28/2020, coming soon)
-![image]()
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.28.HeatmapPanel.png)
 
 ## Figure 6
 
