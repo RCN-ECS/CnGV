@@ -14,7 +14,7 @@ library(viridis)
 # Load Data compiled on cluster
 setwd("~/Documents/GitHub/CnGV/CnGV/results/Sim_12.15.20/")
 start_df = read.csv("Power_output_results.csv") 
-phen_data = read.csv("phenotype_output_results.csv")
+phen_data = read.csv("~/Desktop/phenotype_output_results.csv")
 
 # Split up into two experimental designs
 dat_csv = start_df %>% filter(env_scenario == 1) %>% droplevels() # Reciprocal Transplant
@@ -175,105 +175,6 @@ ggplot((filter(dat_dub, sample_size != 16)), aes(x = covariance, y = GxE_omega, 
   theme(legend.position = "none")+
   scale_colour_identity()+
   facet_grid(sample_size~n_pop)
-
-
-#############################
-## Power Analysis Heatmaps ##
-#############################
-
-# Covariance - FRT
-cov_hm = fnr.effsize(dat_csv1, metric = "cov", analysis = "perm", resolution = "fine")
-cov_hm1 = cov_hm %>%
-  filter(between(bin,0.2,0.6))%>%
-  group_by(sample_size,n_pop) %>%
-  summarize("avgpower" = mean(power))
-cov_hm1$totals = cov_hm1$n_pop *cov_hm1$n_pop * cov_hm1$sample_size
-
-# Covariance - CG
-cov_hm2 = fnr.effsize(dat_dub1, metric = "cov", analysis = "perm", resolution = "fine")
-cov_hm3 = cov_hm2 %>%
-  filter(between(bin,0.2,0.6))%>%
-  group_by(sample_size,n_pop) %>%
-  summarize("avgpower" = mean(power))
-cov_hm3$totals = cov_hm3$n_pop * 2 * cov_hm3$sample_size
-
-# HeatMaps - Covariance based on Permutation - FRT
-(CovPower1 = ggplot(cov_hm1,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
-    geom_tile() + 
-    geom_text(aes(label= paste(cov_hm1$totals, round(cov_hm1$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
-    scale_fill_viridis(
-      breaks=seq(0,1,0.25), #breaks in the scale bar
-      limits=c(0,1))+
-    xlab("Sample Size") + ylab("Number of Genotypes")+
-    labs(fill = "Power")+
-    theme(axis.text = element_text(colour = "black"))+  
-    theme(legend.position = "none")+
-    ggtitle(expression("Cov"["GE"]*": Full Reciprocal Transplant"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
-
-# HeatMaps - Covariance based on Permutation - FRT
-(CovPower2 = ggplot(cov_hm3,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
-    geom_tile() + 
-    geom_text(aes(label= paste(cov_hm3$totals, round(cov_hm3$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
-    scale_fill_viridis(
-      breaks=seq(0,1,0.25), #breaks in the scale bar
-      limits=c(0,1))+
-    xlab("Sample Size") + ylab("Number of Genotypes")+
-    labs(fill = "Power")+
-    theme(axis.text = element_text(colour = "black"))+  
-    theme(legend.position = "none")+
-    ggtitle(expression("Cov"["GE"]*": Paired Common Garden"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
-
-# Covariance - FRT
-gxe_hm = fnr.effsize(dat_csv1, metric = "gxe", analysis = "perm", resolution = "fine")
-gxe_hm1 = gxe_hm %>%
-  filter(between(bin,0.3,0.6))%>%
-  group_by(sample_size,n_pop) %>%
-  summarize("avgpower" = mean(power))
-gxe_hm1$totals = gxe_hm1$n_pop *gxe_hm1$n_pop * gxe_hm1$sample_size
-
-# Covariance - CG
-gxe_hm2 = fnr.effsize(dat_dub1, metric = "gxe", analysis = "perm", resolution = "fine")
-gxe_hm3 = gxe_hm2 %>%
-  filter(between(bin,0.3,0.6))%>%
-  group_by(sample_size,n_pop) %>%
-  summarize("avgpower" = mean(power))
-gxe_hm3$totals = gxe_hm3$n_pop * 2 * gxe_hm3$sample_size
-
-# HeatMaps - Covariance based on Permutation - FRT
-(GxEPower1 = ggplot(gxe_hm1,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
-    geom_tile() + 
-    geom_text(aes(label= paste(gxe_hm1$totals, round(gxe_hm1$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
-    scale_fill_viridis(
-      breaks=seq(0,1,0.25), #breaks in the scale bar
-      limits=c(0,1))+
-    xlab("Sample Size") + ylab("Number of Genotypes")+
-    labs(fill = "Power")+
-    theme(axis.text = element_text(colour = "black"))+  
-    theme(legend.position = "none")+
-    ggtitle(expression(bar(Delta)*""["GxE"]*": Full Reciprocal Transplant"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
-
-# HeatMaps - Covariance based on Permutation - FRT
-(GxEPower2 = ggplot(gxe_hm3,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
-    geom_tile() + 
-    geom_text(aes(label= paste(gxe_hm3$totals, round(gxe_hm3$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
-    scale_fill_viridis(
-      breaks=seq(0,1,0.25), #breaks in the scale bar
-      limits=c(0,1))+
-    xlab("Sample Size") + ylab("Number of Genotypes")+
-    labs(fill = "Power")+
-    theme(axis.text = element_text(colour = "black"))+  
-    theme(legend.position = "none")+
-    ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
-
-grid.arrange(CovPower1,GxEPower1,CovPower2,GxEPower2,ncol = 2)
 
 
 ########################################################
@@ -1076,6 +977,106 @@ for(i in 1:nrow(dub_fpdf_means)){
    theme(axis.text = element_text(colour = "black")))
 
 
+
+#############################
+## Power Analysis Heatmaps ##
+#############################
+
+# Covariance - FRT
+cov_hm = fnr.effsize(dat_csv1, metric = "cov", analysis = "perm", resolution = "fine")
+cov_hm1 = cov_hm %>%
+  filter(between(bin,0.2,0.6))%>%
+  group_by(sample_size,n_pop) %>%
+  summarize("avgpower" = mean(power))
+cov_hm1$totals = cov_hm1$n_pop *cov_hm1$n_pop * cov_hm1$sample_size
+
+# Covariance - CG
+cov_hm2 = fnr.effsize(dat_dub1, metric = "cov", analysis = "perm", resolution = "fine")
+cov_hm3 = cov_hm2 %>%
+  filter(between(bin,0.2,0.6))%>%
+  group_by(sample_size,n_pop) %>%
+  summarize("avgpower" = mean(power))
+cov_hm3$totals = cov_hm3$n_pop * 2 * cov_hm3$sample_size
+
+# HeatMaps - Covariance based on Permutation - FRT
+(CovPower1 = ggplot(cov_hm1,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(cov_hm1$totals, round(cov_hm1$avgpower,3),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(
+      breaks=seq(0,1,0.25), #breaks in the scale bar
+      limits=c(0,1))+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+  
+    theme(legend.position = "none")+
+    ggtitle(expression("Cov"["GE"]*": Full Reciprocal Transplant"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+# HeatMaps - Covariance based on Permutation - FRT
+(CovPower2 = ggplot(cov_hm3,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(cov_hm3$totals, round(cov_hm3$avgpower,3),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(
+      breaks=seq(0,1,0.25), #breaks in the scale bar
+      limits=c(0,1))+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+  
+    theme(legend.position = "none")+
+    ggtitle(expression("Cov"["GE"]*": Paired Common Garden"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+# Covariance - FRT
+gxe_hm = fnr.effsize(dat_csv1, metric = "gxe", analysis = "perm", resolution = "fine")
+gxe_hm1 = gxe_hm %>%
+  filter(between(bin,0.3,0.6))%>%
+  group_by(sample_size,n_pop) %>%
+  summarize("avgpower" = mean(power))
+gxe_hm1$totals = gxe_hm1$n_pop *gxe_hm1$n_pop * gxe_hm1$sample_size
+
+# Covariance - CG
+gxe_hm2 = fnr.effsize(dat_dub1, metric = "gxe", analysis = "perm", resolution = "fine")
+gxe_hm3 = gxe_hm2 %>%
+  filter(between(bin,0.3,0.6))%>%
+  group_by(sample_size,n_pop) %>%
+  summarize("avgpower" = mean(power))
+gxe_hm3$totals = gxe_hm3$n_pop * 2 * gxe_hm3$sample_size
+
+# HeatMaps - Covariance based on Permutation - FRT
+(GxEPower1 = ggplot(gxe_hm1,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(gxe_hm1$totals, round(gxe_hm1$avgpower,3),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(
+      breaks=seq(0,1,0.25), #breaks in the scale bar
+      limits=c(0,1))+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+  
+    theme(legend.position = "none")+
+    ggtitle(expression(bar(Delta)*""["GxE"]*": Full Reciprocal Transplant"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+# HeatMaps - Covariance based on Permutation - FRT
+(GxEPower2 = ggplot(gxe_hm3,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
+    geom_tile() + 
+    geom_text(aes(label= paste(gxe_hm3$totals, round(gxe_hm3$avgpower,3),sep = '\n')), size = 5) +
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    scale_fill_viridis(
+      breaks=seq(0,1,0.25), #breaks in the scale bar
+      limits=c(0,1))+
+    xlab("Sample Size") + ylab("Number of Genotypes")+
+    labs(fill = "Power")+
+    theme(axis.text = element_text(colour = "black"))+  
+    theme(legend.position = "none")+
+    ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+grid.arrange(CovPower1,GxEPower1,CovPower2,GxEPower2,ncol = 2)
+
+
 ######################################
 ## Tradeoff with GxE and Covariance ##
 ######################################
@@ -1447,17 +1448,19 @@ suspect.pvals.mean = dat_csv %>% # mean
 (ggplot(suspect.pvals.mean, aes(x = GxE_means, y = GxE_emm_pvalue)) + 
     geom_point()+theme_classic())
 
-####### Phenotype plots ##########
+#############################
+##      Phenotype plots    ##
+#############################
 
 
 # To find examples  
-(rowpicker = dat_dub %>%
+(rowpicker = dat_csv %>%
     filter(sample_size == 4)%>%
-    filter(n_pop == 16)%>%
-    #filter(GxE_emm < 0.35)%>% #No GxE
-    filter(GxE_emm > 0.65)%>% # GxE
+    filter(n_pop == 4)%>%
+    filter(GxE_emm < 0.35)%>% #No GxE
+    #filter(GxE_emm > 0.65)%>% # GxE
     #filter(covariance < -.35)) # CnGV
-    filter(covariance > .35)) # CoGV
+    filter(covariance > .75)) # CoGV
 
 chosen_1 = c(45657, # CoGV, GxE, 2 pop #
              11021, # CnGV, GxE, 2 pop #
@@ -1469,7 +1472,7 @@ chosen_1 = c(45657, # CoGV, GxE, 2 pop #
              13709, # CnGV, GxE, 8 pop #
              17324, # CoGV, GxE, 8 pops #
              
-             13662, # CoGV, No GxE, 4 pop #
+             9279, # CoGV, No GxE, 4 pop #
              299, # CnGV, No GxE, 4 pop #
              6484, # CnGV, GxE, 4 pop #
              13662) # CoGV, GxE, 4 pops #
@@ -1514,11 +1517,12 @@ shape_8 = c("E_1" = 15, "E_2" = 17,"E_3" = 19, "E_4"= 18,
 p = ggplot(plotdat,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor,colour = nat_env_factor))+
   geom_point(aes(shape = nat_env_factor),size = 2, position=position_dodge(width = 0.15))+
   geom_smooth(size = 2, se=FALSE)+
-  theme_classic(base_size = 24, base_family = "Times")+
+  theme_classic(base_size = 32, base_family = "Times")+
   labs(colour = "",shape = "")+
+  guides(colour = guide_legend(ncol = 2))+
   ylab("Phenotype")+xlab("Environment")+
-  annotate("text", x = 1, y = 2.75, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=8, color = "black",hjust = 0,parse = T)+
-  annotate("text", x = 1, y = 2.25, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=8 , color = "black", hjust = 0,parse = T)+
+  annotate("text", x = 1, y = 4, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=12, color = "black",hjust = 0,parse = T)+
+  annotate("text", x = 1, y = 3, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=12 , color = "black", hjust = 0,parse = T)+
   theme(axis.text=element_text(colour="black"))+
   theme(legend.position="bottom")
 
@@ -1536,7 +1540,6 @@ p3 = p2 + if(phenRow$n_pop == 2){
 }else if(phenRow$env_scenario == 2){scale_shape_manual(values = shape_2,labels = short_gen)
 }else if(phenRow$n_pop == 4){scale_shape_manual(values = shape_4,labels = mid_gen)
 }else{scale_shape_manual(values = shape_8,labels = long_genlab)}
-
 
 
 pdf(paste("Row_", phenRow$row, ".pdf", sep = ""), width=11, height=8.5) # start export
@@ -2266,7 +2269,7 @@ bindf3 = merge(bindf, bindf2)
 
 
 
-########## Panels for Confusion Matrices for both scenarios ########## 
+# Panels for Confusion Matrices for both scenarios 
 
 # Confusion Plots for Raw (both scenarios)
 grid.arrange(gxe_confusion_boot,gxe_confusion_boot_dub,
