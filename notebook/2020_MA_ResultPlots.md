@@ -4,7 +4,7 @@ I ran a (hopefully) final round of simulations last week. The plots here are arr
 Supplementary materials are located below the main 7 plots.
 
 ## Figure 3
-Phenotype Panel 
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/PhenotypePlotPanel.png)
 
 ## Figure 4
