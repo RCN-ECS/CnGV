@@ -6,7 +6,7 @@ I like all of these - great job!
 
 - Overall thoughts
   - How were the effect sizes binned? was it >0-0.25, >.25-0.5, etc? Some of the GxE had > 1, just making sure we didn't miss them
-  - the same general hard thing of how to represent the total sample sizes - e.g. the yellow bars under 2 populations on the reciprocal transplant is not the same total sample size as the yellow bars under 2 populations on the bottom.
+  - the same general hard thing of how to represent the total sample sizes - e.g. the yellow bars under 2 populations on the reciprocal transplant is not the same total sample size as the yellow bars under 2 populations on the bottom. It's also a little odd to have the unbalanced designs, what would it look like if we panel by method instead of by design?
   - It might help to have the GxE permutation next to ANOVa so we can show their performance. ANOVA generally has higher power and lower false positive rates. We should discuss how to deal with this for the metanalysis.
   - For the paper I'm thinking (happy to chat more):
     - for CovGE we should use bootstrap and permutation to display and discuss results 
