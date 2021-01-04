@@ -463,7 +463,7 @@ bootstrap_raw <- function(input_df){ # input is model_df
 bootstrap_means <- function(input_df){ # input is means_df
   
   # Clear outputs
-  new_phen.<- new_phen <-NULL
+  new_phen.<- new_phen <- NULL
   new_mean_temp <- data.frame()
   new_means <- data.frame()
   
