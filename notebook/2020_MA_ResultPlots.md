@@ -9,6 +9,8 @@ Supplementary materials are located below the main 7 plots.
 
 * KEL note: looks good. Add CI for permutation and ANOVA p-values for GxE. I worry the font will be too small for a 6-inch page. The significant GxE and non-sig GxE appear to be reversed?
 
+**Molly: pick a few to show and leave it - maybe 2x2 and 4x4**
+
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/PhenotypePlotPanel.png)
 
 ## Figure 4
