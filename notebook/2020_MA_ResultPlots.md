@@ -72,4 +72,4 @@ I'm trying to think of other things we've plotted in the past that have helped u
 and (ii) go with other supplemental parts of the paper:
 - the variance partitioning plots and examples (https://github.com/RCN-ECS/CnGV/blob/master/notebook/20201019_VarPart_KEL.Rmd)
 - the PL statistic comparison
-- 
+   **Molly: Include, methods saying that we compared to another method, results - we found X, results are in the supplement (from comment) (katie's plots)**
