@@ -28,9 +28,10 @@ dat_dub = start_df %>% filter(env_scenario == 2) %>% droplevels() # Common Garde
   summarize(average_time = mean(Sim_time)))
 
 ####### Check 0s for FPR and FNR ##########
-sizecheck = dat_dub %>%
-   filter(true_cov == 0) 
-  # filter(true_GxE_emm == 0)
+sizecheck = dat_csv %>%
+   #filter(true_cov == 0) 
+   filter(true_GxE_emm >= 0.75)
+   #filter(abs(true_cov) >=0.75) 
 dim(sizecheck) # Should be around 1000 (or 100 if 1 replicate)
 
 ####### Check # for each type ##########
@@ -343,24 +344,24 @@ for(i in 1:nrow(fpdf)){
 fpdf1 = fpdf[fpdf$name == "False Positive",]
 
 ## False Negative Rates
-covperm1 = fnr.effsize(dat_csv1, metric = "cov", analysis ="perm")
+covperm1 = fnr.effsize(dat_csv1, metric = "cov", analysis ="perm",resolution = "fine")
 covperm1$label = rep("Cov_Perm",nrow(covperm1))
-covboot1 = fnr.effsize(dat_csv1, metric = "cov", analysis ="boot")
+covboot1 = fnr.effsize(dat_csv1, metric = "cov", analysis ="boot",resolution = "fine")
 covboot1$label = rep("Cov_Boot",nrow(covboot1))
-gxeperm1 = fnr.effsize(dat_csv1, metric = "gxe", analysis ="perm")
+gxeperm1 = fnr.effsize(dat_csv1, metric = "gxe", analysis ="perm",resolution = "fine")
 gxeperm1$label = rep("GxE_Perm",nrow(gxeperm1))
-gxeboot1 = fnr.effsize(dat_csv1, metric = "gxe", analysis = "boot")
+gxeboot1 = fnr.effsize(dat_csv1, metric = "gxe", analysis = "boot",resolution = "fine")
 gxeboot1$label = rep("GxE_Boot",nrow(gxeboot1))
-gxeanova1 = fnr.effsize(dat_csv1, metric = "gxe", analysis = "anova")
+gxeanova1 = fnr.effsize(dat_csv1, metric = "gxe", analysis = "anova",resolution = "fine")
 gxeanova1$label = rep("GxE_Anova",nrow(gxeanova1))
 
 fndf = rbind(covperm1,covboot1,gxeperm1,gxeboot1,gxeanova1)
-gxePow = rbind(gxeperm1,gxeboot1,gxeanova1)
+gxePow = rbind(gxeperm1,gxeanova1)
 covPow = rbind(covperm1,covboot1)
 
 ############ Confusion Plots  -- Env Scenario 1 ###############
 
-## False Positive Rates 
+## False Positive BarPlot 
 (falsePos = ggplot(fpdf1, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
   geom_bar(position = "dodge", stat = "identity") + 
   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
@@ -376,6 +377,21 @@ covPow = rbind(covperm1,covboot1)
                             "GxE_Anova" = "ANOVA \n GxE"))+
   theme_classic(base_family = "Times",base_size = 16) + 
   theme(axis.text = element_text(colour = "black")))
+
+## False Positive Heatmap 
+(falsePos = ggplot(filter(fpdf1,ID == "GxE_Perm"), aes(x = sample_size, y = npop_plot, fill = rate))+ 
+  geom_tile() + 
+ # geom_text(aes(label= paste(fpdf1$total, round(fpdf1$rate,2),sep = '\n')), size = 5) +
+  theme_classic(base_size = 24, base_family = "Times")+ 
+  scale_fill_viridis(
+    breaks=seq(0,1,0.25), #breaks in the scale bar
+    limits=c(0,1))+
+  xlab("Sample Size") + ylab("Number of Genotypes")+
+  labs(fill = "Power")+
+  theme(axis.text = element_text(colour = "black"))+  
+  theme(legend.position = "none")+
+  ggtitle(expression("Cov"["GE"]*": Full Reciprocal Transplant"))+
+  theme(plot.title = element_text(size = 24, face = "bold")))
 
 ## False Negative Rates 
 (falseNeg = ggplot(fndf, aes(x = label, y = fnr, group = sample_size, fill = factor(sample_size)))+ 
@@ -393,6 +409,7 @@ covPow = rbind(covperm1,covboot1)
                               "GxE_Anova" = "ANOVA \n GxE"))+
     theme_classic(base_family = "Times",base_size = 16) + 
     theme(axis.text = element_text(colour = "black")))
+
 
 ## GxE Power Bar plot
 gxePow$totals = gxePow$n_pop * gxePow$n_pop * gxePow$sample_size
@@ -1070,7 +1087,7 @@ gxe_hm3$totals = gxe_hm3$n_pop * 2 * gxe_hm3$sample_size
     xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+  
-    theme(legend.position = "none")+
+    #theme(legend.position = "none")+
     ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
     theme(plot.title = element_text(size = 24, face = "bold")))
 
@@ -1208,32 +1225,33 @@ ggplot(sigGxE, aes(x = GxE_omega, y = covtick))+
 ###      ANOVA vs. GxE_EMM comparison       ###
 ###############################################
 devcol = c("None Significant" = "white", 
-           "Both Significant" = "#440154FF", 
-           "Omega Significant" = "#39568CFF",
-           "E.M.M Significant" = "#73D055FF")
+           "All Significant" = "#440154FF", 
+           "ANOVA P-value < 0.05" = "#39568CFF",
+           "Permutation P-value < 0.05" = "#73D055FF")
 devshape = c("None Significant" = 21, 
-           "Both Significant" = 22, 
-           "Omega Significant" = 23,
-           "E.M.M Significant" = 24)
+           "All Significant" = 22, 
+           "ANOVA P-value < 0.05" = 23,
+           "Permutation P-value < 0.05" = 24)
 dat_csv$sigsig = NA
-dat_csv = dat_csv %>% mutate(sigsig = ifelse(GxE_emm_pvalue <= 0.05 & GxE_omega_pvalue <= 0.05, "Both Significant",
+dat_csv = dat_csv %>% mutate(sigsig = ifelse(GxE_emm_pvalue <= 0.05 & GxE_omega_pvalue <= 0.05, "All Significant",
                                              ifelse(GxE_emm_pvalue > 0.05 & GxE_omega_pvalue > 0.05, "None Significant",
-                                                ifelse(GxE_emm_pvalue > 0.05 & GxE_omega_pvalue <= 0.05, "Omega Significant", 
-                                                   "E.M.M Significant"))))
+                                                ifelse(GxE_emm_pvalue > 0.05 & GxE_omega_pvalue <= 0.05, "ANOVA P-value < 0.05", 
+                                                   "Permutation P-value < 0.05"))))
+oe = dat_csv %>% filter(replicate == 1) %>% filter(std_dev == 1)
                                         
-(eff_var1 = ggplot(filter(dat_csv,replicate == 1), aes(x = true_GxE_emm, y = GxE_omega, group = factor(std_dev))) + 
-    geom_point(aes(shape = factor(sigsig), fill = factor(sigsig)), alpha = 1, size = 4)+
+(eff_var1 = ggplot(oe, aes(x = true_GxE_emm, y = GxE_omega)) + 
+    geom_point(aes(shape = factor(sigsig), fill = factor(sigsig)), alpha = 0.65, size = 4)+
     scale_fill_manual(values = devcol)+
                       #breaks = c("0.5", "1"))+
     scale_shape_manual(values = devshape)+
-    geom_smooth(aes(linetype = factor(std_dev)),method = "lm", formula = y ~ splines::bs(x, 3),se = F,colour = "black",size = 1.5) + 
-    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+
-    scale_linetype_manual(values = c("0.5" = "dotted", "1" = "solid"))+
-    ylab(expression(""*omega^2))+
+    geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3),se = F,colour = "black",size = 1.5) + 
+    xlab(expression(""*bar(Delta)*""["GxE"]*" of Population"))+
+    #scale_linetype_manual(values = c("0.5" = "dotdash", "1" = "solid"))+
+    ylab(expression(""*omega^2*" of Population"))+
     #guides(fill=guide_legend(override.aes=list(shape=21,size =6)))+
     labs(fill = "Significance", shape =  "Significance", linetype = "Standard Deviation")+
     guides(shape = guide_legend(override.aes = list(size = 6)))+
-    ggtitle("Full Reciprocal Transplant Design")+
+    #ggtitle("Full Reciprocal Transplant Design")+
     theme_classic(base_size = 24, base_family = "Times")+
     theme(axis.text =element_text(colour = "black")))
 
@@ -1467,10 +1485,10 @@ chosen_1 = c(45657, # CoGV, GxE, 2 pop #
              44014, # CnGV, No GxE, 2 pop #
              16434, # CoGV, No GxE, 2 pop #
              
-             12949, # CoGV, No GxE, 8 pop #
-             16546, # CnGV, No GxE, 8 pop #
-             13709, # CnGV, GxE, 8 pop #
-             17324, # CoGV, GxE, 8 pops #
+            # 12949, # CoGV, No GxE, 8 pop #
+            # 16546, # CnGV, No GxE, 8 pop #
+            # 13709, # CnGV, GxE, 8 pop #
+            # 17324, # CoGV, GxE, 8 pops #
              
              9279, # CoGV, No GxE, 4 pop #
              299, # CnGV, No GxE, 4 pop #
@@ -1480,12 +1498,12 @@ chosen_1 = c(45657, # CoGV, GxE, 2 pop #
 chosen_2 = c(21997, # CoGV, GxE, 2 pop per env #
              30830, # CnGV, GxE, 2 pop per env #
              54780, # CnGV, No GxE, 2 pop per env #
-             25827, # CoGV, No GxE, 2 pop per env #
+             25827) # CoGV, No GxE, 2 pop per env #
              
-             38536, # CoGV, No GxE, 8 pop per env #
-             42175, # CnGV, No GxE, 8 pop #
-             19648, # CnGV, GxE, 8 pop #
-             32187) # CoGV, GxE, 8 pops #
+            # 38536, # CoGV, No GxE, 8 pop per env #
+           #  42175, # CnGV, No GxE, 8 pop #
+            # 19648, # CnGV, GxE, 8 pop #
+           #  32187) # CoGV, GxE, 8 pops #
 
 chosen = c(chosen_1, chosen_2)
 
@@ -1515,14 +1533,15 @@ shape_8 = c("E_1" = 15, "E_2" = 17,"E_3" = 19, "E_4"= 18,
 
 
 p = ggplot(plotdat,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor,colour = nat_env_factor))+
-  geom_point(aes(shape = nat_env_factor),size = 2, position=position_dodge(width = 0.15))+
-  geom_smooth(size = 2, se=FALSE)+
-  theme_classic(base_size = 32, base_family = "Times")+
+  geom_point(aes(shape = nat_env_factor),size = 5, position=position_dodge(width = 0.15))+
+  geom_smooth(size = 4, se=FALSE)+
+  theme_classic(base_size = 40, base_family = "Times")+
+  ylim(-3,6)+
   labs(colour = "",shape = "")+
   guides(colour = guide_legend(ncol = 2))+
   ylab("Phenotype")+xlab("Environment")+
-  annotate("text", x = 1, y = 4, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=12, color = "black",hjust = 0,parse = T)+
-  annotate("text", x = 1, y = 3, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=12 , color = "black", hjust = 0,parse = T)+
+  annotate("text", x = 0.5, y = 5.5, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=16, color = "black",hjust = 0,parse = T)+
+  annotate("text", x = 0.5, y = 4, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=16 , color = "black", hjust = 0,parse = T)+
   theme(axis.text=element_text(colour="black"))+
   theme(legend.position="bottom")
 
@@ -1540,8 +1559,6 @@ p3 = p2 + if(phenRow$n_pop == 2){
 }else if(phenRow$env_scenario == 2){scale_shape_manual(values = shape_2,labels = short_gen)
 }else if(phenRow$n_pop == 4){scale_shape_manual(values = shape_4,labels = mid_gen)
 }else{scale_shape_manual(values = shape_8,labels = long_genlab)}
-
-
 pdf(paste("Row_", phenRow$row, ".pdf", sep = ""), width=11, height=8.5) # start export
 print(p3) 
 dev.off() # finish export
