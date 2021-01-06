@@ -17,10 +17,40 @@ After discussing various different ways to visualize the data, I have come up wi
 **Molly: Make sure all axes labeled with SAMPLE or POPULATION**
 
 ### Figure 3. 
-GxE Panel. Three plots. Show omega^2 (how these metrics differ), FPR for Anova vs. Permutation, and Powerheatmap. 
+In the meeting we discussed a few different ways of plotting false positives. If we want to show 1) Here's how the metric works, 2) Here's how accurate it is, nad 3) Here's the power. 
+
+In light of that, I was advised to pull a few scenarios and plot the false positive rates.  I've created a few different ways here. In each plot, panel A, C, and D are the same. A shows the relationship between omega^2 and DeltaGxE colored according to significance (goal 1). C and D show power (1-FNR) for Full Reciprocal Tranplant and Common Garden designs (goal 3). The plot that changes out is B. We need to find the best way to show the accuracy of the methods.
+
+Permutation FPR is 0 in basically every design. The overall FPR for permutation across all sample sizes and # genotypes is 0.01, so its not totally surprising. The only design with FPR of 0.03 is 4 sample size/ 8 genotype for FRT which is only shown in the 2nd & 4th mockup.  
+
+The first mock-up shows false positive rates for just  5 scenarios with 128 total samples (3 for Common Garden, 2 for Recip. Transplant). 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.GxEPanels1.png)
+
+The second mock-up shows false positive rates for the 9 scenarios with power above 80% ordered by total sample size.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.GxEPanels2.png)
+
+The next two show the same data but now I've made the designs into the bars and grouped according to method (ANOVA vs. Permutation)
+
+The third mockup shows the flipped grouping with just 128 total samples (same as the first one above)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.GxEPanels3.png)
+
+The final mockup shows the flipped grouping with the 9 high powered designs (same as the second one above)
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.GxEPanels4.png)
 
 ### Figure 4.
-Cov Panel. FalsePositive vs. Power... Pick 5-6 designs. Then use Line plots to show FPRs according to effect size, FPR according to designs, and heatmap to show. 
+Same as GxE, I've made some different mockups to figure out how to best show the Covariance data. Cov Panel. These only show False Positives and Power. The bottom plots remain the same but the top plots (A) differ. 
+
+The first mock up shows False Positive rates in just 128 total samples
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.CovariancePanels1.png)
+
+The second one shows False Positive rates in the 4 scenarios with power above 80%. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.CovariancePanels2.png)
+
+The third is the same as the first but flipping to show design as the bars and method as the x axis group 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.CovariancePanels3.png)
+
+The final is showing the false positives for higher power designs but again with the flipping.
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.CovariancePanels4.png)
 
 ### Figure 5.
 Phenotype plot with just 2x2 and 4x4s. Bigger text. 
