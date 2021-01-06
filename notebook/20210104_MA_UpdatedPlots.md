@@ -53,22 +53,19 @@ The final is showing the false positives for higher power designs but again with
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.CovariancePanels4.png)
 
 ### Figure 5.
-Phenotype plot with just 2x2 and 4x4s. Bigger text. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.4.21.PhenotypePlotPanel.png)
 
 ### Figure 6. 
-Geoff and my data. 
 ![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/12.21.RealData.panel.png)
 
 ### Figure 7. 
-Tradeoff. (candidate for supplement if we want to cut to 6 plots?) 
-![image]()
+ (candidate for supplement if we want to cut to 6 plots?) 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.TradeoffWithCovGxE.png)
 
 ## Supplemental Plots
 
 ### Supplemental Figure 1. 
-hex plot
-![image]()
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.ParameterCoverage.png)
 
 ### Supplemental Figure 2. 
 Same panel for CovGE but with Means? (or do 1:1 line test on Power to see if they differ) 
@@ -77,7 +74,7 @@ Same panel for CovGE but with Means? (or do 1:1 line test on Power to see if the
 Variance Partitioning - Katie has these plots
 
 ### Supplemental Figure 4. 
-Raw vs. Means - update to lwr/upr ci and change axes. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.6.MeansVsRawPanel.png) 
 
 ### Supplemental Figure 5. 
 PL statistic Panels - Katie has these plots.
