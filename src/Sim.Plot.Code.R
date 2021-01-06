@@ -333,6 +333,8 @@ raw_conf3$ID = rep("GxE_Boot", nrow(raw_conf3))
 raw_conf4$ID = rep("GxE_Perm", nrow(raw_conf4))
 raw_conf5$ID = rep("GxE_Anova", nrow(raw_conf5))
 fpdf = rbind(raw_conf1,raw_conf2,raw_conf3,raw_conf4,raw_conf5)
+gxeFPR = rbind(raw_conf4,raw_conf5)
+gxeFPR = gxeFPR[gxeFPR$name == "False Positive",]
 
 ## False Positive Rates
 fpdf$npop_plot = NA
@@ -361,27 +363,36 @@ covPow = rbind(covperm1,covboot1)
 
 ############ Confusion Plots  -- Env Scenario 1 ###############
 
-## False Positive BarPlot 
-(falsePos = ggplot(fpdf1, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+## False Positive BarPlot
+dub_gxe$scenario = rep("CG",nrow(dub_gxe))
+gxeFPR$scenario = rep("FRT",nrow(gxeFPR))
+combo = rbind(dub_gxe,gxeFPR)
+
+combo = filter(combo,totsamp == 128)
+combo$grp = paste(combo$sample_size,combo$n_pop,combo$scenario,sep="_")
+combo[is.nan(combo)] <- 0
+
+(falsePos = ggplot(combo, aes(x = reorder(factor(grp),-rate), y = rate, group = ID,colour = factor(ID),fill = factor(ID)))+ 
   geom_bar(position = "dodge", stat = "identity") + 
   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
   ylab("False Positive Rate") + xlab("")+
-  ggtitle("False Positive Rates: Full Reciprocal Transplant")+
-  facet_wrap(~npop_plot) + 
-  labs(fill = "Sample Size")+
+  ggtitle("False Positive Rates")+
+ # facet_wrap(~npop_plot) + 
+  labs(colour = "Experimental Design",fill = "Experimental Design")+
   scale_fill_viridis(discrete = TRUE)+
-  scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
-                            "Cov_Boot" = "Boot. \n CovGE",
-                            "GxE_Boot" = "Boot. \n GxE",
-                            "GxE_Perm" = "Perm. \n GxE",
-                            "GxE_Anova" = "ANOVA \n GxE"))+
+    scale_colour_viridis(discrete = TRUE)+
+  scale_x_discrete(labels=c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes", 
+                            "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes",
+                            "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes",
+                            "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes",
+                            "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes"))+
   theme_classic(base_family = "Times",base_size = 16) + 
   theme(axis.text = element_text(colour = "black")))
 
 ## False Positive Heatmap 
-(falsePos = ggplot(filter(fpdf1,ID == "GxE_Perm"), aes(x = sample_size, y = npop_plot, fill = rate))+ 
+(falsePos = ggplot(filter(raw_conf1, name == "False Positive"), aes(x = sample_size, y = n_pop, group = sample_size, fill = rate))+ 
   geom_tile() + 
- # geom_text(aes(label= paste(fpdf1$total, round(fpdf1$rate,2),sep = '\n')), size = 5) +
+  geom_text(aes(label= paste(total, round(rate,2),sep = '\n')), size = 5) +
   theme_classic(base_size = 24, base_family = "Times")+ 
   scale_fill_viridis(
     breaks=seq(0,1,0.25), #breaks in the scale bar
@@ -745,7 +756,7 @@ dub_raw_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 2)
 raw_conf_plot4 <- heatmap_fun(dub_raw_conf4,"rate")
 
 raw_confusion_hmap5 = dat_dub2 %>%
-  group_by(sample_size, n_pop,"name" = GxEanova_check) %>%
+  group_by(sample_size, n_pop,"name" = GxEanova_conf) %>%
   summarize("n" = n())
 dub_raw_conf5 = fpr.fnr(raw_confusion_hmap5, divided = TRUE, scenario = 2)
 raw_conf_plot5 <- heatmap_fun(dub_raw_conf5,"rate")
@@ -758,6 +769,10 @@ dub_raw_conf4$ID = rep("GxE_Perm", nrow(dub_raw_conf4))
 dub_raw_conf5$ID = rep("GxE_Anova", nrow(dub_raw_conf5))
 dub_fpdf = rbind(dub_raw_conf1,dub_raw_conf2,dub_raw_conf3,dub_raw_conf4,dub_raw_conf5)
 dub_fpdf = dub_fpdf[dub_fpdf$name == "False Positive",]
+
+dub_gxe = rbind(dub_raw_conf4,dub_raw_conf5)
+dub_gxe = dub_gxe[dub_gxe$name == "False Positive",]
+
 
 ## False Positive Rates
 dub_fpdf$npop_plot = NA
