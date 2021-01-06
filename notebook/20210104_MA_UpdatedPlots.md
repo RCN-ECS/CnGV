@@ -16,15 +16,15 @@ After discussing various different ways to visualize the data, I have come up wi
 
 **Molly: Make sure all axes labeled with SAMPLE or POPULATION**
 
-### Figure 3.
-Phenotype plot with just 2x2 and 4x4s. Bigger text. 
-![image]()
-
-### Figure 4. 
+### Figure 3. 
 GxE Panel. Three plots. Show omega^2 (how these metrics differ), FPR for Anova vs. Permutation, and Powerheatmap. 
 
-### Figure 5.
+### Figure 4.
 Cov Panel. FalsePositive vs. Power... Pick 5-6 designs. Then use Line plots to show FPRs according to effect size, FPR according to designs, and heatmap to show. 
+
+### Figure 5.
+Phenotype plot with just 2x2 and 4x4s. Bigger text. 
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_12.15.20/1.4.21.PhenotypePlotPanel.png)
 
 ### Figure 6. 
 Geoff and my data. 
