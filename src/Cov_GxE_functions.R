@@ -798,14 +798,14 @@ fnr.effsize <- function(x, metric, analysis, scenario = 1, resolution){ # metric
    # metric = "Cov" or "GxE"
    # analysis = "perm" or "boot"
    # scenario = 1 or 2
-   # resolution = "fine" (for heatmaps) or "course" (for barplots)
+   # resolution = "fine" (for heatmaps) or "coarse" (for barplots)
   
   output = data.frame()
   
 
   if(metric == "Cov"){
     
-    if(resolution == "course"){
+    if(resolution == "coarse"){
       x$binCov = "NA"
       for(i in 1:nrow(x)){
         if(abs(x$true_cov[i]) > 0 & abs(x$true_cov[i]) <= 0.25){x$binCov[i] = 0.25
@@ -1004,7 +1004,8 @@ fnr.effsize <- function(x, metric, analysis, scenario = 1, resolution){ # metric
                   }else{
                     
                     if(scenario == 1){
-                    tempdf <- x %>% 
+                    
+                      tempdf <- x %>% 
                       filter(sample_size == ss) %>% 
                       filter(n_pop == np) %>%
                       filter(binGxE == bc) %>%
@@ -1048,6 +1049,10 @@ fnr.effsize <- function(x, metric, analysis, scenario = 1, resolution){ # metric
             }
   return(output)
 }
+
+is.nan.data.frame <- function(x){
+  do.call(cbind, lapply(x, is.nan))}
+
 
              
       

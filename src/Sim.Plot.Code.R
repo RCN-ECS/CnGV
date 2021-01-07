@@ -68,7 +68,7 @@ dat_csv$ss_f = factor(dat_csv$ss_chr, levels=c("2 Samples","4 Samples","8 Sample
 
 (hexy = ggplot(dat_csv, aes(x = true_cov, y = true_GxE_emm)) + 
    geom_hex()+ 
-   ylab(expression("Actual "*bar(Delta)*""["GxE"]))+xlab(expression("Actual Cov"["GE"]))+
+   ylab(expression(""*bar(Delta)*""["GxE"]*" of population"))+xlab(expression("Cov"["GE"]*" of population"))+
    ggtitle("Full Reciprocal Transplant") + facet_grid(ss_f~np_f) +
   #facet_grid(sample_size~n_pop)+
    theme_classic(base_family = "Times"))
@@ -86,7 +86,7 @@ dat_dub$ss_f = factor(dat_dub$ss_chr, levels=c("2 Samples","4 Samples","8 Sample
 dat_dub = filter(dat_dub, n_pop != 2)
 (hexy2 = ggplot(dat_dub, aes(x = true_cov, y = true_GxE_emm)) + 
     geom_hex()+ 
-    ylab(expression("Actual "*bar(Delta)*""["GxE"]))+xlab(expression("Actual Cov"["GE"]))+
+    ylab(expression(""*bar(Delta)*""["GxE"]*" of population"))+xlab(expression("Cov"["GE"]*" of population"))+
     ggtitle("Paired Common Garden") + facet_grid(ss_f~np_f) +
     theme_classic(base_family = "Times"))
 
@@ -300,31 +300,31 @@ fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 1)
     group_by(sample_size, n_pop, "name" =Covconfintperm) %>%
     summarize("n" = n()))
 raw_conf1 = fpr.fnr(raw_confusion_hmap1, divided = TRUE, scenario = 1)
-raw_conf_plot1 <- heatmap_fun(raw_conf1,"rate") # Can also do "percent"
+#raw_conf_plot1 <- heatmap_fun(raw_conf1,"rate") # Can also do "percent"
 
 (raw_confusion_hmap2 = dat_csv1 %>%
     group_by(sample_size, n_pop, "name" =Covconfintboot) %>%
     summarize("n" = n()))
 raw_conf2 = fpr.fnr(raw_confusion_hmap2, divided = TRUE, scenario = 1)
-raw_conf_plot2 <- heatmap_fun(raw_conf2,"rate")
+#raw_conf_plot2 <- heatmap_fun(raw_conf2,"rate")
 
 (raw_confusion_hmap3 = dat_csv2 %>%
     group_by(sample_size, n_pop,"name" = GxEconfintboot) %>%
     summarize("n" = n()))
 raw_conf3 = fpr.fnr(raw_confusion_hmap3, divided = TRUE, scenario = 1)
-raw_conf_plot3 <- heatmap_fun(raw_conf3,"rate")
+#raw_conf_plot3 <- heatmap_fun(raw_conf3,"rate")
 
 raw_confusion_hmap4 = dat_csv2 %>%
     group_by(sample_size, n_pop,"name" = GxEconfintperm) %>%
     summarize("n" = n())
 raw_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
-raw_conf_plot4 <- heatmap_fun(raw_conf4,"rate")
+#raw_conf_plot4 <- heatmap_fun(raw_conf4,"rate")
 
 raw_confusion_hmap5 = dat_csv2 %>%
   group_by(sample_size, n_pop,"name" = GxEanova_conf) %>%
   summarize("n" = n())
 raw_conf5 = fpr.fnr(raw_confusion_hmap5, divided = TRUE, scenario = 1)
-raw_conf_plot5 <- heatmap_fun(raw_conf5,"rate")
+#raw_conf_plot5 <- heatmap_fun(raw_conf5,"rate")
 
 # Compile FPs for plot
 raw_conf1$ID = rep("Cov_Perm", nrow(raw_conf1))
@@ -333,8 +333,12 @@ raw_conf3$ID = rep("GxE_Boot", nrow(raw_conf3))
 raw_conf4$ID = rep("GxE_Perm", nrow(raw_conf4))
 raw_conf5$ID = rep("GxE_Anova", nrow(raw_conf5))
 fpdf = rbind(raw_conf1,raw_conf2,raw_conf3,raw_conf4,raw_conf5)
+
 gxeFPR = rbind(raw_conf4,raw_conf5)
 gxeFPR = gxeFPR[gxeFPR$name == "False Positive",]
+
+covFPR = rbind(raw_conf1,raw_conf2)
+covFPR = covFPR[covFPR$name == "False Positive",]
 
 ## False Positive Rates
 fpdf$npop_plot = NA
@@ -363,30 +367,84 @@ covPow = rbind(covperm1,covboot1)
 
 ############ Confusion Plots  -- Env Scenario 1 ###############
 
-## False Positive BarPlot
+bigcov = c("4_8_FRT","16_4_FRT","8_16_CG","16_8_CG")
+
+## False Positive BarPlot for Covariance
+label128 = c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments", 
+             "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
+             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
+             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments",
+             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments")
+label128 = c("4_8_FRT" = "Reciprocal Transplant \n 4 Samples \n 8 Genotypes \n 8 Environments",
+             "16_4_FRT"= "Reciprocal Transplant \n 16 Samples \n 4 Genotypes \n 4 Environments",
+             "8_16_CG"= "Common Garden \n 8 Samples \n 16 Genotypes \n 2 Environments",
+             "16_8_CG"="Common Garden \n 16 Samples \n 8 Genotypes \n 2 Environments")
+dub_cov$scenario = rep("CG",nrow(dub_cov))
+covFPR$scenario = rep("FRT",nrow(covFPR))
+covbo = rbind(dub_cov,covFPR)
+covbo$grp = paste(covbo$sample_size,covbo$n_pop,covbo$scenario,sep="_")
+#covbo = filter(covbo,totsamp == 128)
+covbo = filter(covbo, grp %in% bigcov)
+covbo[is.nan(covbo)] <- 0
+
+(falsePosCov = ggplot(covbo, aes(x = reorder(factor(ID),-totsamp), y = rate, group = grp,colour = factor(grp),fill = factor(grp)))+ 
+    geom_bar(position = "dodge", stat = "identity") + 
+    geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+    ylab("False Positive Rate") + xlab("")+
+    ggtitle("False Positive Rates")+
+    labs(colour = "Experimental Design",fill = "Experimental Design")+
+    scale_fill_viridis(discrete = TRUE, labels  = label128)+
+                        #labels = c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+
+    scale_colour_viridis(discrete = TRUE, labels  = label128)+
+                    #labels = c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+
+    scale_x_discrete(labels= c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+ #label128)+#
+    theme(axis.text.x = element_text(colour = "black",size = 22)) +
+    theme_classic(base_family = "Times",base_size = 14) + 
+    theme(axis.text = element_text(colour = "black")))
+
+
+
+
+## False Positive BarPlot for GxE 
+
+bigpow = c("8_8_CG","16_8_CG","16_4_CG","8_16_CG","4_16_CG","16_4_FRT","8_4_FRT","4_8_FRT","2_8_FRT")
+label128 = c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments", 
+             "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
+             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
+             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments",
+             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments")
+label128 = c("8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
+             "16_8_CG" = "Common Garden \n 16 Samples \n 8 Genotypes \n 2 Environments",
+             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
+             "8_16_CG" = "Common Garden \n 8 Samples \n 16 Genotypes \n 2 Environments",
+             "4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments",
+             "16_4_FRT" = "Reciprocal Transplant \n 16 Samples \n 4 Genotypes \n 4 Environments",
+             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments",
+             "4_8_FRT" = "Reciprocal Transplant \n 4 Samples \n 8 Genotypes \n 8 Environments",
+             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments")
+
 dub_gxe$scenario = rep("CG",nrow(dub_gxe))
 gxeFPR$scenario = rep("FRT",nrow(gxeFPR))
 combo = rbind(dub_gxe,gxeFPR)
-
-combo = filter(combo,totsamp == 128)
 combo$grp = paste(combo$sample_size,combo$n_pop,combo$scenario,sep="_")
+#combo = filter(combo,totsamp == 128)
+combo = filter(combo, grp %in% bigpow)
 combo[is.nan(combo)] <- 0
 
-(falsePos = ggplot(combo, aes(x = reorder(factor(grp),-rate), y = rate, group = ID,colour = factor(ID),fill = factor(ID)))+ 
+
+(falsePosGxE = ggplot(combo, aes(x = reorder(factor(ID),-totsamp), y = rate, group = grp,colour = factor(grp),fill = factor(grp)))+ 
   geom_bar(position = "dodge", stat = "identity") + 
   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
   ylab("False Positive Rate") + xlab("")+
   ggtitle("False Positive Rates")+
- # facet_wrap(~npop_plot) + 
   labs(colour = "Experimental Design",fill = "Experimental Design")+
-  scale_fill_viridis(discrete = TRUE)+
-    scale_colour_viridis(discrete = TRUE)+
-  scale_x_discrete(labels=c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes", 
-                            "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes",
-                            "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes",
-                            "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes",
-                            "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes"))+
-  theme_classic(base_family = "Times",base_size = 16) + 
+  scale_fill_viridis(discrete = TRUE, labels  = label128)+
+                     #labels = c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+
+  scale_colour_viridis(discrete = TRUE,labels  = label128)+
+                       #labels = c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+
+  scale_x_discrete(labels= c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+#label128)+
+  theme(axis.text.x = element_text(colour = "black",size = 22)) +
+  theme_classic(base_family = "Times",base_size = 14) + 
   theme(axis.text = element_text(colour = "black")))
 
 ## False Positive Heatmap 
@@ -735,31 +793,31 @@ fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 2)
     group_by(sample_size, n_pop, "name" =Covconfintperm) %>%
     summarize("n" = n()))
 dub_raw_conf1 = fpr.fnr(raw_confusion_hmap1, divided = TRUE, scenario = 2)
-raw_conf_plot1 <- heatmap_fun(dub_raw_conf1,"rate") # Can also do "percent"
+#raw_conf_plot1 <- heatmap_fun(dub_raw_conf1,"rate") # Can also do "percent"
 
 (raw_confusion_hmap2 = dat_dub1 %>%
     group_by(sample_size, n_pop, "name" =Covconfintboot) %>%
     summarize("n" = n()))
 dub_raw_conf2 = fpr.fnr(raw_confusion_hmap2, divided = TRUE, scenario = 2)
-raw_conf_plot2 <- heatmap_fun(dub_raw_conf2,"rate")
+#raw_conf_plot2 <- heatmap_fun(dub_raw_conf2,"rate")
 
 (raw_confusion_hmap3 = dat_dub2 %>%
     group_by(sample_size, n_pop,"name" = GxEconfintboot) %>%
     summarize("n" = n()))
 dub_raw_conf3 = fpr.fnr(raw_confusion_hmap3, divided = TRUE, scenario = 2)
-raw_conf_plot3 <- heatmap_fun(dub_raw_conf3,"rate")
+#raw_conf_plot3 <- heatmap_fun(dub_raw_conf3,"rate")
 
 raw_confusion_hmap4 = dat_dub2 %>%
   group_by(sample_size, n_pop,"name" = GxEconfintperm) %>%
   summarize("n" = n())
 dub_raw_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 2)
-raw_conf_plot4 <- heatmap_fun(dub_raw_conf4,"rate")
+#raw_conf_plot4 <- heatmap_fun(dub_raw_conf4,"rate")
 
 raw_confusion_hmap5 = dat_dub2 %>%
   group_by(sample_size, n_pop,"name" = GxEanova_conf) %>%
   summarize("n" = n())
 dub_raw_conf5 = fpr.fnr(raw_confusion_hmap5, divided = TRUE, scenario = 2)
-raw_conf_plot5 <- heatmap_fun(dub_raw_conf5,"rate")
+#raw_conf_plot5 <- heatmap_fun(dub_raw_conf5,"rate")
 
 # Compile FPs for plot
 dub_raw_conf1$ID = rep("Cov_Perm", nrow(dub_raw_conf1))
@@ -772,7 +830,8 @@ dub_fpdf = dub_fpdf[dub_fpdf$name == "False Positive",]
 
 dub_gxe = rbind(dub_raw_conf4,dub_raw_conf5)
 dub_gxe = dub_gxe[dub_gxe$name == "False Positive",]
-
+dub_cov = rbind(dub_raw_conf1,dub_raw_conf2)
+dub_cov = dub_cov[dub_cov$name == "False Positive",]
 
 ## False Positive Rates
 dub_fpdf$npop_plot = NA
@@ -1060,7 +1119,9 @@ cov_hm3$totals = cov_hm3$n_pop * 2 * cov_hm3$sample_size
     ggtitle(expression("Cov"["GE"]*": Paired Common Garden"))+
     theme(plot.title = element_text(size = 24, face = "bold")))
 
-# Covariance - FRT
+grid.arrange(CovPower1,CovPower2,ncol = 2)
+
+# GxE - FRT
 gxe_hm = fnr.effsize(dat_csv1, metric = "gxe", analysis = "perm", resolution = "fine")
 gxe_hm1 = gxe_hm %>%
   filter(between(bin,0.3,0.6))%>%
@@ -1068,7 +1129,7 @@ gxe_hm1 = gxe_hm %>%
   summarize("avgpower" = mean(power))
 gxe_hm1$totals = gxe_hm1$n_pop *gxe_hm1$n_pop * gxe_hm1$sample_size
 
-# Covariance - CG
+# GxE - CG
 gxe_hm2 = fnr.effsize(dat_dub1, metric = "gxe", analysis = "perm", resolution = "fine")
 gxe_hm3 = gxe_hm2 %>%
   filter(between(bin,0.3,0.6))%>%
@@ -1102,12 +1163,12 @@ gxe_hm3$totals = gxe_hm3$n_pop * 2 * gxe_hm3$sample_size
     xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+  
-    #theme(legend.position = "none")+
+    theme(legend.position = "none")+
     ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
     theme(plot.title = element_text(size = 24, face = "bold")))
 
 grid.arrange(CovPower1,GxEPower1,CovPower2,GxEPower2,ncol = 2)
-
+grid.arrange(GxEPower1,GxEPower2, ncol = 2)
 
 ######################################
 ## Tradeoff with GxE and Covariance ##
@@ -1158,7 +1219,7 @@ sigGxE2 = dat_dub %>%
 (bin = ggplot(sigGxE, aes(x = true_GxE_emm, y = covtick))+
     geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
     geom_point()+
-    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+ylab(expression("Proportion significant Cov"["GE"]))+
+    xlab(expression(""*bar(Delta)*""["GxE"]*" of population"))+ylab(expression("Proportion significant Cov"["GE"]))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
@@ -1172,7 +1233,7 @@ sigGxE2 = dat_dub %>%
 (lin = ggplot(filter(sigGxE,replicate ==1), aes(x = true_GxE_emm, y = abs(true_cov)))+
     geom_point(alpha = 0.15)+
     geom_smooth(method = "glm", colour = "black", size = 1.5)+
-    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+ylab(expression("| Actual Cov"["GE"]*" |"))+
+    xlab(expression(bar(Delta)*""["GxE"]*" of population"))+ylab(expression("|Cov"["GE"]*" | of population"))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
@@ -1185,7 +1246,7 @@ sigGxE2 = dat_dub %>%
 (bin2 = ggplot(sigGxE2, aes(x = true_GxE_emm, y = covtick))+
     geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
     geom_point()+
-    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+ylab(expression("Proportion significant Cov"["GE"]))+
+    xlab(expression(bar(Delta)*""["GxE"]*" of population"))+ylab(expression("Proportion significant Cov"["GE"]))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
@@ -1199,7 +1260,7 @@ sigGxE2 = dat_dub %>%
 (lin2 = ggplot(filter(sigGxE2, replicate == 1), aes(x = true_GxE_emm, y = abs(true_cov)))+
     geom_point(alpha = 0.15)+
     geom_smooth(method = "glm", colour = "black", size = 1.5)+
-    xlab(expression("Actual "*bar(Delta)*""["GxE"]))+ylab(expression("| Actual Cov"["GE"]*" |"))+
+    xlab(expression(bar(Delta)*""["GxE"]*" of population"))+ylab(expression("| Cov"["GE"]*" | of population"))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
@@ -1260,9 +1321,9 @@ oe = dat_csv %>% filter(replicate == 1) %>% filter(std_dev == 1)
                       #breaks = c("0.5", "1"))+
     scale_shape_manual(values = devshape)+
     geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3),se = F,colour = "black",size = 1.5) + 
-    xlab(expression(""*bar(Delta)*""["GxE"]*" of Population"))+
+    xlab(expression(""*bar(Delta)*""["GxE"]*" of population"))+
     #scale_linetype_manual(values = c("0.5" = "dotdash", "1" = "solid"))+
-    ylab(expression(""*omega^2*" of Population"))+
+    ylab(expression(""*omega^2*" of population"))+
     #guides(fill=guide_legend(override.aes=list(shape=21,size =6)))+
     labs(fill = "Significance", shape =  "Significance", linetype = "Standard Deviation")+
     guides(shape = guide_legend(override.aes = list(size = 6)))+
@@ -1378,7 +1439,7 @@ grid.arrange(covmeancheck, coverrorcheck)
     theme_classic(base_size = 20, base_family = "Times")+
     theme(axis.text = element_text(colour = "black")))
 
-grid.arrange(coverrorcheck_lwr, coverrorcheck_upr)
+grid.arrange(covmeancheck, coverrorcheck_lwr, coverrorcheck_upr)
 
 (covmeancheck2 = ggplot(dat_dub,aes(x = covariance, y = cov_means))+
     geom_point()+ylab(expression("Cov"["GE"]*": Group Means"))+xlab(expression("Cov"["GE"]*": Raw data"))+
@@ -1423,7 +1484,7 @@ grid.arrange(gxemeancheck, gxeerrorcheck)
     theme_classic(base_size = 20, base_family = "Times")+
     theme(axis.text = element_text(colour = "black")))
 
-grid.arrange(gxeerrorcheck, gxeerrorcheck_lwr, gxeerrorcheck_upr, ncol = 1)
+grid.arrange(covmeancheck, gxemeancheck, coverrorcheck_lwr, gxeerrorcheck_lwr, coverrorcheck_upr,  gxeerrorcheck_upr, ncol = 2)
 
 (gxemeancheck2 = ggplot(dat_dub,aes(x = true_GxE_emm, y = true_GxE_means))+
     geom_point()+theme_classic()+ylab(expression(bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression(bar(Delta)*""["GxE"]*": Raw data"))+
