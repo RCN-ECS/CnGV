@@ -54,6 +54,7 @@ CovGE
   - same questions go for FP and power for the means data. But the simple thing may be to calculate these for each scenario in the raw data and just compare
   in a scatterplot to the means data. For things that fall off the 1:1 line we may need to dig in.
   - in order to get this paper into review, I suggest that we discuss moving this to the metanalysis paper. If we come across issues, we can resolve them in the revisions of the raw data paper.
+  - does it matter that the CI for the GxE means matches the raw data, if they are not accurate in the first place?
   
 ### 7. How does CovGE compare to other stats that have been used for CovGE (PL)?
    - in order to get this paper into review, I suggest that we discuss moving this to the metanalysis paper. Especially since the PL was a metanalysis and our results will almost certainly overturn their conclusions.
