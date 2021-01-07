@@ -6,7 +6,7 @@ which we may or may not include in the manuscript). Then we should go through th
 
 Here is a start to that list (up for discussion) (not necessarily in order they will be in the manuscript):
 
-### 1. Why do we need a measure of CovGE? (I think this is well addressed in the manuscript, we don't have one)
+### 1. Why do we need a measure of CovGE? (I think this is well addressed in the manuscript: we don't have one)
 
 ### 2. Why do we need a meausure of delta GxE, when we already have an ANOVA framework which is widely used?
   - Answer: equivalent effect sizes of GxE may have different w^2 from an ANOVA depending on the residual variance. Therefore we need a measure that is comparable among datasets with different residual error and sampling designs.
