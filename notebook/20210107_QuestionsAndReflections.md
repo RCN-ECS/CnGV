@@ -49,6 +49,7 @@ CovGE
   - If people are working in a system with a really strong pattern of CovGE, how small a study can they get away with?
     - which of our plots illustrates how power increases with effect size for boostrap and permutation?
   - How do the sample designs/sizes of the Albecker and Trussel studies relate to our power analysis? I think we've got this nailed for Trussel, I'm just curious about whether Molly's design is predicted to have power under our analysis.
+      - **MOLLY NOTE: I have 7 genotypes and 2 experimental environments with an average of 27 samples per treatment (variable due to survival). Thus my total sample size is 378, plenty of power.**
 
 ### 6. For the purposes of metanalysis, how do the means data and raw data compare?
   - same questions go for FP and power for the means data. But the simple thing may be to calculate these for each scenario in the raw data and just compare
