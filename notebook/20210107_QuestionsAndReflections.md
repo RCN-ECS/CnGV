@@ -34,7 +34,7 @@ CovGE
 
 ### 4. What are the costs and benefits of variance partitioning vs. effect size?
   - datasets with equivalent CovGE may be driven by Vg explaining more variance than Ve, or by Ve explaining more variance than Vg. 
-  Understanding whether CovGE 
+  Understanding whether CovGE relates to questions regarding the evolution of fixed genetic effects (Vg) vs. plastic effects (Ve) and may also affect predictions for how populations with equivalent levels of CovGE, but different contributions of Vg vs Ve, respond to changing environments
   - When CovGE is maximized, the contributions of Vg and Ve to phenotypic variance are equal
       - Which of our figures illustrates the above concepts?
       - once the rest of the manusccript and supp is together, KEL will help with supp figures for this
