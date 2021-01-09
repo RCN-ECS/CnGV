@@ -14,6 +14,8 @@ Here is a start to that list (up for discussion) (not necessarily in order they 
  - Also: CovGE can exist in the presence of GxE, but based on first principles is also inversely related, so we need a measure of both that is 
  comparable across different datasets.
 
+### IMPT: Are the sampling estimates accurate and unbiased estimations of the population parameters?
+- which of our plots show this?
 
 ### 3. How should people test for the significance of CovGE and GxE estimates? How should people describe the uncertainy of their estimates?
   
