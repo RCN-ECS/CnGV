@@ -3,7 +3,7 @@ denominator and not the population variance (divide by n):
 
 ![](20210201_covGE.png)
 
-The consequence of this will not effect any of our sampling estimates, or confidence intervals. It may affect the power analysis, but that is doubtful 
+The consequence of this will not effect any of our sampling estimates, and I dont' think it will affect the confidence intervals. It may affect the power analysis, but that is doubtful 
 because those are generally based on whether CovGE is 0 or not.
 
 The consequence will probably be greatest for the comparison between the population parameter and the sampling estimate, and be greatest for when 
