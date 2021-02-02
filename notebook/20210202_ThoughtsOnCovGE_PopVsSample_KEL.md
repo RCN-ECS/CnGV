@@ -13,7 +13,7 @@ and again be greatest for the 2 population case, because as n gets larger, the r
 We also discussed how the overall mean was being calculated in this function. At first I thought that for the raw data we should use the overall mean, 
 but then I thought that would be a bad idea if the sample sizes are unequal. It makes sense to use the G-means or the E-means, but the G-means and E-means 
 should be equal because they are not independent. We need to check this across a wide range of scenarios, including the common garden experiment. The common garden
-experiment in particular troubles me, because you only have 2 E-emeans that are being counted several times with the above approach, but you have several G-means.
+experiment in particular troubles me, because you only have 2 E-emeans that are being counted several times with the above approach, but you have several G-means. In our sims all sample sizes are equal and all designs are balanced, so I don't expect the results we have to be affected that much.
 
 This approach of taking the mean(c(G-means, E-means)) could potentially get users into trouble if they do not have balanced data (e.g. not a full 
 reciprocal transplant or not all pairs in the common garden), so we need to do a full analysis of the ways things could go wrong here, or be absolutely clear in the
