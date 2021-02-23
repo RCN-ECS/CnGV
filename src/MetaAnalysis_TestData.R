@@ -1,6 +1,6 @@
 
 # Load functions
-source("~/Documents/GitHub/CnGV/src/Cov_GxE_functions.R")
+source("~/Documents/GitHub/CnGV/CnGV/src/Cov_GxE_functions.R")
 
 # Molly's age at metamorphosis data
 mm = read.csv("~/Desktop/Work/DataSets/Tadpole Plasticity_2017/mortality2017.csv")
@@ -13,7 +13,7 @@ mm1 = mm %>%
   filter(tad %in% c(0,6)) %>% # Only use 0, 6ppt
   droplevels()
 
-mm1$gen_factor = paste0("G_",as.numeric(mm1$Pop))
+mm1$gen_factor = paste0("G_",as.numeric(factor(mm1$Pop)))
 mm1$exp_env_factor = paste0("E_",as.numeric(as.factor(mm1$tad))) 
 mm1$nat_env_factor = NULL
 for(i in 1:nrow(mm1)){
@@ -39,7 +39,7 @@ ma_means$nat_env_factor = mm1$nat_env_factor[match(ma_means$gen_factor,factor(mm
 
 
 ## Geoff's Shell mass growth (mg) data (Fig. 3)
-gt = read.csv("~/Documents/GitHub/CnGV/data/GeoffMeansData.csv")
+gt = read.csv("~/Documents/GitHub/CnGV/CnGV/data/GeoffMeansData.csv")
 gt$data_type = rep("means",nrow(gt))
 
 ## Berven 1979 -- Table sumthin.
@@ -169,8 +169,11 @@ oystershelllength = read.csv("tissueshelllength.csv")
 shelllength.test = amarillo_armadillo(oystershelllength, 99, "raw")
 
 
-
-
+### Compile all extracted data to one file
+library(readxl)
+setwd("~/Downloads/Extracted_Studies/")
+temp <- list.files(pattern= "*DataCollection_Template_studyID")
+rawmeta = do.call(rbind, lapply(temp, function(x) read_xlsx(x)))
 
 
 

@@ -13,8 +13,10 @@ library(viridis)
 
 # Load Data compiled on cluster
 setwd("~/Documents/GitHub/CnGV/CnGV/results/Sim_12.15.20/")
-start_df = read.csv("Power_output_results.csv") 
-phen_data = read.csv("~/Desktop/phenotype_output_results.csv")
+start_params = read.csv("~/Desktop/df.csv")                      # Input Parameters
+start_df1 = read.csv("Power_output_results.csv")                 # Results of simulations 
+start_df = start_df1 %>% filter(row %in% start_params$row)
+phen_data = read.csv("~/Desktop/phenotype_output_results.csv")   # Data for phenotype plots
 
 # Split up into two experimental designs
 dat_csv = start_df %>% filter(env_scenario == 1) %>% droplevels() # Reciprocal Transplant
@@ -44,14 +46,14 @@ dim(sizecheck) # Should be around 1000 (or 100 if 1 replicate)
 
 ####### Check for missing rows ##########
 `%notin%` <- Negate(`%in%`)
-start_params = read.csv("~/Desktop/df.csv")
-start_params2 = read.csv("~/Desktop/df2pop.csv")
+
+h = start_df %>% filter(env_scenario == 2) %>% filter(n_pop == 2)  
+dim(h)
+
 (missing_rows = anti_join(start_df, start_params, by = "row"))
 start_df = filter(start_df, row %notin% missing_rows$row)
 #write.csv(start_df1[,-1], "~/Desktop/rerun.csv")
-range(start_df$row)
-args = filter(start_params, row == 1824)
-args = args[,-1]
+
 
 #####################################
 ##          Parameter Coverage      ##
@@ -69,7 +71,7 @@ dat_csv$ss_f = factor(dat_csv$ss_chr, levels=c("2 Samples","4 Samples","8 Sample
 (hexy = ggplot(dat_csv, aes(x = true_cov, y = true_GxE_emm)) + 
    geom_hex()+ 
    ylab(expression(""*bar(Delta)*""["GxE"]*" of population"))+xlab(expression("Cov"["GE"]*" of population"))+
-   ggtitle("Full Reciprocal Transplant") + facet_grid(ss_f~np_f) +
+   ggtitle("A   Full Reciprocal Transplant") + facet_grid(ss_f~np_f) +
   #facet_grid(sample_size~n_pop)+
    theme_classic(base_family = "Times"))
 
@@ -87,7 +89,7 @@ dat_dub = filter(dat_dub, n_pop != 2)
 (hexy2 = ggplot(dat_dub, aes(x = true_cov, y = true_GxE_emm)) + 
     geom_hex()+ 
     ylab(expression(""*bar(Delta)*""["GxE"]*" of population"))+xlab(expression("Cov"["GE"]*" of population"))+
-    ggtitle("Paired Common Garden") + facet_grid(ss_f~np_f) +
+    ggtitle("B   Paired Common Garden") + facet_grid(ss_f~np_f) +
     theme_classic(base_family = "Times"))
 
 grid.arrange(hexy,hexy2) 
@@ -178,9 +180,9 @@ ggplot((filter(dat_dub, sample_size != 16)), aes(x = covariance, y = GxE_omega, 
   facet_grid(sample_size~n_pop)
 
 
-########################################################
-##          Confusion Matrices  -- Env Scenario 1     ##
-########################################################
+#########################################################
+##          Confusion Matrices  -- Recip Transplant    ##
+#########################################################
 
 # Covariance Permutation check
 dat_csv$Covconfintperm = rep("NA",nrow(dat_csv))
@@ -297,7 +299,7 @@ fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 1)
 
 ## Counts for heatmaps
 (raw_confusion_hmap1 = dat_csv1 %>%
-    group_by(sample_size, n_pop, "name" =Covconfintperm) %>%
+    group_by(sample_size, n_pop, "name" = Covconfintperm) %>%
     summarize("n" = n()))
 raw_conf1 = fpr.fnr(raw_confusion_hmap1, divided = TRUE, scenario = 1)
 #raw_conf_plot1 <- heatmap_fun(raw_conf1,"rate") # Can also do "percent"
@@ -350,165 +352,167 @@ for(i in 1:nrow(fpdf)){
 fpdf1 = fpdf[fpdf$name == "False Positive",]
 
 ## False Negative Rates
-covperm1 = fnr.effsize(dat_csv1, metric = "cov", analysis ="perm",resolution = "fine")
-covperm1$label = rep("Cov_Perm",nrow(covperm1))
-covboot1 = fnr.effsize(dat_csv1, metric = "cov", analysis ="boot",resolution = "fine")
-covboot1$label = rep("Cov_Boot",nrow(covboot1))
-gxeperm1 = fnr.effsize(dat_csv1, metric = "gxe", analysis ="perm",resolution = "fine")
-gxeperm1$label = rep("GxE_Perm",nrow(gxeperm1))
-gxeboot1 = fnr.effsize(dat_csv1, metric = "gxe", analysis = "boot",resolution = "fine")
-gxeboot1$label = rep("GxE_Boot",nrow(gxeboot1))
-gxeanova1 = fnr.effsize(dat_csv1, metric = "gxe", analysis = "anova",resolution = "fine")
-gxeanova1$label = rep("GxE_Anova",nrow(gxeanova1))
+covperm1 = fnr.effsize(dat_csv1, metric = "cov", data.type = "raw", analysis ="perm",resolution = "fine")
+covperm1$ID = rep("Cov_Perm",nrow(covperm1))
+covboot1 = fnr.effsize(dat_csv1, metric = "cov", data.type = "raw", analysis ="boot",resolution = "fine")
+covboot1$ID = rep("Cov_Boot",nrow(covboot1))
+gxeperm1 = fnr.effsize(dat_csv1, metric = "gxe", data.type = "raw", analysis ="perm",resolution = "fine")
+gxeperm1$ID = rep("GxE_Perm",nrow(gxeperm1))
+gxeboot1 = fnr.effsize(dat_csv1, metric = "gxe", data.type = "raw", analysis = "boot",resolution = "fine")
+gxeboot1$ID = rep("GxE_Boot",nrow(gxeboot1))
+gxeanova1 = fnr.effsize(dat_csv1, metric = "gxe", data.type = "raw", analysis = "anova",resolution = "fine")
+gxeanova1$ID = rep("GxE_Anova",nrow(gxeanova1))
 
 fndf = rbind(covperm1,covboot1,gxeperm1,gxeboot1,gxeanova1)
 gxePow = rbind(gxeperm1,gxeanova1)
 covPow = rbind(covperm1,covboot1)
 
+raw_conf3[is.nan(raw_conf3)] <- 0
+raw_conf3 %>%
+  filter(name == "False Positive") %>%
+  summarize(mean(rate))
+
 ############ Confusion Plots  -- Env Scenario 1 ###############
 
-bigcov = c("4_8_FRT","16_4_FRT","8_16_CG","16_8_CG")
+## False Negative Heatmap - Covariance FRT
+covPow[is.nan(covPow)] <- 0
+covPow1 <- 
+  covPow %>% 
+  filter(between(bin,0.2,0.6))%>%
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("FNR" = mean(fnr))
+covPow1$n_pop<-as.factor(covPow1$n_pop)
+covPow2<-
+  covPow1 %>%
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop) + yadj,
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
 
-## False Positive BarPlot for Covariance
-label128 = c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments", 
-             "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
-             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
-             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments",
-             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments")
-label128 = c("4_8_FRT" = "Reciprocal Transplant \n 4 Samples \n 8 Genotypes \n 8 Environments",
-             "16_4_FRT"= "Reciprocal Transplant \n 16 Samples \n 4 Genotypes \n 4 Environments",
-             "8_16_CG"= "Common Garden \n 8 Samples \n 16 Genotypes \n 2 Environments",
-             "16_8_CG"="Common Garden \n 16 Samples \n 8 Genotypes \n 2 Environments")
-dub_cov$scenario = rep("CG",nrow(dub_cov))
-covFPR$scenario = rep("FRT",nrow(covFPR))
-covbo = rbind(dub_cov,covFPR)
-covbo$grp = paste(covbo$sample_size,covbo$n_pop,covbo$scenario,sep="_")
-#covbo = filter(covbo,totsamp == 128)
-covbo = filter(covbo, grp %in% bigcov)
-covbo[is.nan(covbo)] <- 0
+(covFNFRT = covPow2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = FNR)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(FNR, 2))), size = 4, family = "Times", colour = "white", show.legend = F) +
+    #ggtitle("False Negative Rates: CovGE")+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(covPow1$sample_size)) +
+    scale_y_continuous(breaks = 1:3, 
+                       name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    labs(fill = "False Negative Rate")+
+    #  ggtitle(expression("Reciprocal Transplant: Cov"["GE"]*" False Negative Rates"))+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Negative Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
-(falsePosCov = ggplot(covbo, aes(x = reorder(factor(ID),-totsamp), y = rate, group = grp,colour = factor(grp),fill = factor(grp)))+ 
-    geom_bar(position = "dodge", stat = "identity") + 
-    geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
-    ylab("False Positive Rate") + xlab("")+
-    ggtitle("False Positive Rates")+
-    labs(colour = "Experimental Design",fill = "Experimental Design")+
-    scale_fill_viridis(discrete = TRUE, labels  = label128)+
-                        #labels = c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+
-    scale_colour_viridis(discrete = TRUE, labels  = label128)+
-                    #labels = c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+
-    scale_x_discrete(labels= c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+ #label128)+#
-    theme(axis.text.x = element_text(colour = "black",size = 22)) +
-    theme_classic(base_family = "Times",base_size = 14) + 
-    theme(axis.text = element_text(colour = "black")))
-
-
-
-
-## False Positive BarPlot for GxE 
-
-bigpow = c("8_8_CG","16_8_CG","16_4_CG","8_16_CG","4_16_CG","16_4_FRT","8_4_FRT","4_8_FRT","2_8_FRT")
-label128 = c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments", 
-             "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
-             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
-             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments",
-             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments")
-label128 = c("8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
-             "16_8_CG" = "Common Garden \n 16 Samples \n 8 Genotypes \n 2 Environments",
-             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
-             "8_16_CG" = "Common Garden \n 8 Samples \n 16 Genotypes \n 2 Environments",
-             "4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments",
-             "16_4_FRT" = "Reciprocal Transplant \n 16 Samples \n 4 Genotypes \n 4 Environments",
-             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments",
-             "4_8_FRT" = "Reciprocal Transplant \n 4 Samples \n 8 Genotypes \n 8 Environments",
-             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments")
-
-dub_gxe$scenario = rep("CG",nrow(dub_gxe))
-gxeFPR$scenario = rep("FRT",nrow(gxeFPR))
-combo = rbind(dub_gxe,gxeFPR)
-combo$grp = paste(combo$sample_size,combo$n_pop,combo$scenario,sep="_")
-#combo = filter(combo,totsamp == 128)
-combo = filter(combo, grp %in% bigpow)
-combo[is.nan(combo)] <- 0
+## False Positive Heatmap - Covariance 
+covFPR[is.nan(covFPR)] <- 0
+covFPR1 <- 
+  covFPR %>% 
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop)) + yadj,
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
 
 
-(falsePosGxE = ggplot(combo, aes(x = reorder(factor(ID),-totsamp), y = rate, group = grp,colour = factor(grp),fill = factor(grp)))+ 
-  geom_bar(position = "dodge", stat = "identity") + 
-  geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
-  ylab("False Positive Rate") + xlab("")+
-  ggtitle("False Positive Rates")+
-  labs(colour = "Experimental Design",fill = "Experimental Design")+
-  scale_fill_viridis(discrete = TRUE, labels  = label128)+
-                     #labels = c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+
-  scale_colour_viridis(discrete = TRUE,labels  = label128)+
-                       #labels = c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+
-  scale_x_discrete(labels= c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+#label128)+
-  theme(axis.text.x = element_text(colour = "black",size = 22)) +
-  theme_classic(base_family = "Times",base_size = 14) + 
-  theme(axis.text = element_text(colour = "black")))
-
-## False Positive Heatmap 
-(falsePos = ggplot(filter(raw_conf1, name == "False Positive"), aes(x = sample_size, y = n_pop, group = sample_size, fill = rate))+ 
-  geom_tile() + 
-  geom_text(aes(label= paste(total, round(rate,2),sep = '\n')), size = 5) +
-  theme_classic(base_size = 24, base_family = "Times")+ 
-  scale_fill_viridis(
-    breaks=seq(0,1,0.25), #breaks in the scale bar
-    limits=c(0,1))+
-  xlab("Sample Size") + ylab("Number of Genotypes")+
-  labs(fill = "Power")+
-  theme(axis.text = element_text(colour = "black"))+  
+(covFPFRT = covFPR1 %>% 
+  ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+  geom_tile(height = 0.475, width = 0.95, color= "white") +
+  geom_text(aes(label = paste0(ID2,"\n",round(rate, 2))), size = 4, family = "Times", colour = "white", show.legend = F) +
+  #ggtitle("False Positive Rates: CovGE")+
+  scale_fill_viridis(breaks=seq(0,0.4,0.1), #breaks in the scale bar
+                     limits=c(0,.4))+
+  scale_x_discrete(name = "Sample Size",
+                   labels = unique(covFPR1$sample_size)) +
+  scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                     labels = c(2,4,8)) +
+  labs(fill = "False Positive Rate")+
+  #  ggtitle(expression("Reciprocal Transplant: Cov"["GE"]*" False Positive Rates"))+
+    
+  theme_classic(base_size = 18, base_family = "Times")+
+  theme(axis.text = element_text(colour = "black"))+
   theme(legend.position = "none")+
-  ggtitle(expression("Cov"["GE"]*": Full Reciprocal Transplant"))+
-  theme(plot.title = element_text(size = 24, face = "bold")))
+    ggtitle("FRT: False Positive Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold"))) 
 
-## False Negative Rates 
-(falseNeg = ggplot(fndf, aes(x = label, y = fnr, group = sample_size, fill = factor(sample_size)))+ 
-    geom_bar(position = "dodge", stat = "identity") + 
-    #geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
-    ylab("False Negative Rate") + xlab("")+
-    ggtitle("Full Reciprocal Transplant")+
-    facet_wrap(~n_pop) + 
-    labs(fill = "Sample Size")+
-    scale_fill_viridis(discrete = TRUE)+
-    scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
-                              "Cov_Boot" = "Boot. \n CovGE",
-                              "GxE_Boot" = "Boot. \n GxE",
-                              "GxE_Perm" = "Perm. \n GxE",
-                              "GxE_Anova" = "ANOVA \n GxE"))+
-    theme_classic(base_family = "Times",base_size = 16) + 
-    theme(axis.text = element_text(colour = "black")))
+## False Positive Heatmap - GxE 
+gxeFPR[is.nan(gxeFPR)] <- 0
+gxeFPR1 <- 
+  gxeFPR %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+         yadj = ifelse(ID == "GxE_Anova", -.475/2,  .475/2),
+                       #ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+      xpos = as.numeric(factor(sample_size)),
+      ypos = as.numeric(factor(n_pop))+yadj,
+      col = ifelse(rate >= 0.5, "black","white"),
+      ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
 
+(gxeFPFRT = gxeFPR1 %>% 
+  ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+  geom_tile(height = .475, width = 0.95, color= "white") +
+  geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
+            size = 4, family = "Times", show.legend = F) +
+  scale_colour_identity()+
+  scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                     limits=c(0,1))+
+  scale_x_discrete(name = "Sample Size",
+                   labels = unique(gxeFPR1$sample_size)) +
+  scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                     labels = c(2,4,8)) +
+   # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Positive Rate")+
+  theme_classic(base_size = 18, base_family = "Times")+
+  theme(axis.text = element_text(colour = "black"))+
+  theme(legend.position = "none")+
+    ggtitle("FRT: False Positive Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
-## GxE Power Bar plot
-gxePow$totals = gxePow$n_pop * gxePow$n_pop * gxePow$sample_size
-(gxePow1 = ggplot(gxePow,aes(x = factor(sample_size), y = power, group = bin,fill = bin)) + 
-    geom_bar(position = "dodge", stat = "identity")+
-    #geom_text(aes(label= paste(gxePow$totals, round(gxePow$power,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 20, base_family = "Times")+ 
-    scale_fill_viridis(discrete = TRUE)+
-      #breaks=seq(0,1,0.25), #breaks in the scale bar
-      #limits=c(0,1))+
-    xlab("Sample Size") + ylab(expression("Power (1-"*beta*")"))+
-    labs(fill = "Effect Size")+
+## False Negative Heatmap - GxE 
+gxePow[is.nan(gxePow)] <- 0
+gxeFNR1 = gxePow %>%
+  filter(between(bin,0.3,0.6))%>%  
+
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("fnr" = mean(fnr))
+gxeFNR1$n_pop<-as.factor(gxeFNR1$n_pop)
+gxeFNR2 <- 
+  gxeFNR1 %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Anova", -.475/2,  .475/2),
+                 # ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop)+yadj,
+    col = ifelse(fnr >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
+
+(gxeFNFRT = gxeFNR2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxeFNR2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Negative Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
     theme(axis.text = element_text(colour = "black"))+
-    #theme(legend.position = "none")+
-    ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" Power"))+    
-    theme(plot.title = element_text(size = 24, face = "bold"))+
-    facet_grid(~label*n_pop))
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Negative Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
-## Cov Power Bar plot
-covPow$totals = covPow$n_pop * covPow$n_pop * covPow$sample_size
-(covPow1 = ggplot(covPow,aes(x = factor(sample_size), y = power, group = bin, fill = bin)) + 
-    geom_bar(position = "dodge", stat = "identity")+
-    theme_classic(base_size = 20, base_family = "Times")+ 
-    scale_fill_viridis(discrete = TRUE)+
-    xlab("Sample Size") + ylab(expression("Power (1-"*beta*")"))+
-    labs(fill = "Effect Size")+
-    theme(axis.text = element_text(colour = "black"))+
-    ggtitle(expression("Reciprocal Transplant: Cov"["GE"]*" Power"))+
-    theme(plot.title = element_text(size = 24, face = "bold"))+
-    facet_grid(~label*n_pop))
 
 ###################################
 ###  Confusion Matrix on Means  ###
@@ -626,7 +630,7 @@ means_conf_plot3 <- heatmap_fun(means_conf3,"rate")
 means_confusion_hmap4 = dat_csv1 %>%
   group_by(sample_size, n_pop,"name" = meansGxEconfintperm) %>%
   summarize("n" = n())
-means_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
+means_conf4 = fpr.fnr(means_confusion_hmap4, divided = TRUE, scenario = 1)
 means_conf_plot4 <- heatmap_fun(means_conf4,"rate")
 
 # Compile FPs for plot
@@ -645,25 +649,166 @@ for(i in 1:nrow(fpdf_means)){
   }else{fpdf_means$npop_plot[i] = "8 Populations"}
 }
 
+gxeFPRmean = rbind(means_conf3,means_conf4)
+gxeFPRmean = gxeFPRmean[gxeFPRmean$name == "False Positive",]
+
+covFPRmean = rbind(means_conf1,means_conf2)
+covFPRmean = covFPRmean[covFPRmean$name == "False Positive",]
+
+
+## False Negative Rates - MEANS
+covperm1mean = fnr.effsize(dat_csv1, metric = "cov", data.type = "means", analysis ="perm",resolution = "fine",scenario = 1)
+covperm1mean$ID = rep("Cov_Perm",nrow(covperm1mean))
+covboot1mean = fnr.effsize(dat_csv1, metric = "cov", data.type = "means",  analysis ="boot",resolution = "fine")
+covboot1mean$ID = rep("Cov_Boot",nrow(covboot1mean))
+gxeperm1mean = fnr.effsize(dat_csv1, metric = "gxe", data.type = "means",  analysis ="perm",resolution = "fine")
+gxeperm1mean$ID = rep("GxE_Perm",nrow(gxeperm1mean))
+gxeboot1mean = fnr.effsize(dat_csv1, metric = "gxe", data.type = "means", analysis = "boot",resolution = "fine")
+gxeboot1mean$ID = rep("GxE_Boot",nrow(gxeboot1mean))
+
+fndfmean = rbind(covperm1mean,covboot1mean,gxeperm1mean,gxeboot1mean)
+gxePowmean = rbind(gxeperm1mean,gxeboot1mean)
+covPowmean = rbind(covperm1mean,covboot1mean)
+
 ############ Confusion Plots  -- Means -- Env Scenario 1 ###############
 
-## False Positive Rates 
+## False Negative Heatmap - Covariance FRT
+covPowmean[is.nan(covPowmean)] <- 0
+covPowmean1 <- 
+  covPowmean %>% 
+  filter(between(bin,0.2,0.6))%>%
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("FNR" = mean(fnr))
+covPowmean1$n_pop<-as.factor(covPowmean1$n_pop)
+covPowmean2<-
+  covPowmean1 %>%
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop) + yadj,
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
 
-#(falsePos = ggplot(filter(fpdf, ID %in% c("Cov_Perm","GxE_Perm","GxE_Anova")), aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
-(means_falsePos = ggplot(fpdf_means, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
-   geom_bar(position = "dodge", stat = "identity") + 
-   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
-   ylab("False Positive Rate") + xlab("")+
-   facet_wrap(~npop_plot) + 
-   labs(fill = "Sample Size")+
-   #ylim(0,0.3)+
-   scale_fill_viridis(discrete = TRUE)+
-   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
-                             "Cov_Boot" = "Boot. \n CovGE",
-                             "GxE_Boot" = "Boot. \n GxE",
-                             "GxE_Perm" = "Perm. \n GxE"))+
-   theme_classic2(base_family = "Times",base_size = 16) + 
-   theme(axis.text = element_text(colour = "black")))
+(covFNFRTmean = covPowmean2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = FNR)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(FNR, 2))), size = 4, family = "Times", colour = "white", show.legend = F) +
+    #ggtitle("False Negative Rates: CovGE")+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(covPowmean2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, 
+                       name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    labs(fill = "False Negative Rate")+
+    #  ggtitle(expression("Reciprocal Transplant: Cov"["GE"]*" False Negative Rates"))+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Negative Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+## False Positive Heatmap - Covariance 
+covFPRmean[is.nan(covFPRmean)] <- 0
+covFPRmean1 <- 
+  covFPRmean %>% 
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop)) + yadj,
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
+
+
+(covFPFRTmean = covFPRmean1 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(rate, 2))), size = 4, family = "Times", colour = "white", show.legend = F) +
+    #ggtitle("False Positive Rates: CovGE")+
+    scale_fill_viridis(breaks=seq(0,0.4,0.1), #breaks in the scale bar
+                       limits=c(0,.4))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(covFPRmean1$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    labs(fill = "False Positive Rate")+
+    #  ggtitle(expression("Reciprocal Transplant: Cov"["GE"]*" False Positive Rates"))+
+    
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Positive Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold"))) 
+
+## False Positive Heatmap - GxE 
+gxeFPRmean[is.nan(gxeFPRmean)] <- 0
+gxeFPRmean1 <- 
+  gxeFPRmean %>% 
+  mutate(
+    yadj = ifelse(ID == "GxE_Perm", -.475/2,  .475/2),
+    #ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop))+yadj,
+    col = ifelse(rate >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Boot", "Boot.", "Perm."))
+
+(gxeFPFRTmean = gxeFPRmean1 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+    geom_tile(height = .475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxeFPRmean$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Positive Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Positive Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+## False Negative Heatmap - GxE 
+gxePowmean[is.nan(gxePowmean)] <- 0
+gxePowmean1 = gxePowmean %>%
+  filter(between(bin,0.3,0.6))%>%  
+  
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("fnr" = mean(fnr))
+gxePowmean1$n_pop<-as.factor(gxePowmean1$n_pop)
+gxePowmean2 <- 
+  gxePowmean1 %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Perm", -.475/2,  .475/2),
+    # ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop)+yadj,
+    col = ifelse(fnr >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Perm", "Perm.", "Boot."))
+
+(gxeFNFRTmean = gxePowmean2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxePowmean2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Negative Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Negative Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
 
 
 
@@ -829,9 +974,14 @@ dub_fpdf = rbind(dub_raw_conf1,dub_raw_conf2,dub_raw_conf3,dub_raw_conf4,dub_raw
 dub_fpdf = dub_fpdf[dub_fpdf$name == "False Positive",]
 
 dub_gxe = rbind(dub_raw_conf4,dub_raw_conf5)
-dub_gxe = dub_gxe[dub_gxe$name == "False Positive",]
+dub_gxe = dub_gxe %>% filter(name == "False Positive") 
 dub_cov = rbind(dub_raw_conf1,dub_raw_conf2)
 dub_cov = dub_cov[dub_cov$name == "False Positive",]
+
+dub_raw_conf3[is.nan(dub_raw_conf3)] <- 0
+dub_raw_conf3 %>%
+  filter(name == "False Positive") %>%
+  summarize(mean(rate))
 
 ## False Positive Rates
 dub_fpdf$npop_plot = NA
@@ -844,73 +994,159 @@ dub_fpdf$npop_plot = factor(dub_fpdf$npop_plot, levels=c("4 Genotypes","8 Genoty
 
 
 ## False Negative Rates
-covperm2 = fnr.effsize(dat_dub1, metric = "cov", analysis ="perm",scenario = 2)
-covperm2$label = rep("Cov_Perm",nrow(covperm2))
-covboot2 = fnr.effsize(dat_dub1, metric = "cov", analysis ="boot",scenario = 2)
-covboot2$label = rep("Cov_Boot",nrow(covboot2))
-gxeperm2 = fnr.effsize(dat_dub1, metric = "gxe", analysis ="perm",scenario = 2)
-gxeperm2$label = rep("GxE_Perm",nrow(gxeperm2))
-gxeboot2 = fnr.effsize(dat_dub1, metric = "gxe", analysis = "boot",scenario = 2)
-gxeboot2$label = rep("GxE_Boot",nrow(gxeboot2))
-gxeanova2 = fnr.effsize(dat_dub1, metric = "gxe", analysis = "anova",scenario = 2)
-gxeanova2$label = rep("GxE_Anova",nrow(gxeanova2))
+covperm2 = fnr.effsize(dat_dub1, metric = "cov", data.type = "raw", analysis ="perm",scenario = 2,resolution = "fine")
+covperm2$ID = rep("Cov_Perm",nrow(covperm2))
+covboot2 = fnr.effsize(dat_dub1, metric = "cov", data.type = "raw", analysis ="boot",scenario = 2,resolution = "fine")
+covboot2$ID = rep("Cov_Boot",nrow(covboot2))
+gxeperm2 = fnr.effsize(dat_dub1, metric = "gxe", data.type = "raw", analysis ="perm",scenario = 2,resolution = "fine")
+gxeperm2$ID = rep("GxE_Perm",nrow(gxeperm2))
+gxeboot2 = fnr.effsize(dat_dub1, metric = "gxe", data.type = "raw", analysis = "boot",scenario = 2,resolution = "fine")
+gxeboot2$ID = rep("GxE_Boot",nrow(gxeboot2))
+gxeanova2 = fnr.effsize(dat_dub1, metric = "gxe", data.type = "raw", analysis = "anova",scenario = 2,resolution = "fine")
+gxeanova2$ID = rep("GxE_Anova",nrow(gxeanova2))
 
-fndf2 = rbind(covperm2,covboot2,gxeperm1,gxeboot1,gxeanova1)
-gxePow2 = rbind(gxeperm2,gxeboot2,gxeanova2)
-covPow2 = rbind(covperm2,covboot2)
+fndfdub = rbind(covperm2,covboot2,gxeperm1,gxeboot1,gxeanova1)
+gxePowdub = rbind(gxeperm2,gxeanova2)
+covPowdub = rbind(covperm2,covboot2)
 
 ############ Confusion Plots -- Env Scenario 2 ###############
 
-## False Positive Rates 
-(falsePos2 = ggplot(dub_fpdf, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
-   geom_bar(position = "dodge", stat = "identity") + 
-   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
-   ylab("False Positive Rate") + xlab("")+
-   ggtitle("False Positive Rates: Paired Common Garden")+
-   facet_wrap(~npop_plot) + 
-   labs(fill = "Sample Size")+
-   #ylim(0,0.3)+
-   scale_fill_viridis(discrete = TRUE)+
-   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
-                             "Cov_Boot" = "Boot. \n CovGE",
-                             "GxE_Boot" = "Boot. \n GxE",
-                             "GxE_Perm" = "Perm. \n GxE",
-                             "GxE_Anova" = "ANOVA \n GxE"))+
-   theme_classic(base_family = "Times",base_size = 16) + 
-   theme(axis.text = element_text(colour = "black")))
+## False Negative Heatmap - Covariance CG
+covPowdub[is.nan(covPowdub)] <- 0
+covPowdub1 <- 
+  covPowdub %>% 
+  filter(between(bin,0.2,0.6))%>%
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("FNR" = mean(fnr))
+covPowdub1$n_pop<-as.factor(covPowdub1$n_pop)
+covPowdub2<-
+  covPowdub1 %>%
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop) + yadj,
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
 
-grid.arrange(falsePos, falsePos2)
-
-## False Negative Rates 
-gxePow2$totals = gxePow2$n_pop * 2 * gxePow2$sample_size
-(gxePow3 = ggplot(gxePow2,aes(x = factor(sample_size), y = power, group = bin,fill = bin)) + 
-    geom_bar(position = "dodge", stat = "identity")+
-    #geom_text(aes(label= paste(gxePow$totals, round(gxePow$power,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 20, base_family = "Times")+ 
-    scale_fill_viridis(discrete = TRUE)+
-    #breaks=seq(0,1,0.25), #breaks in the scale bar
-    #limits=c(0,1))+
-    xlab("Sample Size") + ylab(expression("Power (1-"*beta*")"))+
-    labs(fill = "Effect Size")+
+(covFNCG = covPowdub2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = FNR)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(FNR, 2))), size = 4, family = "Times", colour = "white", show.legend = F) +
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(covPowdub2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, 
+                       name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    labs(fill = "False Negative Rate")+
+    #  ggtitle(expression("Common Garden: Cov"["GE"]*" False Negative Rates"))+
+    theme_classic(base_size = 18, base_family = "Times")+
     theme(axis.text = element_text(colour = "black"))+
-    #theme(legend.position = "none")+
-    ggtitle(expression("Common Garden: "*bar(Delta)*""["GxE"]*" Power"))+
-    theme(plot.title = element_text(size = 24, face = "bold"))+
-    facet_grid(~label*n_pop))
+    theme(legend.position = "none")+
+    ggtitle("CG: False Negative Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
-covPow2$totals = covPow2$n_pop * 2 * covPow2$sample_size
-(covPow3 = ggplot(covPow2,aes(x = factor(sample_size), y = power, group = bin, fill = bin)) + 
-    geom_bar(position = "dodge", stat = "identity")+
-    theme_classic(base_size = 20, base_family = "Times")+ 
-    scale_fill_viridis(discrete = TRUE)+
-    xlab("Sample Size") + ylab(expression("Power (1-"*beta*")"))+
-    labs(fill = "Effect Size")+
+## False Positive Heatmap - Covariance 
+dub_cov[is.nan(dub_cov)] <- 0
+dub_cov1 <- 
+  dub_cov %>% 
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop)) + yadj,
+    col = ifelse(rate >= 0.29, "black","white"),
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
+
+(covFPCG = dub_cov1 %>% 
+  ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+  geom_tile(height = 0.475, width = 0.95, color= "white") +
+  geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), size =4, family = "Times", show.legend = F) +
+  #ggtitle("False Positive Rates: CovGE")+
+  scale_fill_viridis(breaks=seq(0,0.4,0.1), #breaks in the scale bar
+                     limits=c(0,.4))+
+    scale_colour_identity()+
+  scale_x_discrete(name = "Sample Size",
+                   labels = unique(dub_cov1$sample_size)) +
+  scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                     labels = c(2, 4,8)) +
+   # ggtitle(expression("Common Garden: Cov"["GE"]*" False Positive Rates"))+
+  labs(fill = "False Positive Rate")+
+  theme_classic(base_size = 18, base_family = "Times")+
+  theme(axis.text = element_text(colour = "black"))+
+  theme(legend.position = "none")+
+    ggtitle("CG: False Positive Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+## False Positive Heatmap - GxE 
+dub_gxe[is.nan(dub_gxe)] <- 0
+dub_gxe1 <- 
+  dub_gxe %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Anova",  -.475/2,  .475/2),
+                  #ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop))+yadj,
+    col = ifelse(rate >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
+
+(gxeFPCG = dub_gxe1 %>% 
+  ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+  geom_tile(height = .475, width = 0.95, color= "white") +
+  geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
+            size = 4, family = "Times", show.legend = F) +
+  scale_colour_identity()+
+  scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                     limits=c(0,1))+
+  scale_x_discrete(name = "Sample Size",
+                   labels = unique(gxeFPR1$sample_size)) +
+  scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                     labels = c(4,8,16)) +
+    #ggtitle(expression("Common Garden: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+
+  labs(fill = "False Positive Rate")+
+  theme_classic(base_size = 18, base_family = "Times")+
+  theme(axis.text = element_text(colour = "black"))+
+  theme(legend.position = "none")+
+    ggtitle("CG: False Positive")+
+    theme(plot.title = element_text(size = 18, face = "bold"))) 
+
+## False Negative Heatmap - GxE 
+gxePowdub[is.nan(gxePowdub)] <- 0
+gxePowdub1 = gxePowdub %>%
+  filter(between(bin,0.3,0.6))%>%
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("fnr" = mean(fnr))
+gxePowdub1$n_pop<-as.factor(gxePowdub1$n_pop)
+gxePowdub2 <- 
+  gxePowdub1 %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Anova",  -.475/2,  .475/2),
+                 # ifelse(ID == "GxE_Perm", 0.0, 0.9/2)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop)+yadj,
+    col = ifelse(fnr >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
+
+(gxeFNCG_dub  = gxePowdub2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxePowdub2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    #ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Negative Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
     theme(axis.text = element_text(colour = "black"))+
-    ggtitle(expression("Common Garden: Cov"["GE"]*" Power"))+
-    theme(plot.title = element_text(size = 24, face = "bold"))+
-    facet_grid(~label*n_pop))
-grid.arrange(covPow1, gxePow1, covPow3,gxePow3,ncol = 1)
-
+    theme(legend.position = "none")+
+    ggtitle("CG: False Negative Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
 
 
@@ -987,50 +1223,62 @@ for(i in 1:nrow(dat_dub)){
 }
 
 ## Counts for table
+dat_dub1 <- dat_dub %>% 
+  filter(std_dev == 1) %>%
+  #filter(between(abs(covariance),0.2,0.6))%>%
+  filter(total_samples > 17)
+#filter(total_samples > 128)
+dat_dub2 <- dat_dub %>% 
+  filter(std_dev == 1) %>%
+  # filter(between(GxE_emm,0.3,0.6)) %>%
+  filter(total_samples > 17)
+#filter(total_samples > 128)
 
-means_cov_perm_table = dat_dub %>%
+## Counts for table
+
+means_cov_perm_table = dat_dub1 %>%
   group_by("name" = meansCovconfintperm) %>%
   summarize("n" = n())
-fpr.fnr(means_cov_perm_table, divided = FALSE, scenario = 1)
+fpr.fnr(means_cov_perm_table, divided = FALSE, scenario = 2)
 
-means_cov_boot_table = dat_dub %>%
+means_cov_boot_table = dat_dub1 %>%
   group_by("name" =MeansCovconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(means_cov_boot_table, divided = FALSE, scenario = 1)
+fpr.fnr(means_cov_boot_table, divided = FALSE, scenario = 2)
 
-means_gxe_boot_table = dat_dub %>%
+means_gxe_boot_table = dat_dub2 %>%
   group_by("name" =MeanGxEconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(means_gxe_boot_table, divided = FALSE, scenario = 1)
+fpr.fnr(means_gxe_boot_table, divided = FALSE, scenario = 2)
 
-means_gxe_perm_table = dat_dub %>%
+means_gxe_perm_table = dat_dub2 %>%
   group_by("name" =meansGxEconfintperm) %>%
   summarize("n" = n())
-fpr.fnr(means_gxe_perm_table, divided = FALSE, scenario = 1)
+fpr.fnr(means_gxe_perm_table, divided = FALSE, scenario = 2)
 
 ## Counts for heatmaps
-(means_confusion_hmap1 = dat_dub %>%
+(means_confusion_hmap1 = dat_dub1 %>%
     group_by(sample_size, n_pop, "name" =meansCovconfintperm) %>%
     summarize("n" = n()))
-dub_means_conf1 = fpr.fnr(means_confusion_hmap1, divided = TRUE, scenario = 1)
+dub_means_conf1 = fpr.fnr(means_confusion_hmap1, divided = TRUE, scenario = 2)
 means_conf_plot1 <- heatmap_fun(dub_means_conf1,"rate") # Can also do "percent"
 
-(means_confusion_hmap2 = dat_dub %>%
+(means_confusion_hmap2 = dat_dub1 %>%
     group_by(sample_size, n_pop, "name" =MeansCovconfintboot) %>%
     summarize("n" = n()))
-dub_means_conf2 = fpr.fnr(means_confusion_hmap2, divided = TRUE, scenario = 1)
+dub_means_conf2 = fpr.fnr(means_confusion_hmap2, divided = TRUE, scenario = 2)
 means_conf_plot2 <- heatmap_fun(dub_means_conf2,"rate")
 
-(means_confusion_hmap3 = dat_dub %>%
+(means_confusion_hmap3 = dat_dub2 %>%
     group_by(sample_size, n_pop,"name" = MeanGxEconfintboot) %>%
     summarize("n" = n()))
-dub_means_conf3 = fpr.fnr(means_confusion_hmap3, divided = TRUE, scenario = 1)
+dub_means_conf3 = fpr.fnr(means_confusion_hmap3, divided = TRUE, scenario = 2)
 means_conf_plot3 <- heatmap_fun(dub_means_conf3,"rate")
 
-means_confusion_hmap4 = dat_dub %>%
+means_confusion_hmap4 = dat_dub2 %>%
   group_by(sample_size, n_pop,"name" = meansGxEconfintperm) %>%
   summarize("n" = n())
-dub_means_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 1)
+dub_means_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 2)
 means_conf_plot4 <- heatmap_fun(dub_means_conf4,"rate")
 
 # Compile FPs for plot
@@ -1049,25 +1297,181 @@ for(i in 1:nrow(dub_fpdf_means)){
   }else{dub_fpdf_means$npop_plot[i] = "8 Populations"}
 }
 
-############ Confusion Plots -- Env Scenario 2 -- MEANS ###############
+gxeFPRmeandub = rbind(dub_means_conf3,dub_means_conf4)
+gxeFPRmeandub = gxeFPRmeandub[gxeFPRmeandub$name == "False Positive",]
 
-# False Positive Rates 
-(dub_means_falsePos = ggplot(fpdf_means, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
-   geom_bar(position = "dodge", stat = "identity") + 
-   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
-   ylab("False Positive Rate") + xlab("")+
-   facet_wrap(~npop_plot) + 
-   labs(fill = "Sample Size")+
-   #ylim(0,0.3)+
-   scale_fill_viridis(discrete = TRUE)+
-   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
-                             "Cov_Boot" = "Boot. \n CovGE",
-                             "GxE_Boot" = "Boot. \n GxE",
-                             "GxE_Perm" = "Perm. \n GxE"))+
-   theme_classic2(base_family = "Times",base_size = 16) + 
-   theme(axis.text = element_text(colour = "black")))
+covFPRmeandub = rbind(dub_means_conf1,dub_means_conf2)
+covFPRmeandub = covFPRmeandub[covFPRmeandub$name == "False Positive",]
 
 
+## False Negative Rates - MEANS
+covperm1mean_dub = fnr.effsize(dat_dub1, metric = "cov", data.type = "means", analysis ="perm",scenario = 2,resolution = "fine")
+covperm1mean_dub$ID = rep("Cov_Perm",nrow(covperm1mean_dub))
+covboot1mean_dub = fnr.effsize(dat_dub1, metric = "cov", data.type = "means",  analysis ="boot",scenario = 2,resolution = "fine")
+covboot1mean_dub$ID = rep("Cov_Boot",nrow(covboot1mean_dub))
+gxeperm1mean_dub = fnr.effsize(dat_dub2, metric = "gxe", data.type = "means",  analysis ="perm",scenario = 2,resolution = "fine")
+gxeperm1mean_dub$ID = rep("GxE_Perm",nrow(gxeperm1mean_dub))
+gxeboot1mean_dub = fnr.effsize(dat_dub2, metric = "gxe", data.type = "means", analysis = "boot",scenario = 2,resolution = "fine")
+gxeboot1mean_dub$ID = rep("GxE_Boot",nrow(gxeboot1mean_dub))
+
+fndfmean_dub = rbind(covperm1mean_dub,covboot1mean_dub,gxeperm1mean_dub,gxeboot1mean_dub)
+gxePowmean_dub = rbind(gxeperm1mean_dub,gxeboot1mean_dub)
+covPowmean_dub = rbind(covperm1mean_dub,covboot1mean_dub)
+
+############ Confusion Plots  -- Means -- Env Scenario 2 ###############
+
+## False Negative Heatmap - Covariance CG
+covPowmean_dub[is.nan(covPowmean_dub)] <- 0
+covPowmean_dub1 <- 
+  covPowmean_dub %>% 
+  filter(between(bin,0.2,0.6))%>%
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("FNR" = mean(fnr))
+covPowmean_dub1$n_pop<-as.factor(covPowmean_dub1$n_pop)
+covPowmean_dub2<-
+  covPowmean_dub1 %>%
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop) + yadj,
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
+
+(covFNFRTmean_dub = covPowmean_dub2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = FNR)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(FNR, 2))), size = 4, family = "Times", colour = "white", show.legend = F) +
+    #ggtitle("False Negative Rates: CovGE")+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(covPowmean_dub2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, 
+                       name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    labs(fill = "False Negative Rate")+
+    #  ggtitle(expression("Reciprocal Transplant: Cov"["GE"]*" False Negative Rates"))+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("CG: False Negative Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+## False Positive Heatmap - Covariance 
+covFPRmeandub[is.nan(covFPRmeandub)] <- 0
+covFPRmeandub1 <- 
+  covFPRmeandub %>% 
+  mutate(#xadj = ifelse(ID %in% c("Cov_Perm"), -.45/2,  .45/2),
+    yadj = ifelse(ID %in% c("Cov_Perm"), -.475/2,  .475/2),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop)) + yadj,
+    ID2 = ifelse(ID %in% c("Cov_Perm"), "Perm.", "Boot."))
+
+
+(covFPRmean_dub = covFPRmeandub1 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(rate, 2))), size = 4, family = "Times", colour = "white", show.legend = F) +
+    #ggtitle("False Positive Rates: CovGE")+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(covFPRmeandub$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    labs(fill = "False Positive Rate")+
+    #  ggtitle(expression("Reciprocal Transplant: Cov"["GE"]*" False Positive Rates"))+
+    
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("CG: False Positive Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold"))) 
+
+## False Positive Heatmap - GxE 
+gxeFPRmeandub[is.nan(gxeFPRmeandub)] <- 0
+gxeFPRmeandub1 <- 
+  gxeFPRmeandub %>% 
+  mutate(
+    yadj = ifelse(ID == "GxE_Perm", -.475/2,  .475/2),
+    #ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop))+yadj,
+    col = ifelse(rate >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Boot", "Boot.", "Perm."))
+
+(gxeFPCGmean_dub = gxeFPRmeandub1 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+    geom_tile(height = .475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxeFPRmeandub1$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Positive Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("CG: False Positive Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+## False Negative Heatmap - GxE 
+gxePowmean_dub[is.nan(gxePowmean_dub)] <- 0
+gxePowmean_dub1 = gxePowmean_dub %>%
+  filter(between(bin,0.3,0.6))%>%  
+  
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("fnr" = mean(fnr))
+gxePowmean_dub1$n_pop<-as.factor(gxePowmean_dub1$n_pop)
+gxePowmean_dub2 <- 
+  gxePowmean_dub1 %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Perm", -.475/2,  .475/2),
+    # ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop)+yadj,
+    col = ifelse(fnr >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Perm", "Perm.", "Boot."))
+
+(gxeFNCGmean_dub = gxePowmean_dub2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
+    geom_tile(height = 0.475, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxePowmean_dub2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Negative Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Negative Rates for Means")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+# Raw vs. Means comparisons
+
+## False Positives
+grid.arrange(covFPFRT,covFPFRTmean,covFPCG,covFPRmean_dub, ncol=2, nrow=2,
+             top = textGrob("CovGE False Positive Rates",gp=gpar(fontsize=20)))
+
+grid.arrange(gxeFPFRT, gxeFPFRTmean, gxeFPCG, gxeFPFRTmean_dub, ncol=2, nrow=2,
+             top = textGrob("GxE False Positive Rates",gp=gpar(fontsize=20)))
+
+## False Negatives
+grid.arrange(covFNFRT, covFNFRTmean, covFNCG, covFNFRTmean_dub, ncol=2, nrow=2,
+             top = textGrob("CovGE False Negative Rates",gp=gpar(fontsize=20)))
+
+grid.arrange(gxeFNFRT, gxeFNFRTmean, gxeFNCG_dub, gxeFNCGmean_dub, ncol=2, nrow=2,
+             top = textGrob("GxE False Negative Rates",gp=gpar(fontsize=20)))
 
 #############################
 ## Power Analysis Heatmaps ##
@@ -1092,34 +1496,37 @@ cov_hm3$totals = cov_hm3$n_pop * 2 * cov_hm3$sample_size
 # HeatMaps - Covariance based on Permutation - FRT
 (CovPower1 = ggplot(cov_hm1,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
     geom_tile() + 
-    geom_text(aes(label= paste(cov_hm1$totals, round(cov_hm1$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
+    geom_text(aes(label= paste(cov_hm1$totals, round(cov_hm1$avgpower,3),sep = '\n')), family = "Times", size = 5) +
+    theme_classic(base_size = 18, base_family = "Times")+ 
     scale_fill_viridis(
       breaks=seq(0,1,0.25), #breaks in the scale bar
       limits=c(0,1))+
     xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
-    theme(axis.text = element_text(colour = "black"))+  
+    theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
-    ggtitle(expression("Cov"["GE"]*": Full Reciprocal Transplant"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
+    ggtitle("FRT: Power")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
 # HeatMaps - Covariance based on Permutation - FRT
 (CovPower2 = ggplot(cov_hm3,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
     geom_tile() + 
-    geom_text(aes(label= paste(cov_hm3$totals, round(cov_hm3$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
+    geom_text(aes(label= paste(cov_hm3$totals, round(cov_hm3$avgpower,3),sep = '\n')),family = "Times",size = 5) +
+    theme_classic(base_size = 18, base_family = "Times")+ 
     scale_fill_viridis(
       breaks=seq(0,1,0.25), #breaks in the scale bar
       limits=c(0,1))+
     xlab("Sample Size") + ylab("Number of Genotypes")+
     labs(fill = "Power")+
-    theme(axis.text = element_text(colour = "black"))+  
+    theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
-    ggtitle(expression("Cov"["GE"]*": Paired Common Garden"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
+    ggtitle("CG: Power")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+    #theme(legend.position = c(0.85,0.85)))
 
-grid.arrange(CovPower1,CovPower2,ncol = 2)
+grid.arrange(covFNFRT, covFNCG,
+             covFPFRT, covFPCG, 
+             CovPower1,CovPower2,ncol = 2)
 
 # GxE - FRT
 gxe_hm = fnr.effsize(dat_csv1, metric = "gxe", analysis = "perm", resolution = "fine")
@@ -1140,8 +1547,8 @@ gxe_hm3$totals = gxe_hm3$n_pop * 2 * gxe_hm3$sample_size
 # HeatMaps - Covariance based on Permutation - FRT
 (GxEPower1 = ggplot(gxe_hm1,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
     geom_tile() + 
-    geom_text(aes(label= paste(gxe_hm1$totals, round(gxe_hm1$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
+    geom_text(aes(label= paste(gxe_hm1$totals, round(gxe_hm1$avgpower,3),sep = '\n'),family = "Times"), size = 4) +
+    theme_classic(base_size = 18, base_family = "Times")+ 
     scale_fill_viridis(
       breaks=seq(0,1,0.25), #breaks in the scale bar
       limits=c(0,1))+
@@ -1149,14 +1556,14 @@ gxe_hm3$totals = gxe_hm3$n_pop * 2 * gxe_hm3$sample_size
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+  
     theme(legend.position = "none")+
-    ggtitle(expression(bar(Delta)*""["GxE"]*": Full Reciprocal Transplant"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
+    ggtitle("FRT: Power")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
 # HeatMaps - Covariance based on Permutation - FRT
 (GxEPower2 = ggplot(gxe_hm3,aes(x = factor(sample_size), y = factor(n_pop), fill = avgpower)) + 
     geom_tile() + 
-    geom_text(aes(label= paste(gxe_hm3$totals, round(gxe_hm3$avgpower,3),sep = '\n')), size = 5) +
-    theme_classic(base_size = 24, base_family = "Times")+ 
+    geom_text(aes(label= paste(gxe_hm3$totals, round(gxe_hm3$avgpower,3),sep = '\n'),family = "Times"), size = 4) +
+    theme_classic(base_size = 18, base_family = "Times")+ 
     scale_fill_viridis(
       breaks=seq(0,1,0.25), #breaks in the scale bar
       limits=c(0,1))+
@@ -1164,11 +1571,12 @@ gxe_hm3$totals = gxe_hm3$n_pop * 2 * gxe_hm3$sample_size
     labs(fill = "Power")+
     theme(axis.text = element_text(colour = "black"))+  
     theme(legend.position = "none")+
-    ggtitle(expression(bar(Delta)*""["GxE"]*": Paired Common Garden"))+
-    theme(plot.title = element_text(size = 24, face = "bold")))
+    ggtitle("CG: Power")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
 
-grid.arrange(CovPower1,GxEPower1,CovPower2,GxEPower2,ncol = 2)
-grid.arrange(GxEPower1,GxEPower2, ncol = 2)
+grid.arrange(eff_var1, gxeFNFRT, gxePowdub3, gxeFPFRT, gxeFPCG, GxEPower1,GxEPower2, #ncol = 4,
+             layout_matrix = cbind(c(1,2,3),c(1,4,5),c(1,6,7)))
+
 
 ######################################
 ## Tradeoff with GxE and Covariance ##
@@ -1209,6 +1617,7 @@ sigGxE = dat_csv %>%
   filter(Covconfintboot != "false positive") %>%
   filter(GxEconfintperm != "false positive")
 
+
 sigGxE2 = dat_dub %>% 
   filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.
   filter(true_GxE_emm != 0) %>%
@@ -1216,14 +1625,20 @@ sigGxE2 = dat_dub %>%
   filter(Covconfintboot != "false positive") %>%
   filter(GxEconfintperm != "false positive")
 
+sigGxEdub = fnr.effsize(sigGxE2, metric = "GxE", scenario = 2, analysis ="perm",resolution = "fine")
+sigGxEdub$ID = rep("GxE_Perm", nrow(sigGxEdub))
+sigcovdub = fnr.effsize(sigGxE2, metric = "Cov", scenario = 2,  analysis ="perm",resolution = "fine")
+sigcovdub$ID = rep("Cov_Perm", nrow(sigcovdub))
+trade_dub = rbind(sigcovdub,sigGxEdub)
+
 (bin = ggplot(sigGxE, aes(x = true_GxE_emm, y = covtick))+
     geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
     geom_point()+
-    xlab(expression(""*bar(Delta)*""["GxE"]*" of population"))+ylab(expression("Proportion significant Cov"["GE"]))+
+    xlab(expression(""*bar(Delta)*""["GxE"]*": Population"))+ylab(expression("Proportion significant Cov"["GE"]))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
-    ggtitle("")+
+    ggtitle(expression("C   FRT: Significant Cov"["GE"]*" vs. "*bar(Delta)*""["GxE"]))+
     theme(plot.background = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -1233,11 +1648,11 @@ sigGxE2 = dat_dub %>%
 (lin = ggplot(filter(sigGxE,replicate ==1), aes(x = true_GxE_emm, y = abs(true_cov)))+
     geom_point(alpha = 0.15)+
     geom_smooth(method = "glm", colour = "black", size = 1.5)+
-    xlab(expression(bar(Delta)*""["GxE"]*" of population"))+ylab(expression("|Cov"["GE"]*" | of population"))+
+    xlab(expression(bar(Delta)*""["GxE"]*": Population"))+ylab(expression("|Cov"["GE"]*" |: Population"))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
-    ggtitle("Full Reciprocal Transplant Design")+
+    ggtitle(expression("A   FRT: |Cov"["GE"]*"| vs. "*bar(Delta)*""["GxE"]))+
     theme(plot.background = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -1246,11 +1661,11 @@ sigGxE2 = dat_dub %>%
 (bin2 = ggplot(sigGxE2, aes(x = true_GxE_emm, y = covtick))+
     geom_smooth(method = "glm",method.args = list(family = "binomial"),se = T,colour = "black") + 
     geom_point()+
-    xlab(expression(bar(Delta)*""["GxE"]*" of population"))+ylab(expression("Proportion significant Cov"["GE"]))+
+    xlab(expression(bar(Delta)*""["GxE"]*": Population"))+ylab(expression("Proportion of significant Cov"["GE"]))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
-    ggtitle("")+
+    ggtitle(expression("D   CG: Significant Cov"["GE"]*" vs. "*bar(Delta)*""["GxE"]))+
     theme(plot.background = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -1260,19 +1675,46 @@ sigGxE2 = dat_dub %>%
 (lin2 = ggplot(filter(sigGxE2, replicate == 1), aes(x = true_GxE_emm, y = abs(true_cov)))+
     geom_point(alpha = 0.15)+
     geom_smooth(method = "glm", colour = "black", size = 1.5)+
-    xlab(expression(bar(Delta)*""["GxE"]*" of population"))+ylab(expression("| Cov"["GE"]*" | of population"))+
+    xlab(expression(bar(Delta)*""["GxE"]*": Population"))+ylab(expression("| Cov"["GE"]*" |: Population"))+
     theme_bw(base_size = 18, base_family = "Times")+
     theme(axis.text.x = element_text(colour = "black"))+
     theme(axis.text.y = element_text(colour = "black"))+
-    ggtitle("Paired Common Garden Design")+
+    ggtitle(expression("B   CG: |Cov"["GE"]*"| vs. "*bar(Delta)*""["GxE"]))+
     theme(plot.background = element_blank(),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.border = element_rect(size = 2)))
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(size = 2)))
 
-grid.arrange(lin, bin, lin2, bin2, ncol = 2)
+grid.arrange(lin, lin2, bin, bin2,fndf2,fndfdub, ncol = 2)
 
-### Same but with Omega^2
+### FRT: Power Analysis For Both GxE and CovGE
+SigGxEonly = filter(dat_csv1, GxE_emm_pvalue <= 0.05)
+sigGxE1 = fnr.effsize(dat_csv1, metric = "GxE", scenario = 1, analysis ="perm",resolution = "fine")
+sigGxE1$ID = rep("GxE_Perm", nrow(sigGxE1))
+sigcov1 = fnr.effsize(SigGxEonly, metric = "Cov", scenario = 1,  analysis ="perm",resolution = "fine")
+sigcov1$ID = rep("Cov_Perm", nrow(sigcov1))
+trade = rbind(sigGxE1, sigcov1)
+trade$totals = trade$sample_size*trade$n_pop*trade$n_pop
+trade$grp = paste(trade$bin,trade$totals,trade$ID)
+
+(fndf2 = ggplot(trade,aes(x = bin, y = power, group = grp, fill = factor(ID))) + 
+    geom_jitter(aes(shape = factor(totals)), width = 0.4,size = 3,alpha = 0.7)+
+    geom_hline(aes(yintercept = 0.8),linetype = "dashed")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    scale_fill_manual(values = c("#3CBB75FF","#453781FF"),
+                      labels = c(expression("Cov"["GE"]),expression(bar(Delta)*""["GxE"])),
+                      guide = guide_legend(override.aes = list(size = 3,
+                                                               alpha = 1)))+
+    scale_shape_manual(values = c(21,22,23,24))+
+    xlab("Effect Size")+ylab("Power")+
+    theme(axis.text = element_text(colour = "black"))+ 
+    #scale_x_continuous(breaks=c(0.2)) +    
+    ggtitle("E   FRT Design")+
+    theme(legend.position = "none")+
+    labs(fill = "",shape = "Total Sample Size")+
+    guides(fill=guide_legend(override.aes=list(shape=21))))
+    
+### Tradeof with Omega^2
 dat_csv$sig = NULL
 for(i in 1:nrow(dat_csv)){ # Use only if one or the other is significant
   if(dat_csv$GxE_omega_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$sig[i] = TRUE
@@ -1313,22 +1755,22 @@ dat_csv = dat_csv %>% mutate(sigsig = ifelse(GxE_emm_pvalue <= 0.05 & GxE_omega_
                                              ifelse(GxE_emm_pvalue > 0.05 & GxE_omega_pvalue > 0.05, "None Significant",
                                                 ifelse(GxE_emm_pvalue > 0.05 & GxE_omega_pvalue <= 0.05, "ANOVA P-value < 0.05", 
                                                    "Permutation P-value < 0.05"))))
-oe = dat_csv %>% filter(replicate == 1) %>% filter(std_dev == 1)
+oe = dat_csv %>% filter(replicate == 1) #%>% filter(std_dev == 1)
                                         
-(eff_var1 = ggplot(oe, aes(x = true_GxE_emm, y = GxE_omega)) + 
+(eff_var1 = ggplot(oe, aes(x = true_GxE_emm, y = GxE_omega, linetype = factor(std_dev), group = std_dev)) + 
     geom_point(aes(shape = factor(sigsig), fill = factor(sigsig)), alpha = 0.65, size = 4)+
     scale_fill_manual(values = devcol)+
                       #breaks = c("0.5", "1"))+
     scale_shape_manual(values = devshape)+
-    geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3),se = F,colour = "black",size = 1.5) + 
+    geom_smooth(method = "lm", formula = y ~ splines::bs(x, 3),se = F, colour = "black",size = 1.5) + 
     xlab(expression(""*bar(Delta)*""["GxE"]*" of population"))+
-    #scale_linetype_manual(values = c("0.5" = "dotdash", "1" = "solid"))+
+    scale_linetype_manual(values = c("0.5" = "dotdash", "1" = "solid"),labels = c("0.5" = "Low (0.5)", "1" = "High (1.0)"))+
     ylab(expression(""*omega^2*" of population"))+
     #guides(fill=guide_legend(override.aes=list(shape=21,size =6)))+
     labs(fill = "Significance", shape =  "Significance", linetype = "Standard Deviation")+
     guides(shape = guide_legend(override.aes = list(size = 6)))+
     #ggtitle("Full Reciprocal Transplant Design")+
-    theme_classic(base_size = 24, base_family = "Times")+
+    theme_classic(base_size = 18, base_family = "Times")+
     theme(axis.text =element_text(colour = "black")))
 
 
@@ -1402,11 +1844,28 @@ dat_dub$gxeerror = dat_dub$GxE_emm_uprCI - dat_dub$GxE_emm_lwrCI
 
 # Covariance
 dat_csv_2 = filter(dat_csv, sample_size != 2)
-(covpopcheck = ggplot(dat_csv_2,aes(x = abs(true_cov), y = abs(covariance)))+
-    geom_point(aes(colour = factor(n_pop)))+ylab(expression("Cov"["GE"]*": Group Means"))+xlab(expression("Cov"["GE"]*": Raw data"))+
-    geom_abline(slope = 1, intercept = 0,colour = "red")+
+(covpopcheck = ggplot(dat_csv_2,aes(x = true_cov, y = covariance))+
+    geom_point(aes(colour = factor(n_pop),shape = factor(std_dev)),alpha = 0.5)+
+    ylab(expression("Cov"["GE"]*": Sample Estimate"))+xlab(expression("Cov"["GE"]*": Population"))+
+    geom_abline(slope = 1, intercept = 0,colour = "black",size = 1.5)+
+    geom_smooth(method= "glm",colour="red")+
+    scale_colour_viridis(discrete = TRUE)+
     theme_classic(base_size = 20, base_family = "Times")+
-    ggtitle("Full reciprocal transplant design")+
+    ggtitle(expression("A   FRT: Cov"["GE"]))+
+    theme(legend.position="none")+
+    labs(colour = "Number of genotypes", shape = "Residual error")+
+    theme(axis.text = element_text(colour = "black")))
+
+(covpopcheckdub = ggplot(dat_dub,aes(x = true_cov, y = covariance))+
+    geom_point(aes(colour = factor(n_pop),shape = factor(std_dev)),alpha = 0.5)+
+    ylab(expression("Cov"["GE"]*": Sample Estimate"))+xlab(expression("Cov"["GE"]*": Population"))+
+    geom_abline(slope = 1, intercept = 0,colour = "black",size = 1.5)+
+    geom_smooth(method= "glm",colour="red")+
+    scale_colour_viridis(discrete = TRUE)+
+    theme_classic(base_size = 20, base_family = "Times")+
+    ggtitle(expression("B   CG: Cov"["GE"]))+
+    labs(colour = "Number of genotypes", shape = "Residual error")+
+    theme(legend.position="none")+
     theme(axis.text = element_text(colour = "black")))
 
 (covmeancheck = ggplot(dat_csv,aes(x = covariance, y = cov_means))+
@@ -1458,6 +1917,31 @@ grid.arrange(covmeancheck, coverrorcheck_lwr, coverrorcheck_upr)
 grid.arrange(covmeancheck, coverrorcheck,covmeancheck2, coverrorcheck2,ncol = 2)
 
 # GxE
+(gxepopcheck = ggplot(dat_csv_2,aes(x = true_GxE_emm, y = GxE_emm))+
+    geom_point(aes(colour = factor(n_pop),shape = factor(std_dev)),alpha = 0.5)+
+    ylab(expression(""*bar(Delta)*""["GxE"]*": Sample Estimate"))+xlab(expression(""*bar(Delta)*""["GxE"]*": Population"))+
+    geom_abline(slope = 1, intercept = 0,colour = "black",size = 1.5)+
+    geom_smooth(method= "glm",colour="red")+
+    scale_colour_viridis(discrete = TRUE)+
+    theme_classic(base_size = 20, base_family = "Times")+
+    ggtitle(expression("C   FRT: "*bar(Delta)*""["GxE"]))+
+    labs(colour = "Number of genotypes", shape = "Residual error")+
+    theme(legend.position="none")+
+    theme(axis.text = element_text(colour = "black")))
+
+(gxepopcheck_dub = ggplot(dat_dub,aes(x = true_GxE_emm, y = GxE_emm))+
+    geom_point(aes(colour = factor(n_pop),shape = factor(std_dev)),alpha = 0.5)+
+    ylab(expression(""*bar(Delta)*""["GxE"]*": Sample Estimate"))+xlab(expression(""*bar(Delta)*""["GxE"]*": Population"))+
+    geom_abline(slope = 1, intercept = 0,colour = "black",size = 1.5)+
+    geom_smooth(method= "glm",colour="red")+
+    scale_colour_viridis(discrete = TRUE)+
+    theme_classic(base_size = 20, base_family = "Times")+
+    ggtitle(expression("D   CG: "*bar(Delta)*""["GxE"]))+
+    labs(colour = "Number of genotypes", shape = "Residual error")+
+    theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(covpopcheck, covpopcheckdub, gxepopcheck, gxepopcheck_dub,ncol = 2)
+
 (gxemeancheck = ggplot(dat_csv,aes(x = true_GxE_emm, y = true_GxE_means))+
     geom_point()+ylab(expression(bar(Delta)*""["GxE"]*": Group Means"))+xlab(expression(bar(Delta)*""["GxE"]*": Raw data"))+
     geom_abline(slope = 1, intercept = 0,colour = "red")+
@@ -1546,34 +2030,33 @@ suspect.pvals.mean = dat_csv %>% # mean
 ##      Phenotype plots    ##
 #############################
 
-
 # To find examples  
-(rowpicker = dat_csv %>%
+(rowpicker = dat_dub %>%
     filter(sample_size == 4)%>%
     filter(n_pop == 4)%>%
-    filter(GxE_emm < 0.35)%>% #No GxE
-    #filter(GxE_emm > 0.65)%>% # GxE
-    #filter(covariance < -.35)) # CnGV
-    filter(covariance > .75)) # CoGV
+    #filter(GxE_emm < 0.25)%>% #No GxE
+    filter(GxE_emm > 0.70)%>% # GxE
+    filter(covariance < -.75)) # CnGV
+    #filter(covariance > .75)) # CoGV
 
-chosen_1 = c(45657, # CoGV, GxE, 2 pop #
+chosen_1 = c(16434, # CoGV, GxE, 2 pop #
              11021, # CnGV, GxE, 2 pop #
-             44014, # CnGV, No GxE, 2 pop #
-             16434, # CoGV, No GxE, 2 pop #
+             8243, # CnGV, No GxE, 2 pop #
+             1018, # CoGV, No GxE, 2 pop #
              
             # 12949, # CoGV, No GxE, 8 pop #
             # 16546, # CnGV, No GxE, 8 pop #
             # 13709, # CnGV, GxE, 8 pop #
             # 17324, # CoGV, GxE, 8 pops #
              
-             9279, # CoGV, No GxE, 4 pop #
-             299, # CnGV, No GxE, 4 pop #
-             6484, # CnGV, GxE, 4 pop #
-             13662) # CoGV, GxE, 4 pops #
+            12867, # CoGV, No GxE, 4 pop #
+            299, # CnGV, No GxE, 4 pop #
+            6484, # CnGV, GxE, 4 pop #
+            13662) # CoGV, GxE, 4 pops #
 
-chosen_2 = c(21997, # CoGV, GxE, 2 pop per env #
+chosen_2 = c(25869, # CoGV, GxE, 2 pop per env #
              30830, # CnGV, GxE, 2 pop per env #
-             54780, # CnGV, No GxE, 2 pop per env #
+             24478, # CnGV, No GxE, 2 pop per env #
              25827) # CoGV, No GxE, 2 pop per env #
              
             # 38536, # CoGV, No GxE, 8 pop per env #
@@ -1595,29 +2078,31 @@ long_gen = c("E_1" = "Gen. 1\n(Native to Env. 1)", "E_2" = "Gen. 2\n(Native to E
 long_genlab = c("E_1" = "Native to Env. 1", "E_2" = "Native to Env. 2","E_3" = "Native to Env. 3", "E_4" = "Native to Env. 4",
                 "E_5" = "Native to Env. 5", "E_6" = "Native to Env. 6","E_7" = "Native to Env. 7", "E_8" = "Native to Env. 8")
 
-for(i in 1:length(chosen)){
 
-phenRow = filter(start_df,row == chosen[i])
-plotdat = filter(phen_data, row == chosen[i])
+#for(i in 1:length(chosen)){
+#phenRow = filter(start_df,row == chosen[i])
+#plotdat = filter(phen_data, row == chosen[i])
+(chosen = filter(dat_dub, row == 31969))
+(phenRow = chosen)
+plotdat = filter(phen_data, row == chosen$row)
 label1 = paste0(phenRow$covariance,"; P = ",phenRow$covariance_pvalue)
 label2 = paste0(phenRow$GxE_emm,"; P = ",phenRow$GxE_emm_pvalue)
-colorpal = c("E_1" = "#404788FF", "E_2" = "#73D055FF")
+colorpal = c("E_1" = "#3CBB75FF", "E_2" = "#453781FF")
 shape_2 = c("E_1" = 15, "E_2" =  17)
 shape_4 = c("E_1" = 15, "E_2" = 17,"E_3" = 19, "E_4"= 18)
 shape_8 = c("E_1" = 15, "E_2" = 17,"E_3" = 19, "E_4"= 18,
             "E_5" = 15, "E_6" = 17,"E_7" = 19, "E_8"= 18)
 
-
 p = ggplot(plotdat,aes(x = exp_env_factor, y = phen_corrected, group = gen_factor,colour = nat_env_factor))+
-  geom_point(aes(shape = nat_env_factor),size = 5, position=position_dodge(width = 0.15))+
+  geom_jitter(aes(shape = nat_env_factor),size = 5,width = 0.07)+ #position=position_dodge(width = 0.15))+
   geom_smooth(size = 4, se=FALSE)+
   theme_classic(base_size = 40, base_family = "Times")+
-  ylim(-3,6)+
+  ylim(-4,6)+
   labs(colour = "",shape = "")+
   guides(colour = guide_legend(ncol = 2))+
   ylab("Phenotype")+xlab("Environment")+
-  annotate("text", x = 0.5, y = 5.5, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=16, color = "black",hjust = 0,parse = T)+
-  annotate("text", x = 0.5, y = 4, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=16 , color = "black", hjust = 0,parse = T)+
+  #annotate("text", x = 0.5, y = 5.5, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=16, color = "black",hjust = 0,parse = T)+
+  #annotate("text", x = 0.5, y = 4, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label2))),size=16 , color = "black", hjust = 0,parse = T)+
   theme(axis.text=element_text(colour="black"))+
   theme(legend.position="bottom")
 
@@ -1635,10 +2120,11 @@ p3 = p2 + if(phenRow$n_pop == 2){
 }else if(phenRow$env_scenario == 2){scale_shape_manual(values = shape_2,labels = short_gen)
 }else if(phenRow$n_pop == 4){scale_shape_manual(values = shape_4,labels = mid_gen)
 }else{scale_shape_manual(values = shape_8,labels = long_genlab)}
+p3
 pdf(paste("Row_", phenRow$row, ".pdf", sep = ""), width=11, height=8.5) # start export
 print(p3) 
 dev.off() # finish export
-}
+#}
 phenRow
 
 # Check with Variance partition data frame
@@ -1674,9 +2160,306 @@ ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor,
 
 
 
+
+################################
+##      Applied Data Plots    ##
+################################
+# Load Functions for meta-analysis 
+setwd("~/Documents/GitHub/CnGV/CnGV/src/")
+source("CovarianceDataFunctions.R")
+
+# Set bootstraps
+n_boot = 999
+
+# Molly's age at metamorphosis data
+mm = read.csv("~/Desktop/Work/DataSets/Tadpole Plasticity_2017/mortality2017.csv")
+mm = mm[-which(is.na(mm$Jul_metamorph)),] # Include only those that metamorphosed
+mm$age = mm$Jul_metamorph-mm$Jul_hatch # Calculate age at MM
+
+# Wrangle data for analysis
+mm1 = mm %>%
+  filter(Pop != "BELL") %>% # Exclude bellamy bc missing data at 6ppt
+  filter(tad %in% c(0,6)) %>% # Only use 0, 6ppt
+  droplevels()
+mm1$gen_factor = paste0("G_",as.numeric(factor(mm1$Pop)))
+mm1$exp_env_factor = paste0("E_",as.numeric(as.factor(mm1$tad))) 
+mm1$nat_env_factor = NULL
+for(i in 1:nrow(mm1)){
+  if(mm1$Pop[i] == "BOD" | mm1$Pop[i] == "CSI" |mm1$Pop[i] == "LH" |mm1$Pop[i] == "DQ"){ mm1$nat_env_factor[i] = "E_2"
+  }else{ mm1$nat_env_factor[i] = "E_1"}
+}
+
+# Format final dataset
+ma = data.frame("data_type" = rep("raw", nrow(mm1)),
+                "gen_factor" = factor(mm1$gen_factor),
+                "exp_env_factor" = factor(mm1$exp_env_factor), 
+                "nat_env_factor" = factor(mm1$nat_env_factor), # E_2 = coastal; E_1 = inland
+                "phen_data"= mm1$age)
+dim(ma)
+totalss = ma %>%
+  group_by(gen_factor,nat_env_factor)%>%
+  summarize("ss" = n())
+length(unique(ma$gen_factor))*length(unique(ma$exp_env_factor))*mean(totalss$ss)
+
+# Standardize by standard deviation of group means
+ma$group = paste(ma$gen_factor,ma$exp_env_factor,sep = "-")
+ma$phen_corrected = (ma$phen_data - mean(ma$phen_data))/sd(tapply(ma$phen_data, ma$group, mean))
+MollyTest = amarillo_armadillo(ma, n_boot, data_type)
+
+# Plot Molly's study
+label1 = MollyTest$Covariance.Estimate
+label2 = paste0(":  C.I. = ", MollyTest$Covariance.Lower.CI," - ", MollyTest$Covariance.Upper.CI)
+label3 = round(MollyTest$GxE.Estimate,3)
+label4 = paste0(":  P-value = ",round(MollyTest$GxE.p.value,3))
+
+(mollyplot = ggplot(ma, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor)) + 
+    geom_smooth(aes(colour = nat_env_factor),size = 2, method = "glm",se=FALSE)+
+    geom_point(aes(shape = gen_factor, fill = gen_factor),size = 4, alpha = 0.7,position = position_dodge(width = 0.25))+   
+    xlab("")+ylab("Normalized Phenotype \n(age at metamorphosis in days)")+
+    scale_x_discrete(breaks=c("E_1","E_2"),labels=c("Freshwater", "Saltwater"))+
+    scale_colour_manual(values =  c("E_1" = "#3CBB75FF", "E_2" = "#453781FF"),
+                        labels = c("E_1" = "Inland populations", "E_2" = "Coastal populations"))+
+    scale_fill_manual(values =  c("G_1" = "#453781FF","G_2" = "#453781FF","G_3" = "#453781FF","G_4" = "#453781FF","G_5" = "#3CBB75FF", "G_6" ="#3CBB75FF","G_7" =  "#3CBB75FF"),
+                      labels = c("G_1" = "Genotype1","G_2" = "Genotype2","G_3" = "Genotype3","G_4" = "Genotype4",
+                                 "G_5" = "Genotype5", "G_6" = "Genotype6","G_7" = "Genotype7"))+
+    scale_shape_manual(values = c("G_1" = 21,"G_2" = 22,"G_3" = 24,"G_4" = 23,"G_5" = 21, "G_6" = 22,"G_7" = 24),
+                       labels = c("G_1" = "Genotype1","G_2" = "Genotype2","G_3" = "Genotype3","G_4" = "Genotype4",
+                                  "G_5" = "Genotype5", "G_6" = "Genotype6","G_7" = "Genotype7"))+
+    labs(col=" ",fill=" ",shape = " ")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(legend.position="none")+
+    ggtitle("A")+
+    theme(axis.text.x=element_text(colour="black"))+
+    theme(axis.text.y=element_text(colour="black")))
+    #annotate("text", x = 1, y = 3.5, label = deparse(bquote("Cov"["GE"] ==~.(label1))),size=6, color = "black",hjust = 0,parse = T)+
+   # annotate("text", x = 1.35, y = 3.5, label = label2 ,size=6, color = "black",hjust = 0,parse = F)+
+    #annotate("text", x = 1, y = 3, label = deparse(bquote(bar(Delta)*""["GxE"] ==~.(label3))),size=6 , color = "black", hjust = 0,parse = T)+
+    #annotate("text", x = 1.3, y = 3, label = label4 ,size=6, color = "black",hjust = 0,parse = F))
+#Save as PDF A4
+
+## Wing Length Study
+setwd("~/Documents/GitHub/CnGV/CnGV/data/")
+data.df1 <- read.csv("meta_df.csv")
+data.df1$Data_file_name <- as.character(data.df1$Data_file_name)
+malewings = filter(data.df1, data.df1$Data_file_name == "630_Cenzer_male_wing_length")
+femalewings = filter(data.df1, data.df1$Data_file_name == "630_Cenzer_female_wing_length")
+
+# Format data for each
+malewings$gen_factor = factor(malewings$gen_factor)
+malewings$exp_env_factor = factor(malewings$exp_env_factor)
+malewings$nat_env_factor = factor(malewings$nat_env_factor)
+
+femalewings$gen_factor = factor(femalewings$gen_factor)
+femalewings$exp_env_factor = factor(femalewings$exp_env_factor)
+femalewings$nat_env_factor = factor(femalewings$nat_env_factor)
+
+# Standardize by standard deviation of group means
+malewings$group = paste(malewings$gen_factor,malewings$exp_env_factor,sep = "-")
+malewings$phen_corrected = (malewings$phen_data - mean(malewings$phen_data))/sd(tapply(malewings$phen_data, malewings$group, mean))
+femalewings$group = paste(femalewings$gen_factor,femalewings$exp_env_factor,sep = "-")
+femalewings$phen_corrected = (femalewings$phen_data - mean(femalewings$phen_data))/sd(tapply(femalewings$phen_data, femalewings$group, mean))
+
+# Run tests
+MaleWingsTest = amarillo_armadillo(malewings, n_boot, data_type)
+FemaleWingsTest = amarillo_armadillo(femalewings, n_boot, data_type)
+
+totalss = femalewings %>%
+  group_by(gen_factor,nat_env_factor)%>%
+  summarize("ss" = n())
+length(unique(femalewings$gen_factor))*length(unique(femalewings$exp_env_factor))*mean(totalss$ss)
+
+
+
+# Plot MaleWings
+(malewingplot = ggplot(malewings, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor)) + 
+    geom_smooth(aes(colour = nat_env_factor),size = 2, method = "glm",se=FALSE)+
+    geom_point(aes(shape = gen_factor, fill = gen_factor),size = 4, alpha = 0.7,position = position_dodge(width = 0.25))+
+    xlab("")+ylab("Normalized Phenotype \n(forewing length in mm)")+
+    scale_shape_manual(values = c("G_1" = 21,"G_2" = 22,"G_3" = 24,"G_4" = 21,"G_5" = 22, "G_6" = 23,"G_7" = 24,"G_8" = 25),
+                       labels = c("G_1" = "Genotype1","G_2" = "Genotype2","G_3" = "Genotype3","G_4" = "Genotype4",
+                                  "G_5" = "Genotype5", "G_6" = "Genotype6","G_7" = "Genotype7","G_8" = "Genotype8"))+
+    scale_x_discrete(breaks=c("E_1","E_2"),labels=c("Native \n host plant", "Introduced \n host plant"))+
+    scale_colour_manual(values =  c("E_1" = "#3CBB75FF", "E_2" = "#453781FF"),labels = male_labels)+
+    scale_fill_manual(values = c("G_1" = "#3CBB75FF","G_2" = "#3CBB75FF","G_3" = "#3CBB75FF","G_4" = "#453781FF",
+                                 "G_5" = "#453781FF", "G_6" = "#453781FF","G_7" = "#453781FF","G_8" = "#453781FF"),
+                      labels = c("G_1" = "Genotype1","G_2" = "Genotype2","G_3" = "Genotype3","G_4" = "Genotype4",
+                                 "G_5" = "Genotype5", "G_6" = "Genotype6","G_7" = "Genotype7","G_8" = "Genotype8"))+
+    labs(col=" ",fill=" ",shape = " ")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text.x=element_text(colour="black"))+
+    ggtitle("B  Male")+
+    theme(legend.position="none")+    
+    theme(axis.text.y=element_text(colour="black")))
+
+# Plot femaleWings
+(femalewingplot = ggplot(femalewings, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor)) + 
+    geom_smooth(aes(colour = nat_env_factor),size = 2, method = "glm",se=FALSE)+
+    geom_point(aes(shape = gen_factor, fill = gen_factor),size = 4, alpha = 0.7,position = position_dodge(width = 0.25))+
+    xlab("")+ylab("Normalized Phenotype \n(forewing length in mm)")+
+    scale_shape_manual(values = c("G_1" = 21,"G_2" = 22,"G_3" = 24,"G_4" = 21,"G_5" = 22, "G_6" = 23,"G_7" = 24,"G_8" = 25),
+                       labels = c("G_1" = "Genotype1","G_2" = "Genotype2","G_3" = "Genotype3","G_4" = "Genotype4",
+                                  "G_5" = "Genotype5", "G_6" = "Genotype6","G_7" = "Genotype7","G_8" = "Genotype8"))+
+    scale_x_discrete(breaks=c("E_1","E_2"),labels=c("Native \n host plant", "Introduced \n host plant"))+
+    scale_colour_manual(values =  c("E_1" = "#3CBB75FF", "E_2" = "#453781FF"),labels = male_labels)+
+    scale_fill_manual(values = c("G_1" = "#3CBB75FF","G_2" = "#3CBB75FF","G_3" = "#3CBB75FF","G_4" = "#453781FF",
+                                 "G_5" = "#453781FF", "G_6" = "#453781FF","G_7" = "#453781FF","G_8" = "#453781FF"),
+                      labels = c("G_1" = "Genotype1","G_2" = "Genotype2","G_3" = "Genotype3","G_4" = "Genotype4",
+                                 "G_5" = "Genotype5", "G_6" = "Genotype6","G_7" = "Genotype7","G_8" = "Genotype8"))+
+    labs(col=" ",fill=" ",shape = " ")+
+    theme_classic(base_size = 20, base_family = "Times")+
+    theme(axis.text.x=element_text(colour="black"))+
+    ggtitle("C  Female")+
+    theme(legend.position="none")+    
+    theme(axis.text.y=element_text(colour="black")))
+    
+grid.arrange(mollyplot,malewingplot,femalewingplot,
+             layout_matrix = cbind(c(1,2),c(1,3))) #Device size 11x11
 #######################################
 #########     Extra Code      #########
 #######################################
+
+## False Positive Rates 
+(falsePos2 = ggplot(dub_fpdf, aes(x = ID, y = rate, group = sample_size, fill = factor(sample_size)))+ 
+   geom_bar(position = "dodge", stat = "identity") + 
+   geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+   ylab("False Positive Rate") + xlab("")+
+   ggtitle("False Positive Rates: Paired Common Garden")+
+   facet_wrap(~npop_plot) + 
+   labs(fill = "Sample Size")+
+   #ylim(0,0.3)+
+   scale_fill_viridis(discrete = TRUE)+
+   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
+                             "Cov_Boot" = "Boot. \n CovGE",
+                             "GxE_Boot" = "Boot. \n GxE",
+                             "GxE_Perm" = "Perm. \n GxE",
+                             "GxE_Anova" = "ANOVA \n GxE"))+
+   theme_classic(base_family = "Times",base_size = 16) + 
+   theme(axis.text = element_text(colour = "black")))
+
+grid.arrange(falsePos, falsePos2)
+
+## False Negative Rates 
+gxePow2$totals = gxePow2$n_pop * 2 * gxePow2$sample_size
+(gxePow3 = ggplot(gxePow2,aes(x = factor(sample_size), y = power, group = bin,fill = bin)) + 
+    geom_bar(position = "dodge", stat = "identity")+
+    #geom_text(aes(label= paste(gxePow$totals, round(gxePow$power,3),sep = '\n')), size = 5) +
+    theme_classic(base_size = 20, base_family = "Times")+ 
+    scale_fill_viridis(discrete = TRUE)+
+    #breaks=seq(0,1,0.25), #breaks in the scale bar
+    #limits=c(0,1))+
+    xlab("Sample Size") + ylab(expression("Power (1-"*beta*")"))+
+    labs(fill = "Effect Size")+
+    theme(axis.text = element_text(colour = "black"))+
+    #theme(legend.position = "none")+
+    ggtitle(expression("Common Garden: "*bar(Delta)*""["GxE"]*" Power"))+
+    theme(plot.title = element_text(size = 24, face = "bold"))+
+    facet_grid(~label*n_pop))
+
+covPow2$totals = covPow2$n_pop * 2 * covPow2$sample_size
+(covPow3 = ggplot(covPow2,aes(x = factor(sample_size), y = power, group = bin, fill = bin)) + 
+    geom_bar(position = "dodge", stat = "identity")+
+    theme_classic(base_size = 20, base_family = "Times")+ 
+    scale_fill_viridis(discrete = TRUE)+
+    xlab("Sample Size") + ylab(expression("Power (1-"*beta*")"))+
+    labs(fill = "Effect Size")+
+    theme(axis.text = element_text(colour = "black"))+
+    ggtitle(expression("Common Garden: Cov"["GE"]*" Power"))+
+    theme(plot.title = element_text(size = 24, face = "bold"))+
+    facet_grid(~label*n_pop))
+grid.arrange(covPow1, gxePow1, covPow3,gxePow3,ncol = 1)
+
+## False Negative Rates 
+(falseNeg = ggplot(fndf, aes(x = label, y = fnr, group = sample_size, fill = factor(sample_size)))+ 
+   geom_bar(position = "dodge", stat = "identity") + 
+   #geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+   ylab("False Negative Rate") + xlab("")+
+   ggtitle("Full Reciprocal Transplant")+
+   facet_wrap(~n_pop) + 
+   labs(fill = "Sample Size")+
+   scale_fill_viridis(discrete = TRUE)+
+   scale_x_discrete(labels=c("Cov_Perm" = "Perm. \n CovGE", 
+                             "Cov_Boot" = "Boot. \n CovGE",
+                             "GxE_Boot" = "Boot. \n GxE",
+                             "GxE_Perm" = "Perm. \n GxE",
+                             "GxE_Anova" = "ANOVA \n GxE"))+
+   theme_classic(base_family = "Times",base_size = 16) + 
+   theme(axis.text = element_text(colour = "black")))
+bigcov = c("4_8_FRT","16_4_FRT","8_16_CG","16_8_CG")
+
+## False Positive BarPlot for Covariance
+label128 = c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments", 
+             "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
+             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
+             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments",
+             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments")
+label128 = c("4_8_FRT" = "Reciprocal Transplant \n 4 Samples \n 8 Genotypes \n 8 Environments",
+             "16_4_FRT"= "Reciprocal Transplant \n 16 Samples \n 4 Genotypes \n 4 Environments",
+             "8_16_CG"= "Common Garden \n 8 Samples \n 16 Genotypes \n 2 Environments",
+             "16_8_CG"="Common Garden \n 16 Samples \n 8 Genotypes \n 2 Environments")
+dub_cov$scenario = rep("CG",nrow(dub_cov))
+covFPR$scenario = rep("FRT",nrow(covFPR))
+covbo = rbind(dub_cov,covFPR)
+covbo$grp = paste(covbo$sample_size,covbo$n_pop,covbo$scenario,sep="_")
+covbo = filter(covbo,totsamp == 128)
+#covbo = filter(covbo, grp %in% bigcov)
+covbo[is.nan(covbo)] <- 0
+
+(falsePosCov = ggplot(covbo, aes(x = reorder(factor(ID),-totsamp), y = rate, group = grp,colour = factor(grp),fill = factor(grp)))+ 
+    geom_bar(position = "dodge", stat = "identity") + 
+    geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+    ylab("False Positive Rate") + xlab("")+
+    ggtitle("False Positive Rates")+
+    labs(colour = "Experimental Design",fill = "Experimental Design")+
+    scale_fill_viridis(discrete = TRUE, labels  = label128)+
+    #labels = c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+
+    scale_colour_viridis(discrete = TRUE, labels  = label128)+
+    #labels = c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+
+    scale_x_discrete(labels= c("Cov_Boot" = "Bootstrap", "Cov_Perm" = "Permutation"))+ #label128)+#
+    theme(axis.text.x = element_text(colour = "black",size = 22)) +
+    theme_classic(base_family = "Times",base_size = 14) + 
+    theme(axis.text = element_text(colour = "black")))
+
+## False Positive BarPlot for GxE 
+
+bigpow = c("8_8_CG","16_8_CG","16_4_CG","8_16_CG","4_16_CG","16_4_FRT","8_4_FRT","4_8_FRT","2_8_FRT")
+label128 = c("4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments", # Total = 128
+             "8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments",
+             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
+             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments",
+             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments")
+label128 = c("8_8_CG" = "Common Garden \n 8 Samples \n 8 Genotypes \n 2 Environments", # Big Cov
+             "16_8_CG" = "Common Garden \n 16 Samples \n 8 Genotypes \n 2 Environments",
+             "16_4_CG" = "Common Garden \n 16 Samples \n 4 Genotypes \n 2 Environments",
+             "8_16_CG" = "Common Garden \n 8 Samples \n 16 Genotypes \n 2 Environments",
+             "4_16_CG" = "Common Garden \n 4 Samples \n 16 Genotypes \n 2 Environments",
+             "16_4_FRT" = "Reciprocal Transplant \n 16 Samples \n 4 Genotypes \n 4 Environments",
+             "8_4_FRT" = "Reciprocal Transplant \n 8 Samples \n 4 Genotypes \n 4 Environments",
+             "4_8_FRT" = "Reciprocal Transplant \n 4 Samples \n 8 Genotypes \n 8 Environments",
+             "2_8_FRT" = "Reciprocal Transplant \n 2 Samples \n 8 Genotypes \n 8 Environments")
+
+dub_gxe$scenario = rep("CG",nrow(dub_gxe))
+gxeFPR$scenario = rep("FRT",nrow(gxeFPR))
+combo = rbind(dub_gxe,gxeFPR)
+combo$grp = paste(combo$sample_size,combo$n_pop,combo$scenario,sep="_")
+combo = filter(combo,totsamp == 128)
+#combo = filter(combo, grp %in% bigpow)
+combo[is.nan(combo)] <- 0
+
+
+(falsePosGxE = ggplot(combo, aes(x = reorder(factor(ID),-totsamp), y = rate, group = grp,colour = factor(grp),fill = factor(grp)))+ 
+    geom_bar(position = "dodge", stat = "identity") + 
+    geom_hline(aes(yintercept = 0.05),linetype = "dashed")+
+    ylab("False Positive Rate") + xlab("")+
+    ggtitle("False Positive Rates")+
+    labs(colour = "Experimental Design",fill = "Experimental Design")+
+    scale_fill_viridis(discrete = TRUE, labels  = label128)+
+    #labels = c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+
+    scale_colour_viridis(discrete = TRUE,labels  = label128)+
+    #labels = c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+
+    scale_x_discrete(labels= c("GxE_Anova" = "ANOVA", "GxE_Perm" = "Permutation"))+#label128)+
+    theme(axis.text.x = element_text(colour = "black",size = 22)) +
+    theme_classic(base_family = "Times",base_size = 14) + 
+    theme(axis.text = element_text(colour = "black")))
 
 ## Old Power Analysis approach:
 

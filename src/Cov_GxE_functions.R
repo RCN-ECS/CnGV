@@ -633,12 +633,33 @@ pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "r
   return(p.value)
 }
 
-cov.function <- function(input_df, is.sample = TRUE){ # input_df = cov_matrix of G_means and E_means
+cov.function <- function(input_df, is.sample = TRUE){ # input_df = raw data
   
   N = length(input_df$gen_factor)
-  Goverallmean = mean(input_df$G_means)
-  Eoverallmean = mean(input_df$E_means)
-  numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
+  # Goverallmean = mean(input_df$G_means)
+  # Eoverallmean = mean(input_df$E_means)
+  overallmean = mean(c(input_df$G_means,input_df$E_means)) # not mean of means, mean of overall data
+  # numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
+  numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
+  
+  if(is.sample == TRUE){
+    correcter = max(sd(input_df$E_means),sd(input_df$G_means))
+    cv = (1/(N-1))*(numerator/correcter^2)
+  }else{
+    correcter = max(sd(input_df$E_means),sd(input_df$G_means))
+    cv = (1/(N))*(numerator/correcter^2)
+  }
+  return(cv)
+}
+
+cov.function_means <- function(input_df, is.sample = TRUE){ # input_df = cov_matrix of G_means and E_means
+  
+  N = length(input_df$gen_factor)
+  #Goverallmean = mean(input_df$G_means)
+  #Eoverallmean = mean(input_df$E_means)
+  overallmean = mean(c(input_df$G_means,input_df$E_means)) #not mean of means, mean of overall data
+  #numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
+  numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
   correcter = max(sd(input_df$E_means),sd(input_df$G_means))
   
   if(is.sample == TRUE){
@@ -694,7 +715,7 @@ fpr.fnr <- function(input_df, divided, scenario){
       
       n = c(fn, fp, tn, tp)
       rate = c(fnr,fpr,NA,NA)
-      n_env = if(scenario == 1){n_env = unique(tempdf$n_pop)}else{n_env = 2}
+      if(scenario == 1){n_env = unique(tempdf$n_pop)}else{n_env = 2}
       total = sum(n)
       percent = (n/total)*100
       
@@ -794,20 +815,22 @@ heatmap_fun <- function(plot_data, plot_type){ #plot_type is "percent" or "rate"
 } 
 
 ## Calculate Power and False Negative rates
-fnr.effsize <- function(x, metric, analysis, scenario = 1, resolution){ # metric = Cov or GxE; analysis is perm or boot or anova
+fnr.effsize <- function(x, metric, data.type, analysis, scenario = 1, resolution){ # metric = Cov or GxE; analysis is perm or boot or anova
    # metric = "Cov" or "GxE"
+   # data.type = "raw" or "means"
    # analysis = "perm" or "boot"
    # scenario = 1 or 2
    # resolution = "fine" (for heatmaps) or "coarse" (for barplots)
   
   output = data.frame()
   
+  if(data.type == "raw"){
 
-  if(metric == "Cov"){
+    if(metric == "Cov"){
     
-    if(resolution == "coarse"){
-      x$binCov = "NA"
-      for(i in 1:nrow(x)){
+      if(resolution == "coarse"){
+        x$binCov = "NA"
+        for(i in 1:nrow(x)){
         if(abs(x$true_cov[i]) > 0 & abs(x$true_cov[i]) <= 0.25){x$binCov[i] = 0.25
         }else if(abs(x$true_cov[i]) > 0.25 & abs(x$true_cov[i]) <= 0.5){x$binCov[i] = 0.5
         }else if(abs(x$true_cov[i]) > 0.5 & abs(x$true_cov[i]) <= 0.75){x$binCov[i] = 0.75
@@ -1017,7 +1040,7 @@ fnr.effsize <- function(x, metric, analysis, scenario = 1, resolution){ # metric
                       filter(sample_size == ss) %>% 
                       filter(n_pop == np) %>%
                       filter(binGxE == bc) %>%
-                      group_by("name" = GxEanova_check,sample_size,n_pop,binGxE)%>%
+                      group_by("name" = GxEanova_conf,sample_size,n_pop,binGxE)%>%
                       summarise(n = n())
                     }
                   
@@ -1046,7 +1069,217 @@ fnr.effsize <- function(x, metric, analysis, scenario = 1, resolution){ # metric
                 }
               }
             }
+          }
+  }else{
+    
+    if(metric == "Cov"){
+      
+      if(resolution == "coarse"){
+        x$binCov = "NA"
+        for(i in 1:nrow(x)){
+          if(abs(x$true_cov_means[i]) > 0 & abs(x$true_cov_means[i]) <= 0.25){x$binCov[i] = 0.25
+          }else if(abs(x$true_cov_means[i]) > 0.25 & abs(x$true_cov_means[i]) <= 0.5){x$binCov[i] = 0.5
+          }else if(abs(x$true_cov_means[i]) > 0.5 & abs(x$true_cov_means[i]) <= 0.75){x$binCov[i] = 0.75
+          }else{x$binCov[i] = 1}
+        }
+      }else{
+        x$binCov = "NA"
+        for(i in 1:nrow(x)){
+          if(x$true_cov_means[i] == 0){x$binCov[i] = 0
+          }else if(abs(x$true_cov_means[i]) > 0 & abs(x$true_cov_means[i]) <= 0.15){x$binCov[i] = 0.1
+          }else if(abs(x$true_cov_means[i]) > 0.15 & abs(x$true_cov_means[i]) <= 0.25){x$binCov[i] = 0.2
+          }else if(abs(x$true_cov_means[i]) > 0.25 & abs(x$true_cov_means[i]) <= 0.35){x$binCov[i] = 0.3
+          }else if(abs(x$true_cov_means[i]) > 0.35 & abs(x$true_cov_means[i]) <= 0.45){x$binCov[i] = 0.4
+          }else if(abs(x$true_cov_means[i]) > 0.45 & abs(x$true_cov_means[i]) <= 0.55){x$binCov[i] = 0.5
+          }else if(abs(x$true_cov_means[i]) > 0.55 & abs(x$true_cov_means[i]) <= 0.65){x$binCov[i] = 0.6
+          }else if(abs(x$true_cov_means[i]) > 0.65 & abs(x$true_cov_means[i]) <= 0.75){x$binCov[i] = 0.7
+          }else if(abs(x$true_cov_means[i]) > 0.75 & abs(x$true_cov_means[i]) <= 0.85){x$binCov[i] = 0.8
+          }else if(abs(x$true_cov_means[i]) > 0.85 & abs(x$true_cov_means[i]) <= 0.95){x$binCov[i] = 0.9
+          }else{x$binCov[i] = 1}
+        }
+        
+      }
+      
+      for(i in 1:length(unique(x$sample_size))){
+        for(j in 1:length(unique(x$n_pop))){
+          for(k in 1:length(unique(x$binCov))){
+            
+            fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+            ss = unique(x$sample_size)[i]
+            np = unique(x$n_pop)[j]
+            bc = unique(x$binCov)[k]
+            
+            if(analysis == "perm"){
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = meansCovconfintperm,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+              
+            }else{
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = MeansCovconfintboot,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
             }
+          }
+        }
+      }
+    }else{
+      
+      if(resolution == "course"){
+        x$binGxE = "NA"
+        for(i in 1:nrow(x)){
+          if(abs(x$true_GxE_means[i]) > 0 & abs(x$true_GxE_means[i]) <= 0.25){x$binGxE[i] = 0.25
+          }else if(abs(x$true_GxE_means[i]) > 0.25 & abs(x$true_GxE_means[i]) <= 0.5){x$binGxE[i] = 0.5
+          }else if(abs(x$true_GxE_means[i]) > 0.5 & abs(x$true_GxE_means[i]) <= 0.75){x$binGxE[i] = 0.75
+          }else{x$binGxE[i] = 1}
+        }
+        
+      }else{
+        x$binGxE = "NA"
+        for(i in 1:nrow(x)){
+          if(x$true_GxE_means[i] == 0){x$binGxE[i] = 0
+          }else if(abs(x$true_GxE_means[i]) > 0 & abs(x$true_GxE_means[i]) <= 0.15){x$binGxE[i] = 0.1
+          }else if(abs(x$true_GxE_means[i]) > 0.15 & abs(x$true_GxE_means[i]) <= 0.25){x$binGxE[i] = 0.2
+          }else if(abs(x$true_GxE_means[i]) > 0.25 & abs(x$true_GxE_means[i]) <= 0.35){x$binGxE[i] = 0.3
+          }else if(abs(x$true_GxE_means[i]) > 0.35 & abs(x$true_GxE_means[i]) <= 0.45){x$binGxE[i] = 0.4
+          }else if(abs(x$true_GxE_means[i]) > 0.45 & abs(x$true_GxE_means[i]) <= 0.55){x$binGxE[i] = 0.5
+          }else if(abs(x$true_GxE_means[i]) > 0.55 & abs(x$true_GxE_means[i]) <= 0.65){x$binGxE[i] = 0.6
+          }else if(abs(x$true_GxE_means[i]) > 0.65 & abs(x$true_GxE_means[i]) <= 0.75){x$binGxE[i] = 0.7
+          }else if(abs(x$true_GxE_means[i]) > 0.75 & abs(x$true_GxE_means[i]) <= 0.85){x$binGxE[i] = 0.8
+          }else if(abs(x$true_GxE_means[i]) > 0.85 & abs(x$true_GxE_means[i]) <= 0.95){x$binGxE[i] = 0.9
+          }else{x$binGxE[i] = 1}
+        }
+        
+      }
+      
+      for(i in 1:length(unique(x$sample_size))){
+        for(j in 1:length(unique(x$n_pop))){
+          for(k in 1:length(unique(x$binGxE))){
+            
+            fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+            ss = unique(x$sample_size)[i]
+            np = unique(x$n_pop)[j]
+            bc = unique(x$binGxE)[k]
+            
+            if(analysis == "perm"){
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binGxE == bc) %>%
+                group_by("name" = meansGxEconfintperm,sample_size,n_pop,binGxE)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+              
+            }else{
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binGxE == bc) %>%
+                group_by("name" = MeanGxEconfintboot,sample_size,n_pop,binGxE)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+              
+            }
+              
+              
+          }
+        }
+      }
+    }
+    
+  }
+      
   return(output)
 }
 

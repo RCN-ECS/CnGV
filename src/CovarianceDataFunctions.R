@@ -334,7 +334,7 @@ mod.GxE <- function(input_df,is.perm = FALSE){ # input is model_df
         GE_sd <- input_df %>%
           filter(gen_factor == G_levels[i]) %>%
           filter(exp_env_factor == E_levels[j]) %>%
-          summarize("GEsd" = sd(phen_corrected))
+          summarize("GEsd" = sd(phen_corrected, na.rm = TRUE))
         
         # Create a sample of the null expectation for the Gi+Ej
         GiEj_null_samp <- rnorm(1, mean = (Gi_mean + Ej_mean), sd = abs(GE_sd[[1]]))
@@ -375,17 +375,18 @@ mean.GxE <- function(input_df,is.perm = FALSE){ # input is mean_df
     Cov_mean_matrix$E_means <- Emean_mat$E_means[match(Cov_mean_matrix$exp_env_factor,Emean_mat$exp_env_factor)]
     
     # Magnitude of GxE -- Loop -- Means
-    for (i in 1:nlevels(input_df$gen_factor)){
-      for (j in 1:nlevels(input_df$exp_env_factor)){
+    for (p in 1:nlevels(input_df$gen_factor)){
+      for (q in 1:nlevels(input_df$exp_env_factor)){
         G_levels <- levels(input_df$gen_factor)
         E_levels <- levels(input_df$exp_env_factor)
-        GxE_mean.temp <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
-                               mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i]], na.rm=TRUE)- # mean phenotype of ith Genotype
-                               mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]], na.rm=TRUE)+ # mean phenotype of jth Environment
+        GxE_mean.temp <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[p] & input_df$exp_env_factor == E_levels[q]] - # GxE (Phenotype of ith genotype in jth environment)
+                               mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[p]], na.rm=TRUE)- # mean phenotype of ith Genotype
+                               mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[q]], na.rm=TRUE)+ # mean phenotype of jth Environment
                                mean(input_df$avg_phen_corrected, na.rm=TRUE)) # Overall mean
         allGEmeans <- c(allGEmeans, GxE_mean.temp)
       }
     }
+    
     
     GxE_means = mean(allGEmeans, na.rm=TRUE)
     
@@ -402,18 +403,18 @@ mean.GxE <- function(input_df,is.perm = FALSE){ # input is mean_df
     Cov_mean_matrix$exp_env_factor <- input_df$nat_env_factor[match(Cov_mean_matrix$gen_factor,input_df$gen_factor)]
     Cov_mean_matrix$E_means <- Emean_mat$E_means[match(Cov_mean_matrix$exp_env_factor,Emean_mat$exp_env_factor)]
     
-    for (i in 1:nlevels(input_df$gen_factor)){
-      for (j in 1:nlevels(input_df$exp_env_factor)){
+    for (r in 1:nlevels(input_df$gen_factor)){
+      for (s in 1:nlevels(input_df$exp_env_factor)){
         
         G_levels <- levels(input_df$gen_factor)
         E_levels <- levels(input_df$exp_env_factor)
         
-        GiEj_mean <- input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]]
-        Gi_mean <- mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i]], na.rm=TRUE)
-        Ej_mean <- mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]], na.rm=TRUE)
+        GiEj_mean <- input_df$avg_phen_corrected[input_df$gen_factor == G_levels[r] & input_df$exp_env_factor == E_levels[s]]
+        Gi_mean <- mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[r]], na.rm=TRUE)
+        Ej_mean <- mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[s]], na.rm=TRUE)
         
         # Create a sample of the null expectation for the GiEj
-        GiEj_null_samp <- rnorm(1, mean = (Gi_mean + Ej_mean), sd = mean(input_df$error[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]], na.rm=TRUE))
+        GiEj_null_samp <- rnorm(1, mean = (Gi_mean + Ej_mean), sd = mean(input_df$error[input_df$gen_factor == G_levels[r] & input_df$exp_env_factor == E_levels[s]], na.rm=TRUE))
         
         # Estimate 
         GxE_mean.temp <- abs(GiEj_null_samp - # GxE (Phenotype of ith genotype in jth environment)
@@ -477,11 +478,7 @@ bootstrap_means <- function(input_df){ # input is means_df
         filter(exp_env_factor == unique(input_df$exp_env_factor)[r])
       
       # Create new means data
-      if(unique(is.na(cond$phen_mean_SE == TRUE))){
-        new_phen <- rnorm(nrow(cond), mean = cond$avg_phen_corrected, sd = cond$phen_SD) # generate replicate means
-      }else{
-        new_phen <- rnorm(nrow(cond), mean = cond$avg_phen_corrected, sd = cond$phen_mean_SE) 
-      }
+      new_phen <- rnorm(nrow(cond), mean = cond$avg_phen_corrected, sd = cond$error)
       
       # Output
       new_mean_temp <- data.frame("gen_factor" = cond$gen_factor,
@@ -522,13 +519,8 @@ permutation_means <- function(input_df, perm.seed){ # means dataframe (mean_df)
   null_means <- sample(input_df$avg_phen_corrected, size = length(input_df$avg_phen_corrected), replace = FALSE)
   
   # Create new means data
-  if(unique(is.na(input_df$phen_mean_SE == TRUE))){
-    set.seed(perm.seed)
-    null_se <- sample(input_df$phen_SD, size = length(input_df$phen_SD), replace = FALSE)
-  }else{
-    set.seed(perm.seed)
-    null_se <- sample(input_df$phen_mean_SE, size = length(input_df$phen_mean_SE), replace = FALSE)
-  }
+  set.seed(perm.seed)
+  null_se <- sample(input_df$error, size = length(input_df$error), replace = FALSE)
 
   perm_means <- data.frame("gen_factor" = input_df$gen_factor,
                            "exp_env_factor" = input_df$exp_env_factor,
