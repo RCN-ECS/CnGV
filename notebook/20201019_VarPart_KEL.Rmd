@@ -95,3 +95,7 @@ vardf3[indexes,]
 makeplot(23069, paste0(figures_folder,"moreplots/"))
 makeplot(26300, paste0(figures_folder,"moreplots/"))
 ```
+
+```{r}
+plot(vardf3$V_cov, vardf3$V_gxe, col=adjustcolor("blue", 0.01), pch=19)
+```
