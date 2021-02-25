@@ -29,7 +29,7 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   
   # True mean phenotype data using regression equation
   model_df$GE_true = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
-
+  
   # True means 
   G_true <- data.frame(G_true = tapply(model_df$GE_true, model_df$gen_factor, mean))
   G_true <- rownames_to_column(G_true, var = "gen_factor")
@@ -53,15 +53,15 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   
   # Add error to standardized phenotype
   model_df$phen_corrected <- model_df$GE_stn_true + model_df$e
-
+  
   # Chr -> Factor
   model_df$gen_factor <- as.factor(model_df$gen_factor)
   model_df$exp_env_factor <- as.factor(model_df$exp_env_factor)
   
   # Sanity plots
-  #ggplot(model_df, aes(x = exp_env_factor, y = GE_stn_true, group = gen_factor, colour = nat_env_factor))+ geom_point()+geom_line()
-  #ggplot(model_df, aes(x = exp_env_factor, y = GE_true, group = gen_factor, colour = gen_factor))+ geom_point()+geom_line()
-  #ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = gen_factor))+ geom_point()+geom_smooth(se=FALSE)
+  # ggplot(model_df, aes(x = exp_env_factor, y = GE_stn_true, group = gen_factor, colour = nat_env_factor))+ geom_point()+geom_line()
+  # ggplot(model_df, aes(x = exp_env_factor, y = GE_true, group = gen_factor, colour = gen_factor))+ geom_point()+geom_line()
+  # ggplot(model_df, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = gen_factor))+ geom_point()+geom_smooth(se=FALSE)
   
   # Generate means dataframe
   GE_means <- data.frame(avg_phen_corrected = tapply(model_df$phen, model_df$GE_factor, mean))
@@ -103,10 +103,6 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   # Add native environments
   mean_df_ne$nat_env_factor = df.ne$nat_env_factor[match(mean_df_ne$gen_factor,df.ne$gen_factor)]
   
-  # No error Plots
-  #ggplot(df.ne, aes(x = exp_env_factor, y = phen_corrected, group = gen_factor, colour = gen_factor))+geom_line()
-  #ggplot(mean_df_ne, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, colour = gen_factor))+geom_line()
-  
   # Chr -> Factor
   mean_df_ne$gen_factor <- as.factor(mean_df_ne$gen_factor)
   mean_df_ne$exp_env_factor <- as.factor(mean_df_ne$exp_env_factor)
@@ -137,7 +133,7 @@ df.foundations <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_
   return(list(model_df,mean_df,df.ne,mean_df_ne,varpar.df))
 }
 
-df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2, seed3, errpop){
+df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2, seed3){
   
   # Dataframe foundations
   n_environments <- n_env 
@@ -156,12 +152,7 @@ df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n
   model_df <- data.frame(gen, env, int)
   
   # True mean phenotype data using regression equation
-  model_df$GE_true_temp = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
-
-  set.seed = seed3
-  model_df$e_pop <- rep(rnorm(n_pop, 0, sd = errpop), each = n_env*sample_size)
-
-  model_df$GE_true <- model_df$GE_true_temp + model_df$e_pop
+  model_df$GE_true = delta_env * model_df$env + delta_gen * model_df$gen + model_df$int 
   
   # Now add in actual genotypes
   model_df$gen <- rep(1:n_pop, each = sample_size*n_env)
@@ -196,7 +187,7 @@ df.foundations2 <- function(delta_env, delta_gen, sample_size, n_env, std_dev, n
   
   # Phenotype with error
   model_df$phen_corrected <- model_df$GE_stn_true + model_df$e
-
+  
   # Chr -> Factor
   model_df$gen_factor <- as.factor(model_df$gen_factor)
   model_df$exp_env_factor <- as.factor(model_df$exp_env_factor)
@@ -293,7 +284,7 @@ var.partition <- function(input_df){
   
   # Variance due to error
   V_error = sum((input_df$phen_corrected - input_df$GE_stn_est)^2)
-
+  
   SS <- round(rbind(V_g, V_e, V_gxe, V_cov, V_error),4)
   omega2 <- round(abs(SS)/sum(abs(SS)),4)
   var_part = data.frame(SS, abs(SS), omega2)
@@ -302,7 +293,7 @@ var.partition <- function(input_df){
   return(var_part)
 }
 
-mod.GxE <- function(input_df){ # input is model_df
+mod.GxE <- function(input_df,is.perm,seed){ # input is model_df
   
   # Outputs
   allGE <- c()
@@ -321,8 +312,6 @@ mod.GxE <- function(input_df){ # input is model_df
   emm_GxE = as.data.frame(emmeans(aov.test, ~ exp_env_factor*gen_factor))
   
   # Gmeans
-  #E_means <- tapply(emm_GxE$emmean, emm_GxE$exp_env_factor, mean)
-  #G_means <- tapply(emm_GxE$emmean, emm_GxE$gen_factor, mean)
   G_matrix <- data.frame("G_means" = emm_G$emmean, "gen_factor" = emm_G$gen_factor)
   E_matrix <- data.frame("E_means" = emm_E$emmean, "exp_env_factor" = emm_E$exp_env_factor)
   
@@ -331,41 +320,17 @@ mod.GxE <- function(input_df){ # input is model_df
   Cov_matrix$exp_env_factor = native_df$nat_env_factor[match(G_matrix$gen_factor,native_df$gen_factor)]
   Cov_matrix$E_means = E_matrix$E_means[match(Cov_matrix$exp_env_factor,E_matrix$exp_env_factor)]
   
-  # Magnitude of GxE -- EMMs
-  GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
-                         emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
-                         emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
-                         mean(emm_GxE$emmean)) # Overall mean phenotype
-  
   # Output based on Stamps/Hadfield approach
   delta_E = ((emm_GxE$emmean[3]-emm_GxE$emmean[4])+(emm_GxE$emmean[1]-emm_GxE$emmean[2]))/2 
   delta_H = (emm_GxE$emmean[1]-emm_GxE$emmean[4])
   aov.coefs = coef(aov.test)
   
-  
-  # Magnitude of GxE -- Loop
-  allGE = c()
-  loopGxE = NULL
-  for (i in 1:nlevels(emm_GxE$gen_factor)){
-    for (j in 1:nlevels(emm_GxE$exp_env_factor)){
-      G_levels <- levels(emm_GxE$gen_factor)
-      E_levels <- levels(emm_GxE$exp_env_factor)
-      loopGxE <- abs(emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
-                     emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # mean phenotype of ith Genotype
-                     emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # mean phenotype of jth Environment
-                     mean(emm_GxE$emmean)) # Overall mean
-      allGE <- c(allGE, loopGxE)
-    }
-  }
-  #hist(allGE)
-  GxE_emm_loop = mean(allGE)
-  
   # Omega^2
-  w2_GxE = (summary(aov(aov.test))[[1]][3,2] - #(SS_effect -
-           (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / #(Df_effect * MS_error))/
+  w2_GxE = (summary(aov(aov.test))[[1]][3,2] - # (SS_effect -
+           (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / # (Df_effect * MS_error))/
            (sum(summary(aov(aov.test))[[1]][,2]) + # (SS_total+
            (summary(aov(aov.test))[[1]][4,3])) # MS_error)
-        
+  
   # Eta^2 
   eta_GxE = summary(aov(aov.test))[[1]][3,2]/sum(summary(aov(aov.test))[[1]][,2])
   
@@ -377,6 +342,67 @@ mod.GxE <- function(input_df){ # input is model_df
   mod_df <- rownames_to_column(mod_df) 
   colnames(mod_df)[1] <- "Fixed_effect"
   
+  if(is.perm == FALSE){ # No seed needed here
+  
+  # Magnitude of GxE -- EMMs
+  GxE_emm_original<- abs(emm_GxE$emmean[emm_GxE$gen_factor == "G_1" & emm_GxE$exp_env_factor == "E_1"] - # GxE (Phenotype of ith genotype in jth environment)
+                        emm_G$emmean[emm_G$gen_factor == "G_1"] - # phenotype of ith Genotype
+                        emm_E$emmean[emm_E$exp_env_factor == "E_1"] + # phenotype of jth Environment
+                        mean(emm_GxE$emmean)) # Overall mean phenotype
+  
+  # Magnitude of GxE -- Loop
+  allGE = c()
+  loopGxE = NULL
+  for (i in 1:nlevels(emm_GxE$gen_factor)){
+    for (j in 1:nlevels(emm_GxE$exp_env_factor)){
+      G_levels <- levels(emm_GxE$gen_factor)
+      E_levels <- levels(emm_GxE$exp_env_factor)
+      loopGxE <- abs(emm_GxE$emmean[emm_GxE$gen_factor == G_levels[i] & emm_GxE$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
+                       emm_G$emmean[emm_G$gen_factor == G_levels[i]] - # mean phenotype of ith Genotype
+                       emm_E$emmean[emm_E$exp_env_factor == E_levels[j]] + # mean phenotype of jth Environment
+                       mean(emm_GxE$emmean)) # Overall mean
+      allGE <- c(allGE, loopGxE)
+    }
+  }
+
+    GxE_emm_loop = mean(allGE)
+  
+  }else{ # Below generates null distribution for null of G+E means
+    
+    allGE <- NULL
+    for (i in 1:nlevels(input_df$gen_factor)){
+      for (j in 1:nlevels(input_df$exp_env_factor)){
+        
+        G_levels <- levels(input_df$gen_factor)
+        E_levels <- levels(input_df$exp_env_factor)
+        
+        Gi_mean <- mean(sample(input_df$phen_corrected[input_df$gen_factor == G_levels[i]], 
+                               size = length(input_df$phen_corrected[input_df$gen_factor == G_levels[i]]),
+                               replace = TRUE))
+        Ej_mean <- mean(sample(input_df$phen_corrected[input_df$exp_env_factor == E_levels[j]],
+                               size = length(input_df$phen_corrected[input_df$exp_env_factor == E_levels[j]]),
+                               replace = TRUE))
+        GE_sd <- input_df %>%
+          filter(gen_factor == G_levels[i]) %>%
+          filter(exp_env_factor == E_levels[j]) %>%
+          summarize("GEsd" = mean(e))
+
+        # Create a sample of the null expectation for the Gi+Ej
+        set.seed = seed
+        GiEj_null_samp <- rnorm(1, mean = (Gi_mean + Ej_mean), sd = abs(GE_sd[[1]]))
+        
+        # Estimate 
+        GxE_mean.temp <- abs(GiEj_null_samp - # G+E (Phenotype of ith genotype in jth environment)
+                             Gi_mean - # mean phenotype of ith Genotype
+                             Ej_mean + # mean phenotype of jth Environment
+                             mean(input_df$phen_corrected)) # Overall mean
+        allGE <- c(allGE, GxE_mean.temp)
+      }
+    }
+    
+    GxE_emm_loop = mean(allGE)
+    
+  }
   return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs))
 }
 
@@ -387,36 +413,37 @@ mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df
   GxE_mean.temp <- c()
   GiEj_mean = Gi_mean = Ej_mean = GiEj_null_samp = NULL
   
-  if(is.perm == FALSE){
-
-  # Means of Means
-  E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
-  G_means <- tapply(input_df$avg_phen_corrected, input_df$gen_factor, mean)
-  Gmean_mat <- data.frame("G_means" = G_means, "gen_factor" = unique(input_df$gen_factor))
-  Emean_mat <- data.frame("E_means" = E_means, "exp_env_factor" = unique(input_df$exp_env_factor))
-  
-  # Match means to native
-  Cov_mean_matrix = Gmean_mat
-  Cov_mean_matrix$exp_env_factor <- input_df$nat_env_factor[match(Cov_mean_matrix$gen_factor,input_df$gen_factor)]
-  Cov_mean_matrix$E_means <- Emean_mat$E_means[match(Cov_mean_matrix$exp_env_factor,Emean_mat$exp_env_factor)]
-  
-  # Magnitude of GxE -- Loop -- Means
-  for (i in 1:nlevels(input_df$gen_factor)){
-    for (j in 1:nlevels(input_df$exp_env_factor)){
-      G_levels <- levels(input_df$gen_factor)
-      E_levels <- levels(input_df$exp_env_factor)
-      GxE_mean.temp <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
-                            mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i]])- # mean phenotype of ith Genotype
-                            mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]])+ # mean phenotype of jth Environment
-                            mean(input_df$avg_phen_corrected)) # Overall mean
-      allGEmeans <- c(allGEmeans, GxE_mean.temp)
+  if(is.perm == FALSE){ # No seed needed here
+    
+    # Means of Means
+    E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
+    G_means <- tapply(input_df$avg_phen_corrected, input_df$gen_factor, mean)
+    Gmean_mat <- data.frame("G_means" = G_means, "gen_factor" = unique(input_df$gen_factor))
+    Emean_mat <- data.frame("E_means" = E_means, "exp_env_factor" = unique(input_df$exp_env_factor))
+    
+    # Match means to native
+    Cov_mean_matrix = Gmean_mat
+    Cov_mean_matrix$exp_env_factor <- input_df$nat_env_factor[match(Cov_mean_matrix$gen_factor,input_df$gen_factor)]
+    Cov_mean_matrix$E_means <- Emean_mat$E_means[match(Cov_mean_matrix$exp_env_factor,Emean_mat$exp_env_factor)]
+    
+    # Magnitude of GxE -- Loop -- Means
+    for (i in 1:nlevels(input_df$gen_factor)){
+      for (j in 1:nlevels(input_df$exp_env_factor)){
+        G_levels <- levels(input_df$gen_factor)
+        E_levels <- levels(input_df$exp_env_factor)
+        GxE_mean.temp <- abs(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i] & input_df$exp_env_factor == E_levels[j]] - # GxE (Phenotype of ith genotype in jth environment)
+                               mean(input_df$avg_phen_corrected[input_df$gen_factor == G_levels[i]])- # mean phenotype of ith Genotype
+                               mean(input_df$avg_phen_corrected[input_df$exp_env_factor == E_levels[j]])+ # mean phenotype of jth Environment
+                               mean(input_df$avg_phen_corrected)) # Overall mean
+        allGEmeans <- c(allGEmeans, GxE_mean.temp)
+      }
     }
-  }
-  #hist(allGEmeans)
-  GxE_means = mean(allGEmeans)
-  
-  }else{ # Below generates null distribution for GxE means
    
+    # hist(allGEmeans)
+    GxE_means = mean(allGEmeans)
+    
+  }else{ # Below generates null distribution for null of G+E means
+    
     # Means of Means
     E_means <- tapply(input_df$avg_phen_corrected, input_df$exp_env_factor, mean)
     G_means <- tapply(input_df$avg_phen_corrected, input_df$gen_factor, mean)
@@ -444,16 +471,16 @@ mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df
         
         # Estimate 
         GxE_mean.temp <- abs(GiEj_null_samp - # GxE (Phenotype of ith genotype in jth environment)
-                             Gi_mean - # mean phenotype of ith Genotype
-                             Ej_mean + # mean phenotype of jth Environment
-                             mean(input_df$avg_phen_corrected)) # Overall mean
+                               Gi_mean - # mean phenotype of ith Genotype
+                               Ej_mean + # mean phenotype of jth Environment
+                               mean(input_df$avg_phen_corrected)) # Overall mean
         allGEmeans <- c(allGEmeans, GxE_mean.temp)
       }
     }
     
     GxE_means = mean(allGEmeans)
     
-    }
+  }
   
   return(list(Cov_mean_matrix, GxE_means, allGEmeans))
 }
@@ -487,7 +514,7 @@ bootstrap_raw <- function(input_df){ # input is model_df
   return(shuffle_dat)
 }
 
-bootstrap_means <- function(input_df, seedset){ # input is means_df
+bootstrap_means <- function(input_df){ # input is means_df
   
   # Clear outputs
   new_phen.<- new_phen <-NULL
@@ -504,52 +531,54 @@ bootstrap_means <- function(input_df, seedset){ # input is means_df
         filter(exp_env_factor == unique(input_df$exp_env_factor)[r])
       
       # Create new means data
-      set.seed = seedset
-      new_phen. <- rnorm(nrow(cond), mean = cond$avg_phen, sd = cond$se) # generate replicate means
-      new_phen <- sample(new_phen., size = length(new_phen.), replace = TRUE) # shuffle
-
+      new_phen <- rnorm(nrow(cond), mean = cond$avg_phen_corrected, sd = cond$se) # generate replicate means
+      #set.seed(bootseed2)
+      #new_phen <- sample(new_phen., size = length(new_phen.), replace = TRUE) # shuffle
+      
       # Output
       new_mean_temp <- data.frame("gen_factor" = cond$gen_factor,
                                   "exp_env_factor" = cond$exp_env_factor,
                                   "nat_env_factor" = cond$nat_env_factor,
-                                  "mean_phen" = new_phen.)
+                                  "avg_phen_corrected" = new_phen)
       new_means <- rbind(new_means, new_mean_temp)
     }
   }
   
   # Standardize resampled means
-  new_means$avg_phen_corrected = (new_means$mean_phen - mean(new_means$mean_phen))/sd(new_means$mean_phen) 
+  # new_means$avg_phen_corrected = (new_means$mean_phen - mean(new_means$mean_phen))/sd(new_means$mean_phen) 
   
   return(new_means)
 }
 
-permutation_raw <- function(input_df){ # input is model_df
+permutation_raw <- function(input_df, perm.seed){ # input is model_df
   
   # Clear outputs
   perm_dat = data.frame()
   null_temp <- NULL
   
   # Shuffle raw data
+  set.seed(perm.seed)
   null_temp <- sample(input_df$phen_corrected, size=nrow(input_df), replace=FALSE)
   
   perm_dat <- data.frame("gen_factor" = input_df$gen_factor,
                          "exp_env_factor" = input_df$exp_env_factor,
                          "nat_env_factor" = input_df$nat_env_factor,
+                         "e" = input_df$e,
                          "phen_corrected" = null_temp)
   return(perm_dat)
 }
 
-permutation_means <- function(input_df, permseed){ # means dataframe (mean_df)
+permutation_means <- function(input_df, perm.seed2){ # means dataframe (mean_df)
   
   # Clear outputs
   perm_means <- data.frame()
   null_gen = null_env = null_means = NULL
   
   # Shuffle means data (same set.seed keeps phen and corresponding se matched)
-  set.seed(permseed)
-  null_means <- sample(input_df$avg_phen, size = length(input_df$avg_phen), replace = FALSE)
+  set.seed(perm.seed2)
+  null_means <- sample(input_df$avg_phen_corrected, size = length(input_df$avg_phen_corrected), replace = FALSE)
   
-  set.seed(permseed)
+  set.seed(perm.seed2)
   null_se <- sample(input_df$se, size = length(input_df$se), replace = FALSE)
   
   #null_means <- rnorm(length(null_means.), mean = null_means., sd = null_se) # create replicate mean
@@ -557,10 +586,10 @@ permutation_means <- function(input_df, permseed){ # means dataframe (mean_df)
   perm_means <- data.frame("gen_factor" = input_df$gen_factor,
                            "exp_env_factor" = input_df$exp_env_factor,
                            "nat_env_factor" = input_df$nat_env_factor,
-                           "avg_phen" = null_means,
+                           "avg_phen_corrected" = null_means,
                            "se" = null_se)
   # Restandardize
-  perm_means$avg_phen_corrected = (perm_means$avg_phen - mean(perm_means$avg_phen))/sd(perm_means$avg_phen)
+  # perm_means$avg_phen_corrected = (perm_means$avg_phen - mean(perm_means$avg_phen))/sd(perm_means$avg_phen)
   
   return(perm_means)
 }
@@ -604,320 +633,660 @@ pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "r
   return(p.value)
 }
 
-########### Meta-Analysis Functions ####################
-
-amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of bootstraps, data_type = "raw" or "means"
+cov.function <- function(input_df, is.sample = TRUE){ # input_df = raw data
   
-  # Load packages
-  library("emmeans")
-  library("lme4")
-  library("tidyverse")
+  N = length(input_df$gen_factor)
+  # Goverallmean = mean(input_df$G_means)
+  # Eoverallmean = mean(input_df$E_means)
+  overallmean = mean(c(input_df$G_means,input_df$E_means)) # not mean of means, mean of overall data
+  # numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
+  numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
   
-  if(data_type == "raw"){
-    
-    # Output 
-    output = data.frame()
-    
-    # Standardize data
-    input_df$phen_corrected = (input_df$phen_data - mean(input_df$phen_data))/sd(input_df$phen_data)
-    
-    # Rename Native Environments
-    input_df$nat_env_factor = gsub("N_", "E_", input_df$nat_env_factor)
-    
-    # Sanity Check 
-    # ggplot(input_df,aes(x=exp_env_factor,y=phen_corrected, group = gen_factor, colour=nat_env_factor))+geom_point()+geom_smooth(method="glm")+theme_classic()
-    # ggplot(input_df,aes(x=exp_env_factor,y=phen_data, group = gen_factor, colour=nat_env_factor))+geom_point()+geom_smooth(method="glm")+theme_classic()
-    
-    # Anova model fit & GxE estimates
-    m1 <- mod.GxE(input_df) # Raw phenotype dataframe
-    
-    # GxE Estimates
-    cov_matrix <- m1[[1]]
-    GxE_emm_original <- m1[[2]]
-    GxE_emm <- m1[[3]]
-    GxE_loop_output <- m1[[4]] # All GxE estimates from loop 
-    omega2 <- m1[[5]]
-    eta2 <- m1[[6]]
-    GxE_SSq <- m1[[7]] 
-    aov.df1 <- m1[[8]] # Anova SSq output
-    aov_coefs <- m1[[11]]
-    
-    # Covariance Estimates
-    cov_est = cov(cov_matrix$G_means,cov_matrix$E_means)
-    cor_est = cor(cov_matrix$G_means,cov_matrix$E_means)
-    correction_raw = max(sd(cov_matrix$E_means),sd(cov_matrix$G_means))
-    cov_corrected = round(cov(cov_matrix$G_means, cov_matrix$E_means)/(correction_raw^2),2)
-    
-    ###############
-    ## Bootstrap ##
-    ###############
-    
-    boot_dat_raw = boot_df_raw = data.frame()
-    for(i in 1:n_boot){
-      
-      # Shuffle Data
-      shuffle_dat <- bootstrap_raw(input_df) 
-      
-      # Anova model fit & GxE estimates
-      m2 <- mod.GxE(shuffle_dat) # Insert shuffled raw phenotype dataframe
-      
-      # GxE Estimates
-      cov_matrix_boot <- m2[[1]]
-      #GxE_emm_original_boot <- m2[[2]]
-      GxE_emm_boot <- m2[[3]]
-      GxE_loop_output_boot <- m2[[4]] # GxE output 
-      omega2_boot <- m2[[5]]
-      eta2_boot <- m2[[6]]
-      GxE_SSq_boot <- m2[[7]] 
-      
-      # Covariance Estimates
-      cov_est_boot = cov(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
-      cor_est_boot = cor(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
-      correction_raw_boot = max(sd(cov_matrix_boot$E_means),sd(cov_matrix_boot$G_means))
-      cov_corrected_boot = round(cov(cov_matrix_boot$G_means, cov_matrix_boot$E_means)/(correction_raw_boot^2),2)
-      
-      # Bootstrap dataframe
-      boot_dat_raw <- data.frame("covariance" = cov_est_boot,
-                                 "cor_est_boot" = cor_est_boot,
-                                 "cov_corrected_boot" = cov_corrected_boot,
-                                 #"GxE_emm_original_boot" = GxE_emm_original_boot,
-                                 "GxE_emm_boot" = GxE_emm_boot,
-                                 "GxE_omega_boot" = omega2_boot,
-                                 "GxE_eta_boot" = eta2_boot,
-                                 "GxE_SSq_boot" = GxE_SSq_boot)
-      boot_df_raw <- rbind(boot_df_raw,boot_dat_raw)
-    }
-    
-    # Covariance Confidence Intervals 
-    cov_CI = quantile(boot_df_raw$covariance, probs=c(0.025, 0.975), type=1) 
-    cor_CI = quantile(boot_df_raw$cor_est_boot, probs=c(0.025, 0.975), type=1) 
-    cov_corrected_CI = quantile(boot_df_raw$cov_corrected_boot, probs=c(0.025, 0.975), type=1) 
-    
-    # GxE Confidence Intervals
-    GxE_orig_CI = quantile(boot_df_raw$GxE_emm_original_boot, probs=c(0.025, 0.975), type=1) 
-    GxE_emm_CI = quantile(boot_df_raw$GxE_emm_boot, probs = c(0.025, 0.975), type=1)
-    GxE_omega_CI = quantile(boot_df_raw$GxE_omega_boot, probs=c(0.025, 0.975), type=1)
-    GxE_eta_CI = quantile(boot_df_raw$GxE_eta_boot, probs=c(0.025,0.975), type = 1)
-    GxE_SSq_CI = quantile(boot_df_raw$GxE_SSq_boot, probs = c(0.025,0.975), type = 1)
-    
-    
-    #######################################
-    #####   Permutation -- Raw Data   #####
-    #######################################
-    
-    # Output dataframe
-    perm_df_raw = perm_dat_raw = data.frame()
-    
-    for(i in 1:n_boot){
-      
-      # Resample Data
-      perm_dat <- permutation_raw(input_df)
-      
-      # Anova model fit & GxE estimates
-      m3 <- mod.GxE(perm_dat) # Insert shuffled permutation raw data frame
-      
-      # GxE Estimates
-      cov_matrix_perm <- m3[[1]]
-      #GxE_emm_original_perm <- m3[[2]]
-      GxE_emm_perm <- m3[[3]]
-      GxE_loop_output_perm <- m3[[4]] # GxE output 
-      omega2_perm <- m3[[5]]
-      eta2_perm <- m3[[6]]
-      GxE_SSq_perm <- m3[[7]] 
-      
-      # Covariance Estimates
-      cov_est_perm = cov(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
-      cor_est_perm = cor(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
-      correction_raw_perm = max(sd(cov_matrix_perm$E_means),sd(cov_matrix_perm$G_means))
-      cov_corrected_perm = round(cov(cov_matrix_perm$G_means, cov_matrix_perm$E_means)/(correction_raw_perm^2),2)
-      
-      # Permutation dataframe
-      perm_dat_raw <- data.frame("covariance_perm" = cov_est_perm,
-                                 "cor_est_perm" = cor_est_perm,
-                                 "cov_corrected_perm" = cov_corrected_perm,
-                                 #"GxE_emm_original_perm" = GxE_emm_original_perm,
-                                 "GxE_emm_perm" = GxE_emm_perm,
-                                 "GxE_omega_perm" = omega2_perm,
-                                 "GxE_eta_perm" = eta2_perm,
-                                 "GxE_SSq_perm" = GxE_SSq_perm)
-      perm_df_raw <- rbind(perm_df_raw,perm_dat_raw)
-    }
-    
-    # Check: Permutation histogram
-    # hist(round(perm_df_raw$cov_corrected_perm,3))
-    
-    # Covariance P-values
-    cov_original_pvalue <- pvalue_fun(cov_est,perm_df_raw$covariance_perm,"twotail",n_boot)
-    #cor_pvalue <- pvalue_fun(cor_est,perm_df_raw$cor_est_perm,"twotail",n_boot)
-    cov_corrected_pvalue <- pvalue_fun(cov_corrected,perm_df_raw$cov_corrected_perm,"twotail",n_boot)
-    
-    # GxE P-values
-    #GxE_emm_orig_pvalue <- pvalue_fun(GxE_emm_original,perm_df_raw$GxE_emm_original_perm,"righttail",n_boot)
-    GxE_emm_pvalue <- pvalue_fun(GxE_emm,perm_df_raw$GxE_emm_perm,"righttail",n_boot)
-    GxE_omega_pvalue <- pvalue_fun(omega2,perm_df_raw$GxE_omega_perm,"righttail",n_boot)
-    GxE_eta_pvalue <- pvalue_fun(eta2,perm_df_raw$GxE_eta_perm,"righttail",n_boot)
-    
-    # Output
-    output = data.frame("Covariance Estimate" = cov_corrected,
-                        "Covariance Lower CI" = cov_corrected_CI[[1]],
-                        "Covariance Upper CI" = cov_corrected_CI[[2]],
-                        "Covariance p-value" = cov_corrected_pvalue,
-                        "GxE Estimate" = GxE_emm,
-                        "GxE Lower CI" = GxE_emm_CI[[1]],
-                        "GxE Upper CI" = GxE_emm_CI[[2]],
-                        "GxE p-value" = GxE_emm_pvalue)
-    return(output)
-    
-  }else{ # MEANS ------- NEEDS TO HAVE GxE AND P-VALUE CODE UPDATE? 
-    
-    # Establish seeds
-    #set.seed(seed)
-    sim_seeds <- round(runif(4*n_boot)*1000000) # More than enough
-    seed1 = sim_seeds[1] # df.foundations
-    seed2 = sim_seeds[2] # df.foundations
-    seed3 = sim_seeds[3] # mean_gxe
-    seed.set1 = sim_seeds[c(4:(4+n_boot))] # Bootstrap Means seeds
-    seed.set2 = sim_seeds[c((5+n_boot):(5+2*n_boot))] # Permutation means set 1
-    seed.set3 = sim_seeds[c((6+2*n_boot):(6+3*n_boot))] # Permutation means set 1
-    
-    # Output 
-    output = data.frame()
-    
-    # Standardize data
-    input_df$se = input_df$phen_se
-    input_df$avg_phen = (input_df$phen_data - mean(input_df$phen_data))/sd(input_df$phen_data)
-    input_df$avg_phen_corrected = (input_df$phen_data - mean(input_df$phen_data))/sd(input_df$phen_data)
-    
-    # GxE estimates
-    m4 <- mean.GxE(input_df,is.perm = FALSE, seed = NA) # Insert means data frame (seed not necessary if is.perm is False)
-    
-    # GxE 
-    Cov_mean_matrix <- m4[[1]]
-    GxE_means <- m4[[2]]
-    GxE_means_loop_output <- m4[[3]]
-    
-    # Covariance
-    cov_est_means = cov(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
-    #cor_est_means = cor(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
-    means_correction = max(sd(Cov_mean_matrix$E_means),sd(Cov_mean_matrix$G_means))
-    cov_means_corrected = round(cov(Cov_mean_matrix$G_means, Cov_mean_matrix$E_means)/(means_correction^2),2)
-    
-    ###################################
-    ##### BOOTSTRAP -- MEANS DATA #####
-    ###################################
-    
-    # Output Dataframes
-    boot_df_means = boot_dat_means = data.frame()
-    
-    for(i in 1:n_boot){
-      
-      # Shuffle Data
-      boot.seed = seed.set1
-      shuffle_means <- bootstrap_means(input_df, boot.seed[i]) # Insert means data, Need n_boot seeds
-      
-      # GxE :: Covariance Matrix
-      m5 <- mean.GxE(shuffle_means, is.perm = FALSE, seed = NA) # Insert shuffled up means data frame
-      
-      # GxE Estimates
-      Cov_mean_matrix_boot <- m5[[1]]
-      GxE_means_boot <- m5[[2]]
-      
-      # Covariance Estimates
-      cov_mean_boot = cov(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
-      cor_mean_boot = cor(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
-      correction_mean_boot = max(sd(Cov_mean_matrix_boot$E_means),sd(Cov_mean_matrix_boot$G_means))
-      cov_corrected_mean_boot = round(cov(Cov_mean_matrix_boot$G_means, Cov_mean_matrix_boot$E_means)/(correction_mean_boot^2),2)
-      
-      # Bootstrap dataframe
-      boot_dat_means <- data.frame("cov_means_boot" = cov_mean_boot,
-                                   "cor_mean_boot" = cor_mean_boot,
-                                   "cov_corrected_mean_boot" = cov_corrected_mean_boot,
-                                   "GxE_means_boot" = GxE_means_boot)
-      boot_df_means <- rbind(boot_df_means,boot_dat_means)
-    }
-    
-    # Covariance Confidence Intervals -- Means
-    cov_means_CI = quantile(boot_df_means$cov_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
-    #cor_means_CI = quantile(boot_df_means$cor_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
-    cov_corrected_means_CI = quantile(boot_df_means$cov_corrected_mean_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
-    
-    # GxE Confidence Intervals -- Means
-    GxE_means_CI = quantile(boot_df_means$GxE_means_boot, probs=c(0.025, 0.975), na.rm = TRUE, type=1) 
-    
-    #######################################
-    #####  Permutation -- Means Data  #####
-    #######################################
-    
-    # Output
-    perm_df_means = perm_dat_means = data.frame()
-    
-    for(i in 1:n_boot){
-      
-      # Set seeds for perm_means and mean.GxE
-      perm.seeds1 = seed.set2
-      perm.seeds2 = seed.set3
-      
-      # Resample Data
-      perm_means <- permutation_means(input_df,perm.seeds1[i])
-      
-      # GxE :: Covariance Matrix
-      m6 <- mean.GxE(perm_means, is.perm = TRUE,perm.seeds2[i]) # Insert resampled mean phenotype dataframe
-      
-      # GxE Estimates
-      Cov_mean_matrix_perm <- m6[[1]]
-      GxE_means_perm <- m6[[2]]
-      GxE_means_output_perm <- m6[[3]]
-      
-      # Covariance Estimates
-      cov_mean_perm = cov(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)
-      cor_mean_perm = cor(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)
-      correction_mean_perm = max(sd(Cov_mean_matrix_perm$E_means),sd(Cov_mean_matrix_perm$G_means))
-      cov_corrected_mean_perm = round(cov(Cov_mean_matrix_perm$G_means, Cov_mean_matrix_perm$E_means)/(correction_mean_perm^2),2)
-      
-      # Check: GxE Histogram
-      # hist(GxE_means_output_perm)
-      
-      # Permutation dataframe -- Means
-      perm_dat_means <- data.frame("cov_means_perm" = cov_mean_perm,
-                                   "cor_mean_perm" = cor_mean_perm,
-                                   "cov_corrected_mean_perm" = cov_corrected_mean_perm,
-                                   "GxE_means_perm" = GxE_means_perm)
-      perm_df_means <- rbind(perm_df_means,perm_dat_means)
-    }
-    
-    # Check: Histogram
-    # hist(perm_df_means$GxE_means_perm)
-    # abline(v = GxE_means,col = "red")
-    
-    # Covariance P-values
-    cov_original_mean_pvalue <- pvalue_fun(cov_est_means,perm_df_means$cov_means_perm,"twotail", n_boot)
-    #cor_mean_pvalue <- pvalue_fun(cor_est_means,perm_df_means$cor_mean_perm,"twotail", n_boot)
-    cov_corrected_mean_pvalue <- pvalue_fun(cov_means_corrected,perm_df_means$cov_corrected_mean_perm,"twotail", n_boot)
-    
-    # GxE P-values
-    GxE_mean_pvalue <- pvalue_fun(GxE_means,perm_df_means$GxE_means_perm,"righttail",n_boot)
-    
-    # Output
-    output = data.frame("Covariance Estimate" = cov_means_corrected,
-                        "Covariance Lower CI" = cov_corrected_means_CI[[1]],
-                        "Covariance Upper CI" = cov_corrected_means_CI[[2]],
-                        "Covariance p-value" = cov_corrected_mean_pvalue,
-                        "GxE Estimate" = GxE_means,
-                        "GxE Lower CI" = GxE_means_CI[[1]],
-                        "GxE Upper CI" = GxE_means_CI[[2]],
-                        "GxE p-value" = GxE_mean_pvalue)
-    return(output)
-  } 
-} # May need to be updated - check means code! (written 9/30/20)
-rm(amarillo_armadillo)
-
-empty_as_na <- function(x){
-  if("factor" %in% class(x)) x <- as.character(x) ## since ifelse wont work with factors
-  ifelse(as.character(x)!="", x, NA)
+  if(is.sample == TRUE){
+    correcter = max(sd(input_df$E_means),sd(input_df$G_means))
+    cv = (1/(N-1))*(numerator/correcter^2)
+  }else{
+    correcter = max(sd(input_df$E_means),sd(input_df$G_means))
+    cv = (1/(N))*(numerator/correcter^2)
+  }
+  return(cv)
 }
-rm(empty_as_na)
 
-fun <- function(x) {
-  df <- read_excel(x)
+cov.function_means <- function(input_df, is.sample = TRUE){ # input_df = cov_matrix of G_means and E_means
+  
+  N = length(input_df$gen_factor)
+  #Goverallmean = mean(input_df$G_means)
+  #Eoverallmean = mean(input_df$E_means)
+  overallmean = mean(c(input_df$G_means,input_df$E_means)) #not mean of means, mean of overall data
+  #numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
+  numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
+  correcter = max(sd(input_df$E_means),sd(input_df$G_means))
+  
+  if(is.sample == TRUE){
+    cv = (1/(N-1))*(numerator/correcter^2)
+  }else{
+    cv = (1/(N))*(numerator/correcter^2)
+  }
+  return(cv)
 }
-rm(fun)
+
+########### Simulation Summary/Plotting Functions ####################
+is.empty <- function(x, mode=NULL){
+  if (is.null(mode)) mode <- class(x)
+  identical(vector(mode,1),c(x,vector(class(x),1)))
+}
+
+## Confusion Matrix data wrangling ##
+fpr.fnr <- function(input_df, divided, scenario){
+  
+  is.empty <- function(x, mode=NULL){
+    if (is.null(mode)) mode <- class(x)
+    identical(vector(mode,1),c(x,vector(class(x),1)))
+  }
+  
+  df <- data.frame()
+  if(divided == TRUE){
+    
+  for(i in 1:length(unique(input_df$sample_size))){
+    for(j in 1:length(unique(input_df$n_pop))){
+      
+      fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+      ss = unique(input_df$sample_size)[i]
+      np = unique(input_df$n_pop)[j]
+      
+      tempdf <- input_df %>% 
+        filter(sample_size == ss) %>% 
+        filter(n_pop == np)
+      
+      if(nrow(tempdf)==0){next}
+      
+      fn1 = tempdf$n[tempdf$name == "False Negative"]
+      fp1 = tempdf$n[tempdf$name == "False Positive"]
+      tn1 = tempdf$n[tempdf$name == "True Negative"]
+      tp1 = tempdf$n[tempdf$name == "True Positive"]
+      
+      if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+      if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+      if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+      if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+      
+      fnr = fn/(fn+tp)
+      fpr = fp/(fp+tn)
+      
+      n = c(fn, fp, tn, tp)
+      rate = c(fnr,fpr,NA,NA)
+      if(scenario == 1){n_env = unique(tempdf$n_pop)}else{n_env = 2}
+      total = sum(n)
+      percent = (n/total)*100
+      
+      df. <- data.frame("name" = c("False Negative", "False Positive", "True Negative", "True Positive"),
+                        "sample_size" = rep(ss,4),
+                        "n_pop" = rep(np,4),
+                        "totsamp" = rep(unique(tempdf$n_pop) * n_env * unique(tempdf$sample_size),4),
+                        "n" = n, 
+                        "total" = total, 
+                        "percent" = round(percent,2),
+                        "rate" = round(rate,2))
+      df <- rbind(df,df.)
+    }
+  }
+      
+    }else{
+      
+      fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NA
+      
+      fn1 = input_df$n[input_df$name == "False Negative"]
+      fp1 = input_df$n[input_df$name == "False Positive"]
+      tn1 = input_df$n[input_df$name == "True Negative"]
+      tp1 = input_df$n[input_df$name == "True Positive"]
+    
+      
+      if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+      if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+      if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+      if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+      
+      fnr = fn/(fn+tp)
+      fpr = fp/(fp+tn)
+      
+      n = c(fn, fp, tn, tp)
+      rate = c(fnr,fpr,NA,NA)
+      total = sum(n)
+      percent = (n/total)*100
+      
+      df <- data.frame("name" = c("False Negative", "False Positive", "True Negative", "True Positive"),
+                       "n" = n, 
+                       "total" = total, 
+                       "percent" = round(percent,2),
+                       "rate" = round(rate,2))
+     }
+  return(df)
+} # Result goes into heatmap_fun
+
+## Confusion Matrix Heatmaps ## 
+heatmap_fun <- function(plot_data, plot_type){ #plot_type is "percent" or "rate"
+  
+  p <- list()
+  
+  if(plot_type == "percent"){
+  for(i in 1:length(unique(plot_data$name))){
+    
+    subcat <- filter(plot_data, name == unique(plot_data$name)[i])
+    
+    p[[i]] <- ggplot(subcat,aes(x = factor(sample_size), y = factor(n_pop), fill = percent)) + 
+      geom_tile() + 
+      geom_text(aes(label= paste(round(percent,3), totsamp,sep = '\n')), size = 5) +
+      theme_classic(base_size = 12, base_family = "Times") + 
+      scale_fill_gradient2(#low="#DDDDDD", mid="#99CCEE", high="#000044", #colors in the scale
+        #                     midpoint=mean(rng.gxe2),    #same midpoint for plots (mean of the range)
+        #                     breaks=seq(0,1,0.25), #breaks in the scale bar
+        limits=c(0,1))+
+      xlab("Sample Size") + ylab("Number of Populations")+
+      #labs(fill = "Percent")+
+      theme(axis.text = element_text(colour = "black"))+
+      theme(legend.position = "none")+
+      ggtitle(unique(subcat$name))+
+      theme(plot.title = element_text(size = 16, face = "bold"))
+  }
+  }else{
+
+    for(i in 1:length(unique(plot_data$name))){
+      
+      subcat <- filter(plot_data, name == unique(plot_data$name)[i])
+      if(unique(is.na(subcat$rate))==TRUE){next}
+      
+      p[[i]] <- ggplot(subcat,aes(x = factor(sample_size), y = factor(n_pop), fill = rate)) + 
+        geom_tile() + 
+        geom_text(aes(label= paste(round(rate,3), totsamp,sep = '\n')), size = 5) +
+        theme_classic(base_size = 12, base_family = "Times")+ 
+        scale_fill_gradient2(limits=c(0,1))+
+        xlab("Sample Size") + ylab("Number of Populations")+
+        #labs(fill = "Percent")+
+        theme(axis.text = element_text(colour = "black"))+
+        theme(legend.position = "none")+
+        ggtitle(unique(subcat$name))+
+        theme(plot.title = element_text(size = 16, face = "bold"))
+      
+      
+    
+  }
+  }
+  return(do.call(grid.arrange, p))
+} 
+
+## Calculate Power and False Negative rates
+fnr.effsize <- function(x, metric, data.type, analysis, scenario = 1, resolution){ # metric = Cov or GxE; analysis is perm or boot or anova
+   # metric = "Cov" or "GxE"
+   # data.type = "raw" or "means"
+   # analysis = "perm" or "boot"
+   # scenario = 1 or 2
+   # resolution = "fine" (for heatmaps) or "coarse" (for barplots)
+  
+  output = data.frame()
+  
+  if(data.type == "raw"){
+
+    if(metric == "Cov"){
+    
+      if(resolution == "coarse"){
+        x$binCov = "NA"
+        for(i in 1:nrow(x)){
+        if(abs(x$true_cov[i]) > 0 & abs(x$true_cov[i]) <= 0.25){x$binCov[i] = 0.25
+        }else if(abs(x$true_cov[i]) > 0.25 & abs(x$true_cov[i]) <= 0.5){x$binCov[i] = 0.5
+        }else if(abs(x$true_cov[i]) > 0.5 & abs(x$true_cov[i]) <= 0.75){x$binCov[i] = 0.75
+        }else{x$binCov[i] = 1}
+      }
+    }else{
+      x$binCov = "NA"
+      for(i in 1:nrow(x)){
+        if(x$true_cov[i] == 0){x$binCov[i] = 0
+        }else if(abs(x$true_cov[i]) > 0 & abs(x$true_cov[i]) <= 0.15){x$binCov[i] = 0.1
+        }else if(abs(x$true_cov[i]) > 0.15 & abs(x$true_cov[i]) <= 0.25){x$binCov[i] = 0.2
+        }else if(abs(x$true_cov[i]) > 0.25 & abs(x$true_cov[i]) <= 0.35){x$binCov[i] = 0.3
+        }else if(abs(x$true_cov[i]) > 0.35 & abs(x$true_cov[i]) <= 0.45){x$binCov[i] = 0.4
+        }else if(abs(x$true_cov[i]) > 0.45 & abs(x$true_cov[i]) <= 0.55){x$binCov[i] = 0.5
+        }else if(abs(x$true_cov[i]) > 0.55 & abs(x$true_cov[i]) <= 0.65){x$binCov[i] = 0.6
+        }else if(abs(x$true_cov[i]) > 0.65 & abs(x$true_cov[i]) <= 0.75){x$binCov[i] = 0.7
+        }else if(abs(x$true_cov[i]) > 0.75 & abs(x$true_cov[i]) <= 0.85){x$binCov[i] = 0.8
+        }else if(abs(x$true_cov[i]) > 0.85 & abs(x$true_cov[i]) <= 0.95){x$binCov[i] = 0.9
+        }else{x$binCov[i] = 1}
+      }
+      
+    }
+      
+      for(i in 1:length(unique(x$sample_size))){
+        for(j in 1:length(unique(x$n_pop))){
+          for(k in 1:length(unique(x$binCov))){
+            
+            fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+            ss = unique(x$sample_size)[i]
+            np = unique(x$n_pop)[j]
+            bc = unique(x$binCov)[k]
+            
+            if(analysis == "perm"){
+            
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = Covconfintperm,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+            
+              }else{
+              
+                tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = Covconfintboot,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+                
+                if(nrow(tempdf)==0){next}
+                
+                fn1 = tempdf$n[tempdf$name == "False Negative"]
+                fp1 = tempdf$n[tempdf$name == "False Positive"]
+                tn1 = tempdf$n[tempdf$name == "True Negative"]
+                tp1 = tempdf$n[tempdf$name == "True Positive"]
+                
+                if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                
+                fnr = fn/(fn+tp)
+                
+                output1 = data.frame(sample_size = ss, 
+                                     n_pop = np, 
+                                     bin = bc,
+                                     fnr = fnr,
+                                     power = 1-fnr)
+                output = rbind(output, output1)
+              }
+          }
+        }
+      }
+          }else{
+            
+            if(resolution == "course"){
+            x$binGxE = "NA"
+            for(i in 1:nrow(x)){
+              if(abs(x$true_GxE_emm[i]) > 0 & abs(x$true_GxE_emm[i]) <= 0.25){x$binGxE[i] = 0.25
+              }else if(abs(x$true_GxE_emm[i]) > 0.25 & abs(x$true_GxE_emm[i]) <= 0.5){x$binGxE[i] = 0.5
+              }else if(abs(x$true_GxE_emm[i]) > 0.5 & abs(x$true_GxE_emm[i]) <= 0.75){x$binGxE[i] = 0.75
+              }else{x$binGxE[i] = 1}
+            }
+            
+            }else{
+              x$binGxE = "NA"
+              for(i in 1:nrow(x)){
+                if(x$true_GxE_emm[i] == 0){x$binGxE[i] = 0
+                }else if(abs(x$true_GxE_emm[i]) > 0 & abs(x$true_GxE_emm[i]) <= 0.15){x$binGxE[i] = 0.1
+                }else if(abs(x$true_GxE_emm[i]) > 0.15 & abs(x$true_GxE_emm[i]) <= 0.25){x$binGxE[i] = 0.2
+                }else if(abs(x$true_GxE_emm[i]) > 0.25 & abs(x$true_GxE_emm[i]) <= 0.35){x$binGxE[i] = 0.3
+                }else if(abs(x$true_GxE_emm[i]) > 0.35 & abs(x$true_GxE_emm[i]) <= 0.45){x$binGxE[i] = 0.4
+                }else if(abs(x$true_GxE_emm[i]) > 0.45 & abs(x$true_GxE_emm[i]) <= 0.55){x$binGxE[i] = 0.5
+                }else if(abs(x$true_GxE_emm[i]) > 0.55 & abs(x$true_GxE_emm[i]) <= 0.65){x$binGxE[i] = 0.6
+                }else if(abs(x$true_GxE_emm[i]) > 0.65 & abs(x$true_GxE_emm[i]) <= 0.75){x$binGxE[i] = 0.7
+                }else if(abs(x$true_GxE_emm[i]) > 0.75 & abs(x$true_GxE_emm[i]) <= 0.85){x$binGxE[i] = 0.8
+                }else if(abs(x$true_GxE_emm[i]) > 0.85 & abs(x$true_GxE_emm[i]) <= 0.95){x$binGxE[i] = 0.9
+                }else{x$binGxE[i] = 1}
+              }
+              
+            }
+            
+            for(i in 1:length(unique(x$sample_size))){
+              for(j in 1:length(unique(x$n_pop))){
+                for(k in 1:length(unique(x$binGxE))){
+                  
+                  fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+                  ss = unique(x$sample_size)[i]
+                  np = unique(x$n_pop)[j]
+                  bc = unique(x$binGxE)[k]
+                  
+                  if(analysis == "perm"){
+                    
+                    tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEconfintperm,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    
+                    if(nrow(tempdf)==0){next}
+                    
+                    fn1 = tempdf$n[tempdf$name == "False Negative"]
+                    fp1 = tempdf$n[tempdf$name == "False Positive"]
+                    tn1 = tempdf$n[tempdf$name == "True Negative"]
+                    tp1 = tempdf$n[tempdf$name == "True Positive"]
+                    
+                    if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                    if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                    if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                    if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                    
+                    fnr = fn/(fn+tp)
+                    
+                    output1 = data.frame(sample_size = ss, 
+                                         n_pop = np, 
+                                         bin = bc,
+                                         fnr = fnr,
+                                         power = 1-fnr)
+                    output = rbind(output, output1)
+                    
+                  }else if(analysis == "boot"){
+                    
+                    tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEconfintboot,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    
+                    if(nrow(tempdf)==0){next}
+                    
+                    fn1 = tempdf$n[tempdf$name == "False Negative"]
+                    fp1 = tempdf$n[tempdf$name == "False Positive"]
+                    tn1 = tempdf$n[tempdf$name == "True Negative"]
+                    tp1 = tempdf$n[tempdf$name == "True Positive"]
+                    
+                    if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                    if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                    if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                    if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                    
+                    fnr = fn/(fn+tp)
+                    
+                    output1 = data.frame(sample_size = ss, 
+                                         n_pop = np, 
+                                         bin = bc,
+                                         fnr = fnr,
+                                         power = 1-fnr)
+                    output = rbind(output, output1)
+                    
+                  }else{
+                    
+                    if(scenario == 1){
+                    
+                      tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEanova_conf,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    }else{
+                    
+                    tempdf <- x %>% 
+                      filter(sample_size == ss) %>% 
+                      filter(n_pop == np) %>%
+                      filter(binGxE == bc) %>%
+                      group_by("name" = GxEanova_conf,sample_size,n_pop,binGxE)%>%
+                      summarise(n = n())
+                    }
+                  
+                    
+                    if(nrow(tempdf)==0){next}
+                    
+                    fn1 = tempdf$n[tempdf$name == "False Negative"]
+                    fp1 = tempdf$n[tempdf$name == "False Positive"]
+                    tn1 = tempdf$n[tempdf$name == "True Negative"]
+                    tp1 = tempdf$n[tempdf$name == "True Positive"]
+                    
+                    if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+                    if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+                    if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+                    if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+                    
+                    fnr = fn/(fn+tp)
+                    
+                    output1 = data.frame(sample_size = ss, 
+                                         n_pop = np, 
+                                         bin = bc,
+                                         fnr = fnr,
+                                         power = 1-fnr)
+                    output = rbind(output, output1)
+                  }
+                }
+              }
+            }
+          }
+  }else{
+    
+    if(metric == "Cov"){
+      
+      if(resolution == "coarse"){
+        x$binCov = "NA"
+        for(i in 1:nrow(x)){
+          if(abs(x$true_cov_means[i]) > 0 & abs(x$true_cov_means[i]) <= 0.25){x$binCov[i] = 0.25
+          }else if(abs(x$true_cov_means[i]) > 0.25 & abs(x$true_cov_means[i]) <= 0.5){x$binCov[i] = 0.5
+          }else if(abs(x$true_cov_means[i]) > 0.5 & abs(x$true_cov_means[i]) <= 0.75){x$binCov[i] = 0.75
+          }else{x$binCov[i] = 1}
+        }
+      }else{
+        x$binCov = "NA"
+        for(i in 1:nrow(x)){
+          if(x$true_cov_means[i] == 0){x$binCov[i] = 0
+          }else if(abs(x$true_cov_means[i]) > 0 & abs(x$true_cov_means[i]) <= 0.15){x$binCov[i] = 0.1
+          }else if(abs(x$true_cov_means[i]) > 0.15 & abs(x$true_cov_means[i]) <= 0.25){x$binCov[i] = 0.2
+          }else if(abs(x$true_cov_means[i]) > 0.25 & abs(x$true_cov_means[i]) <= 0.35){x$binCov[i] = 0.3
+          }else if(abs(x$true_cov_means[i]) > 0.35 & abs(x$true_cov_means[i]) <= 0.45){x$binCov[i] = 0.4
+          }else if(abs(x$true_cov_means[i]) > 0.45 & abs(x$true_cov_means[i]) <= 0.55){x$binCov[i] = 0.5
+          }else if(abs(x$true_cov_means[i]) > 0.55 & abs(x$true_cov_means[i]) <= 0.65){x$binCov[i] = 0.6
+          }else if(abs(x$true_cov_means[i]) > 0.65 & abs(x$true_cov_means[i]) <= 0.75){x$binCov[i] = 0.7
+          }else if(abs(x$true_cov_means[i]) > 0.75 & abs(x$true_cov_means[i]) <= 0.85){x$binCov[i] = 0.8
+          }else if(abs(x$true_cov_means[i]) > 0.85 & abs(x$true_cov_means[i]) <= 0.95){x$binCov[i] = 0.9
+          }else{x$binCov[i] = 1}
+        }
+        
+      }
+      
+      for(i in 1:length(unique(x$sample_size))){
+        for(j in 1:length(unique(x$n_pop))){
+          for(k in 1:length(unique(x$binCov))){
+            
+            fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+            ss = unique(x$sample_size)[i]
+            np = unique(x$n_pop)[j]
+            bc = unique(x$binCov)[k]
+            
+            if(analysis == "perm"){
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = meansCovconfintperm,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+              
+            }else{
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binCov == bc) %>%
+                group_by("name" = MeansCovconfintboot,sample_size,n_pop,binCov)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+            }
+          }
+        }
+      }
+    }else{
+      
+      if(resolution == "course"){
+        x$binGxE = "NA"
+        for(i in 1:nrow(x)){
+          if(abs(x$true_GxE_means[i]) > 0 & abs(x$true_GxE_means[i]) <= 0.25){x$binGxE[i] = 0.25
+          }else if(abs(x$true_GxE_means[i]) > 0.25 & abs(x$true_GxE_means[i]) <= 0.5){x$binGxE[i] = 0.5
+          }else if(abs(x$true_GxE_means[i]) > 0.5 & abs(x$true_GxE_means[i]) <= 0.75){x$binGxE[i] = 0.75
+          }else{x$binGxE[i] = 1}
+        }
+        
+      }else{
+        x$binGxE = "NA"
+        for(i in 1:nrow(x)){
+          if(x$true_GxE_means[i] == 0){x$binGxE[i] = 0
+          }else if(abs(x$true_GxE_means[i]) > 0 & abs(x$true_GxE_means[i]) <= 0.15){x$binGxE[i] = 0.1
+          }else if(abs(x$true_GxE_means[i]) > 0.15 & abs(x$true_GxE_means[i]) <= 0.25){x$binGxE[i] = 0.2
+          }else if(abs(x$true_GxE_means[i]) > 0.25 & abs(x$true_GxE_means[i]) <= 0.35){x$binGxE[i] = 0.3
+          }else if(abs(x$true_GxE_means[i]) > 0.35 & abs(x$true_GxE_means[i]) <= 0.45){x$binGxE[i] = 0.4
+          }else if(abs(x$true_GxE_means[i]) > 0.45 & abs(x$true_GxE_means[i]) <= 0.55){x$binGxE[i] = 0.5
+          }else if(abs(x$true_GxE_means[i]) > 0.55 & abs(x$true_GxE_means[i]) <= 0.65){x$binGxE[i] = 0.6
+          }else if(abs(x$true_GxE_means[i]) > 0.65 & abs(x$true_GxE_means[i]) <= 0.75){x$binGxE[i] = 0.7
+          }else if(abs(x$true_GxE_means[i]) > 0.75 & abs(x$true_GxE_means[i]) <= 0.85){x$binGxE[i] = 0.8
+          }else if(abs(x$true_GxE_means[i]) > 0.85 & abs(x$true_GxE_means[i]) <= 0.95){x$binGxE[i] = 0.9
+          }else{x$binGxE[i] = 1}
+        }
+        
+      }
+      
+      for(i in 1:length(unique(x$sample_size))){
+        for(j in 1:length(unique(x$n_pop))){
+          for(k in 1:length(unique(x$binGxE))){
+            
+            fn1 = fn = fp1 = fp = tn1 = tn = tp1 = tp = fnr = fpr = NULL
+            ss = unique(x$sample_size)[i]
+            np = unique(x$n_pop)[j]
+            bc = unique(x$binGxE)[k]
+            
+            if(analysis == "perm"){
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binGxE == bc) %>%
+                group_by("name" = meansGxEconfintperm,sample_size,n_pop,binGxE)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+              
+            }else{
+              
+              tempdf <- x %>% 
+                filter(sample_size == ss) %>% 
+                filter(n_pop == np) %>%
+                filter(binGxE == bc) %>%
+                group_by("name" = MeanGxEconfintboot,sample_size,n_pop,binGxE)%>%
+                summarise(n = n())
+              
+              if(nrow(tempdf)==0){next}
+              
+              fn1 = tempdf$n[tempdf$name == "False Negative"]
+              fp1 = tempdf$n[tempdf$name == "False Positive"]
+              tn1 = tempdf$n[tempdf$name == "True Negative"]
+              tp1 = tempdf$n[tempdf$name == "True Positive"]
+              
+              if(is.empty(fn1) == TRUE){fn = 0}else{fn = fn1}
+              if(is.empty(fp1) == TRUE){fp = 0}else{fp = fp1}
+              if(is.empty(tn1) == TRUE){tn = 0}else{tn = tn1}
+              if(is.empty(tp1) == TRUE){tp = 0}else{tp = tp1}
+              
+              fnr = fn/(fn+tp)
+              
+              output1 = data.frame(sample_size = ss, 
+                                   n_pop = np, 
+                                   bin = bc,
+                                   fnr = fnr,
+                                   power = 1-fnr)
+              output = rbind(output, output1)
+              
+            }
+              
+              
+          }
+        }
+      }
+    }
+    
+  }
+      
+  return(output)
+}
+
+is.nan.data.frame <- function(x){
+  do.call(cbind, lapply(x, is.nan))}
+
+
+             
+      
+  
