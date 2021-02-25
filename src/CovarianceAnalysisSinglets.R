@@ -21,8 +21,7 @@ source("CovarianceDataFunctions.R")
 
 # For CnGV Paper: Molly and Geoff's data
 #data.df = ma
-#data.df = gt[gt$Paper == 2002,]
-#data.df$phen_mean_SE = data.df$phen_se
+
 
 # 3. Format Data 
 # Need: "gen_factor" column -as factor (each genotype/population = "G_1", "G_2", etc.)

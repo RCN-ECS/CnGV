@@ -63,7 +63,7 @@ days_df = data.frame("phen_data" = berven1$TimetoMM,"phen_se" = berven1$TimetoMM
 
 # Molly and Geoff Datasets  
 MollyTest = amarillo_armadillo(ma, 999, ma$data_type) # Molly's raw data
-GeoffTest2002 = amarillo_armadillo(gt[gt$Paper == 2002,], 999, data_type = gt$data_type)
+GeoffTest2002 = amarillo_armadillo(gt[gt$Paper == 2002,], 999, data_type = unique(gt$data_type))
 GeoffTest2000 = amarillo_armadillo(gt[gt$Paper == 2000,], 999, data_type = gt$data_type)
 
 

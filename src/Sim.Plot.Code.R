@@ -367,10 +367,6 @@ fndf = rbind(covperm1,covboot1,gxeperm1,gxeboot1,gxeanova1)
 gxePow = rbind(gxeperm1,gxeanova1)
 covPow = rbind(covperm1,covboot1)
 
-raw_conf3[is.nan(raw_conf3)] <- 0
-raw_conf3 %>%
-  filter(name == "False Positive") %>%
-  summarize(mean(rate))
 
 ############ Confusion Plots  -- Env Scenario 1 ###############
 
@@ -613,25 +609,25 @@ fpr.fnr(means_gxe_perm_table, divided = FALSE, scenario = 1)
     group_by(sample_size, n_pop, "name" =meansCovconfintperm) %>%
     summarize("n" = n()))
 means_conf1 = fpr.fnr(means_confusion_hmap1, divided = TRUE, scenario = 1)
-means_conf_plot1 <- heatmap_fun(means_conf1,"rate") # Can also do "percent"
+#means_conf_plot1 <- heatmap_fun(means_conf1,"rate") # Can also do "percent"
 
 (means_confusion_hmap2 = dat_csv1 %>%
     group_by(sample_size, n_pop, "name" =MeansCovconfintboot) %>%
     summarize("n" = n()))
 means_conf2 = fpr.fnr(means_confusion_hmap2, divided = TRUE, scenario = 1)
-means_conf_plot2 <- heatmap_fun(means_conf2,"rate")
+#means_conf_plot2 <- heatmap_fun(means_conf2,"rate")
 
 (means_confusion_hmap3 = dat_csv1 %>%
     group_by(sample_size, n_pop,"name" = MeanGxEconfintboot) %>%
     summarize("n" = n()))
 means_conf3 = fpr.fnr(means_confusion_hmap3, divided = TRUE, scenario = 1)
-means_conf_plot3 <- heatmap_fun(means_conf3,"rate")
+#means_conf_plot3 <- heatmap_fun(means_conf3,"rate")
 
 means_confusion_hmap4 = dat_csv1 %>%
   group_by(sample_size, n_pop,"name" = meansGxEconfintperm) %>%
   summarize("n" = n())
 means_conf4 = fpr.fnr(means_confusion_hmap4, divided = TRUE, scenario = 1)
-means_conf_plot4 <- heatmap_fun(means_conf4,"rate")
+#means_conf_plot4 <- heatmap_fun(means_conf4,"rate")
 
 # Compile FPs for plot
 means_conf1$ID = rep("Cov_Perm", nrow(means_conf1))
@@ -751,7 +747,7 @@ gxeFPRmean1 <-
     col = ifelse(rate >= 0.5, "black","white"),
     ID2 = ifelse(ID == "GxE_Boot", "Boot.", "Perm."))
 
-(gxeFPFRTmean = gxeFPRmean1 %>% 
+(gxeFPFRTmean = filter(gxeFPRmean1,ID2 == "Perm.") %>% 
     ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
     geom_tile(height = .475, width = 0.95, color= "white") +
     geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
@@ -789,7 +785,7 @@ gxePowmean2 <-
     col = ifelse(fnr >= 0.5, "black","white"),
     ID2 = ifelse(ID == "GxE_Perm", "Perm.", "Boot."))
 
-(gxeFNFRTmean = gxePowmean2 %>% 
+(gxeFNFRTmean = filter(gxePowmean2, ID2 == "Perm.") %>% 
     ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
     geom_tile(height = 0.475, width = 0.95, color= "white") +
     geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
@@ -808,8 +804,6 @@ gxePowmean2 <-
     theme(legend.position = "none")+
     ggtitle("FRT: False Negative Rates for Means")+
     theme(plot.title = element_text(size = 18, face = "bold")))
-
-
 
 
 ########################################################
@@ -1261,25 +1255,25 @@ fpr.fnr(means_gxe_perm_table, divided = FALSE, scenario = 2)
     group_by(sample_size, n_pop, "name" =meansCovconfintperm) %>%
     summarize("n" = n()))
 dub_means_conf1 = fpr.fnr(means_confusion_hmap1, divided = TRUE, scenario = 2)
-means_conf_plot1 <- heatmap_fun(dub_means_conf1,"rate") # Can also do "percent"
+#means_conf_plot1 <- heatmap_fun(dub_means_conf1,"rate") # Can also do "percent"
 
 (means_confusion_hmap2 = dat_dub1 %>%
     group_by(sample_size, n_pop, "name" =MeansCovconfintboot) %>%
     summarize("n" = n()))
 dub_means_conf2 = fpr.fnr(means_confusion_hmap2, divided = TRUE, scenario = 2)
-means_conf_plot2 <- heatmap_fun(dub_means_conf2,"rate")
+#means_conf_plot2 <- heatmap_fun(dub_means_conf2,"rate")
 
 (means_confusion_hmap3 = dat_dub2 %>%
     group_by(sample_size, n_pop,"name" = MeanGxEconfintboot) %>%
     summarize("n" = n()))
 dub_means_conf3 = fpr.fnr(means_confusion_hmap3, divided = TRUE, scenario = 2)
-means_conf_plot3 <- heatmap_fun(dub_means_conf3,"rate")
+#means_conf_plot3 <- heatmap_fun(dub_means_conf3,"rate")
 
 means_confusion_hmap4 = dat_dub2 %>%
   group_by(sample_size, n_pop,"name" = meansGxEconfintperm) %>%
   summarize("n" = n())
 dub_means_conf4 = fpr.fnr(raw_confusion_hmap4, divided = TRUE, scenario = 2)
-means_conf_plot4 <- heatmap_fun(dub_means_conf4,"rate")
+#means_conf_plot4 <- heatmap_fun(dub_means_conf4,"rate")
 
 # Compile FPs for plot
 dub_means_conf1$ID = rep("Cov_Perm", nrow(dub_means_conf1))
@@ -1399,7 +1393,7 @@ gxeFPRmeandub1 <-
     col = ifelse(rate >= 0.5, "black","white"),
     ID2 = ifelse(ID == "GxE_Boot", "Boot.", "Perm."))
 
-(gxeFPCGmean_dub = gxeFPRmeandub1 %>% 
+(gxeFPCGmean_dub = filter(gxeFPRmeandub1, ID2 == "Perm.") %>% 
     ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
     geom_tile(height = .475, width = 0.95, color= "white") +
     geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
@@ -1437,7 +1431,7 @@ gxePowmean_dub2 <-
     col = ifelse(fnr >= 0.5, "black","white"),
     ID2 = ifelse(ID == "GxE_Perm", "Perm.", "Boot."))
 
-(gxeFNCGmean_dub = gxePowmean_dub2 %>% 
+(gxeFNCGmean_dub = filter(gxePowmean_dub2, ID2 == "Perm.") %>% 
     ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
     geom_tile(height = 0.475, width = 0.95, color= "white") +
     geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
@@ -1454,7 +1448,7 @@ gxePowmean_dub2 <-
     theme_classic(base_size = 18, base_family = "Times")+
     theme(axis.text = element_text(colour = "black"))+
     theme(legend.position = "none")+
-    ggtitle("FRT: False Negative Rates for Means")+
+    ggtitle("CG: False Negative Rates for Means")+
     theme(plot.title = element_text(size = 18, face = "bold")))
 
 # Raw vs. Means comparisons
@@ -1463,7 +1457,7 @@ gxePowmean_dub2 <-
 grid.arrange(covFPFRT,covFPFRTmean,covFPCG,covFPRmean_dub, ncol=2, nrow=2,
              top = textGrob("CovGE False Positive Rates",gp=gpar(fontsize=20)))
 
-grid.arrange(gxeFPFRT, gxeFPFRTmean, gxeFPCG, gxeFPFRTmean_dub, ncol=2, nrow=2,
+grid.arrange(gxeFPFRT, gxeFPFRTmean, gxeFPCG, gxeFPCGmean_dub, ncol=2, nrow=2,
              top = textGrob("GxE False Positive Rates",gp=gpar(fontsize=20)))
 
 ## False Negatives

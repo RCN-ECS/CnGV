@@ -9,7 +9,7 @@ library("lme4")
 library("dplyr")
 
 # Load Compiled datasets
-#setwd("~/Documents/GitHub/CnGV/CnGV/data/")
+setwd("~/Documents/GitHub/CnGV/CnGV/data/")
 info.df <- read.csv("Extraction_Initialize.csv")
 data.df1 <- read.csv("Meta_data_checked.csv")
 output <- data.frame()
@@ -23,8 +23,9 @@ data.df <- data.df1 %>%
 
 
 # Test data Singles
+data.df = filter(data.df, Data_file_name == "815_new_branch_number")
 #temp = filter(data.df, data.df$Data_file_name == "45_growth_rate")
-#ref = filter(info.df, info.df$Data_file_name == "45_growth_rate")
+info.df = filter(info.df,  Data_file_name == "815_new_branch_number")
 
 # Test data Group
 #testies = c("45_ETS_activity","59_male pupal mass","126_fat_content","126_boldness_distance","221_WCHI_green_inner_cell_width")
@@ -38,7 +39,7 @@ data.df <- data.df1 %>%
 #grid.arrange(untrans,trans)
 
 # Load functions
-#setwd("~/Documents/GitHub/CnGV/CnGV/src/")
+setwd("~/Documents/GitHub/CnGV/CnGV/src/")
 source("CovarianceDataFunctions.R")
 
 # Run analysis
@@ -130,66 +131,152 @@ write.csv(output, "Meta_analysis_results_Feb20.csv")
 library(ggplot2)
 library(viridis)
 
+# Meta-analysis results
 res <- read.csv("~/Desktop/Meta_analysis_results_Feb20.csv")
-str(res)
 
+res$studyID = str_split_fixed(res$Data_file_name, "_", 2)[,1]
+res$phenotype = str_split_fixed(res$Data_file_name, "_", 2)[,2]
 
-## How many have enough samples? 
-(cov_ss = ggplot(res, aes(x = Covariance, y = Total_Sample_Size, shape = Data.type, fill = Covariance_Pvalue))+
-    geom_point(alpha = 0.75) + geom_hline(yintercept = 256)+ ylim(0,3500)+
-    labs(shape = "Data Type",fill = "P-value")+
-    scale_shape_manual(values = c("means" = 21, "raw" = 24))+
-    scale_fill_viridis(option = "plasma")+
-    theme_classic(base_size = 20, base_family = "Arial")+
-    xlab("Covariance")+ ylab("Total Sample Size")+
-    theme(axis.text = element_text(colour = "black")))
+# Summary Data
+(N_authors = length(unique(res$First.Author)))
+(N_phenotypes = length(unique(res$Data_file_name)))
+(N_studies = length(unique(res$studyID)))
+(range_SampleSize = range(res$Total_Sample_Size))
 
-(gxe_ss = ggplot(res, aes(x = GxE_Estimate, y = Total_Sample_Size, shape = Data.type, fill = GxE_Pvalue))+
-    geom_point(alpha = 0.75) + geom_hline(yintercept = 128)+ ylim(0,3500)+
-    labs(shape = "Data Type",fill = "P-value")+
-    scale_shape_manual(values = c("means" = 21, "raw" = 24))+
-    scale_fill_viridis(option = "plasma")+
-    theme_classic(base_size = 20, base_family = "Arial")+
-    xlab("GxE_Estimate")+ ylab("Total Sample Size")+
-    theme(axis.text = element_text(colour = "black")))
+### Plotting Specs ###
 
-ggplot(res, aes(x = GxE_Estimate, y = GxE_CILength))+geom_point()
-
-unique(res$Phylum)
+# Shape according to Phylum
 phyShape <- c("Chordata"=15,"Cnidaria"=16,"Arthropoda"=17,"Dinoflagellata"=18,"Bryophyta"=0,"Tracheophyta"=1,"Mollusca"=2, "Coniferophyta" =4,"Annelida"=5)
 
-# CovGE vs. GxE
-res$color = NULL
+# Label according to P-value significance for both
+res$colorPval = NULL
 res = res %>%
-   mutate(color = ifelse(Covariance_Pvalue <= 0.025 & GxE_Pvalue <= 0.05, "3",
-                         ifelse(GxE_Pvalue <= 0.05, "2", #"#481F70FF",\
-                                ifelse(Covariance_Pvalue <= 0.025, "1","4")))) #"#20A486FF",
-                                      # ifelse(is.na(Covariance_Pvalue) == TRUE & is.na(GxE_Pvalue) == TRUE, NA, "4"))))) #"#FDE725FF", "white")))))
+  mutate(colorPval = ifelse((GxE_Pvalue < 0.05) & (Covariance_Pvalue < 0.025) , "3",
+                           ifelse((GxE_Pvalue < 0.05) & (Covariance_LCI) < 0 & (Covariance_LCI < 0), "3",
+                                   ifelse((GxE_Pvalue < 0.05) & (Covariance_LCI > 0) & (Covariance_LCI > 0) , "3",
+                                          ifelse((Covariance_LCI < 0 & Covariance_UCI < 0), "1",
+                                                  ifelse((Covariance_LCI > 0 & Covariance_UCI > 0), "1",
+                                                         ifelse(GxE_Pvalue < 0.05, "2", 
+                                                               ifelse(Covariance_Pvalue < 0.025, "1","4"))))))))
 
-ggplot(filter(res,is.na(color)!=TRUE), aes(x = Covariance, y = GxE_Estimate, fill = color))+
+for(i in 1:nrow(res)){
+  if(res$GxE_Pvalue[i] < 0.05 & res$Covariance_Pvalue[i] < 0.025){res$colorPval[i] = "3"
+  }else if((res$GxE_Pvalue[i] < 0.05) & (res$Covariance_LCI[i]< 0) & (res$Covariance_LCI[i] < 0)){res$colorPval[i] = "3"
+  }else if((res$GxE_Pvalue[i] < 0.05) & (res$Covariance_LCI[i] > 0) & (res$Covariance_LCI[i] > 0)){res$colorPval[i] = "3"
+  }else if((res$GxE_Pvalue[i] < 0.05) & (res$Covariance_Pvalue[i] > 0.025)){res$colorPval[i] = "2"
+  }else if((res$GxE_Pvalue[i] < 0.05) & (res$Covariance_LCI[i]> 0) & (res$Covariance_LCI[i] < 0)){res$colorPval[i] = "2"
+  }else if((res$GxE_Pvalue[i] < 0.05) & (res$Covariance_LCI[i] > 0) & (res$Covariance_LCI[i] < 0)){res$colorPval[i] = "2"
+  }else if((res$Covariance_LCI[i] < 0) & (res$Covariance_UCI[i] < 0) & (res$GxE_Pvalue[i] > 0.05)){res$colorPval[i] = "1"
+  }else if((res$Covariance_LCI[i] > 0) & (res$Covariance_UCI[i] > 0) & (res$GxE_Pvalue[i] > 0.05)){res$colorPval[i] = "1"
+  }else if((res$Covariance_Pvalue[i] <= 0.025) & (res$GxE_Pvalue[i] > 0.05)){res$colorPval[i] = "1"
+  }else{res$colorPval[i] = "4"}
+}
+
+ggplot(filter(res,colorPval == 1), aes(x = Covariance))+geom_histogram()+theme_classic()
+
+## Covariance vs. Total Sample Size
+(cov_ss = ggplot(res, aes(x = Covariance, y = Total_Sample_Size,colour = Covariance_Pvalue))+
+    geom_point(alpha = 0.75) + geom_hline(yintercept = 256,linetype = "dashed")+  geom_vline(xintercept = 0)+
+    labs(colour = "P-value")+
+    scale_colour_viridis(option = "plasma")+
+    theme_classic(base_size = 20, base_family = "Arial")+
+    xlab(expression("Cov"["GE"]))+ ylab("Total Sample Size")+
+    theme(axis.text = element_text(colour = "black"))+
+    facet_wrap(~Phylum,scales = "free", ncol = 3))
+
+## GxE vs. Total Sample Size
+(gxe_ss = ggplot(res, aes(x = GxE_Estimate, y = Total_Sample_Size, colour = GxE_Pvalue))+
+    geom_point(alpha = 1) + geom_hline(yintercept = 128, linetype = "dashed")+ 
+    labs(colour = "P-value")+
+    scale_colour_viridis(option = "plasma")+
+    theme_classic(base_size = 20, base_family = "Arial")+
+    xlab(expression(""*bar(Delta)*""["GxE"]))+ ylab("Total Sample Size")+
+    theme(axis.text = element_text(colour = "black"))+
+    facet_grid(rows = vars(Phylum), cols = vars(Data.type),scales = "free"))
+
+## Look at study effects for any apparent bias
+(cov_study = ggplot(res, aes(x = studyID, y = Covariance))+geom_point()+theme_linedraw())
+(gxe_study = ggplot(res, aes(x = studyID, y = GxE_Estimate))+geom_point()+theme_linedraw())
+
+# Differences according to Experimental Design?
+ggplot(filter(res,is.na(colorPval)!=TRUE), aes(x = Covariance, y = GxE_Estimate, fill = colorPval))+
   labs(fill = "Significance")+
   geom_vline(aes(xintercept = 0))+
-  geom_point(shape = 21, size = 4) + 
-  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
+  geom_point(shape = 21,size = 4) + 
+  # labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  scale_fill_viridis(option = "plasma", discrete = TRUE,
+                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  xlab(expression("Cov"["GE"]))+
+  ylab(expression(bar(Delta)*""["GxE"]))+
+  theme_classic(base_family = "Times", base_size = 20) +
+  theme(axis.text = element_text(colour = "black"))+
+  facet_wrap(~factor(Experimental.Design))
+
+# According to Phylum
+ggplot(filter(res,is.na(colorPval)!=TRUE), aes(x = Covariance, y = GxE_Estimate, fill = colorPval))+
+  labs(fill = "Significance")+
+  geom_vline(aes(xintercept = 0))+
+  geom_point(shape = 21,size = 4) + 
+   # labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  scale_fill_viridis(option = "plasma", discrete = TRUE,
     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
   xlab(expression("Cov"["GE"]))+
   ylab(expression(bar(Delta)*""["GxE"]))+
-  theme(legend.position="bottom")  +
-  theme_classic(base_family = "Times", base_size = 20)+ facet_wrap(~factor(Phylum),ncol=3)
+  theme_classic(base_family = "Times", base_size = 20) +
+  theme(axis.text = element_text(colour = "black"))
+  #facet_wrap(~factor(Phylum),ncol=3)
 
-## Look at Chordates 
-chords = filter(res, Phylum == "Chordata")
-ggplot(filter(chords,is.na(color)!=TRUE), aes(x = Covariance, y = GxE_Estimate, fill = color))+
+
+# According to Trait classification
+ggplot(filter(res,is.na(colorPval)!=TRUE), aes(x = Covariance, y = GxE_Estimate, fill = colorPval))+
   labs(fill = "Significance")+
   geom_vline(aes(xintercept = 0))+
   geom_point(shape = 21, size = 4) + 
   scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
                      labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
   xlab(expression("Cov"["GE"]))+
-  geom_label_repel(aes(label = Total_Sample_Size), nudge_x = 0, na.rm = TRUE)+
+  ylab(expression(bar(Delta)*""["GxE"]))+
+  theme(axis.text = element_text(colour = "black"))+
+  theme_classic(base_family = "Times", base_size = 20)+ facet_wrap(~factor(Trait.class),ncol=3)
+
+## Endo vs. EctoTherms
+chords = filter(res, Phylum == "Chordata")
+ggplot(filter(chords,is.na(colorPval)!=TRUE), aes(x = Covariance, y = GxE_Estimate, group = Data.type, fill = colorPval))+
+  labs(fill = "Significance")+
+  geom_vline(aes(xintercept = 0))+
+  geom_point(shape = 21, size = 4) + 
+  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
+                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  xlab(expression("Cov"["GE"]))+
+  #geom_label_repel(aes(label = Total_Sample_Size), nudge_x = 0, na.rm = TRUE)+
   ylab(expression(bar(Delta)*""["GxE"]))+
   theme(legend.position="bottom")  +
   theme_linedraw(base_family = "Times", base_size = 20)+ 
   theme(axis.text=element_text(colour = "black"))+
-  facet_grid(factor(res$Phylum_Divided)*factor(res$Phylum_Divided))
+  facet_wrap(~Phylum_Divided)
+
+## Genus
+ggplot(res, aes(x = Genus, y = Covariance, fill = colorPval)) + 
+  geom_point(shape = 21, size = 2) +
+  labs(fill = "Significance")+
+  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
+                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  ylab(expression("Cov"["GE"]))+
+  theme_linedraw(base_family = "Times", base_size = 20)+ 
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1))+
+  theme(axis.text=element_text(colour = "black"))+
+  facet_wrap(~factor(Phylum),scales = "free", ncol=3)
+
+ggplot(res, aes(x = Genus, y = GxE_Estimate, fill = colorPval)) + 
+  geom_point(shape = 21, size = 2) +
+  labs(fill = "Significance")+
+  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
+                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  ylab(expression("Cov"["GE"]))+
+  theme_linedraw(base_family = "Times", base_size = 20)+ 
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1))+
+  theme(axis.text=element_text(colour = "black"))+
+  facet_wrap(~factor(Phylum),scales = "free", ncol=3)
+  
+
 
