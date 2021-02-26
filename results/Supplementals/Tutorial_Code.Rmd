@@ -1,0 +1,61 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Here we provide an example for the covariance analysis. We use the dataset on amphibian (frog) development that was provided by Albecker and McCoy 2019 and is an example presented in the paper. 
+
+First steps are to load the data and the functions. These are available on the Github (https://github.com/RCN-ECS/CnGV/tree/master/src/)
+```{r}
+# Functions
+setwd("~/Documents/GitHub/CnGV/CnGV/src/")
+source("CovarianceDataFunctions.R")
+
+# Dataset
+frog <- read.csv("frog.csv")
+```
+
+This dataset was produced in a study investigating differences in the length of the larval duration in response to salt-exposure for frogs (tadpoles) that were collected from either inland (freshwater, salt- naive) or coastal (brackish, putatively salt-adapted) populations. In frogs, it is considered adaptive to metamorphose earlier in a stressful larval habitat. However, salt exposure has been noted to slow growth and development. 
+
+We assume that each population is a separate genotype. The three inland populations ("G_1", "G_2", "G_3") are native to freshwater which is represented as "E_1". The four coastal populations ("G_4", "G_5", "G_6","G_7") are native to "saltwater" which is represented as "E_2". The phenotype was the number of days it took tadpoles to reach metamorphosis (defined as the day of forelimb emergence). We include just 2 treatments, Freshwater ("E_1") and saltwater (6 parts per thousand; "E_2") to ensure that each genotype could be directly paired with its native environment. 
+
+Other names can be used for different genotypes and environments but for these functions, columns should be named "gen_factor" for genotype, experimental treatment should be named "exp_env_factor", and native environment needs to match the experimental environment (i.e., the native environment must be one of the experimental treatments) and be named, "nat_env_factor".
+
+The next step is to format the data for the analysis. We use an ANOVA to pull out estimated marginal means for each genotype and environment, which requires that fixed effects (genotype and environment) are categorical. 
+
+```{r}
+
+frog$gen_factor = factor(frog$gen_factor)
+frog$exp_env_factor = factor(frog$exp_env_factor)
+
+```
+
+Set starting conditions:
+
+We run 999 bootstraps, but this can be adjusted. Also need to specify if these are raw data or if they are "means" data. "Means" mean the mean and standard error were extracted from a study for which no raw data is available. Both work fine, but we encourage "raw" data when available. The frog data are "raw" data points. 
+
+```{r}
+n_boot <- 999
+data_type <- "raw"
+
+```
+
+Standardize data: 
+
+We standardize the phenotypic data by subtracting the overall mean phenotype from each phenotypic datapoing and dividing by the standard deviation of group means (Group = genotype/environment pair).
+
+```{r}
+# Raw data: 
+frog$group = paste(frog$gen_factor,frog$exp_env_factor,sep = "-")
+frog$phen_corrected = (frog$phen_data - mean(frog$phen_data, na.rm = TRUE))/sd(tapply(frog$phen_data, frog$group, mean, na.rm = TRUE))
+
+```
+
+Run the analysis! The following function will estimate CovGE, confidence intervals, p-values, as well as  delta GxE (GxE effect size based on reaction norms) and omega^2 (GxE effect size based on variance partitioning). 
+
+These data should show moderate levels of countergradient variation that is trending significant. These data do not show a significant delta GxE as well, but GxE does explain a significant amount of variation (for more discussion on how these approaches compare, see the Supplemental materials)
+
+```{r}
+results = amarillo_armadillo(frog, n_boot, data_type)
+results
+```
