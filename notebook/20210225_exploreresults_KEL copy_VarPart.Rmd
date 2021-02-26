@@ -1,0 +1,366 @@
+---
+title: "Explore PL stat and variance partitioning data"
+author: "KE Lotterhos"
+date: "10/2/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Update of Oct 7 and 19 posts, 
+
+setwd("/Users/lotterhos/Documents/GitHub/CnGV/notebook")
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+```
+
+```{r}
+folder <- "../results/Sim_12.15.20/"
+powdf <- read.csv(paste0(folder,"Power_output_results.csv"))
+vardf <- read.csv(paste0(folder,"Variance_output_results.csv"))
+PLdf <- read.csv(paste0(folder,"PL_output_results.csv"))
+phendf <- fread(paste0("20210225_files/large/phenotype_output_results.csv"))
+head(powdf)
+head(vardf)
+head(PLdf)
+head(phendf)
+
+dim(powdf)
+dim(vardf)
+dim(PLdf)
+
+
+summary(powdf$row)
+levels(as.factor(powdf$replicate))
+summary(vardf$row)
+summary(PLdf$row)
+
+sum(!complete.cases(phendf))
+dim(phendf)
+```
+
+# Explore PL stat
+
+### subset to 2x2 cases
+```{r}
+cases <- powdf$row[powdf$n_env==2 & powdf$n_pop==2]
+length(cases)
+
+powdf2 <- powdf[powdf$row %in% cases,]
+vardf2 <- vardf[vardf$row %in% cases,]
+
+dim(powdf2)
+head(PLdf)
+
+newdf <- merge(powdf2, PLdf, by = "row")
+dim(newdf)
+str(newdf)
+
+newdf$G1E1mean <- NA
+newdf$G1E2mean <- NA
+newdf$G2E1mean <- NA
+newdf$G2E2mean <- NA
+# to do: calc from phendf
+i = 1001
+cond <- which(phendf$row==i)
+tapply(phendf$phen_corrected[cond],as.character(phendf$GE_factor[cond]), mean, na.rm=TRUE)
+```
+
+```{r}
+
+## compare covariance and PL
+  plot(newdf$covariance.x, newdf$PL)
+  
+  plot(newdf$covariance.x, newdf$PL, ylim=c(-5,5))
+  abline(1,0)
+  abline(0,0)
+  abline(v=0)
+  # this tells me that their claims that counter > 1 or <0 and cogradient between 0 and 1 is correct
+
+# Compare covariance and GxE
+  plot(newdf$GxE_emm.x, newdf$PL)
+  plot(newdf$GxE_emm.x, newdf$PL, ylim=c(-5,5))
+  
+  hist(newdf$GxE_omega)
+    # note:  according to: https://www.statisticshowto.com/omega-squared/ - if the F-value is less than 1, then omega will be negative
+  plot(newdf$GxE_omega, newdf$PL, ylim=c(-1,2))
+  summary(newdf$GxE_omega)
+  # this tells me there PL metric has no relationship
+  # with GxE
+  
+  plot(newdf$GxE_emm.x, newdf$GxE_omega)
+  
+# compare dela_E and new PL  
+  plot(newdf$delta_E, newdf$PL, ylim=c(-1,2))
+  # when delta_E is large, there is plasticity
+  # when delta_E = 0, there is no plasticity or there is GxE
+  # not very useful. It shows that PL is near 0 when delta_e is 0
+  
+# compare genetic differentiation and PL
+  # denominator of PL minus the numerator is the average difference in phenotype between genotypes raised in a common environment (0.5((PAEA−PBEA)+(PAEB−PBEB))), and is therefore a measure of genetic differentiation.”
+  plot(newdf$G1Emean - newdf$G2Emean, newdf$delta_E-newdf$delta_H)
+  
+  plot(abs(newdf$G1Emean - newdf$G2Emean), abs(newdf$delta_E-newdf$delta_H))
+  
+  plot(newdf$GxE_emm.x, newdf$delta_E-newdf$delta_H)
+  
+# TO DO: create a plot that shows for the same CnGV, PL is bimodal
+  head(newdf)
+  library(dplyr)
+  hist(newdf$true_cov)
+  plot(newdf$true_cov, newdf$true_GxE_emm)
+  table(newdf$true_GxE_emm==0 & newdf$std_dev==1)
+  table(newdf$interaction==0)
+  plot(newdf$true_cov, newdf$true_GxE_emm, xlim=c(-1,-0.9))
+  newdf$true_cov_round <- round(newdf$true_cov,2)
+  table(newdf$true_cov_round)
+  str(newdf$true_cov_round)
+  
+  # Why do the lack of GxE also have no CovGE?
+  newdf2 <- filter(newdf, n_env==2, n_pop==2, std_dev==1, true_GxE_emm==0)
+  hist(newdf2$true_cov, breaks=seq(-1.05, 1.05, by=0.1))
+  
+  # Why do the max CovGE not lack GxE?
+  # newdf2 <- filter(newdf, n_env==2 , n_pop==2 , std_dev==1 , (true_cov < -0.8) ,  true_GxE_emm<0.01) #equal to next line of code
+  newdf2 <- filter(newdf, n_env==2 & n_pop==2 & std_dev==1 & (true_cov < -0.8) &  true_GxE_emm<0.01)
+  dim(newdf2)
+  hist(newdf2$true_GxE_emm, breaks=seq(-0.05, 1.05, by=0.1))
+  hist(newdf2$true_cov, breaks=seq(-1.05, 1.05, by=0.1))
+  hist(newdf2$PL, breaks=seq(-200,200, by=0.1))
+  hist(newdf2$PL, breaks=seq(-200,200, by=0.1), xlim=c(-5,5))
+  newdf2
+  
+  newdf2 <- newdf2[newdf2$true_cov > 0.89 & newdf2$true_cov < 0.91,]
+  dim(newdf2)
+  head(newdf2)
+  
+  newdf2 <- filter(newdf, n_env==2 & n_pop==2 & std_dev==1)
+  plot(newdf2$true_cov, newdf2$true_GxE_emm, xlim=c(-1,-0.9))
+  plot(newdf2$covariance.x, newdf2$GxE_emm.x, xlim=c(-1,-0.9))
+  dim(newdf2)
+
+```
+
+## Contrasting cases for PL
+Show a case of countergradient variation with PL greater than 1, but plasticity induced response different sign as phenotypic divergence.
+Show equivalent case of countegradient variation in opposite direction but with PL less than 0.
+```{r}
+b <- which(abs(round(newdf$PL)) > 100)
+newdf[b,]
+newdf[b,c("row","PL")]
+hist(newdf$true_cov[b], breaks=seq(-1.05,1.05, by=0.1))
+
+hist(newdf$covariance.x[b], breaks=seq(-1.05,1.05, by=0.1))
+str(newdf)
+```
+
+
+Find a case with PL about 1 but huge GxE
+```{r}
+head(newdf)
+a<- which(round(newdf$PL,1)==1.0 & newdf$GxE_omega > 0.7)
+newdf[a,]
+```
+
+```{r}
+i1 = 1834
+i1 <- 10832
+i1 <- 13204
+# from phendf, get phenotype values
+
+
+cond1 <- which(newdf$row==i1)
+newdf[cond1,]
+cond <- which(phendf$row==i1)
+a<- tapply(phendf$phen_corrected[cond],as.character(phendf$GE_factor[cond]), mean, na.rm=TRUE)
+a
+
+  plot(0:1, c(a[1:2]), ylim=c(-3,3), xaxt ="n", type="l", col="blue", xlab="", ylab="Standardized phenotype")
+  mtext("E1", side=1, line=0, adj=0, col="blue")
+  points(0:1, c(a[3:4]), ylim=c(-3,3), xaxt ="n", type="l", col="green", xlab="")
+  mtext("E2", side=1, line=0, adj=1, col="green")
+
+  text(0.3,a[1],"D_H", cex=0.5)
+  arrows(0.4,a[1], 0.4, a[4], length=0.1)
+  
+  text(0.6, a[1], "D_E", cex=0.5)
+  arrows(0.5, 0, 0.5, -newdf[cond1,"delta_E"], length=0.1)
+```
+
+## Explore variance partitioning
+```{r}
+head(powdf)
+head(vardf)
+
+# effect sizes
+#observed covariance vs. omega2 for V_cov
+plot(powdf$covariance, 
+     vardf$omega2[vardf$Variance_Component=="V_cov"],
+     pch=19, 
+     col=adjustcolor("blue",0.05))
+
+#observed covariance vs. omega2
+plot(powdf$covariance, 
+     vardf$omega2[vardf$Variance_Component=="V_g"],
+     pch=19, 
+     col=adjustcolor("blue",0.05))
+
+plot(powdf$covariance, 
+     vardf$omega2[vardf$Variance_Component=="V_e"],
+     pch=19, 
+     col=adjustcolor("blue",0.05))
+
+plot(powdf$GxE_emm, 
+     vardf$omega2[vardf$Variance_Component=="V_gxe"],
+     pch=19, 
+     col=adjustcolor("blue",0.05))
+
+# P-values
+#plot(powdf$covariance_pvalue, 
+#     vardf$Pvalue[vardf$Variance_Component=="V_cov"],
+#     pch=19, 
+#     col=adjustcolor("blue",0.05))
+    # p-values from the variance components are not to be trusted. Put on side burner for now.
+
+```
+
+### Propose for the example figures where we show the raw data to add an insert showing the variance partitioning
+
+omega^2 in variance partitioning code is actually eta^2 
+```{r}
+cond <- vardf$row==1001
+vardf[cond,]
+colr = c(grey(0.1), grey(.3), grey(.50), grey(.70), grey(.90))
+
+barplot(vardf$omega2[cond],
+        names= vardf$Variance_Component[cond],
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2")
+
+barplot(matrix(c(vardf$omega2[cond], rep(0,5)), ncol=2),
+        xlim=c(0,2),
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2")
+legend("right",legend = rev(vardf$Variance_Component[cond]), fill=rev(colr))
+```
+
+```{r}
+results_folder <- paste0(getwd(),"/20210225_files/")
+head(vardf)
+```
+
+```{r}
+#  colr = c(grey(0.1), grey(.3), grey(.50), grey(.70), grey(.90))
+
+dens = c(5,10,20,30,7)
+  colr = c("#56B4E9", "#0072B2", "#009E73", "#E69F00","#000000")
+  ang = c(0,45,90,11,36)
+  
+makeplot <- function(i, figures_folder1=results_folder){ 
+  # i is rowID
+
+  cond <- vardf$row==i
+  
+  pdf(paste0(figures_folder1,i,"VarPlot.pdf"), width=6, height=6)
+  par(mar=c(1,4,1,1), mfrow=c(1,2))
+  
+  # Var component plot
+  barplot(matrix(c(vardf$omega2[cond]), ncol=1),
+         ylim=c(0,1), 
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2",
+        density= dens, angle=ang)
+  
+  # Conditions for effect sizes
+  cond2 <- which(phendf$row==i)
+  a<- tapply(phendf$phen_corrected[cond2],as.character(phendf$GE_factor[cond2]), mean, na.rm=TRUE)
+  
+  # Conditions for covGE
+  cond_cov <- (which(powdf$row == i))
+  
+  if (powdf$n_pop[cond_cov]!=2 | powdf$n_pop[cond_cov]!=2){
+    print("Error, more than 2x2 scenario")
+    break
+  }
+  
+  print(paste("this index has", powdf$n_pop[cond_cov], "populations and", 
+              powdf$n_env[cond_cov], "environments"))
+  
+  cov_obs <- powdf$covariance[cond_cov]
+  
+  # #Effect size plot
+  plot(0:1, c(a[1:2]), ylim=c(-3,3), xaxt ="n", type="l", col="blue", xlab="", ylab="Standardized phenotype")
+  mtext("E1", side=1, line=0, adj=0, col="blue")
+  points(0:1, c(a[3:4]), ylim=c(-3,3), xaxt ="n", type="l", col="green", xlab="", lwd=3)
+  mtext("E2", side=1, line=0, adj=1,  col="green")
+  text(0.5, 3, paste("CovGE=", round(cov_obs,2)))
+  
+  dev.off()
+  return(vardf[cond,])
+}
+
+```
+
+```{r}
+ID <- 10001
+  makeplot(ID)
+cond <- vardf$row==ID
+pdf(paste0(results_folder,"0VarPlotLegend.pdf"), width=6, height=6)
+  barplot(matrix(c(vardf$omega2[cond], rep(0,5)), ncol=2),
+        xlim=c(0,5), density=c(5,10,20,30,7) , angle=c(0,45,90,11,36),
+        beside=FALSE,
+        col=colr, las=2, xlab="", ylab="omega^2")
+  legend("right",legend = rev(vardf$Variance_Component[cond]), fill=rev(colr),
+        density=rev(dens) , angle=rev(ang), cex=3)
+dev.off()
+```
+
+
+A few additional graphs for Supp Mat.
+
+* A case where strong COV-GE caused by a greater G component
+* A case where strong COV-GE caused by a greater E component (8313)
+* A case with large amount of G and E, but small amounts of COV-GE and GxE
+```{r}
+library(tidyverse)
+head(vardf)
+vardf2 <- select(vardf, row, Variance_Component, omega2)
+head(vardf2)
+dim(vardf2)
+vardf3 <- spread(vardf2, Variance_Component, omega2)
+head(vardf3)
+vardf4 <- select(vardf, row, Variance_Component, SS) %>% spread(Variance_Component, SS)
+head(vardf4)
+
+# A case where strong COV-GE caused by a greater E component
+indexes <- which(vardf3$V_cov > 0.25 & vardf3$V_e > 0.25 & vardf3$V_g < 0.2 &
+      vardf3$V_gxe < 0.01 & vardf4$V_cov >0)
+length(indexes)
+
+head(vardf3[indexes,])
+makeplot(1816, paste0(results_folder))
+#vardf3[vardf3$row==1630,]
+
+# A case where strong COV-GE caused by a greater G component
+indexes <- which(vardf3$V_cov > 0.25 & vardf3$V_g > 0.25 & vardf3$V_e < 0.2 &
+      vardf3$V_gxe < 0.01)
+length(indexes)
+vardf3$row[indexes]
+powdf[which(powdf$row %in% vardf3$row[indexes]),1:20]
+  # look for an example with covGE ~ 0.5 and 2x2
+makeplot(16840 , paste0(results_folder))
+
+
+# A case with large amounts of G and E, but small amounts of COV-GE and GxE
+indexes <- which(vardf3$V_cov <0.1 & vardf3$V_g > 0.25 & vardf3$V_e > 0.25 &
+      vardf3$V_gxe < 0.1)
+head(vardf3[indexes,])
+vardf3$row[indexes]
+powdf[which(powdf$row %in% vardf3$row[indexes]),10:11]
+  # no examples with 2x2
+```
+
+```{r}
+plot(vardf3$V_cov, vardf3$V_gxe, col=adjustcolor("blue", 0.01), pch=19)
+```
