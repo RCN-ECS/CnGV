@@ -362,5 +362,8 @@ powdf[which(powdf$row %in% vardf3$row[indexes]),10:11]
 ```
 
 ```{r}
-plot(vardf3$V_cov, vardf3$V_gxe, col=adjustcolor("blue", 0.01), pch=19)
+pdf(paste0(results_folder,"V_gxe_vs_V_cov.pdf"), width=4, height=3)
+  par(mfrow=c(1,1), mar=c(4,4,0,0))
+  plot(vardf3$V_cov, vardf3$V_gxe, col=adjustcolor("blue", 0.01), pch=19, xlab="V_CovGE", ylab="V_GxE")
+dev.off()
 ```
