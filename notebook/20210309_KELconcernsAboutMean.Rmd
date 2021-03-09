@@ -16,10 +16,12 @@ require(emmeans)
 getmeans <- function(ind=1:length(a), true){
   
   # model fit
-  m1 <- lm(b ~ G_lev * E_lev)
-  emms <- as.data.frame(emmeans(m1, ~ G_lev*E_lev))
-  emmG <- as.data.frame(emmeans(m1, "G_lev"))
-  emmE <- as.data.frame(emmeans(m1, "E_lev"))
+  G <- as.factor(G_lev[ind])
+  E <- as.factor(E_lev[ind])
+  m1 <- lm(b[ind] ~ G * E)
+  emms <- as.data.frame(emmeans(m1, ~ G * E))
+  emmG <- as.data.frame(emmeans(m1, "G"))
+  emmE <- as.data.frame(emmeans(m1, "E"))
   obs_all <- mean(b[ind]) # This may or may not be what your eMM does
   obs_mean_GE <- mean(tapply(b[ind],a[ind], mean))
   obs_mean_G <- mean(tapply(b[ind],G_lev[ind], mean))
@@ -50,11 +52,13 @@ getmeans(1:length(a), true1) # no imbalance
 getmeans(15:length(a), true1) # imbalance in first category
 getmeans(1:(length(a)-15), true1) # imbalance in last category
 par(mar=c(10,3,1,1))
+
 bob <- replicate(1000,getmeans(c(sample(1:20,5),20:length(a)), true1),simplify = TRUE)
 rownames(bob) <- c("obs_all", "obs_mean_GE", "obs_mean_G", "obs_mean_E", "obs_mean_cGE", "EMM_mean_GE", "EMM_mean_G", "EMM_mean_E", "EMM_mean_cGE")
 #head(bob)
 boxplot(t(bob), las=2)
 abline(h=0)
+
 bob <- replicate(1000,getmeans(c(1:(length(a)-20), sample((length(a)-20):length(a),5)), true1),simplify = TRUE)
 #head(bob)
 rownames(bob) <- c("obs_all", "obs_mean_GE", "obs_mean_G", "obs_mean_E", "obs_mean_cGE","EMM_mean_GE", "EMM_mean_G", "EMM_mean_E", "EMM_mean_cGE")
