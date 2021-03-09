@@ -6,17 +6,30 @@ output:
   pdf_document: default
   html_document: default
 ---
+```{r}
+require(lme4)
+require(emmeans)
+```
 
 ```{r}
-
 # Different ways of calculating means ####
 getmeans <- function(ind=1:length(a), true){
+  
+  # model fit
+  m1 <- lm(b ~ G_lev * E_lev)
+  emms <- as.data.frame(emmeans(m1, ~ G_lev*E_lev))
+  emmG <- as.data.frame(emmeans(m1, "G_lev"))
+  emmE <- as.data.frame(emmeans(m1, "E_lev"))
   obs_all <- mean(b[ind]) # This may or may not be what your eMM does
   obs_mean_GE <- mean(tapply(b[ind],a[ind], mean))
   obs_mean_G <- mean(tapply(b[ind],G_lev[ind], mean))
   obs_mean_E <- mean(tapply(b[ind],E_lev[ind], mean))
   obs_mean_cGE <- mean(c(obs_mean_G, obs_mean_E))  # Note they count unequally in the common garden N x 2 case
-  out <- cbind(obs_all, obs_mean_GE, obs_mean_G,obs_mean_E, obs_mean_cGE)
+  EMM_mean_GE <- mean(emms$emmean)
+  EMM_mean_G <- mean(emmG$emmean)
+  EMM_mean_E <- mean(emmE$emmean)
+  EMM_mean_cGE <- mean(c(EMM_mean_E,EMM_mean_G))
+  out <- cbind(obs_all, obs_mean_GE, obs_mean_G,obs_mean_E, obs_mean_cGE, EMM_mean_GE, EMM_mean_G, EMM_mean_E, EMM_mean_cGE)
   round(out - true, 4)
 }
 ```
@@ -32,23 +45,19 @@ E_lev <- substr(a, start=3, stop=4)
 b <- c(rnorm(length(a)/4, -1), rnorm(length(a)/4, 0), rnorm(length(a)/4, 1), rnorm(length(a)/4, 2))
 hist(b)
 boxplot(b~a)
-
 true1 <- mean(c(-1,0,1,2)) # true mean
-
 getmeans(1:length(a), true1) # no imbalance
 getmeans(15:length(a), true1) # imbalance in first category
 getmeans(1:(length(a)-15), true1) # imbalance in last category
-
 par(mar=c(10,3,1,1))
-bob <- replicate(10000,getmeans(c(sample(1:20,5),20:length(a)), true1),simplify = TRUE)
-rownames(bob) <- c("obs_all", "obs_mean_GE", "obs_mean_G", "obs_mean_E", "obs_mean_cGE")
+bob <- replicate(1000,getmeans(c(sample(1:20,5),20:length(a)), true1),simplify = TRUE)
+rownames(bob) <- c("obs_all", "obs_mean_GE", "obs_mean_G", "obs_mean_E", "obs_mean_cGE", "EMM_mean_GE", "EMM_mean_G", "EMM_mean_E", "EMM_mean_cGE")
 #head(bob)
 boxplot(t(bob), las=2)
 abline(h=0)
-
 bob <- replicate(1000,getmeans(c(1:(length(a)-20), sample((length(a)-20):length(a),5)), true1),simplify = TRUE)
 #head(bob)
-rownames(bob) <- c("obs_all", "obs_mean_GE", "obs_mean_G", "obs_mean_E", "obs_mean_cGE")
+rownames(bob) <- c("obs_all", "obs_mean_GE", "obs_mean_G", "obs_mean_E", "obs_mean_cGE","EMM_mean_GE", "EMM_mean_G", "EMM_mean_E", "EMM_mean_cGE")
 #head(bob)
 boxplot(t(bob), las=2)
 abline(h=0)
@@ -70,18 +79,14 @@ b <- c(rnorm(length(a)/8, -1),
        rnorm(length(a)/8, 2))
 hist(b)
 boxplot(b~a)
-
 par(mar=c(10,3,1,1))
-
 true2 <- mean(c(-1,0,1,2, -1, 0, 1,2,-1,0,1,2)) # true mean
-
 bob <- replicate(1000,getmeans(c(sample(1:20,5),20:length(a)), true2),
                  simplify = TRUE)
 rownames(bob) <- c("obs_all", "obs_mean_GE", "obs_mean_G", "obs_mean_E", "obs_mean_cGE")
 #head(bob)
 boxplot(t(bob), las=2)
 abline(h=0)
-
 bob <- replicate(1000,getmeans(c(1:(length(a)-20), 
                                 sample((length(a)-20):length(a),5)), true2),
                  simplify = TRUE)
