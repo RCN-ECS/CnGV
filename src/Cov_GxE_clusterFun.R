@@ -115,9 +115,7 @@ aov_coefs <- m1[[11]]
 # Covariance Estimates
 cov_est = cov(cov_matrix$G_means,cov_matrix$E_means)
 cor_est = cor(cov_matrix$G_means,cov_matrix$E_means)
-correction_raw = max(sd(cov_matrix$E_means),sd(cov_matrix$G_means))
-cov_corrected_check = round((cov(cov_matrix$G_means,cov_matrix$E_means)/correction_raw^2),3)
-cov_corrected = round(cov.function(cov_matrix,is.sample = TRUE),3)
+cov_corrected = round(cov.function(cov_matrix, phen_df = model_df, is.sample = TRUE),9)
 
 # Stamps and Hadfield Info
 if (n_pop == 2) {
@@ -181,8 +179,7 @@ for(i in 1:n_boot){
   # Covariance Estimates
   cov_est_boot = cov(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
   cor_est_boot = cor(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
-  correction_raw_boot = max(sd(cov_matrix_boot$E_means),sd(cov_matrix_boot$G_means))
-  cov_corrected_boot = round(cov.function(cov_matrix_boot,is.sample = TRUE),3)
+  cov_corrected_boot = round(cov.function(cov_matrix_boot, phen_df = shuffle_dat, is.sample = TRUE),3)
 
   # Bootstrap dataframe
   boot_dat_raw <- data.frame("covariance" = cov_est_boot,
@@ -245,8 +242,7 @@ for(i in 1:n_boot){
   # Covariance Estimates
   cov_est_perm = cov(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
   cor_est_perm = cor(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
-  correction_raw_perm = max(sd(cov_matrix_perm$E_means),sd(cov_matrix_perm$G_means))
-  cov_corrected_perm = round(cov.function(cov_matrix_perm,is.sample = TRUE),3)
+  cov_corrected_perm = round(cov.function(cov_matrix_perm, phen_df = perm_dat, is.sample = TRUE),3)
   
   # Variance Partitioning
   v3 <- var.partition(var_dat)
@@ -317,7 +313,7 @@ m4 <- mean.GxE(mean_df,is.perm = FALSE, seed = NA) # Insert means data frame (se
 # Covariance and GxE for Means 
 Cov_mean_matrix <- m4[[1]]
 
-# Fix bookkeeping error
+# Fix ordering issue for N_pop > 10 (How R orders factors)
 if(length(Cov_mean_matrix$gen_factor) > 9){
   Cov_mean_matrix[,2] = cov_matrix$gen_factor
   Cov_mean_matrix[,3] = cov_matrix$exp_env_factor
@@ -331,9 +327,7 @@ GxE_means_loop_output <- m4[[3]]
 # Covariance
 cov_est_means = cov(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
 cor_est_means = cor(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)
-means_correction = max(sd(Cov_mean_matrix$E_means),sd(Cov_mean_matrix$G_means))
-cov_means_corrected_check = round(cov(Cov_mean_matrix$G_means,Cov_mean_matrix$E_means)/(means_correction^2),3)
-cov_means_corrected = round(cov.function(Cov_mean_matrix,is.sample = TRUE),3)
+cov_means_corrected = round(cov.function_means(Cov_mean_matrix, phen_df = mean_df, is.sample = TRUE),3)
 
 # Tracking: Covariance Matrix Output
 Cov_mean_matrix$data.type = rep("means",nrow(Cov_mean_matrix))
@@ -367,8 +361,7 @@ for(i in 1:n_boot){
   # Covariance Estimates
   cov_mean_boot = cov(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
   cor_mean_boot = cor(Cov_mean_matrix_boot$G_means,Cov_mean_matrix_boot$E_means)
-  correction_mean_boot = max(sd(Cov_mean_matrix_boot$E_means),sd(Cov_mean_matrix_boot$G_means))
-  cov_corrected_mean_boot = round(cov.function(Cov_mean_matrix_boot,is.sample = TRUE),3)
+  cov_corrected_mean_boot = round(cov.function_means(Cov_mean_matrix_boot,phen_df =shuffle_means, is.sample = TRUE),3)
   
   # Bootstrap dataframe
   boot_dat_means <- data.frame("cov_means_boot" = cov_mean_boot,
@@ -420,7 +413,7 @@ for(i in 1:n_boot){
   # Covariance Estimates
   cov_mean_perm = cov(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)
   cor_mean_perm = cor(Cov_mean_matrix_perm$G_means,Cov_mean_matrix_perm$E_means)
-  cov_corrected_mean_perm = round(cov.function(Cov_mean_matrix_perm,is.sample = TRUE),3)
+  cov_corrected_mean_perm = round(cov.function_means(Cov_mean_matrix_perm, phen_df = perm_means, is.sample = TRUE),3)
   
   # Permutation dataframe -- Means
   perm_dat_means <- data.frame("cov_means_perm" = cov_mean_perm,
@@ -462,8 +455,7 @@ aov.df1.ne <- m7[[8]] # Model output
 # Covariance
 cov_est.ne = cov(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
 cor_est.ne = cor(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
-cov_corrected.ne.pop = round(cov.function(cov_matrix.ne,is.sample = FALSE),3)
-cov_corrected.ne = round(cov.function(cov_matrix.ne,is.sample = TRUE),3)
+cov_corrected.ne = round(cov.function(cov_matrix.ne, phen_df = model_df.ne, is.sample = FALSE),3)
 
 # Check: GxE Loop output
 # hist(GxE_loop_output.ne)
@@ -495,7 +487,7 @@ GxE_means_loop_output.ne <- m8[[3]]
 # Covariance
 cov_est_means.ne = cov(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
 cor_est_means.ne = cor(Cov_mean_matrix.ne$G_means,Cov_mean_matrix.ne$E_means)
-cov_means_corrected.ne = round(cov.function(Cov_mean_matrix.ne,is.sample = TRUE),3)
+cov_means_corrected.ne = round(cov.function_means(Cov_mean_matrix.ne, phen_df = mean_df.ne, is.sample = FALSE),3)
 
 # Tracking: Covariance Matrix Output
 Cov_mean_matrix.ne$data.type <- rep("mean.ne" , nrow(Cov_mean_matrix.ne))
@@ -549,9 +541,9 @@ output_data <- data.frame("row" = row, # Original Parameters
                           "interaction" = interaction,
                           "Sim_time" = time.taken,
                           
-                          "pop_cov" = cov_corrected.ne.pop, # Corrected Covariance Estimates
+                          #"pop_cov" = cov_corrected.ne.pop, # Corrected Covariance Estimates
                           "true_cov" = cov_corrected.ne,
-                          "cov_R" = cov_corrected_check,
+                          #"cov_R" = cov_corrected_check,
                           "covariance" = cov_corrected, 
                           "covariance_lwrCI" = cov_corrected_CI[[1]],
                           "covariance_uprCI" = cov_corrected_CI[[2]],
@@ -564,17 +556,17 @@ output_data <- data.frame("row" = row, # Original Parameters
                           #"cov_uncorrected_pvalue" = cov_original_pvalue,  
                           
                           "true_cov_means" = cov_means_corrected.ne, # Corrected Covariance -- means
-                          "cov_means_R" = cov_means_corrected_check,
+                          #"cov_means_R" = cov_means_corrected_check,
                           "cov_means" = cov_means_corrected,
                           "cov_means_lwrCI" = cov_corrected_means_CI[[1]],
                           "cov_means_uprCI" = cov_corrected_means_CI[[2]],
                           "cov_means_pvalue" = cov_corrected_mean_pvalue,
                           
-                          "true_cor" = round(cor_est.ne,3), # Correlation 
-                          "cor" = round(cor_est,3),
-                          "cor_lwrCI" = round(cor_CI[[1]],3),
-                          "cor_uprCI" = round(cor_CI[[2]],3),
-                          "cor_pvalue" = cor_pvalue,
+                          #"true_cor" = round(cor_est.ne,3), # Correlation 
+                          #"cor" = round(cor_est,3),
+                          #"cor_lwrCI" = round(cor_CI[[1]],3),
+                          #"cor_uprCI" = round(cor_CI[[2]],3),
+                          #"cor_pvalue" = cor_pvalue,
                           
                           #"true_cor_means" = cor_est_means.ne, # Correlation -- means 
                           #"cor_means" = cor_est_means,

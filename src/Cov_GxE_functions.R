@@ -633,39 +633,45 @@ pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "r
   return(p.value)
 }
 
-cov.function <- function(input_df, is.sample = TRUE){ # input_df = raw data
+cov.function <- function(input_df, phen_df, is.sample = TRUE){ # input_df = cov matrix
+  
+  pvar <- function(x) { #population variance - for sample variance can use var() in R
+    sum((x - mean(x))**2) / length(x)
+  }
   
   N = length(input_df$gen_factor)
-  # Goverallmean = mean(input_df$G_means)
-  # Eoverallmean = mean(input_df$E_means)
-  overallmean = mean(c(input_df$G_means,input_df$E_means)) # not mean of means, mean of overall data
-  # numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
+  
+  overallmean = mean(phen_df$phen_corrected) # not mean of means, mean of overall data
+
   numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
   
   if(is.sample == TRUE){
-    correcter = max(sd(input_df$E_means),sd(input_df$G_means))
-    cv = (1/(N-1))*(numerator/correcter^2)
+    sample_correcter = max(var(input_df$E_means),var(input_df$G_means))
+    cv = (1/(N-1))*(numerator/sample_correcter)
   }else{
-    correcter = max(sd(input_df$E_means),sd(input_df$G_means))
-    cv = (1/(N))*(numerator/correcter^2)
+    population_correcter = max(pvar(input_df$E_means),pvar(input_df$G_means))
+    cv = (1/(N))*(numerator/population_correcter)
   }
   return(cv)
-}
+} 
 
-cov.function_means <- function(input_df, is.sample = TRUE){ # input_df = cov_matrix of G_means and E_means
+cov.function_means <- function(input_df, phen_df, is.sample = TRUE){ # input_df = cov_matrix of G_means and E_means
+  
+  pvar <- function(x) { #population variance - for sample variance can use var() in R
+    sum((x - mean(x))**2) / length(x)
+  }
   
   N = length(input_df$gen_factor)
-  #Goverallmean = mean(input_df$G_means)
-  #Eoverallmean = mean(input_df$E_means)
-  overallmean = mean(c(input_df$G_means,input_df$E_means)) #not mean of means, mean of overall data
-  #numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
-  numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
-  correcter = max(sd(input_df$E_means),sd(input_df$G_means))
   
+  overallmean = mean(phen_df$avg_phen_corrected) #not mean of means, mean of overall data
+  numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
+
   if(is.sample == TRUE){
-    cv = (1/(N-1))*(numerator/correcter^2)
+    sample_correcter = max(var(input_df$E_means),var(input_df$G_means))
+    cv = (1/(N-1))*(numerator/sample_correcter)
   }else{
-    cv = (1/(N))*(numerator/correcter^2)
+    population_correcter = max(pvar(input_df$E_means),pvar(input_df$G_means))
+    cv = (1/(N))*(numerator/population_correcter)
   }
   return(cv)
 }

@@ -9,7 +9,7 @@ param_list <- list(
   delta_env = NULL, 
   delta_gen = c(-1,0.0,1),
   sample_size = c(4,8,16), 
-  n_pop = c(2),
+  n_pop = c(2,4,8,16),
   env_scenario = c(1,2),  # 1 = Recip. Transplant ; 2 = Common Garden
   std_dev= c(.5, 1),
   interaction = NULL) 
@@ -180,17 +180,15 @@ parameter_generation <- function(param_list){
   }
 
 df = parameter_generation(param_list)
-dim(df)
+str(df)
 df2 = filter(df, total_samples < 500) 
 dim(df2)
-df2$row = 44000+df2$row 
-write.csv(df2, "~/Desktop/df2pop.csv")
+write.csv(df2, "~/Desktop/df_rerun.csv")
 
 setwd("~/Documents/GitHub/CnGV/CnGV/results/Sim_12.1.20/")
 df=read.csv("df.csv")
 dim(df)
-args = filter(df, row == 1824)
-args = args[,-1]
+args = filter(df, row == 25)
 
 # Pull out test scenarios
 

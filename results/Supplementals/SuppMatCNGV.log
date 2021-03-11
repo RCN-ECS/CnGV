@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  10 FEB 2021 13:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  11 MAR 2021 13:03
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -415,11 +415,11 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [2]
 [3]
-<./Figs/HexPlot.jpeg, id=23, 751.80875pt x 822.07124pt>
-File: ./Figs/HexPlot.jpeg Graphic file (type jpg)
-<use ./Figs/HexPlot.jpeg>
-Package pdftex.def Info: ./Figs/HexPlot.jpeg  used on input line 111.
-(pdftex.def)             Requested size: 433.62pt x 474.1549pt.
+<./Figs/3.11.HexPanel.jpeg, id=23, 640.3925pt x 827.09pt>
+File: ./Figs/3.11.HexPanel.jpeg Graphic file (type jpg)
+<use ./Figs/3.11.HexPanel.jpeg>
+Package pdftex.def Info: ./Figs/3.11.HexPanel.jpeg  used on input line 111.
+(pdftex.def)             Requested size: 433.62pt x 560.04112pt.
 
 
 LaTeX Font Warning: Font shape `OT1/cmss/m/sc' in size <10.95> not available
@@ -427,20 +427,20 @@ LaTeX Font Warning: Font shape `OT1/cmss/m/sc' in size <10.95> not available
 
 [4
 
- <./Figs/HexPlot.jpeg>]
-<./Figs/SampleVsPopulation.jpeg, id=27, 1230.5975pt x 804.00375pt>
-File: ./Figs/SampleVsPopulation.jpeg Graphic file (type jpg)
-<use ./Figs/SampleVsPopulation.jpeg>
-Package pdftex.def Info: ./Figs/SampleVsPopulation.jpeg  used on input line 125
-.
-(pdftex.def)             Requested size: 433.62pt x 283.29482pt.
+ <./Figs/3.11.HexPanel.jpeg>]
+<./Figs/3.11.SampleVsPopulation.jpeg, id=27, 1604.99625pt x 763.85374pt>
+File: ./Figs/3.11.SampleVsPopulation.jpeg Graphic file (type jpg)
+<use ./Figs/3.11.SampleVsPopulation.jpeg>
+Package pdftex.def Info: ./Figs/3.11.SampleVsPopulation.jpeg  used on input lin
+e 125.
+(pdftex.def)             Requested size: 433.62pt x 206.37148pt.
  [5
 
- <./Figs/SampleVsPopulation.jpeg>]
+ <./Figs/3.11.SampleVsPopulation.jpeg>]
 (./SuppMatCNGV.aux) ) 
 Here is how much of TeX's memory you used:
  5419 strings out of 480608
- 79457 string characters out of 5903631
+ 79523 string characters out of 5903631
  327521 words of memory out of 5000000
  21048 multiletter control sequences out of 15000+600000
  540700 words of font info for 56 fonts, out of 8000000 for 9000
@@ -458,7 +458,7 @@ s/cm/cmr10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmr6.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/
 cmr8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cms
 y10.pfb>
-Output written on SuppMatCNGV.pdf (5 pages, 597832 bytes).
+Output written on SuppMatCNGV.pdf (5 pages, 597654 bytes).
 PDF statistics:
  66 PDF objects out of 1000 (max. 8388607)
  45 compressed objects within 1 object stream
