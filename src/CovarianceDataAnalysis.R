@@ -245,36 +245,24 @@ ggplot(filter(res,colorCI == 1), aes(x = Covariance))+geom_histogram()+theme_cla
 
 grid.arrange(Pval_overall, CI_overall,ncol= 2)
 
-# Differences according to Experimental Design?
-ggplot(res, aes(x = Covariance, y = GxE_Estimate, fill = colorPval))+
-  labs(fill = "Significance")+
+# According to various classifications
+ggplot(res, aes(x = Covariance, y = GxE_Estimate,shape = colorCI, fill = colorCI))+
+  labs(fill = "Significance", shape = "Significance")+
   geom_vline(aes(xintercept = 0))+
-  geom_point(shape = 21,size = 4) + 
-  scale_fill_viridis(option = "magma", discrete = TRUE,
-                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  geom_point(size = 4, alpha = 0.75)+
+  scale_shape_manual(values = c("1" = 21, "2" = 22, "3" = 23, "4" = 24),
+                     labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
+  scale_fill_manual(values = cols, labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
   xlab(expression("Cov"["GE"]))+
   ylab(expression(bar(Delta)*""["GxE"]))+
   theme_classic(base_family = "Times", base_size = 20) +
+  #ggtitle("Significance according to Confidence Interval")+
+  theme(plot.title = element_text(size = 20, face = "bold"))+
+  theme(legend.text.align = 0)+
+  theme(legend.position = "none")+
+  #guides(fill=guide_legend(override.aes=list(shape=21)))+
   theme(axis.text = element_text(colour = "black"))+
-  facet_wrap(~factor(Experimental.Design))
-
-
-# According to Phylum
-ggplot(res, aes(x = Covariance, y = GxE_Estimate, fill = colorPval))+
-  labs(fill = "Significance",size = "")+
-  geom_vline(aes(xintercept = 0))+
-  geom_point(shape = 21, size = 4,alpha = 0.75)+
-  #geom_point(aes(size = round(abs(relative_shape),2)),shape = 21,alpha = 0.75) + 
-   # labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
-  scale_fill_viridis(option = "plasma", discrete = TRUE,
-    labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]*"") , "3" = "Both","4"="Neither"))+
-  xlab(expression("Cov"["GE"]))+
-  ylab(expression(bar(Delta)*""["GxE"]))+
-  theme_classic(base_family = "Times", base_size = 20) +
-  ggtitle("Significance according to Confidence Interval")+
-  theme(plot.title = element_text(size = 18, face = "bold"))+
-  theme(axis.text = element_text(colour = "black"))#+
-  #facet_wrap(~factor(Phylum),ncol=3)
+  facet_wrap(~factor(Trait.class),ncol=3) # Phylum, Trait.class, Environment.type, Experimental.Design
 
 
 # According to Trait classification

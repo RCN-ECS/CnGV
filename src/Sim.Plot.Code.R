@@ -1808,7 +1808,7 @@ trade2$grp = paste(trade2$bin,trade2$totals,trade2$ID)
     theme(axis.text = element_text(colour = "black"))+ 
     #scale_x_continuous(breaks=c(0.2)) +    
     ggtitle("F   CG Design")+
-    #theme(legend.position = "none")+
+    theme(legend.position = "none")+
     labs(fill = "",shape = "Total Sample Size")+
     guides(fill=guide_legend(override.aes=list(shape=21))))
     
