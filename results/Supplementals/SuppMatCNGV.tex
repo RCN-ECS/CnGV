@@ -53,9 +53,10 @@ M.A. Albecker, G.C. Trussell, and K.E. Lotterhos
 In the main manuscript, we focus on estimating the effect size of $Cov_{GE}$ and $\bar\Delta_{GxE}$ and their significance. The effect size provides information about the strength of the pattern, which is a distinct type of information from the percent of variation in the phenotype explained by the following components: (i) genetic effects on phenotype, (ii) environmental effects on phenotypes, (iii) genetic x environment interactions, (iv) covariance between genetic and environmental effects on phenotypes, and (iv) residual error. Both Falconer (1989) and Conover and Schultz (1995) have previously discussed $Cov_{GE}$ in this more traditional sense as the percent of variation in the phenotype explained by different variance components:
 
 \begin{equation}
-V_P = V_G + V_E + V_{GE} + xCov_{GE} 
+V_P = V_G + V_E + V_{GxE} + xCov_{GE} 
 \end{equation}
-where $x = 2$.
+
+In a 2x2 reciprocal transplant or common garden design with 2 genotypes in 2 environments, $x = 2$. This factor of $x = 2$ does not extend to more complex designs, as explained below.
 
 Here, we show how to extend sums of squares ($SS$) calculations from a traditional analysis of variance to incorporate $SS_{Cov_{GE}}$, which can in turn be used to understand the percent of variation in phenotypes explained by different components.  These calculations assume a fully factorial reciprocal transplant design. We do not advocate that these $SS$ be used to test the significance of the variance components with a traditional $F$-test, because the presence of $Cov_{GE}$ likely violates the assumption of independence among samples and complicates calculations of degrees of freedom.  It is, however, useful to compare the percent of variation explained by different components to their effect sizes, because it furthers understanding of the relative influence of genetic differentiation and plasticity on the evolved patterns in the population.
 
@@ -72,7 +73,7 @@ V_E = SS_E =  rg\sum_{j=1}^e (\bar{y_j} - \bar{y})^2
 \end{equation}
 
 \begin{equation}
-V_{GE} = SS_{GE} = r \sum_{i=1}^g \sum_{j=1}^e (\bar{y_{ij}} - \bar{y_i} - \bar{y_j} + \bar{y})^2
+V_{GxE} = SS_{GE} = r \sum_{i=1}^g \sum_{j=1}^e (\bar{y_{ij}} - \bar{y_i} - \bar{y_j} + \bar{y})^2
 \end{equation}
 
 \begin{equation}
@@ -89,10 +90,12 @@ where $x = \frac{ge}{(\sum_{i=1}^g\sum_{j=1}^e I_{ij})}$, and $I$ is an indicato
 The percent of variation explained by each component ($Comp$) can then be estimated as
 
 \begin{equation}
-\eta^2_{Comp} =  \frac{SS_{Comp}}{SS_G + SS_E + SS_{GE} + SS_{CovGE} + SS_{Error}}
+\eta^2_{Comp} =  \frac{SS_{Comp}}{SS_G + SS_E + SS_{GxE} + SS_{CovGE} + SS_{Error}}
 \end{equation}
 
-We recognize that this is a crude approach. However, it provides a reasonable way to compare to the percent of variation explained by different components to their effect size estimates in the main text. For example, when residual error is minimized and $| Cov_{GE} |$ is maximized, equal amounts of variance are explained by $V_G$, $V_E$, and $V_{Cov_{GE}}$ for the fully factorial reciprocal transplant experiment with an arbitrary number of populations. 
+We recognize that this is a crude approach. However, it provides a reasonable way to compare to the percent of variation explained by different components to their effect size estimates in the main text. For example, when $| Cov_{GE} |$ is maximized, equal amounts of non-residual variance are explained by $V_G$, $V_E$, and $V_{Cov_{GE}}$ for the fully factorial reciprocal transplant experiment with an arbitrary number of populations (Supp. Fig 4a). For this reason, when residual variation is minimized the maximum percent of phenotypic variance explained by $V_{Cov_{GE}}$ is rarely greater than 1/3 of the total phenotypic variance (Supp. Fig 3, Supp. Fig. 4a).
+
+The comparison of effect sizes and variance components is also useful for understanding the relative influences of $V_G$ and $V_E$ on a particular value of $| Cov_{GE} |$; for instance, similarly intermediate values of $| Cov_{GE} |$ can be driven by higher $V_E$ and lower $V_G$ (Supp. Fig. 4B), or lower $V_E$ and higher $V_G$ (Supp. Fig. 4C).
 
 
 \clearpage
@@ -108,24 +111,49 @@ We recognize that this is a crude approach. However, it provides a reasonable wa
 \renewcommand\thefigure{S1}
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=6in]{3.11.HexPanel.jpeg}
+\includegraphics[width=6in]{Figs/HexPlot.jpeg}
 \end{center}
 \label{Fig: Parameter Coverage}
-\caption{Coverage of parameter space of $Cov_{GE}$ and $\bar\Delta_{GxE}$ for full reciprocal transplant (A) and paired common garden designs (B). Hexagons are colored according to the density of observations in each bin. }
+\caption[Coverage of parameter space of $Cov_{GE}$ and $\bar\Delta_{GxE}$ for full reciprocal transplant (A) and paired common garden designs (B).]{Coverage of parameter space of $Cov_{GE}$ and $\bar\Delta_{GxE}$ for full reciprocal transplant (A) and paired common garden designs (B). Hexagons are colored according to the density of observations in each bin. }
 \end{figure}
 
 \clearpage
 \newpage
 
-\renewcommand{\figurename}{Supplementary Figure}
 
 \renewcommand\thefigure{S2}
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=6in]{3.11.SampleVsPopulation.jpeg}
+\includegraphics[width=6in]{Figs/SampleVsPopulation.jpeg}
 \end{center}
 \label{Fig: Population vs. Sample Estimates}
-\caption{Agreement between population measures and sample estimates of $Cov_{GE}$ and $\bar\Delta_{GxE}$ for Full Reciprocal Transplant (A, C) and paired Common Garden designs (B, D). The black line falls along a 1:1 line while the red line reflects the pattern of the data. Point colors indicate the number of genotypes, while point shapes indicate the level of residual variation. As expected, sample estimates deviate more from the population measure in situations with low sample sizes and higher residual variation.}
+\caption[Agreement between population measures and sample estimates of $Cov_{GE}$ and $\bar\Delta_{GxE}$ for Full Reciprocal Transplant (A, C) and paired Common Garden designs (B, D). ]{Agreement between population measures and sample estimates of $Cov_{GE}$ and $\bar\Delta_{GxE}$ for Full Reciprocal Transplant (A, C) and paired Common Garden designs (B, D). The black line falls along a 1:1 line while the red line reflects the pattern of the data. Point colors indicate the number of genotypes, while point shapes indicate the level of residual variation. As expected, sample estimates deviate more from the population measure in situations with low sample sizes and higher residual variation.}
+\end{figure}
+
+\clearpage
+\newpage
+
+
+\renewcommand\thefigure{S3}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=6in]{Figs/VgxevsVcov.pdf}
+\end{center}
+\label{Fig: }
+\caption[Comparison of the percent of variance explained by $V_{GxE}$ and $V_{Cov_{GE}}$ across all simulations.]{Comparison of the percent of variance explained by $V_{GxE}$ and $V_{Cov_{GE}}$ across all simulations.  }
+\end{figure}
+
+\clearpage
+\newpage
+
+
+\renewcommand\thefigure{S4}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=6in]{Figs/EstimateVsVariance.pdf}
+\end{center}
+\label{Fig: }
+\caption[Comparison of the percent of variance explained by $V_{Cov_{GE}}$ with the effect size $Cov_{GE}$ for three example simulations from a 2 genotype x 2 environment reciprocal transplant design.]{Comparison of the percent of variance explained by $V_{Cov_{GE}}$ with the effect size of $Cov_{GE}$ for three example simulations from a 2 genotype x 2 environment reciprocal transplant design. In each subpanel, the stacked barplot on the left of each panel shows the proportion of variance explained by each component corresponding to the legend (Supp. Eq. 7), while the plot on the right shows the mean standardized reaction norms for each genotype (the effect size of $Cov_{GE}$ is shown at the top). A) When $| Cov_{GE} | = 1$ (i.e., maximal $Cov_{GE}$), equal proportions of phenotypic variance is explained by $V_G$, $V_E$, and $V_{Cov_{GE}}$. B) An intermediate effect size of  $Cov_{GE}~0.5$ arising from larger $V_E$ compared to $V_G$.  C) An intermediate effect size of  $Cov_{GE}~0.5$ arising from larger $V_G$ compared to $V_E$.  }
 \end{figure}
 
 %\renewcommand{\figurename}{Supplementary Table}
