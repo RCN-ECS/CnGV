@@ -633,16 +633,14 @@ pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "r
   return(p.value)
 }
 
-cov.function <- function(input_df, phen_df, is.sample = TRUE){ # input_df = cov matrix
+cov.function <- function(input_df, emm_df, is.sample = TRUE){ # input_df = cov matrix
   
   pvar <- function(x) { #population variance - for sample variance can use var() in R
     sum((x - mean(x))**2) / length(x)
   }
   
   N = length(input_df$gen_factor)
-  
-  overallmean = mean(phen_df$phen_corrected) # not mean of means, mean of overall data
-
+  overallmean = mean(emm_df$emmean,na.rm=TRUE) 
   numerator = sum((input_df$G_means - overallmean)*(input_df$E_means - overallmean))
   
   if(is.sample == TRUE){

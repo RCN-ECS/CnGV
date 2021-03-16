@@ -8,11 +8,10 @@ Here we provide an example for the covariance analysis. We use the dataset on am
 First steps are to load the data and the functions. These are available on the Github (https://github.com/RCN-ECS/CnGV/tree/master/src/)
 ```{r}
 # Functions
-setwd("~/Documents/GitHub/CnGV/CnGV/src/")
-source("CovarianceDataFunctions.R")
+source("~/Documents/GitHub/CnGV/CnGV/src/CovarianceDataFunctions.R")
 
 # Dataset
-frog <- read.csv("frog.csv")
+frog <- read.csv("~/Documents/GitHub/CnGV/CnGV/src/frog.csv")
 ```
 
 This dataset was produced in a study investigating differences in the length of the larval duration in response to salt-exposure for frogs (tadpoles) that were collected from either inland (freshwater, salt- naive) or coastal (brackish, putatively salt-adapted) populations. In frogs, it is considered adaptive to metamorphose earlier in a stressful larval habitat. However, salt exposure has been noted to slow growth and development. 
@@ -35,6 +34,7 @@ Set starting conditions:
 We run 999 bootstraps, but this can be adjusted. Also need to specify if these are raw data or if they are "means" data. "Means" mean the mean and standard error were extracted from a study for which no raw data is available. Both work fine, but we encourage "raw" data when available. The frog data are "raw" data points. 
 
 ```{r}
+
 n_boot <- 999
 data_type <- "raw"
 
@@ -42,7 +42,7 @@ data_type <- "raw"
 
 Standardize data: 
 
-We standardize the phenotypic data by subtracting the overall mean phenotype from each phenotypic datapoing and dividing by the standard deviation of group means (Group = genotype/environment pair).
+We standardize the phenotypic data by subtracting the overall mean phenotype from each phenotypic datapoint and dividing by the standard deviation of group means (Group = genotype and experimental environment pair).
 
 ```{r}
 # Raw data: 

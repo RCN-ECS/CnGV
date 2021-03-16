@@ -23,9 +23,10 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
     GxE_emm <- m1[[3]]
     GxE_loop_output <- m1[[4]] # All GxE estimates from loop 
     omega2 <- m1[[5]]
+    emm_df <- m1[[12]]
     
     # Covariance Estimates
-    cov_corrected = round(cov.function(cov_matrix),3)
+    cov_corrected = round(cov.function(cov_matrix,emm_df),3)
     
     ###############
     ## Bootstrap ##
@@ -46,9 +47,10 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
       GxE_emm_boot <- m2[[3]]
       GxE_loop_output_boot <- m2[[4]] # GxE output 
       omega2_boot <- m2[[5]]
+      emm_df_boot <- m2[[12]]
       
       # Covariance Estimates
-      cov_corrected_boot = round(cov.function(cov_matrix_boot),3)
+      cov_corrected_boot = round(cov.function(cov_matrix_boot,emm_df_boot),3)
       
       # Bootstrap dataframe
       boot_dat_raw <- data.frame("covariance_boot" = cov_corrected_boot,
@@ -90,9 +92,10 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
       GxE_emm_perm <- m3[[3]]
       GxE_loop_output_perm <- m3[[4]] # GxE output 
       omega2_perm <- m3[[5]]
+      emm_df_perm <- m3[[12]]
       
       # Covariance Estimates
-      cov_corrected_perm = round(cov.function(cov_matrix_perm),3)
+      cov_corrected_perm = round(cov.function(cov_matrix_perm,emm_df_perm),3)
       
       # Permutation dataframe
       perm_dat_raw <- data.frame("covariance_perm" = cov_corrected_perm,
@@ -145,7 +148,7 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
     GxE_means_loop_output <- m4[[3]]
     
     # Covariance
-    cov_means = round(cov.function(Cov_mean_matrix),3)
+    cov_means = round(cov.function_means(Cov_mean_matrix,phen_df = input_df),3)
     
     ###################################
     ##### BOOTSTRAP -- MEANS DATA #####
@@ -167,7 +170,7 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
       GxE_means_boot <- m5[[2]]
       
       # Covariance Estimates
-      cov_corrected_mean_boot = round(cov.function(Cov_mean_matrix_boot),3)
+      cov_corrected_mean_boot = round(cov.function_means(Cov_mean_matrix_boot, shuffle_means),3)
       
       # Bootstrap dataframe
       boot_dat_means <- data.frame("cov_means_boot" = cov_corrected_mean_boot,
@@ -205,7 +208,7 @@ amarillo_armadillo <- function(input_df, n_boot, data_type){ # Data, Number of b
       GxE_means_output_perm <- m6[[3]]
       
       # Covariance Estimates 
-      cov_corrected_mean_perm = round(cov.function(Cov_mean_matrix_perm),3)
+      cov_corrected_mean_perm = round(cov.function_means(Cov_mean_matrix_perm, perm_means),3)
       
       # Permutation dataframe -- Means
       perm_dat_means <- data.frame("cov_means_perm" = cov_corrected_mean_perm,
@@ -351,7 +354,7 @@ mod.GxE <- function(input_df,is.perm = FALSE){ # input is model_df
     GxE_emm_loop = mean(allGE,na.rm = TRUE)
     
   }
-  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs))
+  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs,emm_GxE))
 }
 
 mean.GxE <- function(input_df,is.perm = FALSE){ # input is mean_df
@@ -543,18 +546,43 @@ pvalue_fun <- function(estimate, rankdat, test, n_boot){ #Test = "twotail" or "r
   return(p.value)
 }
 
-cov.function <- function(input_df, is.sample = TRUE){ # input_df = cov_matrix of G_means and E_means
+cov.function <- function(cov_mat, emm_df, is.sample = TRUE){ # input_df = cov matrix
   
-  N = length(input_df$gen_factor)
-  Goverallmean = mean(input_df$G_means)
-  Eoverallmean = mean(input_df$E_means)
-  numerator = sum((input_df$G_means - Goverallmean)*(input_df$E_means - Eoverallmean))
-  correcter = max(sd(input_df$E_means),sd(input_df$G_means))
+  pvar <- function(x) { #population variance - for sample variance can use var() in R
+    sum((x - mean(x))**2) / length(x)
+  }
+  
+  N = length(cov_mat$gen_factor)
+  overallmean = mean(emm_df$emmean,na.rm=TRUE) 
+  numerator = sum((cov_mat$G_means - overallmean)*(cov_mat$E_means - overallmean))
   
   if(is.sample == TRUE){
-    cv = (1/(N-1))*(numerator/correcter^2)
+    sample_correcter = max(var(cov_mat$E_means),var(cov_mat$G_means))
+    cv = (1/(N-1))*(numerator/sample_correcter)
   }else{
-    cv = (1/(N))*(numerator/correcter^2)
+    population_correcter = max(pvar(cov_mat$E_means),pvar(cov_mat$G_means))
+    cv = (1/(N))*(numerator/population_correcter)
+  }
+  return(cv)
+} 
+
+cov.function_means <- function(cov_mat, phen_df, is.sample = TRUE){ # input_df = cov_matrix of G_means and E_means
+  
+  pvar <- function(x) { #population variance - for sample variance can use var() in R
+    sum((x - mean(x))**2) / length(x)
+  }
+  
+  N = length(cov_mat$gen_factor)
+  
+  overallmean = mean(phen_df$avg_phen_corrected,na.rm = TRUE)
+  numerator = sum((cov_mat$G_means - overallmean)*(cov_mat$E_means - overallmean))
+  
+  if(is.sample == TRUE){
+    sample_correcter = max(var(cov_mat$E_means),var(cov_mat$G_means))
+    cv = (1/(N-1))*(numerator/sample_correcter)
+  }else{
+    population_correcter = max(pvar(cov_mat$E_means),pvar(cov_mat$G_means))
+    cv = (1/(N))*(numerator/population_correcter)
   }
   return(cv)
 }

@@ -967,7 +967,7 @@ dub_raw_conf5$ID = rep("GxE_Anova", nrow(dub_raw_conf5))
 dub_fpdf = rbind(dub_raw_conf1,dub_raw_conf2,dub_raw_conf3,dub_raw_conf4,dub_raw_conf5)
 dub_fpdf = dub_fpdf[dub_fpdf$name == "False Positive",]
 
-dub_gxe = rbind(dub_raw_conf4,dub_raw_conf5)
+dub_gxe = rbind(dub_raw_conf3,dub_raw_conf4,dub_raw_conf5)
 dub_gxe = dub_gxe %>% filter(name == "False Positive") 
 dub_cov = rbind(dub_raw_conf1,dub_raw_conf2)
 dub_cov = dub_cov[dub_cov$name == "False Positive",]
@@ -999,7 +999,7 @@ gxeboot2$ID = rep("GxE_Boot",nrow(gxeboot2))
 gxeanova2 = fnr.effsize(dat_dub1, metric = "gxe", data.type = "raw", analysis = "anova",scenario = 2,resolution = "fine")
 gxeanova2$ID = rep("GxE_Anova",nrow(gxeanova2))
 
-fndfdub = rbind(covperm2,covboot2,gxeperm1,gxeboot1,gxeanova1)
+fndfdub = rbind(covperm2,covboot2,gxeperm2,gxeboot2,gxeanova2)
 gxePowdub = rbind(gxeperm2,gxeanova2)
 covPowdub = rbind(covperm2,covboot2)
 
@@ -1103,45 +1103,6 @@ dub_gxe1 <-
   theme(legend.position = "none")+
     ggtitle("B   CG: False Positive")+
     theme(plot.title = element_text(size = 18, face = "bold"))) 
-
-## False Negative Heatmap - GxE 
-gxePowdub[is.nan(gxePowdub)] <- 0
-gxePowdub1 = gxePowdub %>%
-  filter(between(bin,0.3,0.6))%>%
-  group_by(sample_size,n_pop,ID) %>%
-  summarize("fnr" = mean(fnr))
-gxePowdub1$n_pop<-as.factor(gxePowdub1$n_pop)
-gxePowdub2 <- 
-  gxePowdub1 %>% 
-  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
-    yadj = ifelse(ID == "GxE_Anova",  -.475/2,  .475/2),
-                 # ifelse(ID == "GxE_Perm", 0.0, 0.9/2)),
-    xpos = as.numeric(factor(sample_size)),
-    ypos = as.numeric(n_pop)+yadj,
-    col = ifelse(fnr >= 0.5, "black","white"),
-    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
-                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
-
-(gxeFNCG_dub  = gxePowdub2 %>% 
-    ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
-    geom_tile(height = 0.475, width = 0.95, color= "white") +
-    geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
-              size = 4, family = "Times", show.legend = F) +
-    scale_colour_identity()+
-    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
-                       limits=c(0,1))+
-    scale_x_discrete(name = "Sample Size",
-                     labels = unique(gxePowdub2$sample_size)) +
-    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
-                       labels = c(2,4,8)) +
-    #ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
-    labs(fill = "False Negative Rate")+
-    theme_classic(base_size = 18, base_family = "Times")+
-    theme(axis.text = element_text(colour = "black"))+
-    theme(legend.position = "none")+
-    ggtitle("CG: False Negative Rates")+
-    theme(plot.title = element_text(size = 18, face = "bold")))
-
 
 
 ###############################################
@@ -1413,7 +1374,7 @@ gxeFPRmeandub1 <-
     ggtitle("CG: False Positive Rates for Means")+
     theme(plot.title = element_text(size = 18, face = "bold")))
 
-## False Negative Heatmap - GxE 
+## CG - False Negative Heatmap - GxE 
 gxePowmean_dub[is.nan(gxePowmean_dub)] <- 0
 gxePowmean_dub1 = gxePowmean_dub %>%
   filter(between(bin,0.3,0.6))%>%  
@@ -1450,8 +1411,6 @@ gxePowmean_dub2 <-
     theme(legend.position = "none")+
     ggtitle("CG: False Negative Rates for Means")+
     theme(plot.title = element_text(size = 18, face = "bold")))
-
-# Raw vs. Means comparisons
 
 ## False Positives
 grid.arrange(covFPFRT,covFPFRTmean,covFPCG,covFPRmean_dub, ncol=2, nrow=2,
@@ -2411,6 +2370,174 @@ length(unique(femalewings$gen_factor))*length(unique(femalewings$exp_env_factor)
     
 grid.arrange(mollyplot,malewingplot,femalewingplot,
              layout_matrix = cbind(c(1,2),c(1,3))) #Device size 11x11
+#########################################
+##      Supplemental Materials Plots   ##
+#########################################
+
+## False Negative Heatmap - GxE 
+allgxe = rbind(gxeperm1,gxeboot1,gxeanova1)
+
+allgxe[is.nan(allgxe)] <- 0
+gxeFNR1 = allgxe %>%
+  filter(between(bin,0.3,0.6))%>%  
+  
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("fnr" = mean(fnr))
+gxeFNR1$n_pop<-as.factor(gxeFNR1$n_pop)
+gxeFNR2 <- 
+  gxeFNR1 %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Anova", -0.325,
+                  ifelse(ID == "GxE_Perm", 0, 0.325)),
+    # ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop)+yadj,
+    col = ifelse(fnr >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
+
+(gxeFNFRT = gxeFNR2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
+    geom_tile(height = 0.33, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxeFNR2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Negative Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Negative Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+
+## CG False Negative Heatmap - GxE 
+allgxe_dub = rbind(gxeperm2,gxeboot2,gxeanova2)
+
+
+allgxe_dub[is.nan(allgxe)] <- 0
+gxeFNRdub = allgxe_dub %>%
+  filter(between(bin,0.3,0.6))%>%  
+  
+  group_by(sample_size,n_pop,ID) %>%
+  summarize("fnr" = mean(fnr))
+gxeFNRdub$n_pop<-as.factor(gxeFNRdub$n_pop)
+gxeFNRdub2 <- 
+  gxeFNRdub %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Anova", -0.325,
+                  ifelse(ID == "GxE_Perm", 0, 0.325)),
+    # ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop)+yadj,
+    col = ifelse(fnr >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
+
+(gxeFNRdub2plot = gxeFNRdub2 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = fnr)) + 
+    geom_tile(height = 0.33, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(fnr, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxeFNRdub2$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(4,8,16)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Negative Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("CG: False Negative Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+## FRT - False Positive Heatmap - GxE 
+gxe_fp = rbind(raw_conf3,raw_conf4,raw_conf5)
+
+gxe_fp[is.nan(gxe_fp)] <- 0
+gxe_fp$n_pop<-as.factor(gxe_fp$n_pop)
+
+gxe_fp1 <- 
+  gxe_fp %>% 
+  filter(name == "False Positive")%>%
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Anova", -0.325,
+                  ifelse(ID == "GxE_Perm", 0, 0.325)),
+    # ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(n_pop)+yadj,
+    col = ifelse(rate >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
+
+(gxeFPFRT = gxe_fp1 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+    geom_tile(height = 0.33, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxe_fp1$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(2,4,8)) +
+    # ggtitle(expression("Reciprocal Transplant: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+  
+    labs(fill = "False Positive Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("FRT: False Positive Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold")))
+
+
+## CG - False Positive Heatmap - GxE 
+dub_gxefp = rbind(dub_raw_conf3,dub_raw_conf4,dub_raw_conf5)
+dub_gxefp = dub_gxefp %>% filter(name == "False Positive") 
+dub_gxefp[is.nan(dub_gxefp)] <- 0
+dub_gxefp1 <- 
+  dub_gxefp %>% 
+  mutate(#xadj = ifelse(ID == "GxE_Anova", -.45/3,ifelse(ID == "GxE_Perm", 0.0, .45/3)),
+    yadj = ifelse(ID == "GxE_Anova", -0.325,
+                  ifelse(ID == "GxE_Perm", 0, 0.325)),
+    #ifelse(ID == "GxE_Perm", 0.0, 0.9/3)),
+    xpos = as.numeric(factor(sample_size)),
+    ypos = as.numeric(factor(n_pop))+yadj,
+    col = ifelse(rate >= 0.5, "black","white"),
+    ID2 = ifelse(ID == "GxE_Anova", "Anova",  
+                 ifelse(ID == "GxE_Perm", "Perm.", "Boot.")))
+
+(gxeFPCG = dub_gxefp1 %>% 
+    ggplot(aes(as.factor(sample_size), ypos, fill = rate)) + 
+    geom_tile(height = 0.33, width = 0.95, color= "white") +
+    geom_text(aes(label = paste0(ID2,"\n",round(rate, 2)), colour = col), 
+              size = 4, family = "Times", show.legend = F) +
+    scale_colour_identity()+
+    scale_fill_viridis(breaks=seq(0,1,0.25), #breaks in the scale bar
+                       limits=c(0,1))+
+    scale_x_discrete(name = "Sample Size",
+                     labels = unique(gxeFPR1$sample_size)) +
+    scale_y_continuous(breaks = 1:3, name = "Number of Genotypes",
+                       labels = c(4,8,16)) +
+    #ggtitle(expression("Common Garden: "*bar(Delta)*""["GxE"]*" False Positive Rates"))+
+    labs(fill = "False Positive Rate")+
+    theme_classic(base_size = 18, base_family = "Times")+
+    theme(axis.text = element_text(colour = "black"))+
+    theme(legend.position = "none")+
+    ggtitle("CG: False Positive Rates")+
+    theme(plot.title = element_text(size = 18, face = "bold"))) 
+
+grid.arrange(gxeFNFRT,gxeFNRdub2plot,gxeFPFRT, gxeFPCG)
+
 #######################################
 #########     Extra Code      #########
 #######################################

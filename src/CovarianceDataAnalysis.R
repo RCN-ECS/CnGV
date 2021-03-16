@@ -24,16 +24,17 @@ data.df <- data.df1 %>%
 
 # Test data Singles
 temp = data.df = filter(data.df, Data_file_name == "326_flowering_startdate_2017")
-#temp = filter(data.df, data.df$Data_file_name == "45_growth_rate")
+#temp = filter(data.df, data.df$Data_file_name == "2224_loss_after_transplant_2mo_Adur")
 info.df = filter(info.df,  Data_file_name == "326_flowering_startdate_2017")
+#info.df = filter(info.df,  Data_file_name == "2224_loss_after_transplant_2mo_Adur")
 
 # Test data Group
 #testies = c("45_ETS_activity","59_male pupal mass","126_fat_content","126_boldness_distance","221_WCHI_green_inner_cell_width")
 #data.df = filter(data.df, data.df$Data_file_name %in% testies)
 
 #Sanity plots
-(untrans = ggplot(temp, aes(x = exp_env_factor, y = phen_data, group = paste(gen_factor,exp_env_factor), colour = gen_factor))+ 
-  geom_boxplot() + geom_smooth()) #+ geom_errorbar(aes(ymin = phen_data-(phen_SD/sqrt(phen_n)),ymax= phen_data+(phen_SD/sqrt(phen_n)))))
+#(untrans = ggplot(temp, aes(x = exp_env_factor, y = phen_data, group = paste(gen_factor,exp_env_fact), colour = gen_factor))+ 
+# geom_boxplot()) #+ geom_errorbar(aes(ymin = phen_data-(phen_SD/sqrt(phen_n)),ymax= phen_data+(phen_SD/sqrt(phen_n)))))
 #(trans = ggplot(temp, aes(x = exp_env_factor, y = avg_phen_corrected, group = gen_factor, colour = gen_factor))+ 
 #    geom_point() + geom_line() + geom_errorbar(aes(ymin = avg_phen_corrected-error,ymax= avg_phen_corrected+error)))
 #grid.arrange(untrans,trans)
@@ -55,7 +56,7 @@ for(x in 1:length(unique(data.df$Data_file_name))){
   
   # Establish starting conditions
   skip_to_next <- FALSE
-  n_boot <- 999
+  n_boot <- 9
   
   # Rename native environments 
   temp$nat_env_factor = gsub("N_", "E_", temp$nat_env_factor)
