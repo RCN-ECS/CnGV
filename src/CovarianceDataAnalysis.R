@@ -133,7 +133,7 @@ library(ggplot2)
 library(viridis)
 
 # Meta-analysis results
-res <- read.csv("~/Desktop/Meta_analysis_results_Feb20.csv")
+res <- read.csv("~/Desktop/Meta_analysis_results_March14.csv")
 
 res$studyID = str_split_fixed(res$Data_file_name, "_", 2)[,1]
 res$phenotype = str_split_fixed(res$Data_file_name, "_", 2)[,2]
@@ -143,6 +143,7 @@ res$phenotype = str_split_fixed(res$Data_file_name, "_", 2)[,2]
 (N_phenotypes = length(unique(res$Data_file_name)))
 (N_studies = length(unique(res$studyID)))
 (range_SampleSize = range(res$Total_Sample_Size))
+(percent_powered = nrow(res[res$Total_Sample_Size>=128,])/nrow(res))
 (Means_studies = res %>% 
   filter_at(vars(Data.type), all_vars(.=="means")) %>% 
   select(studyID) %>% 
@@ -263,58 +264,53 @@ ggplot(res, aes(x = Covariance, y = GxE_Estimate,shape = colorCI, fill = colorCI
   theme(legend.position = "none")+
   #guides(fill=guide_legend(override.aes=list(shape=21)))+
   theme(axis.text = element_text(colour = "black"))+
-  facet_wrap(~factor(Trait.class),ncol=3) # Phylum, Trait.class, Environment.type, Experimental.Design
+  facet_wrap(~factor(Environment.type),ncol=2) # Phylum, Trait.class, Environment.type, Experimental.Design
 
-
-# According to Trait classification
-ggplot(filter(res,is.na(colorPval)!=TRUE), aes(x = Covariance, y = GxE_Estimate, fill = colorPval))+
-  labs(fill = "Significance")+
-  geom_vline(aes(xintercept = 0))+
-  geom_point(shape = 21, size = 4) + 
-  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
-                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
-  xlab(expression("Cov"["GE"]))+
-  ylab(expression(bar(Delta)*""["GxE"]))+
-  theme(axis.text = element_text(colour = "black"))+
-  theme_classic(base_family = "Times", base_size = 20)+ facet_wrap(~factor(Trait.class),ncol=3)
 
 ## Endo vs. EctoTherms
 chords = filter(res, Phylum == "Chordata")
-ggplot(filter(chords,is.na(colorPval)!=TRUE), aes(x = Covariance, y = GxE_Estimate, group = Data.type, fill = colorPval))+
+chord.labs <- c("Endothermic", "Ectothermic")
+names(chord.labs) <- c("Chordata_endo", "Chordata_ecto")
+ggplot(filter(chords,is.na(colorCI)!=TRUE), aes(x = Covariance, y = GxE_Estimate, group = Data.type, fill = colorCI))+
   labs(fill = "Significance")+
   geom_vline(aes(xintercept = 0))+
-  geom_point(shape = 21, size = 4) + 
-  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
-                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  geom_point(aes(shape = colorCI), size = 4) + 
+  scale_shape_manual(values = c("1" = 21, "2" = 22, "3" = 23, "4" = 24),
+                     labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
+  scale_fill_manual(values = cols, labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
   xlab(expression("Cov"["GE"]))+
   #geom_label_repel(aes(label = Total_Sample_Size), nudge_x = 0, na.rm = TRUE)+
   ylab(expression(bar(Delta)*""["GxE"]))+
-  theme(legend.position="bottom")  +
-  theme_linedraw(base_family = "Times", base_size = 20)+ 
+  theme_classic(base_family = "Times", base_size = 20) +
   theme(axis.text=element_text(colour = "black"))+
-  facet_wrap(~Phylum_Divided)
+  theme(legend.position="none")  +
+  facet_wrap(~Phylum_Divided, labeller = labeller(Phylum_Divided = chord.labs))
 
 ## Genus
-ggplot(res, aes(x = Genus, y = Covariance, fill = colorPval)) + 
-  geom_point(shape = 21, size = 2) +
+ggplot(res, aes(x = Genus, y = Covariance, fill = colorCI)) + 
+  geom_point(aes(shape = colorCI), size = 2) +
   labs(fill = "Significance")+
-  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
-                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
+  scale_shape_manual(values = c("1" = 21, "2" = 22, "3" = 23, "4" = 24),
+                     labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
+  scale_fill_manual(values = cols, labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
   ylab(expression("Cov"["GE"]))+
-  theme_linedraw(base_family = "Times", base_size = 20)+ 
+  theme_classic(base_family = "Times", base_size = 20) +
   theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1))+
   theme(axis.text=element_text(colour = "black"))+
+  theme(legend.position="none")  +
   facet_wrap(~factor(Phylum),scales = "free", ncol=3)
 
-ggplot(res, aes(x = Genus, y = GxE_Estimate, fill = colorPval)) + 
-  geom_point(shape = 21, size = 2) +
+ggplot(res, aes(x = Genus, y = GxE_Estimate, fill = colorCI)) + 
+  geom_point(aes(shape = colorCI), size = 2) +
   labs(fill = "Significance")+
-  scale_fill_viridis(option = "plasma", discrete = TRUE,#values = c("1" = "#20A486FF","2" = "#481F70FF", "3" = "#FDE725FF", "4" = "white"),
-                     labels = c("1" = expression("Cov"["GE"]*" Significant"), "2" = expression(""*bar(Delta)*""["GxE"]*" Significant") , "3" = "Both Significant","4"="None Significant"))+
-  ylab(expression("Cov"["GE"]))+
-  theme_linedraw(base_family = "Times", base_size = 20)+ 
+  scale_shape_manual(values = c("1" = 21, "2" = 22, "3" = 23, "4" = 24),
+                     labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
+  scale_fill_manual(values = cols, labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
+  ylab(expression(bar(Delta)*""["GxE"]))+
+  theme_classic(base_family = "Times", base_size = 20) +
   theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1))+
   theme(axis.text=element_text(colour = "black"))+
+  theme(legend.position="none")  +
   facet_wrap(~factor(Phylum),scales = "free", ncol=3)
   
 
