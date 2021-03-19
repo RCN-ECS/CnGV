@@ -187,10 +187,10 @@ ggplot((filter(dat_dub, sample_size != 16)), aes(x = covariance, y = GxE_omega, 
 # Covariance Permutation check
 dat_csv$Covconfintperm = rep("NA",nrow(dat_csv))
 for(i in 1:nrow(dat_csv)){
-    if(dat_csv$true_cov[i] != 0 && dat_csv$covariance_pvalue[i] <= 0.025){dat_csv$Covconfintperm[i] = "True Positive"
-    }else if(dat_csv$true_cov[i] == 0 & dat_csv$covariance_pvalue[i] <= 0.025){dat_csv$Covconfintperm[i] = "False Positive"
-    }else if(dat_csv$true_cov[i]!= 0 & dat_csv$covariance_pvalue[i] > 0.025){dat_csv$Covconfintperm[i] = "False Negative"
-    }else if(dat_csv$true_cov[i] == 0 & dat_csv$covariance_pvalue[i] > 0.025){dat_csv$Covconfintperm[i] = "True Negative"
+    if(dat_csv$true_cov[i] != 0 && dat_csv$covariance_pvalue[i] <= 0.05){dat_csv$Covconfintperm[i] = "True Positive"
+    }else if(dat_csv$true_cov[i] == 0 & dat_csv$covariance_pvalue[i] <=  0.05){dat_csv$Covconfintperm[i] = "False Positive"
+    }else if(dat_csv$true_cov[i]!= 0 & dat_csv$covariance_pvalue[i] >  0.05){dat_csv$Covconfintperm[i] = "False Negative"
+    }else if(dat_csv$true_cov[i] == 0 & dat_csv$covariance_pvalue[i] >  0.05){dat_csv$Covconfintperm[i] = "True Negative"
     }else{dat_csv$Covconfintperm[i] = "None"}
 }
 
@@ -517,10 +517,10 @@ gxeFNR2 <-
 # MEANS -- CovGE -- Permutation
 dat_csv1$meansCovconfintperm = rep("NA",nrow(dat_csv1))
 for(i in 1:nrow(dat_csv1)){
-  if(dat_csv1$true_cov_means[i] != 0 && dat_csv1$cov_means_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "True Positive"
-  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$cov_means_pvalue[i] <= 0.025){dat_csv1$meansCovconfintperm[i] = "False Positive"
-  }else if(dat_csv1$true_cov_means[i]!= 0 & dat_csv1$cov_means_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "False Negative"
-  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$cov_means_pvalue[i] > 0.025){dat_csv1$meansCovconfintperm[i] = "True Negative"
+  if(dat_csv1$true_cov_means[i] != 0 && dat_csv1$cov_means_pvalue[i] <= 0.05){dat_csv1$meansCovconfintperm[i] = "True Positive"
+  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$cov_means_pvalue[i] <= 0.05){dat_csv1$meansCovconfintperm[i] = "False Positive"
+  }else if(dat_csv1$true_cov_means[i]!= 0 & dat_csv1$cov_means_pvalue[i] > 0.05){dat_csv1$meansCovconfintperm[i] = "False Negative"
+  }else if(dat_csv1$true_cov_means[i] == 0 & dat_csv1$cov_means_pvalue[i] > 0.05){dat_csv1$meansCovconfintperm[i] = "True Negative"
   }else{dat_csv1$meansCovconfintperm[i] = "None"}
 }
 
@@ -814,10 +814,10 @@ gxePowmean2 <-
 dat_dub$Covconfintperm = rep("NA",nrow(dat_dub))
 
 for(i in 1:nrow(dat_dub)){
-  if(dat_dub$true_cov[i] != 0 && dat_dub$covariance_pvalue[i] <= 0.025){dat_dub$Covconfintperm[i] = "True Positive"
-  }else if(dat_dub$true_cov[i] == 0 & dat_dub$covariance_pvalue[i] <= 0.025){dat_dub$Covconfintperm[i] = "False Positive"
-  }else if(dat_dub$true_cov[i]!= 0 & dat_dub$covariance_pvalue[i] > 0.025){dat_dub$Covconfintperm[i] = "False Negative"
-  }else if(dat_dub$true_cov[i] == 0 & dat_dub$covariance_pvalue[i] > 0.025){dat_dub$Covconfintperm[i] = "True Negative"
+  if(dat_dub$true_cov[i] != 0 && dat_dub$covariance_pvalue[i] <= 0.05){dat_dub$Covconfintperm[i] = "True Positive"
+  }else if(dat_dub$true_cov[i] == 0 & dat_dub$covariance_pvalue[i] <= 0.05){dat_dub$Covconfintperm[i] = "False Positive"
+  }else if(dat_dub$true_cov[i]!= 0 & dat_dub$covariance_pvalue[i] > 0.05){dat_dub$Covconfintperm[i] = "False Negative"
+  }else if(dat_dub$true_cov[i] == 0 & dat_dub$covariance_pvalue[i] > 0.05){dat_dub$Covconfintperm[i] = "True Negative"
   }else{dat_dub$Covconfintperm[i] = "None"}
 }
 
@@ -1112,10 +1112,10 @@ dub_gxe1 <-
 dat_dub$meansCovconfintperm = rep("NA",nrow(dat_dub))
 
 for(i in 1:nrow(dat_dub)){
-  if(dat_dub$true_cov_means[i] != 0 && dat_dub$cov_means_pvalue[i] <= 0.025){dat_dub$meansCovconfintperm[i] = "True Positive"
-  }else if(dat_dub$true_cov_means[i] == 0 & dat_dub$cov_means_pvalue[i] <= 0.025){dat_dub$meansCovconfintperm[i] = "False Positive"
-  }else if(dat_dub$true_cov_means[i]!= 0 & dat_dub$cov_means_pvalue[i] > 0.025){dat_dub$meansCovconfintperm[i] = "False Negative"
-  }else if(dat_dub$true_cov_means[i] == 0 & dat_dub$cov_means_pvalue[i] > 0.025){dat_dub$meansCovconfintperm[i] = "True Negative"
+  if(dat_dub$true_cov_means[i] != 0 && dat_dub$cov_means_pvalue[i] <= 0.05){dat_dub$meansCovconfintperm[i] = "True Positive"
+  }else if(dat_dub$true_cov_means[i] == 0 & dat_dub$cov_means_pvalue[i] <= 0.05){dat_dub$meansCovconfintperm[i] = "False Positive"
+  }else if(dat_dub$true_cov_means[i]!= 0 & dat_dub$cov_means_pvalue[i] > 0.05){dat_dub$meansCovconfintperm[i] = "False Negative"
+  }else if(dat_dub$true_cov_means[i] == 0 & dat_dub$cov_means_pvalue[i] > 0.05){dat_dub$meansCovconfintperm[i] = "True Negative"
   }else{dat_dub$meansCovconfintperm[i] = "None"}
 }
 
@@ -1597,7 +1597,6 @@ gxePowdub2 <-
     theme(plot.title = element_text(size = 18, face = "bold")))
 
 
-
 grid.arrange(eff_var1, gxeFPFRT, gxeFPCG, gxepowerFRT,gxepower_dub, #ncol = 4,
              layout_matrix = cbind(c(1,2,4),c(1,3,5)))
 
@@ -1605,34 +1604,6 @@ grid.arrange(eff_var1, gxeFPFRT, gxeFPCG, gxepowerFRT,gxepower_dub, #ncol = 4,
 ######################################
 ## Tradeoff with GxE and Covariance ##
 ######################################
-
-dat_csv$sig = NULL
-for(i in 1:nrow(dat_csv)){ # Use only if one or the other is significant
-  if(dat_csv$GxE_emm_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$sig[i] = TRUE
-  }else if(dat_csv$GxE_emm_pvalue[i] <= 0.05 | dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$sig[i] = TRUE
-  }else{dat_csv$sig[i]=FALSE} 
-}
-
-dat_dub$sig = NULL
-for(i in 1:nrow(dat_dub)){ # Use only if one or the other is significant
-  if(dat_dub$GxE_emm_pvalue[i] <= 0.05 | dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$sig[i] = TRUE
-  }else if(dat_dub$GxE_emm_pvalue[i] <= 0.05 | dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$sig[i] = TRUE
-  }else{dat_dub$sig[i]=FALSE} 
-}
-
-dat_csv$covtick <- NULL
-for(i in 1:nrow(dat_csv)){
-  if(dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$covtick[i]=1
-  }else if(dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$covtick[i]=1
-  }else{dat_csv$covtick[i]=0} 
-}
-
-dat_dub$covtick <- NULL
-for(i in 1:nrow(dat_dub)){
-  if(dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$covtick[i]=1
-  }else if(dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$covtick[i]=1
-  }else{dat_dub$covtick[i]=0} 
-}
 
 sigGxE = dat_csv %>% 
   filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.

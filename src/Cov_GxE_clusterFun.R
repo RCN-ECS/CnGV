@@ -13,6 +13,7 @@ library("ggplot2")
 library("tibble")
 
 # Load functions
+setwd("~/Documents/GitHub/CnGV/CnGV/src/")
 source("Cov_GxE_functions.R")
 
 start.time <- Sys.time()
@@ -25,7 +26,7 @@ sample_size = as.numeric(args[3])
 std_dev = as.numeric(args[4])
 n_env = as.numeric(args[5])
 delta_env = as.numeric(args[6])
-delta_gen = as.numeric(args[7])
+delta_gen = -as.numeric(args[7])
 interaction = as.numeric(args[8])
 replicate = as.numeric(args[9])
 env_scenario = as.numeric(args[10])
@@ -99,7 +100,7 @@ phen_out <- cbind(phen_out.,model_df)
 ###############################################
 
 # Anova model fit & GxE estimates
-m1 <- mod.GxE(model_df, is.perm = FALSE, seed = NA) # Raw phenotype dataframe
+m1 <- mod.GxE(model_df, is.perm = FALSE) # Raw phenotype dataframe
 
 # GxE Estimates
 cov_matrix <- m1[[1]]
@@ -111,11 +112,12 @@ eta2 <- m1[[6]]
 GxE_SSq <- m1[[7]] 
 aov.df1 <- m1[[8]] # Anova SSq output
 aov_coefs <- m1[[11]]
+emm_df <- m1[[12]]
 
 # Covariance Estimates
 cov_est = cov(cov_matrix$G_means,cov_matrix$E_means)
 cor_est = cor(cov_matrix$G_means,cov_matrix$E_means)
-cov_corrected = round(cov.function(cov_matrix, phen_df = model_df, is.sample = TRUE),9)
+cov_corrected = round(cov.function(cov_matrix, emm_df, is.sample = TRUE),9)
 
 # Stamps and Hadfield Info
 if (n_pop == 2) {
@@ -165,7 +167,7 @@ for(i in 1:n_boot){
   shuffle_dat <- bootstrap_raw(model_df) 
   
   # Anova model fit & GxE estimates
-  m2 <- mod.GxE(shuffle_dat, is.perm = FALSE, seed = NA) # Insert shuffled raw phenotype dataframe
+  m2 <- mod.GxE(shuffle_dat, is.perm = FALSE) # Insert shuffled raw phenotype dataframe
   
   # GxE Estimates
   cov_matrix_boot <- m2[[1]]
@@ -175,17 +177,18 @@ for(i in 1:n_boot){
   omega2_boot <- m2[[5]]
   eta2_boot <- m2[[6]]
   GxE_SSq_boot <- m2[[7]] 
+  emm_boot <- m2[[12]]
   
   # Covariance Estimates
-  cov_est_boot = cov(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
-  cor_est_boot = cor(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
-  cov_corrected_boot = round(cov.function(cov_matrix_boot, phen_df = shuffle_dat, is.sample = TRUE),3)
+  #cov_est_boot = cov(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
+  #cor_est_boot = cor(cov_matrix_boot$G_means,cov_matrix_boot$E_means)
+  cov_corrected_boot = round(cov.function(cov_matrix_boot, emm_boot, is.sample = TRUE),3)
 
   # Bootstrap dataframe
-  boot_dat_raw <- data.frame("covariance" = cov_est_boot,
-                             "cor_est_boot" = cor_est_boot,
+  boot_dat_raw <- data.frame(#"covariance" = cov_est_boot,
+                             #"cor_est_boot" = cor_est_boot,
                              "cov_corrected_boot" = cov_corrected_boot,
-                             "GxE_emm_original_boot" = GxE_emm_original_boot,
+                             #"GxE_emm_original_boot" = GxE_emm_original_boot,
                              "GxE_emm_boot" = GxE_emm_boot,
                              "GxE_omega_boot" = omega2_boot,
                              "GxE_eta_boot" = eta2_boot,
@@ -238,11 +241,12 @@ for(i in 1:n_boot){
   omega2_perm <- m3[[5]]
   eta2_perm <- m3[[6]]
   GxE_SSq_perm <- m3[[7]] 
+  emm_perm <- m3[[12]]
   
   # Covariance Estimates
   cov_est_perm = cov(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
   cor_est_perm = cor(cov_matrix_perm$G_means,cov_matrix_perm$E_means)
-  cov_corrected_perm = round(cov.function(cov_matrix_perm, phen_df = perm_dat, is.sample = TRUE),3)
+  cov_corrected_perm = round(cov.function(cov_matrix_perm, emm_perm, is.sample = TRUE),3)
   
   # Variance Partitioning
   v3 <- var.partition(var_dat)
@@ -250,10 +254,10 @@ for(i in 1:n_boot){
   var_perm = rbind(v3, var_perm) 
   
   # Permutation dataframe
-  perm_dat_raw <- data.frame("covariance_perm" = cov_est_perm,
-                             "cor_est_perm" = cor_est_perm,
+  perm_dat_raw <- data.frame(#"covariance_perm" = cov_est_perm,
+                             #"cor_est_perm" = cor_est_perm,
                              "cov_corrected_perm" = cov_corrected_perm,
-                             "GxE_emm_original_perm" = GxE_emm_original_perm,
+                             #"GxE_emm_original_perm" = GxE_emm_original_perm,
                              "GxE_emm_perm" = GxE_emm_perm,
                              "GxE_omega_perm" = omega2_perm,
                              "GxE_eta_perm" = eta2_perm,
@@ -265,12 +269,12 @@ for(i in 1:n_boot){
 # ggplot(perm_df_raw, aes(x = GxE_emm_perm), alpha = 0.5)+geom_histogram()+xlim(0,(GxE_emm+0.1))+geom_vline(aes(xintercept = GxE_emm))+theme_classic()+ ggtitle("Null Histogram: Raw")
  
 # Covariance P-values
-cov_original_pvalue <- pvalue_fun(cov_est,perm_df_raw$covariance_perm,"twotail",n_boot)
-cor_pvalue <- pvalue_fun(cor_est,perm_df_raw$cor_est_perm,"twotail",n_boot)
+#cov_original_pvalue <- pvalue_fun(cov_est,perm_df_raw$covariance_perm,"twotail",n_boot)
+#cor_pvalue <- pvalue_fun(cor_est,perm_df_raw$cor_est_perm,"twotail",n_boot)
 cov_corrected_pvalue <- pvalue_fun(cov_corrected,perm_df_raw$cov_corrected_perm,"twotail",n_boot)
 
 # GxE P-values
-GxE_emm_orig_pvalue <- pvalue_fun(GxE_emm_original,perm_df_raw$GxE_emm_original_perm,"righttail",n_boot)
+#GxE_emm_orig_pvalue <- pvalue_fun(GxE_emm_original,perm_df_raw$GxE_emm_original_perm,"righttail",n_boot)
 GxE_emm_pvalue <- pvalue_fun(GxE_emm,perm_df_raw$GxE_emm_perm,"righttail",n_boot)
 GxE_omega_pvalue <- pvalue_fun(omega2,perm_df_raw$GxE_omega_perm,"righttail",n_boot)
 GxE_eta_pvalue <- pvalue_fun(eta2,perm_df_raw$GxE_eta_perm,"righttail",n_boot)
@@ -451,11 +455,12 @@ omega2.ne <- m7[[5]]
 eta2.ne <- m7[[6]]
 GxE_SSq.ne <- m7[[7]] 
 aov.df1.ne <- m7[[8]] # Model output
+emm.ne <- m7[[12]]
 
 # Covariance
 cov_est.ne = cov(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
 cor_est.ne = cor(cov_matrix.ne$G_means,cov_matrix.ne$E_means)
-cov_corrected.ne = round(cov.function(cov_matrix.ne, phen_df = model_df.ne, is.sample = FALSE),3)
+cov_corrected.ne = round(cov.function(cov_matrix.ne, emm.ne, is.sample = FALSE),3)
 
 # Check: GxE Loop output
 # hist(GxE_loop_output.ne)
@@ -611,13 +616,13 @@ output_data <- data.frame("row" = row, # Original Parameters
                           "GxE_means_pvalue" = round(GxE_mean_pvalue,3)) 
 
 # Write Files
-write.csv(output_data,paste0("/scratch/albecker/Power_analysis/power_output/Results_",row,".csv"))
-write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,".csv"))
-write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,".csv"))
-write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,".csv"))
-write.csv(Cov_Matrix_Output,paste0("/scratch/albecker/Power_analysis/GEmeans_output/covmatrix_",row,".csv"))
-write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_SSQ_data",row,".csv"))
-write.csv(aov_coefs1,paste0("/scratch/albecker/Power_analysis/Anova_output/anova_coef_data",row,".csv"))
-write.csv(Variance.partition, paste0("/scratch/albecker/Power_analysis/power_output/variance_",row,".csv"))
+#write.csv(output_data,paste0("/scratch/albecker/Power_analysis/power_output/Results_",row,".csv"))
+#write.csv(phen_out,paste0("/scratch/albecker/Power_analysis/phenotype_output/Phenotype_data",row,".csv"))
+#write.csv(perm_df,paste0("/scratch/albecker/Power_analysis/permutation_output/Permutation_data",row,".csv"))
+#write.csv(boot_df,paste0("/scratch/albecker/Power_analysis/bootstrap_output/Bootstrap_data",row,".csv"))
+#write.csv(Cov_Matrix_Output,paste0("/scratch/albecker/Power_analysis/GEmeans_output/covmatrix_",row,".csv"))
+#write.csv(model_info,paste0("/scratch/albecker/Power_analysis/Anova_output/model_SSQ_data",row,".csv"))
+#write.csv(aov_coefs1,paste0("/scratch/albecker/Power_analysis/Anova_output/anova_coef_data",row,".csv"))
+#write.csv(Variance.partition, paste0("/scratch/albecker/Power_analysis/power_output/variance_",row,".csv"))
 
 

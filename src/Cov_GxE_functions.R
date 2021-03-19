@@ -403,7 +403,7 @@ mod.GxE <- function(input_df,is.perm,seed){ # input is model_df
     GxE_emm_loop = mean(allGE)
     
   }
-  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs))
+  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs,emm_GxE))
 }
 
 mean.GxE <- function(input_df,is.perm, seed){ # input is mean_df

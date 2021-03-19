@@ -11,7 +11,7 @@ First steps are to load the data and the functions. These are available on the G
 source("~/Documents/GitHub/CnGV/CnGV/src/CovarianceDataFunctions.R")
 
 # Dataset
-frog <- read.csv("~/Documents/GitHub/CnGV/CnGV/src/frog.csv")
+frog <- read.csv("~/Documents/GitHub/CnGV/CnGV/data/frog.csv")
 ```
 
 This dataset was produced in a study investigating differences in the length of the larval duration in response to salt-exposure for frogs (tadpoles) that were collected from either inland (freshwater, salt- naive) or coastal (brackish, putatively salt-adapted) populations. In frogs, it is considered adaptive to metamorphose earlier in a stressful larval habitat. However, salt exposure has been noted to slow growth and development. 

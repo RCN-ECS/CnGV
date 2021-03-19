@@ -163,12 +163,12 @@ res$is.Cov.SigPval = NULL
 
 res = res %>%
   mutate(is.GxE.Sig = ifelse(GxE_Pvalue <= 0.05,"Yes", "No")) %>%
-  mutate(is.Cov.SigCI = ifelse(Covariance_Pvalue <= 0.025, "Yes",
+  mutate(is.Cov.SigCI = ifelse(Covariance_Pvalue <= 0.1, "Yes",
                              ifelse(Covariance_LCI < 0 & Covariance_UCI < 0, "Yes",
                                     ifelse(Covariance_LCI > 0 & Covariance_UCI > 0, "Yes", "No"))))
 
 res = res %>%
-  mutate(is.Cov.SigPval = ifelse(Covariance_Pvalue <= 0.025, "Yes", "No"))
+  mutate(is.Cov.SigPval = ifelse(Covariance_Pvalue <= 0.05, "Yes", "No"))
 
 res$colorCI = NULL
 res = res %>%
@@ -248,23 +248,34 @@ ggplot(filter(res,colorCI == 1), aes(x = Covariance))+geom_histogram()+theme_cla
 grid.arrange(Pval_overall, CI_overall,ncol= 2)
 
 # According to various classifications
-ggplot(res, aes(x = Covariance, y = GxE_Estimate,shape = colorCI, fill = colorCI))+
-  labs(fill = "Significance", shape = "Significance")+
-  geom_vline(aes(xintercept = 0))+
-  geom_point(size = 4, alpha = 0.75)+
-  scale_shape_manual(values = c("1" = 21, "2" = 22, "3" = 23, "4" = 24),
-                     labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
-  scale_fill_manual(values = cols, labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
-  xlab(expression("Cov"["GE"]))+
-  ylab(expression(bar(Delta)*""["GxE"]))+
+nonsigs = filter(res, is.Cov.SigCI == "Yes")
+bigs = filter(res, Total_Sample_Size >= 256)
+nonsigs_F = nonsigs %>%
+  filter(Environment.type %in% env) %>%
+  filter(Trait.class %in% trait)
+trait = c("Physiology","Metabolic")
+env = c("Latitudinal Gradient","Altitudinal Gradient","Thermal Gradient")
+
+#ggplot(filter(bigs, Environment.type %in% env), aes(x = Index, y = Covariance))+
+  ggplot(res, aes(x = Index, y = Covariance,colour = colorPval))+
+  
+  #labs(fill = "Significance")+
+  #geom_vline(aes(xintercept = 0))+
+  #geom_boxplot()+
+  geom_jitter(size = 4, alpha = 0.75)+
+  #scale_shape_manual(values = c("1" = 21, "2" = 22, "3" = 23, "4" = 24),
+  #                   labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
+  scale_colour_manual(values = cols, labels = c("1" = expression("Cov"["GE"]*""), "2" = expression(""*bar(Delta)*""["GxE"]) , "3" = "Both ","4"= "Neither "))+
+  ylab(expression("Cov"["GE"]))+
+  #ylab(expression(bar(Delta)*""["GxE"]))+
   theme_classic(base_family = "Times", base_size = 20) +
   #ggtitle("Significance according to Confidence Interval")+
   theme(plot.title = element_text(size = 20, face = "bold"))+
   theme(legend.text.align = 0)+
-  theme(legend.position = "none")+
+  #theme(legend.position = "none")+
   #guides(fill=guide_legend(override.aes=list(shape=21)))+
-  theme(axis.text = element_text(colour = "black"))+
-  facet_wrap(~factor(Environment.type),ncol=2) # Phylum, Trait.class, Environment.type, Experimental.Design
+  theme(axis.text = element_text(colour = "black"))
+  #facet_wrap(~factor(Environment.type),ncol=2) # Phylum, Trait.class, Environment.type, Experimental.Design
 
 
 ## Endo vs. EctoTherms
