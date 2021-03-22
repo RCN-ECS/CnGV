@@ -354,7 +354,7 @@ mod.GxE <- function(input_df,is.perm = FALSE){ # input is model_df
     GxE_emm_loop = mean(allGE,na.rm = TRUE)
     
   }
-  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs,emm_GxE))
+  return(list(Cov_matrix, GxE_emm_original, GxE_emm_loop, allGE, w2_GxE, eta_GxE, GxE_SumsSquares, mod_df, delta_E, delta_H, aov.coefs, emm_GxE))
 }
 
 mean.GxE <- function(input_df,is.perm = FALSE){ # input is mean_df
