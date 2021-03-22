@@ -2,6 +2,16 @@
 
 It was identified that several studies in the meta-analysis have unbalanced designs, particularly in common garden designs, where there can be different numbers of genotypes across the 2 environments. 
 
-To see whether estimated marginal means are robust to unbalanced designs, I ran a few quick tests across different magnitudes of CovGE and different total numbers of genotypes to see how removing genotypes affects CovGE estimates. 
+To see whether estimated marginal means are robust to unbalanced designs, I ran a few quick tests across different magnitudes of CovGE and different total numbers of genotypes to see how removing genotypes affects CovGE estimates. I tested both population and sample estimates
 
-Answer: It affects the estimate. The more missing genotypes relative to total, the more variation, as expected. I played around with omitting genotypes from the other native environment to see if equalizing the number of genotypes returned the estimate to the  full desiggn
+Answer: Yes, it affects the Population AND sample estimate. The more missing genotypes relative to total, the more variation in the sample estimatE, which is expected. I played around with omitting genotypes from the other native environment to see if equalizing the number of genotypes "corrects" the estimate back the original. It does not. (Makes sense - removing data will affect CovGE!) 
+
+In the plots below, I am showing how removing 1 (top), 2 (middle), or 3 (bottom) genotypes affects the population or sample estimate. The variation gets larger as the number of genotypes removed gets larger relative to the total number.
+
+### Population Estimate
+
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_3.10.21/3.21.Pop_MissingGenotypes.png)
+
+
+### Sample Estimate
+![image](https://github.com/RCN-ECS/CnGV/blob/master/results/Sim_3.10.21/3.19.MissingGenotypes.png)
