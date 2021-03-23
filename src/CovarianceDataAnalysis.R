@@ -154,7 +154,7 @@ res$phenotype = str_split_fixed(res$Data_file_name, "_", 2)[,2]
 
 # Shape according to Phylum
 phyShape <- c("Chordata"=15,"Cnidaria"=16,"Arthropoda"=17,"Dinoflagellata"=18,"Bryophyta"=0,"Tracheophyta"=1,"Mollusca"=2, "Coniferophyta" =4,"Annelida"=5)
-cols = c("4" = "#1f77b4","2"="#ff7f0e", "3" = "#2ca02c", "1" = "#d62728")
+cols = c("4" = "grey","2"="#ff7f0e", "3" = "#2ca02c", "1" = "#d62728")
 
 # Sort and Label according to significance 
 res$is.GxE.Sig = NULL
@@ -163,9 +163,8 @@ res$is.Cov.SigPval = NULL
 
 res = res %>%
   mutate(is.GxE.Sig = ifelse(GxE_Pvalue <= 0.05,"Yes", "No")) %>%
-  mutate(is.Cov.SigCI = ifelse(Covariance_Pvalue <= 0.1, "Yes",
-                             ifelse(Covariance_LCI < 0 & Covariance_UCI < 0, "Yes",
-                                    ifelse(Covariance_LCI > 0 & Covariance_UCI > 0, "Yes", "No"))))
+  mutate(is.Cov.SigCI = ifelse(Covariance_LCI < 0 & Covariance_UCI < 0, "Yes",
+                                    ifelse(Covariance_LCI > 0 & Covariance_UCI > 0, "Yes", "No")))
 
 res = res %>%
   mutate(is.Cov.SigPval = ifelse(Covariance_Pvalue <= 0.05, "Yes", "No"))
@@ -191,7 +190,7 @@ ggplot(filter(res,colorCI == 1), aes(x = Covariance))+geom_histogram()+theme_cla
 (cov_study = ggplot(res, aes(x = studyID, y = Covariance))+geom_point()+theme_linedraw())
 (gxe_study = ggplot(res, aes(x = studyID, y = GxE_Estimate))+geom_point()+theme_linedraw())
 
-## Covariance Pvalues vs. Total Sample Size
+# Covariance Pvalues vs. Total Sample Size
 (cov_ss = ggplot(res, aes(x = Covariance, y = Total_Sample_Size,colour = Covariance_Pvalue))+
     geom_point(alpha = 0.75) + geom_hline(yintercept = 256,linetype = "dashed")+geom_vline(xintercept = 0)+
     labs(colour = "P-value")+
@@ -242,7 +241,7 @@ ggplot(filter(res,colorCI == 1), aes(x = Covariance))+geom_histogram()+theme_cla
     ggtitle("A   P-values")+
     theme(plot.title = element_text(size = 20, face = "bold"))+
     theme(legend.text.align = 0)+
-    theme(legend.position = "none")+
+    #theme(legend.position = "none")+
     theme(axis.text = element_text(colour = "black")))
 
 grid.arrange(Pval_overall, CI_overall,ncol= 2)

@@ -19,9 +19,6 @@ data.df = filter(data.df1, data.df1$Data_file_name == "1632_Wrangle_shell_streng
 setwd("~/Documents/GitHub/CnGV/CnGV/src/")
 source("CovarianceDataFunctions.R")
 
-# For CnGV Paper: Molly and Geoff's data
-#data.df = ma
-
 
 # 3. Format Data 
 # Need: "gen_factor" column -as factor (each genotype/population = "G_1", "G_2", etc.)

@@ -55,6 +55,7 @@ start_df = filter(start_df, row %notin% missing_rows$row)
 #write.csv(start_df1[,-1], "~/Desktop/rerun.csv")
 
 
+
 #####################################
 ##          Parameter Coverage      ##
 ######################################
@@ -1605,8 +1606,34 @@ grid.arrange(eff_var1, gxeFPFRT, gxeFPCG, gxepowerFRT,gxepower_dub, #ncol = 4,
 ## Tradeoff with GxE and Covariance ##
 ######################################
 
+# Assign 1's for significant outcomes and 0's for nonsignificant outcomes
+
+dat_csv$covtick <- NULL
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$covtick[i]=1
+  }else if(dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$covtick[i]=1
+  }else{dat_csv$covtick[i]=0} 
+}
+
+dat_dub$covtick <- NULL
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$covtick[i]=1
+  }else if(dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$covtick[i]=1
+  }else{dat_dub$covtick[i]=0} 
+}
+
+dat_csv$gxetick <- NULL
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$GxE_emm_pvalue[i] > 0.05){dat_csv$gxetick[i]=0}else{dat_csv$gxetick[i]=1}
+}
+
+dat_dub$gxetick <- NULL
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$GxE_emm_pvalue[i] > 0.05){dat_dub$gxetick[i]=0}else{dat_dub$gxetick[i]=1}
+}
+
 sigGxE = dat_csv %>% 
-  filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.
+  #filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.
   filter(true_GxE_emm != 0) %>%
   filter(true_cov != 0) %>%
   filter(Covconfintboot != "false positive") %>%
@@ -1614,7 +1641,7 @@ sigGxE = dat_csv %>%
 
 
 sigGxE2 = dat_dub %>% 
-  filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.
+  #filter(sig ==TRUE) %>% # filter out false positives as potential solution to weed out messiness.
   filter(true_GxE_emm != 0) %>%
   filter(true_cov != 0) %>%
   filter(Covconfintboot != "false positive") %>%
@@ -2749,31 +2776,6 @@ combo[is.nan(combo)] <- 0
 
 ## Old Power Analysis approach:
 
-# Assign 1's for significant outcomes and 0's for nonsignificant outcomes
-
-dat_csv$covtick <- NULL
-for(i in 1:nrow(dat_csv)){
-  if(dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$covtick[i]=1
-  }else if(dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$covtick[i]=1
-  }else{dat_csv$covtick[i]=0} 
-}
-
-dat_dub$covtick <- NULL
-for(i in 1:nrow(dat_dub)){
-  if(dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$covtick[i]=1
-  }else if(dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$covtick[i]=1
-  }else{dat_dub$covtick[i]=0} 
-}
-
-dat_csv$gxetick <- NULL
-for(i in 1:nrow(dat_csv)){
-  if(dat_csv$GxE_emm_pvalue[i] > 0.05){dat_csv$gxetick[i]=0}else{dat_csv$gxetick[i]=1}
-}
-
-dat_dub$gxetick <- NULL
-for(i in 1:nrow(dat_dub)){
-  if(dat_dub$GxE_emm_pvalue[i] > 0.05){dat_dub$gxetick[i]=0}else{dat_dub$gxetick[i]=1}
-}
 
 # Estimate Power and wrangle datums
 covpow1 = cov1pow %>%
