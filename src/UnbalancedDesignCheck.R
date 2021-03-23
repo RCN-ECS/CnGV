@@ -4,14 +4,15 @@ library(tibble)
 library(dplyr)
 library(ggplot2)
 
-Delta_gen = seq(from = -1, to = 1, length.out = 100)
+Delta_gen = seq(from = -1, to = 1, length.out = 50)
 
 
 results = results. = data.frame()
 source("~/Documents/GitHub/CnGV/CnGV/src/Cov_GxE_functions.R")
 
-for(j in 1:100){
+
 for(i in 1:length(Delta_gen)){
+    for(j in 1:100){
 
 #df1 <- df.foundations(1, Delta_gen[i], 8, 2, 1, N_gen[j], 0, 2, 3)
 df1 <- df.foundations(1, Delta_gen[i], 8, 2, 1, 8, 0, i, (i+100)) #(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2)
@@ -128,83 +129,91 @@ results1 = data.frame("iteration" =  j,
                     "Cov_Samp_Unbalanced-3Genotype.b" = cov_corrected4b,
                     "Cov_Pop_Unbalanced-3Genotype.a" = cov_corrected4a.ne,
                     "Cov_Pop_Unbalanced-3Genotype.b" = cov_corrected4b.ne)
-results. = rbind(results1, results)
+results. = rbind(results1, results.)
 }
     results = rbind(results., results)
 }
 
 results = read.csv("~/Desktop/Unbalanced_results.csv")
 
-# Balanced vs. 1 Removal
-(minus1 = ggplot(results, aes(x = CovPop_Balanced)) + 
-         geom_point(aes(y = CovPop_Balanced),colour = "black")+
-         ggtitle("Population: Balanced vs. 1 Removal from each genotype group ")+
-         geom_point(aes(y = Cov_Pop_Unbalanced.1Genotype.a),colour = "red")+
-         geom_point(aes(y = Cov_Pop_Unbalanced.1Genotype.b),colour = "blue")+ 
-         geom_text(aes(x=CovPop_Balanced, y=Cov_Pop_Unbalanced.1Genotype.b+0.001), family = "Times", colour = "blue", label="B-side removal")+
-         geom_text(aes(x=CovPop_Balanced, y=CovPop_Balanced+0.001), colour = "black", label="Balanced - No Removal")+
-         geom_text(aes(x=CovPop_Balanced, y=Cov_Pop_Unbalanced.1Genotype.a+0.001), colour = "red", label="A-side removal")+
-         ylab("CovGE of Population") + xlab("CovGE of Population") + theme_bw())
+# Population 
+annotation <- data.frame(
+    x = c(0.35, 0.35, 0.35),
+    y = c(-.3,-.4,-.5),
+    label = c("Balanced Design", "A-side removal","B-side removal")
+)
+(unbalancedPop1 = ggplot(results, aes(x = CovPop_Balanced)) + 
+        geom_point(aes(y = Cov_Pop_Unbalanced.1Genotype.a), colour = "blue")+
+       # geom_text(aes(x = 0.2, y= -0.2), colour = "blue", label="A-side removal")+
+        geom_point(aes(y = Cov_Pop_Unbalanced.1Genotype.b, group = Delta_gen), colour = "deepskyblue")+
+       # geom_text(aes(x = 0.2, y= -0.3), colour = "deepskyblue", label="B-side removal")+
+        geom_point(aes(y = CovPop_Balanced),colour = "black") +
+        geom_text(data=annotation, aes( x=x, y=y, label=label), 
+                  color=c("black", "blue", "deepskyblue"), 
+                  size=5)  +    
+        ggtitle("Population Effects: 1 Genotype removal")+
+        ylab("CovGE") + xlab("CovGE") + theme_bw())
 
-(minus2 = ggplot(results, aes(x = CovPop_Balanced)) + 
-    geom_point(aes(y = CovPop_Balanced),colour = "black")+
-    ggtitle("Population: Balanced vs. 2 Removals from each genotype group ")+
-    geom_point(aes(y = Cov_Pop_Unbalanced.2Genotype.a),colour = "red")+
-    geom_point(aes(y = Cov_Pop_Unbalanced.2Genotype.b),colour = "blue")+ 
-    geom_text(aes(x=CovPop_Balanced, y=Cov_Pop_Unbalanced.2Genotype.b+0.002), family = "Times", colour = "blue", label="B-side removal")+
-    geom_text(aes(x=CovPop_Balanced, y=CovPop_Balanced+0.002), colour = "black", label="'+' is Balanced - No Removal")+
-    geom_text(aes(x=CovPop_Balanced, y=Cov_Pop_Unbalanced.2Genotype.a+0.002), family = "Times", colour = "red", label="A-side removal")+
-    ylab("CovGE of Population") + xlab("CovGE of Population") + theme_bw())
+(unbalancedPop2 = ggplot(results, aes(x = CovPop_Balanced)) + 
+        geom_point(aes(y = Cov_Pop_Unbalanced.2Genotype.a), colour = "blue")+
+        # geom_text(aes(x = 0.2, y= -0.2), colour = "blue", label="A-side removal")+
+        geom_point(aes(y = Cov_Pop_Unbalanced.2Genotype.b, group = Delta_gen), colour = "deepskyblue")+
+        # geom_text(aes(x = 0.2, y= -0.3), colour = "deepskyblue", label="B-side removal")+
+        geom_point(aes(y = CovPop_Balanced),colour = "black") +
+        geom_text(data=annotation, aes( x=x, y=y, label=label), 
+                  color=c("black", "blue", "deepskyblue"), 
+                  size=5)  +    
+        ggtitle("Population Effects: 2 Genotype removal")+
+        ylab("CovGE") + xlab("CovGE") + theme_bw())
 
-(minus3 = ggplot(results, aes(x = CovPop_Balanced)) + 
-    geom_point(aes(y = CovPop_Balanced),colour = "black")+
-    ggtitle("Population: Balanced vs. 3 Removals from each genotype group ")+
-    geom_point(aes(y = Cov_Pop_Unbalanced.3Genotype.a),colour = "red")+
-    geom_point(aes(y = Cov_Pop_Unbalanced.3Genotype.b),colour = "blue")+ 
-    geom_text(aes(x=CovPop_Balanced, y=Cov_Pop_Unbalanced.3Genotype.b+0.002), family = "Times", colour = "blue", label="B-side removal")+
-    geom_text(aes(x=CovPop_Balanced, y=CovPop_Balanced+0.002), colour = "black", label="Balanced - No Removal")+
-    geom_text(aes(x=CovPop_Balanced, y=Cov_Pop_Unbalanced.3Genotype.a+0.002), family = "Times", colour = "red", label="A-side removal")+
-    ylab("CovGE of Population") + xlab("CovGE of Population") + theme_bw())
+(unbalancedPop3 = ggplot(results, aes(x = CovPop_Balanced)) + 
+        geom_point(aes(y = Cov_Pop_Unbalanced.3Genotype.a), colour = "blue")+
+        # geom_text(aes(x = 0.2, y= -0.2), colour = "blue", label="A-side removal")+
+        geom_point(aes(y = Cov_Pop_Unbalanced.3Genotype.b, group = Delta_gen), colour = "deepskyblue")+
+        # geom_text(aes(x = 0.2, y= -0.3), colour = "deepskyblue", label="B-side removal")+
+        geom_point(aes(y = CovPop_Balanced),colour = "black") +
+        geom_text(data=annotation, aes( x=x, y=y, label=label), 
+                  color=c("black", "blue", "deepskyblue"), 
+                  size=5)  +    
+        ggtitle("Population Effects: 3 Genotype removal")+
+        ylab("CovGE") + xlab("CovGE") + theme_bw())
 
-grid.arrange(minus1, minus2, minus3,ncol = 3)
+grid.arrange(unbalancedPop1, unbalancedPop2, unbalancedPop3, ncol = 3)
 
-(samppopminus1 = ggplot(results) + 
-    ggtitle("Sample vs.Population: 1 Genotype Removal")+
-    geom_boxplot(aes(x = -1, y = Cov_Samp_Unbalanced.1Genotype.a), fill = "red", alpha = 0.5,  colour = "red")+
-    geom_boxplot(aes(x = 1, y = Cov_Samp_Unbalanced.1Genotype.b), fill = "blue", alpha = 0.5, colour = "blue")+ 
-    geom_point(aes(x = 0, y = CovPop_Balanced),shape = 3, size = 4, colour = "black")+
-    geom_text(aes(x = 1, y= -0.45), family = "Times", colour = "blue", label="B-side removal")+
-    geom_text(aes(x = -0.2, y = -.2), colour = "black", label="Balanced - No Removal")+
-    geom_text(aes(x = -1, y = -0.55),colour = "red", label="A-side removal")+
-    xlab(" ")+ylab("CovGE Estimate") + theme_bw()+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()))
+# Pop vs. Sample
+(balanced = ggplot(results, aes(x = CovPop_Balanced)) + 
+         geom_point(aes(y = CovSample_Balanced, group = Delta_gen), colour = "grey")+
+         geom_point(aes(y = CovPop_Balanced),colour = "black") +
+         ggtitle("Balanced: Population vs. Sample")+
+         ylab("CovGE") + xlab("CovGE") + theme_bw())
 
-(samppopminus2 = ggplot(results) + 
-    ggtitle("Sample vs.Population: 2 Genotype Removal")+
-    geom_boxplot(aes(x = -1, y = Cov_Samp_Unbalanced.2Genotype.a), fill = "red", alpha = 0.5,  colour = "red")+
-    geom_boxplot(aes(x = 1, y = Cov_Samp_Unbalanced.2Genotype.b), fill = "blue", alpha = 0.5, colour = "blue")+ 
-    geom_point(aes(x = 0, y = CovPop_Balanced),shape = 3, size = 4, colour = "black")+
-    geom_text(aes(x = 1, y= -0.45), family = "Times", colour = "blue", label="B-side removal")+
-    geom_text(aes(x = -0.2, y = -.2), colour = "black", label="Balanced - No Removal")+
-    geom_text(aes(x = -1, y = -0.55),colour = "red", label="A-side removal")+
-    xlab(" ")+ylab("CovGE Estimate") + theme_bw()+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()))
+(PS_unbalanced1 = ggplot(results, aes(x = CovPop_Balanced)) + 
+        geom_point(aes(y = Cov_Samp_Unbalanced.1Genotype.a, group = Delta_gen), alpha = 0.4, colour = "blue")+
+        geom_point(aes(y = Cov_Samp_Unbalanced.1Genotype.b, group = Delta_gen), alpha = 0.4, colour ="deepskyblue")+
+        geom_point(aes(y = CovPop_Balanced),colour = "black") +
+        geom_text(data=annotation, aes( x=x, y=y, label=label), 
+                  color=c("black", "blue", "deepskyblue"), 
+                  size=5)  +  
+        ggtitle("Population vs. Sample: 1 Genotype Removal")+
+        ylab("CovGE") + xlab("CovGE") + theme_bw())
 
-(samppopminus3 = ggplot(results) + 
-    ggtitle("Sample vs.Population: 3 Genotype Removals")+
-    geom_boxplot(aes(x = -1, y = Cov_Samp_Unbalanced.3Genotype.a), fill = "red", alpha = 0.5,  colour = "red")+
-    geom_boxplot(aes(x = 1, y = Cov_Samp_Unbalanced.3Genotype.b), fill = "blue", alpha = 0.5, colour = "blue")+ 
-    geom_point(aes(x = 0, y = CovPop_Balanced),shape = 3, size = 4, colour = "black")+
-    geom_text(aes(x = 1, y= -0.45), family = "Times", colour = "blue", label="B-side removal")+
-    geom_text(aes(x = -0.2, y = -.2), colour = "black", label="Balanced - No Removal")+
-    geom_text(aes(x = -1, y = -0.55),colour = "red", label="A-side removal")+
-    xlab(" ")+ylab("CovGE Estimate") + theme_bw()+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()))
-library(gridExtra)
-grid.arrange(samppopminus1, samppopminus2,samppopminus3, ncol = 3)
+(PS_unbalanced2 = ggplot(results, aes(x = CovPop_Balanced)) + 
+        geom_point(aes(y = Cov_Samp_Unbalanced.2Genotype.a, group = Delta_gen), alpha = 0.4, colour = "blue")+
+        geom_point(aes(y = Cov_Samp_Unbalanced.2Genotype.b, group = Delta_gen), alpha = 0.4, colour ="deepskyblue")+
+        geom_point(aes(y = CovPop_Balanced),colour = "black") +
+        geom_text(data=annotation, aes( x=x, y=y, label=label), 
+                  color=c("black", "blue", "deepskyblue"), 
+                  size=5)  +  
+        ggtitle("Population vs. Sample: 2 Genotype Removal")+
+        ylab("CovGE") + xlab("CovGE") + theme_bw())
+
+(PS_unbalanced3 = ggplot(results, aes(x = CovPop_Balanced)) + 
+        geom_point(aes(y = Cov_Samp_Unbalanced.3Genotype.a, group = Delta_gen), alpha = 0.4, colour = "blue")+
+        geom_point(aes(y = Cov_Samp_Unbalanced.3Genotype.b, group = Delta_gen), alpha = 0.4, colour ="deepskyblue")+
+        geom_point(aes(y = CovPop_Balanced),colour = "black") +
+        geom_text(data=annotation, aes( x=x, y=y, label=label), 
+                  color=c("black", "blue", "deepskyblue"), 
+                  size=5)  +  
+        ggtitle("Population vs. Sample: 3 Genotype Removal")+
+        ylab("CovGE") + xlab("CovGE") + theme_bw())
+ grid.arrange(balanced,PS_unbalanced1,PS_unbalanced2,PS_unbalanced3, ncol = 4)         
