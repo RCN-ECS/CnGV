@@ -95,91 +95,6 @@ dat_dub = filter(dat_dub, n_pop != 2)
 
 grid.arrange(hexy,hexy2) 
 
-######################
-## Covariance x GxE ##
-######################
-
-# Assign colors for Cov (CI) x GxE (pval) plot
-dat_csv$col = NULL
-for(i in 1:nrow(dat_csv)){
-  if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$col[i] = "red" # Both significant
-  }else if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$col[i] = "red"
-  }else if(dat_csv$GxE_Anova[i] > 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$col[i] = "darkgreen" # Cov significant
-  }else if(dat_csv$GxE_Anova[i] > 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$col[i] = "darkgreen" 
-  }else if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$col[i] = "dodgerblue4" # GxE significant
-  }else if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$col[i] = "dodgerblue4"
-  }else{dat_csv$col[i] = "grey"} # None significant
-}
-
-dat_dub$col = NULL
-for(i in 1:nrow(dat_dub)){
-  if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$col[i] = "red" # Both significant
-  }else if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$col[i] = "red"
-  }else if(dat_dub$GxE_Anova[i] > 0.05 & dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$col[i] = "darkgreen" # Cov significant
-  }else if(dat_dub$GxE_Anova[i] > 0.05 & dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$col[i] = "darkgreen" 
-  }else if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$col[i] = "dodgerblue4" # GxE significant
-  }else if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$col[i] = "dodgerblue4"
-  }else{dat_dub$col[i] = "grey"} # None significant
-}
-
-
-# Cov x GxE Plot
-cge1 = filter(dat_csv, total_samples == 128)
-cge1$n_pop_factor = NULL
-for(i in 1:nrow(cge1)){
-  if(cge1$n_pop[i] == 4){cge1$n_pop_factor[i] = "4 Genotypes"}
-  else{cge1$n_pop_factor[i] = "8 Genotypes"}
-}
-
-(cge1_plot = ggplot(cge1, aes(x = covariance, y = GxE_emm, group = n_pop_factor, alpha = 0.1,colour = col)) + 
-  geom_point() + ylim(0,1) + xlim(-1,1)+
-  theme_classic(base_size = 24, base_family = "Times")+ 
-  ylab(expression(bar(Delta)*""["GxE"]))+xlab(expression("Cov"["GE"]))+
-  theme(legend.position = "none")+
-  scale_colour_identity()+
-  theme(axis.text.x=element_text(colour="black"))+
-  theme(axis.text.y=element_text(colour="black"))+
-  facet_wrap(~n_pop_factor)+
-  ggtitle("Full Reciprocal Transplant Design\nTotal Samples = 128")+
-  theme(plot.title = element_text(size = 24, face = "bold")))
-
-cge2 = filter(dat_dub, total_samples == 128)
-cge2$n_pop_factor = NULL
-for(i in 1:nrow(cge2)){
-  if(cge2$n_pop[i] == 4){cge2$n_pop_factor[i] = "2 Gen. per Env."
-  }else if(cge2$n_pop[i] == 8){cge2$n_pop_factor[i] = "4 Gen. per Env."
-  }else{cge2$n_pop_factor[i] = "8 Gen. per Env."}
-}
-
-(cge2_plot = ggplot(cge2, aes(x = covariance, y = GxE_emm, group = n_pop_factor, alpha = 0.1,colour = col)) + 
-  geom_point() + ylim(0,1) + xlim(-1,1)+
-  theme_classic(base_size = 24, base_family = "Times")+ 
-  ylab(expression(bar(Delta)*""["GxE"]))+xlab(expression("Cov"["GE"]))+  theme(legend.position = "none")+
-  scale_colour_identity()+
-  theme(axis.text.x=element_text(colour="black"))+
-  theme(axis.text.y=element_text(colour="black"))+
-  facet_wrap(~n_pop_factor)+
-  ggtitle("Paired Common Garden Design\nTotal Samples = 128")+
-  theme(plot.title = element_text(size = 24, face = "bold")))
-
-grid.arrange(cge1_plot, cge2_plot)
-
-# Cov x Omega2 Plot
-
-ggplot(dat_csv, aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha = 0.1,colour = col)) + 
-  geom_point() + theme_classic() + 
-  xlab("Covariance Estimate") + ylab("GxE Estimate (Omega^2)") +
-  theme(legend.position = "none")+
-  scale_colour_identity()+
-  facet_grid(sample_size~n_pop)
-
-ggplot((filter(dat_dub, sample_size != 16)), aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha = 0.1,colour = col)) + 
-  geom_point() + theme_classic() + 
-  xlab("Covariance Estimate") + ylab("GxE Estimate (Omega^2)") +
-  theme(legend.position = "none")+
-  scale_colour_identity()+
-  facet_grid(sample_size~n_pop)
-
 
 #########################################################
 ##          Confusion Matrices  -- Recip Transplant    ##
@@ -276,27 +191,27 @@ dat_csv2 <- dat_csv %>%
 cov_perm_table = dat_csv1 %>%
     group_by("name" = Covconfintperm) %>%
     summarize("n" = n())
-fpr.fnr(cov_perm_table, divided = FALSE, scenario = 1)
+#fpr.fnr(cov_perm_table, divided = FALSE, scenario = 1)
 
 cov_boot_table = dat_csv1 %>%
     group_by("name" = Covconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(cov_boot_table, divided = FALSE, scenario = 1)
+#fpr.fnr(cov_boot_table, divided = FALSE, scenario = 1)
 
 gxe_anova_table = dat_csv2 %>%
   group_by("name" =GxEanova_conf) %>%
   summarize("n" = n())
-fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 1)
+#fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 1)
 
 gxe_perm_table = dat_csv2 %>%
     group_by("name" =GxEconfintperm) %>%
     summarize("n" = n())
-fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 1)
+#fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 1)
 
 gxe_boot_table = dat_csv2 %>%
   group_by("name" =GxEconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 1)
+#fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 1)
 
 ## Counts for heatmaps
 (raw_confusion_hmap1 = dat_csv1 %>%
@@ -335,6 +250,7 @@ raw_conf2$ID = rep("Cov_Boot", nrow(raw_conf2))
 raw_conf3$ID = rep("GxE_Boot", nrow(raw_conf3))
 raw_conf4$ID = rep("GxE_Perm", nrow(raw_conf4))
 raw_conf5$ID = rep("GxE_Anova", nrow(raw_conf5))
+
 fpdf = rbind(raw_conf1,raw_conf2,raw_conf3,raw_conf4,raw_conf5)
 
 gxeFPR = rbind(raw_conf4,raw_conf5)
@@ -906,27 +822,27 @@ dat_dub2 <- dat_dub %>%
 cov_perm_table = dat_dub1 %>%
   group_by("name" = Covconfintperm) %>%
   summarize("n" = n())
-fpr.fnr(cov_perm_table, divided = FALSE, scenario = 2)
+#fpr.fnr(cov_perm_table, divided = FALSE, scenario = 2)
 
 cov_boot_table = dat_dub1 %>%
   group_by("name" =Covconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(cov_boot_table, divided = FALSE, scenario = 2)
+#fpr.fnr(cov_boot_table, divided = FALSE, scenario = 2)
 
 gxe_anova_table = dat_dub2 %>%
   group_by("name" = GxEanova_conf) %>%
   summarize("n" = n())
-fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 2)
+#fpr.fnr(gxe_anova_table, divided = FALSE, scenario = 2)
 
 gxe_perm_table = dat_dub2 %>%
   group_by("name" =GxEconfintperm) %>%
   summarize("n" = n())
-fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 2)
+#fpr.fnr(gxe_perm_table, divided = FALSE, scenario = 2)
 
 gxe_boot_table = dat_dub2 %>%
   group_by("name" =GxEconfintboot) %>%
   summarize("n" = n())
-fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 2)
+#fpr.fnr(gxe_boot_table, divided = FALSE, scenario = 2)
 
 ## Counts for heatmaps
 (raw_confusion_hmap1 = dat_dub1 %>%
@@ -1435,7 +1351,7 @@ grid.arrange(gxeFNFRT, gxeFNFRTmean, gxeFNCG_dub, gxeFNCGmean_dub, ncol=2, nrow=
 covPow[is.nan(covPow)] <- 0
 covPow1 <- 
   covPow %>% 
-  filter(between(bin,0.2,0.6))%>%
+  filter(between(bin,0.3,0.6))%>%
   group_by(sample_size,n_pop,ID) %>%
   summarize("FNR" = mean(fnr))
 covPow1$totals = covPow1$n_pop * covPow1$n_pop * covPow1$sample_size
@@ -1519,10 +1435,10 @@ grid.arrange(covFPFRT, covFPCG,
 ## Power Heatmap - GxE FRT
 gxePow[is.nan(gxePow)] <- 0
 gxeFNR1 = gxePow %>%
-  filter(between(bin,0.3,0.6))%>%  
+  filter(between(bin,0.2,0.5))%>%  
   group_by(sample_size,n_pop,ID) %>%
-  summarize("fnr" = mean(fnr))
-gxeFNR1$power = 1- gxeFNR1$fnr
+  summarize("power" = mean(power))
+#gxeFNR1$power = 1- gxeFNR1$fnr
 gxeFNR1$totals = gxeFNR1$sample_size * gxeFNR1$n_pop * gxeFNR1$n_pop
 gxeFNR1$n_pop<-as.factor(gxeFNR1$n_pop)
 
@@ -2539,6 +2455,93 @@ grid.arrange(gxeFNFRT,gxeFNRdub2plot,gxeFPFRT, gxeFPCG)
 #######################################
 #########     Extra Code      #########
 #######################################
+
+
+## Covariance x GxE ##
+
+
+# Assign colors for Cov (CI) x GxE (pval) plot
+dat_csv$col = NULL
+for(i in 1:nrow(dat_csv)){
+  if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$col[i] = "red" # Both significant
+  }else if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$col[i] = "red"
+  }else if(dat_csv$GxE_Anova[i] > 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$col[i] = "darkgreen" # Cov significant
+  }else if(dat_csv$GxE_Anova[i] > 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$col[i] = "darkgreen" 
+  }else if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] < 0 & dat_csv$covariance_uprCI[i] > 0){dat_csv$col[i] = "dodgerblue4" # GxE significant
+  }else if(dat_csv$GxE_Anova[i] <= 0.05 & dat_csv$covariance_lwrCI[i] > 0 & dat_csv$covariance_uprCI[i] < 0){dat_csv$col[i] = "dodgerblue4"
+  }else{dat_csv$col[i] = "grey"} # None significant
+}
+
+dat_dub$col = NULL
+for(i in 1:nrow(dat_dub)){
+  if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$col[i] = "red" # Both significant
+  }else if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$col[i] = "red"
+  }else if(dat_dub$GxE_Anova[i] > 0.05 & dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$col[i] = "darkgreen" # Cov significant
+  }else if(dat_dub$GxE_Anova[i] > 0.05 & dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$col[i] = "darkgreen" 
+  }else if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] < 0 & dat_dub$covariance_uprCI[i] > 0){dat_dub$col[i] = "dodgerblue4" # GxE significant
+  }else if(dat_dub$GxE_Anova[i] <= 0.05 & dat_dub$covariance_lwrCI[i] > 0 & dat_dub$covariance_uprCI[i] < 0){dat_dub$col[i] = "dodgerblue4"
+  }else{dat_dub$col[i] = "grey"} # None significant
+}
+
+
+# Cov x GxE Plot
+cge1 = filter(dat_csv, total_samples == 128)
+cge1$n_pop_factor = NULL
+for(i in 1:nrow(cge1)){
+  if(cge1$n_pop[i] == 4){cge1$n_pop_factor[i] = "4 Genotypes"}
+  else{cge1$n_pop_factor[i] = "8 Genotypes"}
+}
+
+(cge1_plot = ggplot(cge1, aes(x = covariance, y = GxE_emm, group = n_pop_factor, alpha = 0.1,colour = col)) + 
+    geom_point() + ylim(0,1) + xlim(-1,1)+
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    ylab(expression(bar(Delta)*""["GxE"]))+xlab(expression("Cov"["GE"]))+
+    theme(legend.position = "none")+
+    scale_colour_identity()+
+    theme(axis.text.x=element_text(colour="black"))+
+    theme(axis.text.y=element_text(colour="black"))+
+    facet_wrap(~n_pop_factor)+
+    ggtitle("Full Reciprocal Transplant Design\nTotal Samples = 128")+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+cge2 = filter(dat_dub, total_samples == 128)
+cge2$n_pop_factor = NULL
+for(i in 1:nrow(cge2)){
+  if(cge2$n_pop[i] == 4){cge2$n_pop_factor[i] = "2 Gen. per Env."
+  }else if(cge2$n_pop[i] == 8){cge2$n_pop_factor[i] = "4 Gen. per Env."
+  }else{cge2$n_pop_factor[i] = "8 Gen. per Env."}
+}
+
+(cge2_plot = ggplot(cge2, aes(x = covariance, y = GxE_emm, group = n_pop_factor, alpha = 0.1,colour = col)) + 
+    geom_point() + ylim(0,1) + xlim(-1,1)+
+    theme_classic(base_size = 24, base_family = "Times")+ 
+    ylab(expression(bar(Delta)*""["GxE"]))+xlab(expression("Cov"["GE"]))+  theme(legend.position = "none")+
+    scale_colour_identity()+
+    theme(axis.text.x=element_text(colour="black"))+
+    theme(axis.text.y=element_text(colour="black"))+
+    facet_wrap(~n_pop_factor)+
+    ggtitle("Paired Common Garden Design\nTotal Samples = 128")+
+    theme(plot.title = element_text(size = 24, face = "bold")))
+
+grid.arrange(cge1_plot, cge2_plot)
+
+# Cov x Omega2 Plot
+
+ggplot(dat_csv, aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha = 0.1,colour = col)) + 
+  geom_point() + theme_classic() + 
+  xlab("Covariance Estimate") + ylab("GxE Estimate (Omega^2)") +
+  theme(legend.position = "none")+
+  scale_colour_identity()+
+  facet_grid(sample_size~n_pop)
+
+ggplot((filter(dat_dub, sample_size != 16)), aes(x = covariance, y = GxE_omega, group = factor(n_pop), alpha = 0.1,colour = col)) + 
+  geom_point() + theme_classic() + 
+  xlab("Covariance Estimate") + ylab("GxE Estimate (Omega^2)") +
+  theme(legend.position = "none")+
+  scale_colour_identity()+
+  facet_grid(sample_size~n_pop)
+
+
 # GxE - FRT
 gxe_hm = fnr.effsize(dat_csv1, metric = "gxe",  data.type = "raw",analysis = "perm", resolution = "fine")
 gxe_hm1 = gxe_hm %>%
