@@ -6,10 +6,9 @@ library(ggplot2)
 
 Delta_gen = seq(from = -1, to = 1, length.out = 50)
 
+results = results. = demm = emm. = data.frame()
 
-results = results. = data.frame()
 source("~/Documents/GitHub/CnGV/CnGV/src/Cov_GxE_functions.R")
-
 
 for(i in 1:length(Delta_gen)){
     for(j in 1:100){
@@ -79,12 +78,14 @@ df3a.ne <- filter(df.ne, gen_factor %notin% c(G_lev[1],G_lev[2]))
 m3a.ne <- mod.GxE(df3a.ne, is.perm = FALSE) 
 cov_matrix3a.ne <- m3a.ne[[1]]
 emm_df3a.ne <- m3a.ne[[12]]
+emm_df3a.ne$category <- rep("Pop_2Removed_a", nrow(emm_df3a.ne))
 cov_corrected3a.ne = round(cov.function(cov_matrix3a.ne, emm_df3a.ne, is.sample = FALSE),3)
 
 df3b.ne <- filter(df.ne, gen_factor %notin% c(G_lev[5],G_lev[6]))
 m3b.ne <- mod.GxE(df3b.ne, is.perm = FALSE) 
 cov_matrix3b.ne <- m3b.ne[[1]]
 emm_df3b.ne <- m3b.ne[[12]]
+emm_df3b.ne$category <- rep("Pop_2Removed_b", nrow(emm_df3b.ne))
 cov_corrected3b.ne = round(cov.function(cov_matrix3b.ne, emm_df3b.ne, is.sample = FALSE),3)
 
 # Unbalanced Designs - Remove 3 Genotypes 
@@ -93,25 +94,37 @@ df4a <- filter(df, gen_factor %notin% c(G_lev[1],G_lev[2],G_lev[3]))
 m4a <- mod.GxE(df4a, is.perm = FALSE) 
 cov_matrix4a <- m4a[[1]]
 emm_df4a <- m4a[[12]]
+emm_df4a$category <- rep("Samp_3Removed_a", nrow(emm_df4a))
 cov_corrected4a = round(cov.function(cov_matrix4a, emm_df4a, is.sample = TRUE),3)
 
 df4b <- filter(df, gen_factor %notin% c(G_lev[5],G_lev[6],G_lev[7]))
 m4b <- mod.GxE(df4b, is.perm = FALSE) 
 cov_matrix4b <- m4b[[1]]
 emm_df4b <- m4b[[12]]
+emm_df4b$category <- rep("Samp_3Removed_b", nrow(emm_df4b))
 cov_corrected4b = round(cov.function(cov_matrix4b, emm_df4b, is.sample = TRUE),3)
 
 df4a.ne <- filter(df.ne, gen_factor %notin% c(G_lev[1],G_lev[2],G_lev[3]))
 m4a.ne <- mod.GxE(df4a.ne, is.perm = FALSE) 
 cov_matrix4a.ne <- m4a.ne[[1]]
 emm_df4a.ne <- m4a.ne[[12]]
+emm_df4a.ne$category <- rep("Pop_3Removed_a", nrow(emm_df4a.ne))
 cov_corrected4a.ne = round(cov.function(cov_matrix4a.ne, emm_df4a.ne, is.sample = FALSE),3)
 
 df4b.ne <- filter(df.ne, gen_factor %notin% c(G_lev[5],G_lev[6],G_lev[7]))
 m4b.ne <- mod.GxE(df4b.ne, is.perm = FALSE) 
 cov_matrix4b.ne <- m4b.ne[[1]]
 emm_df4b.ne <- m4b.ne[[12]]
+emm_df4b.ne$category <- rep("Pop_3Removed_b", nrow(emm_df4b.ne))
 cov_corrected4b.ne = round(cov.function(cov_matrix4b.ne, emm_df4b.ne, is.sample = FALSE),3)
+
+emms1 = rbind( emm_df, emm_df.ne,emm_df2a,emm_df2b, emm_df2a.ne,emm_df2b.ne,
+                   emm_df3a, emm_df3b, emm_df3a.ne, emm_df3b.ne,
+                  emm_df4a, emm_df4b, emm_df4a.ne,emm_df4b.ne)
+emms1$iteration = rep(j, nrow(emms1))
+emms1$delta_gen = rep(i, nrow(emms1))
+
+emm. = rbind(emms1, emm.)
 
 results1 = data.frame("iteration" =  j,
                       "Delta_gen" = i, 
@@ -132,9 +145,20 @@ results1 = data.frame("iteration" =  j,
 results. = rbind(results1, results.)
 }
     results = rbind(results., results)
+    emm = rbind(emm., emm)
 }
 
+write.csv(results, "results_unbalanced.csv")
+write.csv(emm, "emms_unbalanced.csv")
+
+
 results = read.csv("~/Desktop/Unbalanced_results.csv")
+emms = read.csv("~/Desktop/emms_unbalanced.csv")
+emm1 = filter(emms, iteration == 1)
+
+gcol = c("G_1" = "blue", "G_2" = "blue","G_3" = "blue","G_4" = "blue","G_5" = "red","G_6" = "red","G_7" = "red","G_8" = "red")
+
+ggplot(emm1, aes(x = gen_factor, y = emmean, colour = gen_factor))+geom_point()+scale_colour_manual(values = gcol)
 
 # Population 
 annotation <- data.frame(
