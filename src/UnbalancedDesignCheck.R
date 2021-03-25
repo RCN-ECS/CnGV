@@ -7,37 +7,15 @@ library(ggplot2)
 
 ###### Simulating Unbalanced Designs  #########
 
-emm1 = filter(emms, iteration == 1)
-neworder <- c("Pop_balanc","Samp_balanc", "Pop_1Remov" , "Samp_1Remov", "Pop_2Remov" , "Samp_2Remov","Pop_3Remov" , "Samp_3Remov" )
-emm2 <- arrange(transform(emm1,
-                          categorySplit=factor(categorySplit,levels=neworder)),categorySplit)
-emm1$categorySplit = str_split_fixed(emm1$category, "ed", 2)[,1]
-emm1$subgroup = str_split_fixed(emm1$category, "ed", 2)[,2]
-emm1$subsub = paste(emm1$subgroup, emm1$group, sep = "_")
-emm1$subsub_replaced = NULL
-emm1 = emm1 %>%
-    mutate(subsub_replaced = ifelse(subsub == "_A", "A Group",
-                                    ifelse(subsub == "_B", "B Group",
-                                           ifelse(subsub == "_A_A", "A Group \n A Removal",
-                                                  ifelse(subsub == "_A_B", "A Group \n B Removal",
-                                                         ifelse(subsub == "_B_A", "B Group \n A Removal",  "B Group \n B Removal"))))))
-emm1$subsub = toupper(emm1$subsub)
 
-emm1$group = NULL
-emm1 <- emm1 %>%
-    mutate(group = ifelse(gen_factor %in% c("G_1", "G_2", "G_3", "G_4"), "A", "B"))
-ggplot(emm2, aes(x = subsub_replaced, y = emmean, group = subsub, fill = categorySplit))+
-    xlab("Grouping")+ylab("Estimated Marginal Mean")+
-    geom_boxplot()+theme_bw() + facet_wrap(~categorySplit,ncol =2 ) + theme(legend.position = "none")
-
-Delta_gen = seq(from = -1, to = 1, length.out = 50)
+Delta_gen = 1#seq(from = -1, to = 1, length.out = 50)
 
 results = results. = emm = emm. = data.frame()
 
-source("Cov_GxE_functions.R")
+source("~/Documents/GitHub/CnGV/CnGV/src/Cov_GxE_functions.R")
 
 for(i in 1:length(Delta_gen)){
-    for(j in 1:50){
+    for(j in 1:100){
 
 #df1 <- df.foundations(1, Delta_gen[i], 8, 2, 1, N_gen[j], 0, 2, 3)
 df1 <- df.foundations(1, Delta_gen[i], 8, 2, 1, 8, 0, i, (i+100)) #(delta_env, delta_gen, sample_size, n_env, std_dev, n_pop, interaction, seed1, seed2)
@@ -183,37 +161,61 @@ results. = rbind(results1, results.)
     emm = rbind(emm., emm)
 }
 
-write.csv(results, "results_unbalanced.csv")
-write.csv(emm, "emms_unbalanced.csv")
+
+res1 = data.frame(t(results))
+res1 = rownames_to_column(res1, "category")
+res1$CovGE = rowMeans(res1[,-1]) 
+res2 = data.frame("old_category" = res1$category, "CovGE" = res1$CovGE)
+res3 = res2[-c(1,2),]
+res3$category <- c("Samp_balanced","Pop_balanced",
+                   "Samp_1Removed_a","Samp_1Removed_b", "Pop_1Removed_a", "Pop_1Removed_b", 
+                   "Samp_2Removed_a","Samp_2Removed_b", "Pop_2Removed_a","Pop_2Removed_b", 
+                   "Samp_3Removed_a", "Samp_3Removed_b", "Pop_3Removed_a", "Pop_3Removed_b" )
+
+#write.csv(results, "results_unbalanced.csv")
+#write.csv(emm, "emms_unbalanced.csv")
 
 
-results = read.csv("~/Desktop/Unbalanced_results.csv")
-emms = read.csv("~/Desktop/emms_unbalanced.csv")
+#results = read.csv("~/Desktop/Unbalanced_results.csv")
+#emms = read.csv("~/Desktop/emms_unbalanced.csv")
 
 ###### Effect of Unbalanced Designs on Estimated Marginal Means #########
 
-emm1 = filter(emms, iteration == 1)
-neworder <- c("Pop_balanc","Samp_balanc", "Pop_1Remov" , "Samp_1Remov", "Pop_2Remov" , "Samp_2Remov","Pop_3Remov" , "Samp_3Remov" )
-emm2 <- arrange(transform(emm1,
-                          categorySplit=factor(categorySplit,levels=neworder)),categorySplit)
-emm1$categorySplit = str_split_fixed(emm1$category, "ed", 2)[,1]
-emm1$subgroup = str_split_fixed(emm1$category, "ed", 2)[,2]
-emm1$subsub = paste(emm1$subgroup, emm1$group, sep = "_")
-emm1$subsub_replaced = NULL
-emm1 = emm1 %>%
-    mutate(subsub_replaced = ifelse(subsub == "_A", "A Group",
-                                    ifelse(subsub == "_B", "B Group",
-                                           ifelse(subsub == "_A_A", "A Group \n A Removal",
-                                                  ifelse(subsub == "_A_B", "A Group \n B Removal",
-                                                         ifelse(subsub == "_B_A", "B Group \n A Removal",  "B Group \n B Removal"))))))
-emm1$subsub = toupper(emm1$subsub)
+emm1 =  emm #filter(emms, iteration == 1)
+neworder <- c( "Pop_balanced","Samp_balanced",
+               "Pop_1Removed_a", "Pop_1Removed_b", 
+               "Pop_2Removed_a","Pop_2Removed_b", 
+               "Pop_3Removed_a", "Pop_3Removed_b", 
+               "Samp_1Removed_a","Samp_1Removed_b", 
+               "Samp_2Removed_a","Samp_2Removed_b",
+               "Samp_3Removed_a", "Samp_3Removed_b")
 
+
+#emm1$categorySplit = str_split_fixed(emm1$category, "ed", 2)[,1]
+#emm1$subgroup = str_split_fixed(emm1$category, "ed", 2)[,2]
+#emm1$subsub = paste(emm1$subgroup, emm1$group, sep = "_")
+#emm1$subsub_replaced = NULL
+#emm1 = emm1 %>%
+#    mutate(subsub_replaced = ifelse(subsub == "_A", "A Group",
+#                                    ifelse(subsub == "_B", "B Group",
+ #                                          ifelse(subsub == "_A_A", "A Group \n A Removal",
+ #                                                 ifelse(subsub == "_A_B", "A Group \n B Removal",
+ #                                                        ifelse(subsub == "_B_A", "B Group \n A Removal",  "B Group \n B Removal"))))))
+#emm1$subsub = toupper(emm1$subsub)
 emm1$group = NULL
 emm1 <- emm1 %>%
     mutate(group = ifelse(gen_factor %in% c("G_1", "G_2", "G_3", "G_4"), "A", "B"))
-ggplot(emm2, aes(x = subsub_replaced, y = emmean, group = subsub, fill = categorySplit))+
-    xlab("Grouping")+ylab("Estimated Marginal Mean")+
-    geom_boxplot()+theme_bw() + facet_wrap(~categorySplit,ncol =2 ) + theme(legend.position = "none")
+
+emm1. = left_join(emm1, res3, by = "category")
+
+emm2 <- arrange(transform(emm1.,
+                          category=factor(category,levels=neworder)),category)
+
+ggplot(emm2, aes(x = gen_factor, y = emmean, colour = category))+
+    xlab("Genotype")+ylab("Estimated Marginal Mean")+
+    geom_text(aes(x = -Inf, y = -Inf, label = CovGE), hjust   = -0.1, vjust   = -1)+
+    geom_point()+ theme_classic() + facet_wrap(~category,ncol =2 ) + theme(legend.position = "none")
+
 
 ###### Effect of Unbalanced Designs on CovGE ###########
 annotation <- data.frame(
@@ -221,6 +223,7 @@ annotation <- data.frame(
     y = c(-.3,-.4,-.5),
     label = c("Balanced Design", "A-side removal","B-side removal")
 )
+
 (unbalancedPop1 = ggplot(results, aes(x = CovPop_Balanced)) + 
         geom_point(aes(y = Cov_Pop_Unbalanced.1Genotype.a), colour = "blue")+
        # geom_text(aes(x = 0.2, y= -0.2), colour = "blue", label="A-side removal")+
