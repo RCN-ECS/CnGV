@@ -4,7 +4,7 @@
 ###########################################################################################
 
 
-amarillo_armadillo <- function(input_df, n_boot, data_type, balanced){ # Data, Number of bootstraps, data_type = "raw" or "means", balanced = T/F
+covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Number of bootstraps, data_type = "raw" or "means", balanced = T/F
   
   library(tibble)
   library(ggplot2)
