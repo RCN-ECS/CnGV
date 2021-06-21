@@ -37,7 +37,7 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     for(i in 1:n_boot){
       
       # Counter
-      cat(i, "- boot") 
+      # cat(i, /n) 
       
       # Shuffle Data
       shuffle_dat <- bootstrap_raw(input_df) 
@@ -84,7 +84,7 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     for(i in 1:n_boot){
       
       # Counter
-      cat(i, "- perm") 
+      # cat(i, "- perm") 
       
       # Resample Data
       perm_dat <- permutation_raw(input_df)
@@ -123,15 +123,15 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     output = data.frame("Covariance Estimate" = cov_corrected,
                         "Covariance Lower CI" = cov_CI[[1]],
                         "Covariance Upper CI" = cov_CI[[2]],
-                        "Covariance p-value" = cov_pvalue,
-                        "GxE Estimate" = GxE_emm,
-                        "GxE Lower CI" = GxE_emm_CI[[1]],
-                        "GxE Upper CI" = GxE_emm_CI[[2]],
-                        "GxE p-value" = GxE_emm_pvalue,
-                        "Omega2" = omega2,
-                        "Omega2 Lower CI" = GxE_omega_CI[[1]],
-                        "Omega2 Upper CI" = GxE_omega_CI[[2]],
-                        "Omega2 p-value" = GxE_omega_pvalue)
+                        "Covariance p-value" = cov_pvalue)
+                        #"GxE Estimate" = GxE_emm,
+                        #"GxE Lower CI" = GxE_emm_CI[[1]],
+                        #"GxE Upper CI" = GxE_emm_CI[[2]],
+                        #"GxE p-value" = GxE_emm_pvalue,
+                        #"Omega2" = omega2,
+                        #"Omega2 Lower CI" = GxE_omega_CI[[1]],
+                        #"Omega2 Upper CI" = GxE_omega_CI[[2]],
+                        #"Omega2 p-value" = GxE_omega_pvalue)
     return(output)
     
   }else{ 
