@@ -44,20 +44,20 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
       
       # Pull out info
       m2a <- mod.Cov(shuffle_dat, balanced)
-      m2b <- mod.GxE(shuffle_dat) # Insert shuffled raw phenotype dataframe
+      # m2b <- mod.GxE(shuffle_dat) # Do not use CIs for GxE
       
       # GxE Estimates
       cov_matrix_boot <- m2a[[1]]
-      GxE_emm_boot <- m2b[[1]]
-      omega2_boot <- m2b[[4]]
+      #GxE_emm_boot <- m2b[[1]]
+      #omega2_boot <- m2b[[4]]
 
       # Covariance Estimates
       cov_corrected_boot = round(cov.function(cov_matrix_boot),3)
       
       # Bootstrap dataframe
-      boot_dat_raw <- data.frame("covariance_boot" = cov_corrected_boot,
-                                 "GxE_emm_boot" = GxE_emm_boot,
-                                 "GxE_omega_boot" = omega2_boot)
+      boot_dat_raw <- data.frame("covariance_boot" = cov_corrected_boot)
+                                 #"GxE_emm_boot" = GxE_emm_boot,
+                                 #"GxE_omega_boot" = omega2_boot)
       boot_df_raw <- rbind(boot_df_raw,boot_dat_raw)
     }
     
@@ -70,8 +70,8 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     cov_CI = quantile(boot_df_raw$covariance_boot, probs=c(0.025, 0.975), type=1) 
     
     # GxE Confidence Intervals
-    GxE_emm_CI = quantile(boot_df_raw$GxE_emm_boot, probs = c(0.025, 0.975), type=1)
-    GxE_omega_CI = quantile(boot_df_raw$GxE_omega_boot, probs=c(0.025, 0.975), type=1)
+    # GxE_emm_CI = quantile(boot_df_raw$GxE_emm_boot, probs = c(0.025, 0.975), type=1)
+    # GxE_omega_CI = quantile(boot_df_raw$GxE_omega_boot, probs=c(0.025, 0.975), type=1)
     
     
     #######################################
@@ -123,11 +123,11 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     output = data.frame("Covariance Estimate" = cov_corrected,
                         "Covariance Lower CI" = cov_CI[[1]],
                         "Covariance Upper CI" = cov_CI[[2]],
-                        "Covariance p-value" = cov_pvalue)
-                        #"GxE Estimate" = GxE_emm,
+                        "Covariance p-value" = cov_pvalue,
+                        "GxE Estimate" = GxE_emm,
                         #"GxE Lower CI" = GxE_emm_CI[[1]],
                         #"GxE Upper CI" = GxE_emm_CI[[2]],
-                        #"GxE p-value" = GxE_emm_pvalue,
+                        "GxE p-value" = GxE_emm_pvalue)
                         #"Omega2" = omega2,
                         #"Omega2 Lower CI" = GxE_omega_CI[[1]],
                         #"Omega2 Upper CI" = GxE_omega_CI[[2]],
@@ -239,13 +239,13 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
                         "Covariance Upper CI" = cov_means_CI[[2]],
                         "Covariance p-value" = cov_mean_pvalue,
                         "GxE Estimate" = GxE_means,
-                        "GxE Lower CI" = GxE_means_CI[[1]],
-                        "GxE Upper CI" = GxE_means_CI[[2]],
-                        "GxE p-value" = GxE_mean_pvalue,
-                        "Omega2" = NA,
-                        "Omega2 Lower CI" = NA,
-                        "Omega2 Upper CI" = NA,
-                        "Omega2 p-value" = NA)
+                        #"GxE Lower CI" = GxE_means_CI[[1]],
+                        #"GxE Upper CI" = GxE_means_CI[[2]],
+                        "GxE p-value" = GxE_mean_pvalue)
+                        #"Omega2" = NA,
+                        #"Omega2 Lower CI" = NA,
+                        #"Omega2 Upper CI" = NA,
+                       #"Omega2 p-value" = NA)
     return(output)
   } 
 }
@@ -325,7 +325,7 @@ mod.GxE <- function(input_df,is.perm = FALSE){ # input is model_df
   
   # Omega^2
   w2_GxE = (summary(aov(aov.test))[[1]][3,2] - # (SS_effect -
-              (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / # (Df_effect * MS_error))/
+           (summary(aov(aov.test))[[1]][3,1]*summary(aov(aov.test))[[1]][4,3])) / # (Df_effect * MS_error))/
               (sum(summary(aov(aov.test))[[1]][,2]) + # (SS_total+
               (summary(aov(aov.test))[[1]][4,3])) # MS_error)
   
