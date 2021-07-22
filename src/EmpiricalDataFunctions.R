@@ -34,10 +34,14 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     
     boot_dat_raw = boot_df_raw = data.frame()
     
+    ## Progess Bar
+    pb1 <- progress_bar$new(total = n_boot)
+    
     for(i in 1:n_boot){
       
-      # Counter
-      # cat(i, /n) 
+      # Progress Bar
+      pb1$tick()
+      Sys.sleep(1 / 100)
       
       # Shuffle Data
       shuffle_dat <- bootstrap_raw(input_df) 
@@ -81,10 +85,15 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     # Output dataframe
     perm_df_raw = perm_dat_raw = data.frame()
     
+    ## Progess Bar
+    pb2 <- progress_bar$new(total = n_boot)
+    
     for(i in 1:n_boot){
       
-      # Counter
-      # cat(i, "- perm") 
+      # Progress Bar
+      pb2$tick()
+      Sys.sleep(1 / 100)
+    
       
       # Resample Data
       perm_dat <- permutation_raw(input_df)
@@ -162,7 +171,14 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     # Output Dataframes
     boot_df_means = boot_dat_means = data.frame()
     
+    ## Progess Bar
+    pb3 <- progress_bar$new(total = n_boot)
+    
     for(i in 1:n_boot){
+      
+      # Progress Bar
+      pb3$tick()
+      Sys.sleep(1 / 100)
       
       # Shuffle Data
       shuffle_means <- bootstrap_means(input_df) # Insert means data, Need n_boot seeds
@@ -197,7 +213,14 @@ covariance.test <- function(input_df, n_boot, data_type, balanced){ # Data, Numb
     # Output
     perm_df_means = perm_dat_means = data.frame()
     
+    ## Progess Bar
+    pb4 <- progress_bar$new(total = n_boot)
+    
     for(i in 1:n_boot){
+      
+      # Progress Bar
+      pb4$tick()
+      Sys.sleep(1 / 100)
       
       # Set seeds for perm_means and mean.GxE
       perm.seeds1 = i
