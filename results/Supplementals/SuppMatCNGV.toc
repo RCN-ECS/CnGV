@@ -1,3 +1,6 @@
 \contentsline {section}{List of Figures}{1}%
-\contentsline {section}{\tocsection {}{Supplemental Methods}{Variance partitioning}}{2}%
-\contentsline {section}{\tocsection {}{Supplemental Figures}{Figures}}{4}%
+\contentsline {section}{\tocsection {}{Supplemental Methods}{1. Proof for $Cov_{GE}$}}{2}%
+\contentsline {section}{\tocsection {}{Supplemental Methods}{2. Population Equations}}{5}%
+\contentsline {section}{\tocsection {}{Supplemental Methods}{3. Imbalanced Designs}}{6}%
+\contentsline {section}{\tocsection {}{Supplemental Methods}{4. Variance partitioning}}{7}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{Figures}}{9}%

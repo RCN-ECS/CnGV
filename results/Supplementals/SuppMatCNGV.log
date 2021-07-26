@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  12 MAR 2021 14:19
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  22 JUL 2021 14:21
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -276,12 +276,75 @@ Package: longtable 2020/01/07 v4.13 Multi-page Table package (DPC)
 (/usr/local/texlive/2020/texmf-dist/tex/latex/graphics/lscape.sty
 Package: lscape 2000/10/22 v3.01 Landscape Pages (DPC)
 )
+(/usr/local/texlive/2020/texmf-dist/tex/latex/siunitx/siunitx.sty
+(/usr/local/texlive/2020/texmf-dist/tex/latex/l3kernel/expl3.sty
+Package: expl3 2020-03-06 L3 programming layer (loader) 
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
+File: l3backend-pdfmode.def 2020-03-12 L3 backend support: PDF mode
+\l__kernel_color_stack_int=\count197
+\l__pdf_internal_box=\box55
+)) (/usr/local/texlive/2020/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
+Package: xparse 2020-03-06 L3 Experimental document command parser
+\l__xparse_current_arg_int=\count198
+\g__xparse_grabber_int=\count266
+\l__xparse_m_args_int=\count267
+\l__xparse_v_nesting_int=\count268
+)
+Package: siunitx 2020/02/25 v2.8b A comprehensive (SI) units package
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty
+Package: l3keys2e 2020-03-06 LaTeX2e option processing using LaTeX3 keys
+)
+\l__siunitx_tmp_box=\box56
+\l__siunitx_tmp_dim=\dimen166
+\l__siunitx_tmp_int=\count269
+\l__siunitx_number_mantissa_length_int=\count270
+\l__siunitx_number_uncert_length_int=\count271
+\l__siunitx_round_int=\count272
+\l__siunitx_process_decimal_int=\count273
+\l__siunitx_process_uncertainty_int=\count274
+\l__siunitx_process_fixed_int=\count275
+\l__siunitx_process_integer_min_int=\count276
+\l__siunitx_process_precision_int=\count277
+\l__siunitx_group_min_int=\count278
+\l__siunitx_angle_marker_box=\box57
+\l__siunitx_angle_unit_box=\box58
+\l__siunitx_angle_marker_dim=\dimen167
+\l__siunitx_angle_unit_dim=\dimen168
+\l__siunitx_unit_int=\count279
+\l__siunitx_unit_denominator_int=\count280
+\l__siunitx_unit_numerator_int=\count281
+\l__siunitx_unit_prefix_int=\count282
+\l__siunitx_unit_prefix_base_int=\count283
+\l__siunitx_unit_prefix_gram_int=\count284
+\l__siunitx_number_product_int=\count285
+\c__siunitx_one_fill_skip=\skip68
+\l__siunitx_table_unit_align_skip=\skip69
+\l__siunitx_table_exponent_dim=\dimen169
+\l__siunitx_table_integer_dim=\dimen170
+\l__siunitx_table_mantissa_dim=\dimen171
+\l__siunitx_table_marker_dim=\dimen172
+\l__siunitx_table_result_dim=\dimen173
+\l__siunitx_table_uncert_dim=\dimen174
+\l__siunitx_table_fill_pre_dim=\dimen175
+\l__siunitx_table_fill_post_dim=\dimen176
+\l__siunitx_table_fill_mid_dim=\dimen177
+\l__siunitx_table_pre_box=\box59
+\l__siunitx_table_post_box=\box60
+\l__siunitx_table_mantissa_box=\box61
+\l__siunitx_table_result_box=\box62
+\l__siunitx_table_number_align_skip=\skip70
+\l__siunitx_table_text_align_skip=\skip71
+(/usr/local/texlive/2020/texmf-dist/tex/latex/translator/translator.sty
+Package: translator 2019-05-31 v1.12a Easy translation of strings in LaTeX
+))
 (/usr/local/texlive/2020/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2019/05/31 v2.5 Span multiple rows of a table
-\multirow@colwidth=\skip68
-\multirow@cntb=\count197
-\multirow@dima=\skip69
-\bigstrutjot=\dimen166
+\multirow@colwidth=\skip72
+\multirow@cntb=\count286
+\multirow@dima=\skip73
+\bigstrutjot=\dimen178
 )
 (/usr/local/texlive/2020/texmf-dist/tex/latex/setspace/setspace.sty
 Package: setspace 2011/12/19 v6.7a set line spacing
@@ -298,25 +361,23 @@ Package: geometry 2020/01/02 v5.9 Page Geometry
 (/usr/local/texlive/2020/texmf-dist/tex/generic/iftex/ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 )
-\Gm@cnth=\count198
-\Gm@cntv=\count266
-\c@Gm@tempcnt=\count267
-\Gm@bindingoffset=\dimen167
-\Gm@wd@mp=\dimen168
-\Gm@odd@mp=\dimen169
-\Gm@even@mp=\dimen170
-\Gm@layoutwidth=\dimen171
-\Gm@layoutheight=\dimen172
-\Gm@layouthoffset=\dimen173
-\Gm@layoutvoffset=\dimen174
+\Gm@cnth=\count287
+\Gm@cntv=\count288
+\c@Gm@tempcnt=\count289
+\Gm@bindingoffset=\dimen179
+\Gm@wd@mp=\dimen180
+\Gm@odd@mp=\dimen181
+\Gm@even@mp=\dimen182
+\Gm@layoutwidth=\dimen183
+\Gm@layoutheight=\dimen184
+\Gm@layouthoffset=\dimen185
+\Gm@layoutvoffset=\dimen186
 \Gm@dimlist=\toks36
 )
-(/usr/local/texlive/2020/texmf-dist/tex/latex/l3backend/l3backend-pdfmode.def
-File: l3backend-pdfmode.def 2020-03-12 L3 backend support: PDF mode
-\l__kernel_color_stack_int=\count268
-\l__pdf_internal_box=\box55
-)
 (./SuppMatCNGV.aux
+
+LaTeX Warning: Label `Fig: ' multiply defined.
+
 
 LaTeX Warning: Label `Fig: ' multiply defined.
 
@@ -326,26 +387,26 @@ LaTeX Warning: Label `Fig: ' multiply defined.
 )
 \openout1 = `SuppMatCNGV.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 33.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 35.
+LaTeX Font Info:    ... okay on input line 35.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 35.
 
  (/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 33.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 35.
 
 
 (/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -362,17 +423,24 @@ Package caption Info: End \AtBeginDocument code.
 
 (/usr/local/texlive/2020/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count269
-\scratchdimen=\dimen175
-\scratchbox=\box56
-\nofMPsegments=\count270
-\nofMParguments=\count271
+\scratchcounter=\count290
+\scratchdimen=\dimen187
+\scratchbox=\box63
+\nofMPsegments=\count291
+\nofMParguments=\count292
 \everyMPshowfont=\toks37
-\MPscratchCnt=\count272
-\MPscratchDim=\dimen176
-\MPnumerator=\count273
-\makeMPintoPDFobject=\count274
+\MPscratchCnt=\count293
+\MPscratchDim=\dimen188
+\MPnumerator=\count294
+\makeMPintoPDFobject=\count295
 \everyMPtoPDFconversion=\toks38
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/translator/translator-basic-dicti
+onary-English.dict
+Dictionary: translator-basic-dictionary, Language: English 
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/siunitx/siunitx-abbreviations.cfg
+File: siunitx-abbreviations.cfg 2017/11/26 v2.7k siunitx: Abbreviated units
 )
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -420,83 +488,122 @@ Package caption Info: End \AtBeginDocument code.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [2]
-[3]
-<Figs/HexPlot.jpeg, id=23, 751.80875pt x 822.07124pt>
-File: Figs/HexPlot.jpeg Graphic file (type jpg)
-<use Figs/HexPlot.jpeg>
-Package pdftex.def Info: Figs/HexPlot.jpeg  used on input line 114.
-(pdftex.def)             Requested size: 433.62pt x 474.1549pt.
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [3]
+[4] [5
+
+]
+<Figs/UnbalancedTable.pdf, id=30, 963.6pt x 542.025pt>
+File: Figs/UnbalancedTable.pdf Graphic file (type pdf)
+<use Figs/UnbalancedTable.pdf>
+Package pdftex.def Info: Figs/UnbalancedTable.pdf  used on input line 156.
+(pdftex.def)             Requested size: 433.62pt x 243.90898pt.
 
 
 LaTeX Font Warning: Font shape `OT1/cmss/m/sc' in size <10.95> not available
-(Font)              Font shape `OT1/cmr/m/sc' tried instead on input line 117.
+(Font)              Font shape `OT1/cmr/m/sc' tried instead on input line 159.
 
-[4
+[6
+
+ <./Figs/UnbalancedTable.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [7
+
+]
+[8]
+<Figs/IncompatibleDesigns.jpg, id=73, 722.7pt x 406.51875pt>
+File: Figs/IncompatibleDesigns.jpg Graphic file (type jpg)
+<use Figs/IncompatibleDesigns.jpg>
+Package pdftex.def Info: Figs/IncompatibleDesigns.jpg  used on input line 228.
+(pdftex.def)             Requested size: 433.62pt x 243.91312pt.
+ [9
+
+ <./Figs/IncompatibleDesigns.jpg>]
+<Figs/HexPlot.jpeg, id=77, 751.80875pt x 822.07124pt>
+File: Figs/HexPlot.jpeg Graphic file (type jpg)
+<use Figs/HexPlot.jpeg>
+Package pdftex.def Info: Figs/HexPlot.jpeg  used on input line 240.
+(pdftex.def)             Requested size: 433.62pt x 474.1549pt.
+ [10
 
  <./Figs/HexPlot.jpeg>]
-<Figs/SampleVsPopulation.jpeg, id=27, 1230.5975pt x 804.00375pt>
+<Figs/SampleVsPopulation.jpeg, id=81, 1230.5975pt x 804.00375pt>
 File: Figs/SampleVsPopulation.jpeg Graphic file (type jpg)
 <use Figs/SampleVsPopulation.jpeg>
-Package pdftex.def Info: Figs/SampleVsPopulation.jpeg  used on input line 127.
+Package pdftex.def Info: Figs/SampleVsPopulation.jpeg  used on input line 253.
 (pdftex.def)             Requested size: 433.62pt x 283.29482pt.
- [5
+ [11
 
  <./Figs/SampleVsPopulation.jpeg>]
-<Figs/VgxevsVcov.pdf, id=31, 289.08pt x 216.81pt>
+<Figs/GxE_Panel.jpg, id=85, 718.685pt x 862.22125pt>
+File: Figs/GxE_Panel.jpg Graphic file (type jpg)
+<use Figs/GxE_Panel.jpg>
+Package pdftex.def Info: Figs/GxE_Panel.jpg  used on input line 265.
+(pdftex.def)             Requested size: 433.62pt x 520.23116pt.
+ [12
+
+ <./Figs/GxE_Panel.jpg>]
+<Figs/VgxevsVcov.pdf, id=89, 289.08pt x 216.81pt>
 File: Figs/VgxevsVcov.pdf Graphic file (type pdf)
 <use Figs/VgxevsVcov.pdf>
-Package pdftex.def Info: Figs/VgxevsVcov.pdf  used on input line 140.
+Package pdftex.def Info: Figs/VgxevsVcov.pdf  used on input line 279.
 (pdftex.def)             Requested size: 433.62pt x 325.23073pt.
- [6
+ [13
 
  <./Figs/VgxevsVcov.pdf>]
-<Figs/EstimateVsVariance.pdf, id=44, 614.295pt x 794.97pt>
+<Figs/EstimateVsVariance.pdf, id=103, 614.295pt x 794.97pt>
 File: Figs/EstimateVsVariance.pdf Graphic file (type pdf)
 <use Figs/EstimateVsVariance.pdf>
-Package pdftex.def Info: Figs/EstimateVsVariance.pdf  used on input line 153.
+Package pdftex.def Info: Figs/EstimateVsVariance.pdf  used on input line 292.
 (pdftex.def)             Requested size: 433.62pt x 561.15749pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[7 <./Figs/EstimateVsVariance.pdf>]
-<Figs/GxE_Panel.jpg, id=57, 718.685pt x 862.22125pt>
-File: Figs/GxE_Panel.jpg Graphic file (type jpg)
-<use Figs/GxE_Panel.jpg>
-Package pdftex.def Info: Figs/GxE_Panel.jpg  used on input line 164.
-(pdftex.def)             Requested size: 433.62pt x 520.23116pt.
- [8
+[14 <./Figs/EstimateVsVariance.pdf>]
+<Figs/Balanced_Imbalanced.jpg, id=115, 722.7pt x 406.51875pt>
+File: Figs/Balanced_Imbalanced.jpg Graphic file (type jpg)
+<use Figs/Balanced_Imbalanced.jpg>
+Package pdftex.def Info: Figs/Balanced_Imbalanced.jpg  used on input line 305.
+(pdftex.def)             Requested size: 433.62pt x 243.91312pt.
+ [15
 
 
- <./Figs/GxE_Panel.jpg>]
+ <./Figs/Balanced_Imbalanced.jpg>]
 (./SuppMatCNGV.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 5439 strings out of 480608
- 79934 string characters out of 5903631
- 328596 words of memory out of 5000000
- 21064 multiletter control sequences out of 15000+600000
- 540700 words of font info for 56 fonts, out of 8000000 for 9000
+ 8195 strings out of 480608
+ 159583 string characters out of 5903631
+ 402954 words of memory out of 5000000
+ 23786 multiletter control sequences out of 15000+600000
+ 543629 words of font info for 67 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
- 41i,7n,42p,1097b,402s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
-></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb
-></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
-</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex8.p
-fb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pf
-b></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb>
-</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></
-usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></us
-r/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/l
-ocal/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/loca
-l/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on SuppMatCNGV.pdf (8 pages, 3733192 bytes).
+ 41i,13n,50p,2191b,915s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
+}</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb>
+</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
+/usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex8.pf
+b></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
+></usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb><
+/usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></u
+sr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr
+/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/lo
+cal/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local
+/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/
+texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm0500.pfb></usr/local/te
+xlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></usr/local/texl
+ive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
+Output written on SuppMatCNGV.pdf (15 pages, 3973646 bytes).
 PDF statistics:
- 97 PDF objects out of 1000 (max. 8388607)
- 66 compressed objects within 1 object stream
+ 166 PDF objects out of 1000 (max. 8388607)
+ 109 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 41 words of extra memory for PDF output out of 10000 (max. 10000000)
 
