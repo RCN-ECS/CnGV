@@ -46,7 +46,7 @@ M.A. Albecker, G.C. Trussell, and K.E. Lotterhos
 
 \tableofcontents
 %\listoftables
-\listoffigures
+%\listoffigures
 
 \newpage
 
@@ -146,28 +146,17 @@ In this equation, $n_{gen}$ is the number of genotypes and $n_{env}$ is the numb
 \clearpage
 \newpage
 
-\section{3. Imbalanced Designs}
-
-For common garden experimental designs, there may be imbalance where there are unequal sample sizes or unequal numbers of genotypes for each native environment. Estimated marginal means reduce bias that may arise from unequal sample sizes within groups, thus do not affect $\hat{Cov_{GE}}$. However, because environment and genotype are treated as factors in the ANOVA to extract estimated marginal means, imbalanced numbers of genotypes (example shown in Supplemental Figure S7B below) introduce bias in the environmental means ($\bar{y_j}$ or $\si\micro$) and overall mean phenotype ($\bar{y}$ or $\si\micro$) (See B in the table below)  In fact, both studies analyzed in the main text have imbalanced numbers of genotypes. To correct for the bias, a second ANOVA model with native environment substituted for genotype can then be used to extract estimated marginal means to calculate unbiased ($\bar{y_{j}}$ or $\si\micro_{j}$) and($\bar{y}$ or $\si\micro$). The original model should be used to generate estimated marginal means for  ($\bar{y_{i}}$ or $\si\micro_{i}$). As shown in column C in the table below, this approach returns $\si\micro_{j}$ and $\si\micro$ to the values in balanced designs (A). 
-
-\renewcommand\thefigure{T1}
-\begin{table}[h]
-\begin{center}
-\includegraphics[width=6in]{Figs/UnbalancedTable.pdf}
-\end{center}
-\label{Table: Unbalanced Designs before and after correction}
-\caption[Overall, genotypic, and environmental mean phenotypes]{(A) shows example data for a strong negative $Cov_{GE}$ pattern for a Common-garden design. When the design is balanced, four genotypes native to two different environments were measured across two experimental environments (Supplemental Figure S7 below for depiction of corresponding sample data, Fig. S7A shows data for panels A in the above table, Fig. S7B shows data for panels B and C in above table). When the design is balanced, the mean phenotypes for genotype ($\si\micro_{i}$), environment ($\si\micro_{j}$), and overall ($\si\micro$) are calculated by extracting estimated marginal means from a single model. When the design is unbalanced (as shown in B), continuing to use the same model to generate estimated marginal means produces bias in environmental means ($\si\micro_{j}$), and overall means ($\si\micro$). As shown in (C), the bias is corrected by conducting a secondary ANOVA with native environment replacing genotype to calculate environmental means ($\si\micro_{j}$), and overall means ($\si\micro$). Genotypic means ($\si\micro_{i}$) are calculated using the original ANOVA model.}
-\end{table}
- 
-\clearpage
-\newpage
-\section{4. Variance partitioning}
+\section{3. Variance partitioning}
 
 In the main manuscript, we focus on estimating the effect size of $Cov_{GE}$ and $\bar\Delta_{GxE}$ and their significance. The effect size provides information about the strength of the pattern, which is a distinct type of information from the percent of variation in the phenotype explained by the following components: (i) genetic effects on phenotype, (ii) environmental effects on phenotypes, (iii) genetic x environment interactions, (iv) covariance between genetic and environmental effects on phenotypes, and (iv) residual error. Both Falconer (1989) and Conover and Schultz (1995) have previously discussed $Cov_{GE}$ in this more traditional sense as the percent of variation in the phenotype explained by different variance components:
 
 \begin{equation}
 V_P = V_G + V_E + V_{GxE} + xCov_{GE} 
 \end{equation}
+
+We follow the definition of environmental variance from Falconer 1989, which states that environmental variance includes all sources of non-genetic variance, including those caused by external causes such as environmental factors, maternal effects, and “untangible” (residual) variation that cannot be eliminated (Falconer 1989). Falconer also defines $Cov_{GE}$ as a correlation between environmental deviation and genotypic values: “genotypic values and environmental deviations may be correlated, in which case $V_P$ will be increased by twice the covariance of G with E”. We think this terminology is confusing, and that it is more accurate to say: the correlation between "phenotypic deviation due to genotype (genotypic deviation/effect)" and "phenotypic deviation due to environment (environmental deviation/effect)" across spatial locations. What can be inferred about the causes of environmental variance (specifically whether it is due to environment or to “untangible” error) depends on the experimental design and how samples are chosen for the study.\\
+
+In this equation, increases in $V_{GxE}$will reduce the potential magnitude of $xCov_{GE} $ just as increases in $V_{G}$ or $V_{E}$ will reduce the potential magnitude of $V_{GxE}$ or  $xCov_{GE} $.\\
 
 In a 2x2 reciprocal transplant or common garden design with 2 genotypes in 2 environments, $x = 2$. This factor of $x = 2$ does not extend to more complex designs, as explained below.
 
@@ -214,14 +203,84 @@ The comparison of effect sizes and variance components is also useful for unders
 \clearpage
 \newpage
 
+\renewcommand\thesection{Supplemental Tables}
+
+\section{Tables}
+
+\renewcommand{\figurename}{Supplementary Table}
+
+\section{1. Comparison of forms of Covariance}
+
+\renewcommand\thefigure{T1}
+\begin{table}[h]
+\begin{center}
+\includegraphics[width=7.5in]{Figs/Table1_CovarianceForms.pdf}
+\end{center}
+\label{Table: Covariance literature comparison}
+\caption[A comparison of different types of covariance found in evolutionary literature]{Many different types of variance and covariance can be found in the evolutionary literature, which can easily lead to confusion about $Cov_{GE}$. This table clarifies the different types of covariance in the literature.}
+\end{table}
+ 
+\clearpage
+\newpage
+
+\section{2. Variance Components - Single Common Garden}
+
+\renewcommand\thefigure{T2}
+\begin{table}[h]
+\begin{center}
+\includegraphics[width=7.5in]{Figs/SuppTable2_VarianceforCommonGarden.pdf}
+\end{center}
+\label{Table: Variance Components - Single common garden design}
+\caption[Biological interpretations of variance components from a single common garden with multiple “genotypes”.]{ Biological interpretations are informed from Falconer (1989). Falconer also defines $Cov_{GE}$ as a correlation between environmental deviation and genotypic values: “genotypic values and environmental deviations may be correlated, in which case $V_P$ will be increased by twice the covariance of G with E”. We think this terminology is confusing, and that it is more accurate to say: the correlation between "phenotypic deviation due to genotype (genotypic deviation/effect)" and "phenotypic deviation due to environment (environmental deviation/effect)" across spatial locations. What can be inferred about the causes of environmental variance (specifically whether it is due to environment or to “untangible” error) depends on the experimental design and how samples are chosen for the study.\\
+
+In the equations, $r$ (k = $1, 2, ...r$) refers to the number of samples collected within each genotype-environment combination (assuming equal sample sizes. $SS$ refers to Sums of Squares, $g$ indicates the genotypes (i = $1,2,....i$), $\bar{y}_{i}$ is the average mean phenotype for a particular genotype, $y_{ik}$ is the phenotype for each sample collected, $\bar{y}$ is the average mean phenotype across all genotypes. See Supplemental Methods 3 above for more details.} 
+\end{table}
+ 
+\clearpage
+\newpage
+
+\section{3. Variance Components - Reciprocal Transplant}
+
+\renewcommand\thefigure{T3}
+\begin{table}[h]
+\begin{center}
+\includegraphics[width=7.5in]{Figs/SuppTable3_VarianceforReciprocalTransplant.pdf}
+\end{center}
+\label{Table: Variance Components - Reciprocal transplant design}
+\caption[Biological interpretations of variance components from a reciprocal transplant with multiple sites (each site is an “environment”), or a common garden experiment with multiple environments and multiple “genotypes” in each environment.]{ Biological interpretations are informed from Falconer (1989) or KEL, personal observation. 
+
+In the equations, $r$ (k = $1, 2, ...r$) refers to the number of samples collected within each genotype-environment combination (assuming equal sample sizes. $SS$ refers to Sums of Squares, $e$ indicates the environments (j = $1,2,....j$), $g$ indicates the genotypes (i = $1,2,....i$), $\bar{y}_{i}$ is the average mean phenotype for a particular genotype, $\bar{y}_{j}$ is the average mean phenotype for a particular environment, $y_{ijk}$ is the phenotype for each sample in each genotype and environment. $\bar{y}$ is the average mean phenotype across all genotypes. In a 2x2 reciprocal transplant or common garden design with 2 genotypes in 2 environments, $x = 2$. This factor of $x = 2$ does not extend to more complex designs, as explained in Supplemental Methods 3.}
+\end{table}
+ 
+\clearpage
+\newpage
+
+
+\section{4. Imbalanced Designs}
+
+For common garden experimental designs, there may be imbalance where there are unequal sample sizes or unequal numbers of genotypes for each native environment. Estimated marginal means reduce bias that may arise from unequal sample sizes within groups, thus do not affect $\hat{Cov_{GE}}$. However, because environment and genotype are treated as factors in the ANOVA to extract estimated marginal means, imbalanced numbers of genotypes (example shown in Supplemental Figure S7B below) introduce bias in the environmental means ($\bar{y_j}$ or $\si\micro$) and overall mean phenotype ($\bar{y}$ or $\si\micro$) (See B in the table below)  In fact, both studies analyzed in the main text have imbalanced numbers of genotypes. To correct for the bias, a second ANOVA model with native environment substituted for genotype can then be used to extract estimated marginal means to calculate unbiased ($\bar{y_{j}}$ or $\si\micro_{j}$) and($\bar{y}$ or $\si\micro$). The original model should be used to generate estimated marginal means for  ($\bar{y_{i}}$ or $\si\micro_{i}$). As shown in column C in the table below, this approach returns $\si\micro_{j}$ and $\si\micro$ to the values in balanced designs (A). 
+
+\renewcommand\thefigure{T4}
+\begin{table}[h]
+\begin{center}
+\includegraphics[width=6in]{Figs/UnbalancedTable.pdf}
+\end{center}
+\label{Table: Unbalanced Designs before and after correction}
+\caption[Overall, genotypic, and environmental mean phenotypes]{(A) shows example data for a strong negative $Cov_{GE}$ pattern for a Common-garden design. When the design is balanced, four genotypes native to two different environments were measured across two experimental environments (Supplemental Figure S7 below for depiction of corresponding sample data, Fig. S7A shows data for panels A in the above table, Fig. S7B shows data for panels B and C in above table). When the design is balanced, the mean phenotypes for genotype ($\si\micro_{i}$), environment ($\si\micro_{j}$), and overall ($\si\micro$) are calculated by extracting estimated marginal means from a single model. When the design is unbalanced (as shown in B), continuing to use the same model to generate estimated marginal means produces bias in environmental means ($\si\micro_{j}$), and overall means ($\si\micro$). As shown in (C), the bias is corrected by conducting a secondary ANOVA with native environment replacing genotype to calculate environmental means ($\si\micro_{j}$), and overall means ($\si\micro$). Genotypic means ($\si\micro_{i}$) are calculated using the original ANOVA model.}
+\end{table}
+\clearpage
+\newpage
+
+
 
 \renewcommand\thesection{Supplemental Figures}
 
 
 \section{Figures}
 
-\renewcommand{\figurename}{Supplementary Figure}
 
+\renewcommand{\figurename}{Supplementary Figure}
+\section{1. Compatible and Incompatible designs}
 \renewcommand\thefigure{S1}
 \begin{figure}[h]
 \begin{center}
@@ -234,6 +293,8 @@ The comparison of effect sizes and variance components is also useful for unders
 \clearpage
 \newpage
 
+\renewcommand{\figurename}{Supplementary Figure}
+\section{2. Coverage of parameter space}
 \renewcommand\thefigure{S2}
 \begin{figure}[h]
 \begin{center}
@@ -246,8 +307,23 @@ The comparison of effect sizes and variance components is also useful for unders
 \clearpage
 \newpage
 
-
+\renewcommand{\figurename}{Supplementary Figure}
+\section{3. Examples of simulated data}
 \renewcommand\thefigure{S3}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=4in]{Figs/3.23.PhenotypePanel.png}
+\end{center}
+\label{Fig: Examples of simulated data}
+\caption[Simulated scenarios showing cogradient variation and countergradient variation in situations with non-significant and significant G×E.]{A) Possible outcomes from a two-genotype by two-environment design. B) Possible outcomes from a full reciprocal transplant design in which four distinct genotypes are transplanted into four distinct environments. C) Possible outcomes from a common garden design in which two pairs of genotypes share the same native environment. In plots A and B, reaction norms signify different genotypes and are colored accordingly. In panel C, separate genotypes that share the same native environment share the same color.  }
+\end{figure}
+
+\clearpage
+\newpage
+
+\renewcommand{\figurename}{Supplementary Figure}
+\section{4. Population vs. Sample Estimates}
+\renewcommand\thefigure{S4}
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=6in]{Figs/SampleVsPopulation.jpeg}
@@ -259,7 +335,10 @@ The comparison of effect sizes and variance components is also useful for unders
 
 \clearpage
 \newpage
-\renewcommand\thefigure{S4}
+
+\renewcommand{\figurename}{Supplementary Figure}
+\section{5. False negative rates for $\bar\Delta_{GxE}$}
+\renewcommand\thefigure{S5}
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=6in]{Figs/GxE_Panel.jpg}
@@ -272,8 +351,9 @@ The comparison of effect sizes and variance components is also useful for unders
 \clearpage
 \newpage
 
-
-\renewcommand\thefigure{S5}
+\renewcommand{\figurename}{Supplementary Figure}
+\section{6. $V_{g*e}$ vs. $V_{cov_{ge}}$}
+\renewcommand\thefigure{S6}
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=6in]{Figs/VgxevsVcov.pdf}
@@ -285,8 +365,9 @@ The comparison of effect sizes and variance components is also useful for unders
 \clearpage
 \newpage
 
-
-\renewcommand\thefigure{S6}
+\renewcommand{\figurename}{Supplementary Figure}
+\section{7. Comparison of the percent of variance explained by $Cov_{GE}$}
+\renewcommand\thefigure{S7}
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=6in]{Figs/EstimateVsVariance.pdf}
@@ -299,18 +380,55 @@ The comparison of effect sizes and variance components is also useful for unders
 \clearpage
 \newpage
 
-\renewcommand\thefigure{S7}
+\renewcommand{\figurename}{Supplementary Figure}
+\section{8. Sample data for balanced and imbalanced designs}
+\renewcommand\thefigure{S8}
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=6in]{Figs/Balanced_Imbalanced.jpg}
 \end{center}
 \label{Fig: }
-\caption[Examples of sample data and reaction norms for balanced (A) vs. unbalanced designs (B) that correspond to Supplementary Table 1 above. ] {(A) An example of normalized phenotypic data for a balanced common garden design, meaning that both native environments have equal numbers of genotypes (in this case, 4 genotypes each). Points show phenotypic data colored according to genotype, while reaction norms are colored according to the environment to which the different genotypes are native. Data point shapes correspond to the native environment as well.  (B) Normalized phenotypic for an imbalanced design in which there are 4 genotypes native to Environment 2, but only 1 genotype native to Environment 1. Imbalanced designs can generate bias in $Cov_{GE}$ unless corrected. See Supplemental Methods 3 for details on the correction. }
+\caption[Examples of sample data and reaction norms for balanced (A) vs. imbalanced designs (B) that correspond to Supplementary Table 1 above. ] {(A) An example of normalized phenotypic data for a balanced common garden design, meaning that both native environments have equal numbers of genotypes (in this case, 4 genotypes each). Points show phenotypic data colored according to genotype, while reaction norms are colored according to the environment to which the different genotypes are native. Data point shapes correspond to the native environment as well.  (B) Normalized phenotypic for an imbalanced design in which there are 4 genotypes native to Environment 2, but only 1 genotype native to Environment 1. Imbalanced designs can generate bias in $Cov_{GE}$ unless corrected. See Supplemental Methods 3 for details on the correction. }
 
 \end{figure}
 
 \clearpage
 \newpage
 
+\renewcommand\thefigure{: Literature Cited}
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=6in]{Figs/Balanced_Imbalanced.jpg}
+\end{center}
+\label{Fig: Literature Cited}
+\caption[Literature Cited]{
+\\
+Conover, D.O. and Schultz, E.T., 1995. Phenotypic similarity and the evolutionary significance of countergradient variation. \emph{Trends in Ecology and Evolution}, 10(6), pp.248-252.\\ 
+
+Coulson, T., 2021. We live in a changing world, but that shouldn’t mean we abandon the concept of equilibrium. \emph{Ecology Letters}, 24(1), pp.3-5.\\
+
+Coulson, T., Kendall, B.E., Barthold, J., Plard, F., Schindler, S., Ozgul, A. and Gaillard, J.M., 2017. Modeling adaptive and nonadaptive responses of populations to environmental change. \emph{The American Naturalist}, 190(3), pp.313-336.\\
+
+De Jong, G., 1995. Phenotypic plasticity as a product of selection in a variable environment. \emph{The American Naturalist}, 145(4), pp.493-512.\\
+
+DeWitt, T.J. and Scheiner, S.M. eds., 2004. Phenotypic plasticity: functional and conceptual approaches. \emph{Oxford University Press}.\\
+
+Falconer, D.S., 1996. Introduction to quantitative genetics. \emph{Pearson Education India}.\\
+
+Lande, R., 2009. Adaptation to an extraordinary environment by evolution of phenotypic plasticity and genetic assimilation. \emph{Journal of evolutionary biology}, 22(7), pp.1435-1446.\\
+
+Levins, R., 1968. Evolution in changing environments. \emph{Princeton University Press}.\\
+
+Lynch, M. and Walsh, B., 1998. Genetics and analysis of quantitative traits. \emph{Sinauer Associates, Inc.}. Sunderland, Massachusetts.\\
+
+Via, S., Gomulkiewicz, R., De Jong, G., Scheiner, S.M., Schlichting, C.D. and Van Tienderen, P.H., 1995. Adaptive phenotypic plasticity: consensus and controversy. \emph{Trends in ecology and evolution}, 10(5), pp.212-217.\\
+
+Via, S. and Lande, R., 1985. Genotype‐environment interaction and the evolution of phenotypic plasticity. \emph{Evolution}, 39(3), pp.505-522.\\
+}
+
+\end{figure}
+
+\clearpage
+\newpage
 
 \end{document}

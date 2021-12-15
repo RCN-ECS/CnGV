@@ -1,6 +1,17 @@
-\contentsline {section}{List of Figures}{1}%
 \contentsline {section}{\tocsection {}{Supplemental Methods}{1. Proof for $Cov_{GE}$}}{2}%
 \contentsline {section}{\tocsection {}{Supplemental Methods}{2. Population Equations}}{5}%
-\contentsline {section}{\tocsection {}{Supplemental Methods}{3. Imbalanced Designs}}{6}%
-\contentsline {section}{\tocsection {}{Supplemental Methods}{4. Variance partitioning}}{7}%
-\contentsline {section}{\tocsection {}{Supplemental Figures}{Figures}}{9}%
+\contentsline {section}{\tocsection {}{Supplemental Methods}{3. Variance partitioning}}{6}%
+\contentsline {section}{\tocsection {}{Supplemental Tables}{Tables}}{9}%
+\contentsline {section}{\tocsection {}{Supplemental Tables}{1. Comparison of forms of Covariance}}{9}%
+\contentsline {section}{\tocsection {}{Supplemental Tables}{2. Variance Components - Single Common Garden}}{10}%
+\contentsline {section}{\tocsection {}{Supplemental Tables}{3. Variance Components - Reciprocal Transplant}}{11}%
+\contentsline {section}{\tocsection {}{Supplemental Tables}{4. Imbalanced Designs}}{12}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{Figures}}{13}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{1. Compatible and Incompatible designs}}{13}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{2. Coverage of parameter space}}{14}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{3. Examples of simulated data}}{15}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{4. Population vs. Sample Estimates}}{16}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{5. False negative rates for $\bar \Delta _{GxE}$}}{17}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{6. $V_{g*e}$ vs. $V_{cov_{ge}}$}}{18}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{7. Comparison of the percent of variance explained by $Cov_{GE}$}}{19}%
+\contentsline {section}{\tocsection {}{Supplemental Figures}{8. Sample data for balanced and imbalanced designs}}{21}%

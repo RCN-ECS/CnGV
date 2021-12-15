@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  22 JUL 2021 14:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  15 DEC 2021 09:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -480,10 +480,6 @@ File: siunitx-abbreviations.cfg 2017/11/26 v2.7k siunitx: Abbreviated units
 \tf@toc=\write3
 \openout3 = `SuppMatCNGV.toc'.
 
- (./SuppMatCNGV.lof)
-\tf@lof=\write4
-\openout4 = `SuppMatCNGV.lof'.
-
  [1{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
@@ -494,97 +490,207 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 [4] [5
 
 ]
-<Figs/UnbalancedTable.pdf, id=30, 963.6pt x 542.025pt>
-File: Figs/UnbalancedTable.pdf Graphic file (type pdf)
-<use Figs/UnbalancedTable.pdf>
-Package pdftex.def Info: Figs/UnbalancedTable.pdf  used on input line 156.
-(pdftex.def)             Requested size: 433.62pt x 243.90898pt.
-
-
-LaTeX Font Warning: Font shape `OT1/cmss/m/sc' in size <10.95> not available
-(Font)              Font shape `OT1/cmr/m/sc' tried instead on input line 159.
-
-[6
-
- <./Figs/UnbalancedTable.pdf>]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [7
+ [6
 
 ]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [7]
 [8]
-<Figs/IncompatibleDesigns.jpg, id=73, 722.7pt x 406.51875pt>
-File: Figs/IncompatibleDesigns.jpg Graphic file (type jpg)
-<use Figs/IncompatibleDesigns.jpg>
-Package pdftex.def Info: Figs/IncompatibleDesigns.jpg  used on input line 228.
-(pdftex.def)             Requested size: 433.62pt x 243.91312pt.
- [9
 
- <./Figs/IncompatibleDesigns.jpg>]
-<Figs/HexPlot.jpeg, id=77, 751.80875pt x 822.07124pt>
-File: Figs/HexPlot.jpeg Graphic file (type jpg)
-<use Figs/HexPlot.jpeg>
-Package pdftex.def Info: Figs/HexPlot.jpeg  used on input line 240.
-(pdftex.def)             Requested size: 433.62pt x 474.1549pt.
- [10
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./Figs/Table1_CovarianceForm
+s.pdf): PDF inclusion: found PDF version <1.7>, but at most version <1.5> allow
+ed
+<Figs/Table1_CovarianceForms.pdf, id=43, 653.4899pt x 472.43163pt>
+File: Figs/Table1_CovarianceForms.pdf Graphic file (type pdf)
+<use Figs/Table1_CovarianceForms.pdf>
+Package pdftex.def Info: Figs/Table1_CovarianceForms.pdf  used on input line 21
+7.
+(pdftex.def)             Requested size: 542.025pt x 391.87305pt.
 
- <./Figs/HexPlot.jpeg>]
-<Figs/SampleVsPopulation.jpeg, id=81, 1230.5975pt x 804.00375pt>
-File: Figs/SampleVsPopulation.jpeg Graphic file (type jpg)
-<use Figs/SampleVsPopulation.jpeg>
-Package pdftex.def Info: Figs/SampleVsPopulation.jpeg  used on input line 253.
-(pdftex.def)             Requested size: 433.62pt x 283.29482pt.
- [11
+LaTeX Font Warning: Font shape `OT1/cmss/m/sc' in size <10.95> not available
+(Font)              Font shape `OT1/cmr/m/sc' tried instead on input line 220.
 
- <./Figs/SampleVsPopulation.jpeg>]
-<Figs/GxE_Panel.jpg, id=85, 718.685pt x 862.22125pt>
-File: Figs/GxE_Panel.jpg Graphic file (type jpg)
-<use Figs/GxE_Panel.jpg>
-Package pdftex.def Info: Figs/GxE_Panel.jpg  used on input line 265.
-(pdftex.def)             Requested size: 433.62pt x 520.23116pt.
+[9
+
+ <./Figs/Table1_CovarianceForms.pdf>]
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./Figs/SuppTable2_Variancefo
+rCommonGarden.pdf): PDF inclusion: found PDF version <1.7>, but at most version
+ <1.5> allowed
+<Figs/SuppTable2_VarianceforCommonGarden.pdf, id=65, 656.19623pt x 209.05824pt>
+
+File: Figs/SuppTable2_VarianceforCommonGarden.pdf Graphic file (type pdf)
+<use Figs/SuppTable2_VarianceforCommonGarden.pdf>
+Package pdftex.def Info: Figs/SuppTable2_VarianceforCommonGarden.pdf  used on i
+nput line 231.
+(pdftex.def)             Requested size: 542.025pt x 172.6857pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 236--236
+
+ []
+
+[10
+
+ <./Figs/SuppTable2_VarianceforCommonGarden.pdf>]
+
+pdfTeX warning: /Library/TeX/texbin/pdflatex (file ./Figs/SuppTable3_Variancefo
+rReciprocalTransplant.pdf): PDF inclusion: found PDF version <1.7>, but at most
+ version <1.5> allowed
+<Figs/SuppTable3_VarianceforReciprocalTransplant.pdf, id=81, 691.98148pt x 364.
+52045pt>
+File: Figs/SuppTable3_VarianceforReciprocalTransplant.pdf Graphic file (type pd
+f)
+<use Figs/SuppTable3_VarianceforReciprocalTransplant.pdf>
+Package pdftex.def Info: Figs/SuppTable3_VarianceforReciprocalTransplant.pdf  u
+sed on input line 247.
+(pdftex.def)             Requested size: 542.025pt x 285.5429pt.
+[11
+
+ <./Figs/SuppTable3_VarianceforReciprocalTransplant.pdf>]
+<Figs/UnbalancedTable.pdf, id=104, 963.6pt x 542.025pt>
+File: Figs/UnbalancedTable.pdf Graphic file (type pdf)
+<use Figs/UnbalancedTable.pdf>
+Package pdftex.def Info: Figs/UnbalancedTable.pdf  used on input line 266.
+(pdftex.def)             Requested size: 433.62pt x 243.90898pt.
  [12
 
- <./Figs/GxE_Panel.jpg>]
-<Figs/VgxevsVcov.pdf, id=89, 289.08pt x 216.81pt>
-File: Figs/VgxevsVcov.pdf Graphic file (type pdf)
-<use Figs/VgxevsVcov.pdf>
-Package pdftex.def Info: Figs/VgxevsVcov.pdf  used on input line 279.
-(pdftex.def)             Requested size: 433.62pt x 325.23073pt.
+ <./Figs/UnbalancedTable.pdf>]
+<Figs/IncompatibleDesigns.jpg, id=138, 722.7pt x 406.51875pt>
+File: Figs/IncompatibleDesigns.jpg Graphic file (type jpg)
+<use Figs/IncompatibleDesigns.jpg>
+Package pdftex.def Info: Figs/IncompatibleDesigns.jpg  used on input line 287.
+(pdftex.def)             Requested size: 433.62pt x 243.91312pt.
  [13
 
+ <./Figs/IncompatibleDesigns.jpg>]
+<Figs/HexPlot.jpeg, id=143, 751.80875pt x 822.07124pt>
+File: Figs/HexPlot.jpeg Graphic file (type jpg)
+<use Figs/HexPlot.jpeg>
+Package pdftex.def Info: Figs/HexPlot.jpeg  used on input line 301.
+(pdftex.def)             Requested size: 433.62pt x 474.1549pt.
+ [14
+
+ <./Figs/HexPlot.jpeg>]
+<Figs/3.23.PhenotypePanel.png, id=147, 542.025pt x 963.6pt>
+File: Figs/3.23.PhenotypePanel.png Graphic file (type png)
+<use Figs/3.23.PhenotypePanel.png>
+Package pdftex.def Info: Figs/3.23.PhenotypePanel.png  used on input line 315.
+(pdftex.def)             Requested size: 289.07999pt x 513.9403pt.
+ [15
+
+ <./Figs/3.23.PhenotypePanel.png>]
+<Figs/SampleVsPopulation.jpeg, id=151, 1230.5975pt x 804.00375pt>
+File: Figs/SampleVsPopulation.jpeg Graphic file (type jpg)
+<use Figs/SampleVsPopulation.jpeg>
+Package pdftex.def Info: Figs/SampleVsPopulation.jpeg  used on input line 329.
+(pdftex.def)             Requested size: 433.62pt x 283.29482pt.
+ [16
+
+ <./Figs/SampleVsPopulation.jpeg>]
+<Figs/GxE_Panel.jpg, id=155, 718.685pt x 862.22125pt>
+File: Figs/GxE_Panel.jpg Graphic file (type jpg)
+<use Figs/GxE_Panel.jpg>
+Package pdftex.def Info: Figs/GxE_Panel.jpg  used on input line 344.
+(pdftex.def)             Requested size: 433.62pt x 520.23116pt.
+
+[17
+
+ <./Figs/GxE_Panel.jpg>]
+<Figs/VgxevsVcov.pdf, id=159, 289.08pt x 216.81pt>
+File: Figs/VgxevsVcov.pdf Graphic file (type pdf)
+<use Figs/VgxevsVcov.pdf>
+Package pdftex.def Info: Figs/VgxevsVcov.pdf  used on input line 359.
+(pdftex.def)             Requested size: 433.62pt x 325.23073pt.
+ [18
+
  <./Figs/VgxevsVcov.pdf>]
-<Figs/EstimateVsVariance.pdf, id=103, 614.295pt x 794.97pt>
+<Figs/EstimateVsVariance.pdf, id=173, 614.295pt x 794.97pt>
 File: Figs/EstimateVsVariance.pdf Graphic file (type pdf)
 <use Figs/EstimateVsVariance.pdf>
-Package pdftex.def Info: Figs/EstimateVsVariance.pdf  used on input line 292.
+Package pdftex.def Info: Figs/EstimateVsVariance.pdf  used on input line 373.
 (pdftex.def)             Requested size: 433.62pt x 561.15749pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[14 <./Figs/EstimateVsVariance.pdf>]
-<Figs/Balanced_Imbalanced.jpg, id=115, 722.7pt x 406.51875pt>
+[19
+
+] [20 <./Figs/EstimateVsVariance.pdf>]
+<Figs/Balanced_Imbalanced.jpg, id=189, 722.7pt x 406.51875pt>
 File: Figs/Balanced_Imbalanced.jpg Graphic file (type jpg)
 <use Figs/Balanced_Imbalanced.jpg>
-Package pdftex.def Info: Figs/Balanced_Imbalanced.jpg  used on input line 305.
+Package pdftex.def Info: Figs/Balanced_Imbalanced.jpg  used on input line 388.
 (pdftex.def)             Requested size: 433.62pt x 243.91312pt.
- [15
-
+ [21
 
  <./Figs/Balanced_Imbalanced.jpg>]
-(./SuppMatCNGV.aux)
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 427--427
+
+ []
+
+[22
+
+] (./SuppMatCNGV.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 8195 strings out of 480608
- 159583 string characters out of 5903631
- 402954 words of memory out of 5000000
- 23786 multiletter control sequences out of 15000+600000
- 543629 words of font info for 67 fonts, out of 8000000 for 9000
+ 8222 strings out of 480608
+ 160814 string characters out of 5903631
+ 403639 words of memory out of 5000000
+ 23810 multiletter control sequences out of 15000+600000
+ 543975 words of font info for 68 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
- 41i,13n,50p,2191b,915s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,13n,50p,2191b,916s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
 }</usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb>
@@ -597,13 +703,15 @@ sr/local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr
 /local/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/lo
 cal/texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local
 /texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/
-texlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm0500.pfb></usr/local/te
-xlive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></usr/local/texl
-ive/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on SuppMatCNGV.pdf (15 pages, 3973646 bytes).
+texlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/te
+xlive/2020/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/tex
+live/2020/texmf-dist/fonts/type1/public/cm-super/sfrm0500.pfb></usr/local/texli
+ve/2020/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></usr/local/texlive
+/2020/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
+Output written on SuppMatCNGV.pdf (22 pages, 4311597 bytes).
 PDF statistics:
- 166 PDF objects out of 1000 (max. 8388607)
- 109 compressed objects within 2 object streams
+ 249 PDF objects out of 1000 (max. 8388607)
+ 169 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
- 41 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 61 words of extra memory for PDF output out of 10000 (max. 10000000)
 
