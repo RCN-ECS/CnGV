@@ -1,0 +1,178 @@
+---
+title: "Behavior of PL metric"
+author: "KE Lotterhos"
+date: "10/7/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Function
+
+PL > 1 countegradient "wrong sign 
+0 < PL < 1 cogradient
+PL < 1 countegradient
+
+
+## Function
+
+This function takes a vector of the (hypothetical) measured phenotypes from a 2x2 reciprocal transplant and plots them with the calculated PL metric.
+
+```{r}
+makeplot <- function(a, letr, main){
+   plot(0:1, c(a[1:2]), ylim=c(-2,2), 
+        xaxt ="n", type="l", col="blue", xlab="", 
+        ylab="Stnd. phenotype", bty="l", 
+        main=main, lwd=2, xlim=c(0,1.5))
+  mtext("EA", side=1, line=1, adj=0, col="blue")
+  points(0:1, c(a[3:4]),  type="l", col="green", xlab="", lwd=1, lty=2)
+  mtext("EB", side=1, line=1, adj=0.66, col="green")
+
+  D_H <- a[1] - a[4]
+  (D_EA <- a[1]-a[2])
+  (D_EB <- a[3]-a[4])
+  (D_E <- mean(c(D_EA, D_EB)))
+  
+  text(1.1,a[1],"D_H", cex=0.8)
+  arrows(1.2,a[4], 1.2, a[1], length=0.1)
+  
+  text(1.4, a[1], "D_E", cex=0.8)
+  arrows(1.3, mean(c(a[2], a[4])), 
+         1.3, mean(c(a[2], a[4]))+D_E, 
+         length=0.1)
+
+  PL <- D_E/D_H
+  text(1,-1.9,paste("PL =",PL),adj=1)
+  
+  text(0,2, letr)
+  return(data.frame(D_H=D_H, D_EA = D_EA,
+                    D_EB=D_EB,D_E=D_E, PL=PL))
+}
+```
+
+## Cases 1 and 2: drastically different PL metrics for similar reaction norms
+These two cases show how slight differences in the mean fitness in the home population can give extremely opposite values of the PL statistic.
+
+- `PAEA` is the phenotype value for genotype A in Environment A
+- `PAEB` is the phenotype value for genotype A in Environment B
+- `PBEA` is the phenotype value for genotype B in Environment A
+- `PBEB` is the phenotype value for genotype B in Environment B
+
+Case 1 and Case 2 are both countergradient scenarios. In both cases, `PAEA` = 0 and `PAEB`= 1. 
+
+However, there are very small differences in `PBEA` and `PBEB`, which generate large differences in the PL metric. In Case 1 `PBEA`=-0.99 while in Case 2 `PBEA`= -1.01 (a difference of -0.02), and in Case 1 `PBEB`=0.01 while in Case 2 `PBEB`= -0.01 (a difference of +0.02).
+
+```{r}
+# Case 1
+case1 <- rep(NA, 4)
+names(case1) <- c("PAEA", "PAEB", "PBEA", "PBEB")
+a <- 0
+case1[1:4] <- c(a,a+1,a-1+0.01,a+0.01)
+case1
+```
+
+```{r}
+# Case 2
+case2 <- rep(NA, 4)
+names(case2) <- names(case1)
+a <- 0
+case2[1:4] <- c(a,a+1,a-1-0.01,a-0.01)
+case2
+```
+
+The following plot shows how Case 1 and Case 2 have almost equivalent reaction norms, and therefore similar plastic responses to the environment and similar amount of countergradient variation.
+
+Case 1 has `PL=100` (implying XXX) while Case 2 has `PL= -100` (implying XXX).
+
+Note that the difference in means for the two cases are very small and are within the range expected by sampling error, but the PL metric implies that they are very different cases.
+
+```{r, fig.height=6, fig.width=4}
+par(mfrow=c(2,1))
+makeplot(case1, "", "Case 1")
+makeplot(case2, "", "Case 2")
+```
+
+## Cases 3 and 4: PL = 1 for GxE reaction norms
+
+In Cases 3 and 4, we compare two very different patterns of reaction norms that both give `PL=1`. In both cases, the "A" genotype is plastic, and the "B" genotype has little or no plasticity.
+
+As you can see in the figures below, in each case there is a pattern of genetic x environment interaction on the trait value:
+
+```{r}
+case3 <- rep(NA, 4)
+names(case3) <- names(case1)
+case3[1:4] <- c(1,-1,0,0)
+case3
+
+case4 <- rep(NA, 4)
+names(case4) <- names(case1)
+case4[1:4] <- c(-1.2, +1.4, +0.5,  -0.3)
+case4
+
+par(mfrow=c(2,1))
+makeplot(case3, "", "Case 3")
+makeplot(case4, "", "Case 4")
+```
+
+
+`PL = 1` implies cogradient or perfect plasticity.
+
+However, due the the GxE in this graph there is very little co-gradient.
+
+
+## PL = 1 for "perfect" plasticity scenario but different degrees of plasticity
+
+In Cases 5 and 6, we compare two very different patterns of reaction norms that also give `PL=1`. In both cases, there is no differentiation between the genotypes (both gentoypes have the same reaction norms).
+
+In Case 5, there is almost no plasticity as there is a very small change in the phenotype from one environment to the other. 
+
+In Case 6, there is a lot of plasticity because there is a relatively large change in the phenotype from one environment to the other.
+
+Nevertheless, both these cases are considered "perfect plasticity" under the PL framework, since trait value of the local genotype is equal to the trait value of the foreign genotype in both environments.
+
+```{r}
+case5 <- rep(NA, 4)
+names(case5) <- names(case1)
+case6 <- case5
+
+case5[1:4] <- c(-0.1, 0.1, -0.15, 0.15)
+case6[1:4] <- c(-1, 1, -1.05, 1.05)
+
+par(mfrow=c(2,1))
+makeplot(case5, "", "Case 5")
+makeplot(case6, "", "Case 6")
+```
+
+## Summary of PL behavior 
+
+Under countergradient variation, PL is bimodal and can give extremely different values for datasets with very similar reaction norms (Cases 1-2).
+
+PL can also give the same value for very different patterns of reaction norms, varying from those with high genetic variation and GxE (Cases 3-4) to those with no genetic differentiation (Cases 5-6).
+
+```{r}
+
+final_1 <- rbind(case1, case2, case3, case4, case5, case6)
+
+# Make plot
+#pdf("")
+par(mfrow=c(3,2), mar=c(3,1,1,1), oma=c(0,3,0,0))
+a <- makeplot(case1, "A", "Case 1")
+b <- makeplot(case2, "B", "Case 2")
+c <- makeplot(case3, "C", "Case 3")
+d <- makeplot(case4, "D", "Case 4")
+e <- makeplot(case5, "E", "Case 5")
+f <- makeplot(case6, "F", "Case 6")
+mtext("Standardized phenotype", side=2, 
+      outer=TRUE, line=1)
+#dev.off()
+
+final_2 <- rbind(a,b,c,d,e, f)
+
+(final <- cbind(final_1, final_2))
+```
+
+TO DO: 
