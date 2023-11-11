@@ -7,16 +7,22 @@ output:
   html_document: default
 ---
 
+setwd("/Users/lotterhos/Documents/GitHub/CnGV/notebook")
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Function
+## Description of PL metric
+
+Add Math
+
+Add Interpretation:
 
 PL > 1 countegradient "wrong sign 
 0 < PL < 1 cogradient
 PL < 1 countegradient
 
+# this tells me that their claims that counter > 1 or <0 and cogradient between 0 and 1 is correct
 
 ## Function
 
@@ -119,7 +125,7 @@ makeplot(case4, "", "Case 4")
 ```
 
 
-`PL = 1` implies cogradient or perfect plasticity.
+In the paper, `PL = 1` implies cogradient or perfect plasticity.
 
 However, due the the GxE in this graph there is very little co-gradient.
 
@@ -175,4 +181,113 @@ final_2 <- rbind(a,b,c,d,e, f)
 (final <- cbind(final_1, final_2))
 ```
 
-TO DO: 
+## Compare PL to CovGE
+
+Here are a complete results of the simulations from Albecker. 
+```{r}
+powdf <- read.csv("../results/Results_10.06.2020/Archive/Power_output_results.csv")
+vardf <- read.csv("../results/Results_10.06.2020/Archive/Variance_output_results.csv")
+PLdf <- read.csv("../results/Results_10.06.2020/Archive/PL_output_results.csv")
+phendf <- read.csv("~/Desktop/phenotype_output_results.csv")
+
+head(powdf)
+head(vardf)
+head(PLdf)
+head(phendf)
+
+dim(powdf)
+dim(vardf)
+dim(PLdf)
+
+
+summary(powdf$row)
+levels(as.factor(powdf$replicate))
+summary(vardf$row)
+summary(PLdf$row)
+
+sum(!complete.cases(phendf))
+dim(phendf)
+```
+
+First, we have to subset the data to cases with 2 genotypes and 2 environments because Stamp and Hadfield (XXXX) only demonostrated how to calculate the PL metric for those cases. However, note that CovGE can be calculated for many different designs.
+
+```{r}
+cases <- powdf$row[powdf$n_env==2 & powdf$n_pop==2]
+length(cases)
+```
+There are 800 cases in our simulations.
+
+Let's subset the data to those cases:
+
+```{r}
+powdf2 <- powdf[powdf$row %in% cases,]
+vardf2 <- vardf[vardf$row %in% cases,]
+
+dim(powdf2)
+head(PLdf)
+
+newdf <- merge(powdf2, PLdf, by = "row")
+dim(newdf)
+str(newdf)
+
+newdf$G1E1mean <- NA
+newdf$G1E2mean <- NA
+newdf$G2E1mean <- NA
+newdf$G2E2mean <- NA
+```
+
+Here is an example of how to extract the mean phenotype value for 2 genotypes grown in 2 environments:
+```{r}
+i = 1001
+cond <- which(phendf$row==i)
+tapply(phendf$phen_corrected[cond],as.character(phendf$GE_factor[cond]), mean, na.rm=TRUE)
+```
+
+First, let's compare CovGE and PL for all the simulations:
+```{r}
+## compare CovGE and PL
+  plot(newdf$covariance.x, newdf$PL, xlab="CovGE", ylab="PL"
+         )
+```
+The above plot shows that as the dataset approaches countergradient variation (CovGE = -1), the PL metric can have very large positive or negative values.
+  
+Let's zoom in on the y-axis:  
+```{r}  
+  plot(newdf$covariance.x, newdf$PL, ylim=c(-1,2),
+       xlab="CovGE", ylab="PL", main="Figure 1")
+  abline(1,0)
+  abline(0,0)
+  abline(v=0)
+```
+This plot shows that in 2x2 cases, the PL metric is directly related to CovGE. At PL = 0 or PL = 1, there is no gradient variation (CovGE=0). The vertical line shows were CovGE = 0 (no gradient variation). The horizontal lines shows where PL = 0 (???) and PL = 1 (???).
+
+
+## Can PL be used to infer the overall distribution of cogradient or countergradient variation in nature?
+
+The last figure shows that PL is bimodally distributed for countegradient variation, which raises questions about the usefulness for PL as a metric to understand whether cogradient variation or countergradient variation is more common. 
+
+The Albecker simulations were designed to capture a range of possible patterns that may arise in 2 genotype x 2 environment experiments in nature. The distribution of simulated parameters gave an approximately even number of cogradient and countergradient patterns, with more patterns with weak or no gradient simulations.
+
+We can visualize this with the distribution of CovGE in the simulations:
+```{r}
+summary(newdf$covariance.x)
+hist(newdf$covariance.x, main="", xlab="Distribution of CovGE in simulations", breaks=seq(-1,1,0.1))
+```
+Note that the distribution is symmetric around 0, with a slight skew toward countegradient scenarios.
+
+
+We can compare this to the distribution of the PL metric from the same simulations, which has an average of 0.5 (implying that the average scenario in the simulations is perfect co-gradient variation). This happens because when PL < 0 (countergradient variation) it is bimodally distributed, and these values essentially cancel each other out. The consequence is that even when the average pattern in nature is no gradient variation (as it was in the simulations), the PL metric would erroneously infer cogradient variation as the most common scenario.
+```{r}
+summary(newdf$PL)
+hist(newdf$PL[newdf$PL<5 & newdf$PL>-5], main="", xlab="Distribution of PL in simulations", breaks=seq(-5,5,0.1))
+
+summary(abs(newdf$PL))
+hist(abs(newdf$PL[newdf$PL<5 & newdf$PL>-5]), main="", xlab="Distribution of PL in simulations", breaks=seq(-5,5,0.1))
+```
+
+TO DO : check if this is what they used to infer in the paper. They may have taken the absolute value?
+
+# Summary
+- PL is limited to calculation for 2 genotypes in 2 environments, while CovGE is not
+- PL SUMMARIZE CASES
+- When the distribution of gradient variation in a set of datasets is symmetric (equal numbers of cogradient and countegradient variation), CovGE will have a mean of 0 while PL will have a mean of 0.5.
