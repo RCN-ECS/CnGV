@@ -14,15 +14,50 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Description of PL metric
 
-Add Math
+The PL metric was developed in Stamp and Hadfield 2020 (hereafter SH2020, doi: 10.1111/ele.13565). The metric can be calculated for a 2 population x 2 environment reciprocal transplant scenario (teciprocal transplant experiments are those in which two populations are assayed in their own and each other’s environment). The used the metric to test whether phenotypic differences between populations are due to genetic differences or a plastic response to environmental variation. They also used the metric to test the prevalance of co-gradient vs. countergradient variation in the datasets. It is this latter application of the PL metric that we explore here.
 
-Add Interpretation:
+The _in situ_ divergence is the difference in mean phenotypes of two populations raised in their home environments ($P_AE_A - P_BE_B$, where $P_iE_j$ refers to the average phenotype of individuals from population $i$ raised in the environment of population of $j$).
 
-PL > 1 countegradient "wrong sign 
-0 < PL < 1 cogradient
-PL < 1 countegradient
 
-# this tells me that their claims that counter > 1 or <0 and cogradient between 0 and 1 is correct
+They define PL as:
+
+$PL = \Delta E / \Delta H$
+
+where
+
+$\Delta E_A = P_AE_A - P_AE_B$
+
+In SH2020 they state "the difference in phenotype between individuals from Population B in Environment A ($P_BE_A$) and from Population B in Environment B ($P_BE_B$) can be ascribed to plasticity ($\Delta E_B$)," so it is a little ambiguous whether then mean $P_BE_B - P_BE_A$ or $P_BE_A - P_BE_B$. We use the latter definition because it would give PL = 1 under a "perfect plasticity" scenario, and would be consistent with the outcomes and interpretation in the paper.
+
+$\Delta E_B = P_BE_A - P_BE_B$
+
+$\Delta E = (\Delta E_A + \Delta E_B)/2 = ((P_AE_A - P_AE_B) + (P_BE_A- P_BE_B))/2$
+
+
+$\Delta H = P_AE_A - P_BE_B$
+
+They also define: 
+
+$\Delta A = P_BE_A - P_AE_B$ (the estimated difference in the two populations phenotypes when away in each other’s environment)
+
+### Interpretation of PL:
+
+SH2020 interpret the plasticity metric $PL = \Delta E / \Delta H$ as lying between zero and one if there is co-gradient variation, negative if there is wrong-sign plasticity, or greater than one if there is hyperplasticity.
+
+- PL > 1 countegradient with hyperplasticity
+- 0 < PL < 1 cogradient
+- PL = 1 is interpreted as perfect plasticity (Figure 4)
+- PL < 1 countegradient with wrong-sign plasticity
+
+
+$PL = \Delta E / \Delta H = (((P_AE_A - P_AE_B) + (P_BE_A- P_BE_B))/2)/(P_AE_A - P_BE_B)$
+
+When 100% of the divergence is due to plasticity with no genetic differentiation, in Environment A both populations would have the same trait value ($P_BE_A = P_AE_A$) and in Environment B both populations would have the same trait value ($P_AE_B = P_BE_B$) 
+
+In this case, plugging in the equivalencies to the PL equations shows that the numerator of PL reduces to 1:
+$PL = (((P_AE_A - P_BE_B) + (P_AE_A- P_BE_B))/2)/(P_AE_A - P_BE_B) = (2(P_AE_A-P_BE_B)/2)/(P_AE_A - P_BE_B) = 1$
+
+Therefore, values of PL = 1 are interepreted as "perfect plasticity" in the paper. (Below, we show that scenarios with GxE can also give PL = 1)
 
 ## Function
 
@@ -30,6 +65,8 @@ This function takes a vector of the (hypothetical) measured phenotypes from a 2x
 
 ```{r}
 makeplot <- function(a, letr, main){
+  # a is vector of "PAEA", "PAEB", "PBEA", "PBEB"
+  
    plot(0:1, c(a[1:2]), ylim=c(-2,2), 
         xaxt ="n", type="l", col="blue", xlab="", 
         ylab="Stnd. phenotype", bty="l", 
@@ -40,7 +77,8 @@ makeplot <- function(a, letr, main){
 
   D_H <- a[1] - a[4]
   (D_EA <- a[1]-a[2])
-  (D_EB <- a[3]-a[4])
+  #(D_EB <- a[3]-a[4])
+  (D_EB <- a[4]-a[3])
   (D_E <- mean(c(D_EA, D_EB)))
   
   text(1.1,a[1],"D_H", cex=0.8)
@@ -68,7 +106,7 @@ These two cases show how slight differences in the mean fitness in the home popu
 - `PBEA` is the phenotype value for genotype B in Environment A
 - `PBEB` is the phenotype value for genotype B in Environment B
 
-Case 1 and Case 2 are both countergradient scenarios. In both cases, `PAEA` = 0 and `PAEB`= 1. 
+Case 1 and Case 2 are both countergradient scenarios, with almost the exact same reaction norms. In both cases, `PAEA` = 0 and `PAEB`= 1. 
 
 However, there are very small differences in `PBEA` and `PBEB`, which generate large differences in the PL metric. In Case 1 `PBEA`=-0.99 while in Case 2 `PBEA`= -1.01 (a difference of -0.02), and in Case 1 `PBEB`=0.01 while in Case 2 `PBEB`= -0.01 (a difference of +0.02).
 
@@ -92,7 +130,7 @@ case2
 
 The following plot shows how Case 1 and Case 2 have almost equivalent reaction norms, and therefore similar plastic responses to the environment and similar amount of countergradient variation.
 
-Case 1 has `PL=100` (implying XXX) while Case 2 has `PL= -100` (implying XXX).
+Case 1 has `PL=100` (implying extreme hyperplasticity) while Case 2 has `PL= -100` (implying extreme wrong-sign plasticity).
 
 Note that the difference in means for the two cases are very small and are within the range expected by sampling error, but the PL metric implies that they are very different cases.
 
@@ -125,23 +163,21 @@ makeplot(case4, "", "Case 4")
 ```
 
 
-In the paper, `PL = 1` implies cogradient or perfect plasticity.
-
-However, due the the GxE in this graph there is very little co-gradient.
+In the paper, `PL = 1` is interpreted as "perfect plasticity" (which is interpreted as all the divergence due to plasticity), however these conceptual examples show that GxE reaction norms can also give PL=1 due to the averaging of the $\Delta E_A$ and $\Delta E_B$.
 
 
-## PL = 1 for "perfect" plasticity scenario but different degrees of plasticity
+## PL = 1 for "perfect" plasticity scenario
 
-In Cases 5 and 6, we compare two very different patterns of reaction norms that also give `PL=1`. In both cases, there is no differentiation between the genotypes (both gentoypes have the same reaction norms).
+In Cases 5 and 6, we show that are function also produces `PL=1` in the perfect plasticity scenario. In both cases, there is no differentiation between the genotypes (both gentoypes have the same reaction norms).
 
 In Case 5, there is almost no plasticity as there is a very small change in the phenotype from one environment to the other. 
 
 In Case 6, there is a lot of plasticity because there is a relatively large change in the phenotype from one environment to the other.
 
-Nevertheless, both these cases are considered "perfect plasticity" under the PL framework, since trait value of the local genotype is equal to the trait value of the foreign genotype in both environments.
+Both these cases are considered "perfect plasticity" under the PL framework, since trait value of the local genotype is equal to the trait value of the foreign genotype in both environments.
 
 ```{r}
-case5 <- rep(NA, 4)
+case5 <- rep(NA, 4) 
 names(case5) <- names(case1)
 case6 <- case5
 
@@ -183,39 +219,31 @@ final_2 <- rbind(a,b,c,d,e, f)
 
 ## Compare PL to CovGE
 
-Here are a complete results of the simulations from Albecker. 
+We compare the PL metric to the CovGE metric from Albecker, Trussell, and Lotterhos 2022 (hereafter ATL2022 https://doi.org/10.1111/ele.14020) to show that the two are related.
+
+The PL metric can only be calculated for a 2x2 reciprocal transplant, however the CovGE metric can be calculated for any reciprocal transplant experiment as well as a specifically designed common garden experiment with at least 2 common gardens and multiple genotypes (see ATL2022 for details.)
+
+First, we load a complete results of the simulations from Albecker, which included a calculation of the PL metric. 
 ```{r}
 powdf <- read.csv("../results/Results_10.06.2020/Archive/Power_output_results.csv")
 vardf <- read.csv("../results/Results_10.06.2020/Archive/Variance_output_results.csv")
 PLdf <- read.csv("../results/Results_10.06.2020/Archive/PL_output_results.csv")
 phendf <- read.csv("~/Desktop/phenotype_output_results.csv")
 
-head(powdf)
-head(vardf)
-head(PLdf)
-head(phendf)
-
-dim(powdf)
-dim(vardf)
-dim(PLdf)
-
-
-summary(powdf$row)
-levels(as.factor(powdf$replicate))
-summary(vardf$row)
-summary(PLdf$row)
-
-sum(!complete.cases(phendf))
-dim(phendf)
+#head(powdf)
+#head(vardf)
+#head(PLdf)
+#head(phendf)
 ```
 
-First, we have to subset the data to cases with 2 genotypes and 2 environments because Stamp and Hadfield (XXXX) only demonostrated how to calculate the PL metric for those cases. However, note that CovGE can be calculated for many different designs.
+First, we have to subset the data to cases with 2 genotypes and 2 environments because SH2020 only derived the PL metric for those cases. However, note that CovGE can be calculated for many different designs.
 
 ```{r}
 cases <- powdf$row[powdf$n_env==2 & powdf$n_pop==2]
 length(cases)
 ```
-There are 800 cases in our simulations.
+
+There are 800 cases that met this criteria in our simulations.
 
 Let's subset the data to those cases:
 
@@ -223,12 +251,12 @@ Let's subset the data to those cases:
 powdf2 <- powdf[powdf$row %in% cases,]
 vardf2 <- vardf[vardf$row %in% cases,]
 
-dim(powdf2)
-head(PLdf)
+#dim(powdf2)
+#head(PLdf)
 
 newdf <- merge(powdf2, PLdf, by = "row")
-dim(newdf)
-str(newdf)
+#dim(newdf)
+#str(newdf)
 
 newdf$G1E1mean <- NA
 newdf$G1E2mean <- NA
@@ -249,6 +277,7 @@ First, let's compare CovGE and PL for all the simulations:
   plot(newdf$covariance.x, newdf$PL, xlab="CovGE", ylab="PL"
          )
 ```
+
 The above plot shows that as the dataset approaches countergradient variation (CovGE = -1), the PL metric can have very large positive or negative values.
   
 Let's zoom in on the y-axis:  
@@ -259,35 +288,49 @@ Let's zoom in on the y-axis:
   abline(0,0)
   abline(v=0)
 ```
-This plot shows that in 2x2 cases, the PL metric is directly related to CovGE. At PL = 0 or PL = 1, there is no gradient variation (CovGE=0). The vertical line shows were CovGE = 0 (no gradient variation). The horizontal lines shows where PL = 0 (???) and PL = 1 (???).
+
+
+This plot shows that in 2x2 cases, the PL metric is directly related to CovGE. At PL = 0 or PL = 1, there is no gradient variation (CovGE=0). The vertical line shows were CovGE = 0 (no gradient variation). The horizontal lines shows where PL = 0 and PL = 1 (perfect plasticity).
 
 
 ## Can PL be used to infer the overall distribution of cogradient or countergradient variation in nature?
 
-The last figure shows that PL is bimodally distributed for countegradient variation, which raises questions about the usefulness for PL as a metric to understand whether cogradient variation or countergradient variation is more common. 
+The last figure shows that PL is bimodally distributed for countergradient variation.
 
-The Albecker simulations were designed to capture a range of possible patterns that may arise in 2 genotype x 2 environment experiments in nature. The distribution of simulated parameters gave an approximately even number of cogradient and countergradient patterns, with more patterns with weak or no gradient simulations.
+The Albecker simulations were designed to capture a range of possible patterns that may arise in 2 genotype x 2 environment experiments in nature. The distribution of simulated parameters gave an approximately uniform distribution from extreme countergradient, to no gradient variation, to extreme cogradient variation.
 
 We can visualize this with the distribution of CovGE in the simulations:
 ```{r}
 summary(newdf$covariance.x)
 hist(newdf$covariance.x, main="", xlab="Distribution of CovGE in simulations", breaks=seq(-1,1,0.1))
+
+sum(newdf$covariance.x>0)/length(newdf$covariance.x) # proportion of cogradient simulations
+sum(newdf$covariance.x<0)/length(newdf$covariance.x) # proportion of countergradient simulations
 ```
-Note that the distribution is symmetric around 0, with a slight skew toward countegradient scenarios.
+
+Note that the distribution is symmetric around 0, with a slight skew toward countergradient scenarios.
 
 
-We can compare this to the distribution of the PL metric from the same simulations, which has an average of 0.5 (implying that the average scenario in the simulations is perfect co-gradient variation). This happens because when PL < 0 (countergradient variation) it is bimodally distributed, and these values essentially cancel each other out. The consequence is that even when the average pattern in nature is no gradient variation (as it was in the simulations), the PL metric would erroneously infer cogradient variation as the most common scenario.
+We can compare this to the distribution of the PL metric from the same simulations, which has a *median of 0.5* (implying that the average scenario in the simulations is perfect co-gradient variation). This happens because when PL < 0 (countergradient variation) it is bimodally distributed, and these values essentially cancel each other out. The consequence is that even when the average pattern in nature is no gradient variation (as it was in the simulations), the PL metric would erroneously infer cogradient variation as having the highest probability of occurring.
 ```{r}
 summary(newdf$PL)
 hist(newdf$PL[newdf$PL<5 & newdf$PL>-5], main="", xlab="Distribution of PL in simulations", breaks=seq(-5,5,0.1))
-
-summary(abs(newdf$PL))
-hist(abs(newdf$PL[newdf$PL<5 & newdf$PL>-5]), main="", xlab="Distribution of PL in simulations", breaks=seq(-5,5,0.1))
 ```
 
-TO DO : check if this is what they used to infer in the paper. They may have taken the absolute value?
+The approach of SH2020 was to look at the posterior means for the the *median* value of PL (second sentences of _Results_), which, as shown above, might be problematic for inferring the prevalence of cogradient vs. countergradient variation. 
 
-# Summary
-- PL is limited to calculation for 2 genotypes in 2 environments, while CovGE is not
-- PL SUMMARIZE CASES
-- When the distribution of gradient variation in a set of datasets is symmetric (equal numbers of cogradient and countegradient variation), CovGE will have a mean of 0 while PL will have a mean of 0.5.
+
+Note that if we look at the probability density of PL between 0 and 1, it gives an accurate estimate of the proportion of cogradient simulations:   
+```{r}
+sum(newdf$PL>0 & newdf$PL<1)/length(newdf$PL)
+```
+
+
+# Summary of PL vs CovGE
+
+| Context | PL | CovGE |
+|---|---|---|
+| sampling design | 2x2 reciprocal transplant only | some common garden designs and any size reciprocal transplant |
+| Median when the distribution of gradient variation is uniform | 0.5 (wrongly implying cogradient) | 0 (correctly implying equal number of counter and co-gradient datasets) |
+| Shape of distribution under countergradient variation | Bimodal (can create extremely opposite values for similar reaction norms) | Unimodal (creates similar values for similar reaction norms) |
+| Gives insight into hyperplasticity and wrong-sign plasticity | Yes | No |
