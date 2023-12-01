@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Description of PL metric
 
-The PL metric was developed in Stamp and Hadfield 2020 (hereafter SH2020, doi: 10.1111/ele.13565). The metric can be calculated for a 2 population x 2 environment reciprocal transplant scenario (teciprocal transplant experiments are those in which two populations are assayed in their own and each other’s environment). The used the metric to test whether phenotypic differences between populations are due to genetic differences or a plastic response to environmental variation. They also used the metric to test the prevalance of co-gradient vs. countergradient variation in the datasets. It is this latter application of the PL metric that we explore here.
+The PL metric was developed in Stamp and Hadfield 2020 (hereafter SH2020, doi: 10.1111/ele.13565). The metric can be calculated for a 2 population x 2 environment reciprocal transplant scenario (reciprocal transplant experiments are those in which two populations are assayed in their own and each other’s environment). The used the metric to test whether phenotypic differences between populations are due to genetic differences or a plastic response to environmental variation. They also used the metric to test the prevalence of co-gradient vs. countergradient variation in the datasets. It is this latter application of the PL metric that we explore here.
 
 The _in situ_ divergence is the difference in mean phenotypes of two populations raised in their home environments ($P_AE_A - P_BE_B$, where $P_iE_j$ refers to the average phenotype of individuals from population $i$ raised in the environment of population of $j$).
 
