@@ -58,10 +58,10 @@ SH2020 interpret the plasticity metric $PL = \Delta E / \Delta H$ as lying betwe
 
 | Value of PL | Interpretation |
 |---|---|
-$PL > 1$ | countegradient with hyperplasticity |
+$PL > 1$ | countergradient with hyperplasticity |
 $0 < PL < 1$ | cogradient variation |
 $PL = 1$ | perfect plasticity (Figure 4 in paper) |
-$PL < 1$ | countegradient with wrong-sign plasticity |
+$PL < - 1$ | countergradient with wrong-sign plasticity |
 
 
 $PL = \Delta E / \Delta H = (((P_AE_A - P_AE_B) + (P_BE_A- P_BE_B))/2)/(P_AE_A - P_BE_B)$
