@@ -271,8 +271,10 @@ We compare the PL metric to the CovGE metric from ATL2022 to show how the two ar
 SH2020 only shows how to calculate PL for a 2x2 reciprocal transplant, however the CovGE metric can be calculated for any reciprocal transplant experiment as well as a specifically designed common garden experiment with at least 2 common gardens and multiple genotypes (see ATL2022 for details).
 
 First, we load a complete results of the simulations from Albecker, which included a calculation of the PL metric for 2 x 2 reciprocal transplant designs.
+The simulation results are archived on BCO-DMO:
+- The `Power_output_results.csv` is available at: https://www.bco-dmo.org/dataset/877456 
 
-MOLLY - CAN YOU DOUBLE CHECK ALL THE FILES BELOW ARE ARCHIVED ONLINE WITH BCO-DMO AND IF NOT, CREATE A NEW BCO-DMO PROJECT FOR THIS PAPER AND ARCHIVE THEM. THEN WE WILL ADD THE LINK HERE. THANKS!
+TO DO ADD PATHS TO OTHER FILES.
 
 (To replicate this code, readers should change the path to where the files are stored on their computer.)
 ```{r}
@@ -308,6 +310,15 @@ vardf2 <- vardf[vardf$row %in% cases,]
 newdf <- merge(powdf2, PLdf, by = "row")
 #dim(newdf)
 #str(newdf)
+```
+
+TO DO: 
+sum(newdf$covariance.x==0)
+sum(newdf$true_cov==0)
+
+summary(newdf$true_cov)
+hist(newdf$true_cov, breaks=seq(-1,1,0.1))
+hist(newdf$covariance.x, breaks=seq(-1,1,0.1))
 ```
 
 
