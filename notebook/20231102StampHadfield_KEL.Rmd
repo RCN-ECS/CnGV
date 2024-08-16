@@ -1,7 +1,7 @@
 ---
 title: "Behavior of PL metric"
 author: "KE Lotterhos, M Albecker, G Trussel"
-date: "April 2023"
+date: "August 2024"
 output:
   pdf_document: default
   html_document: default
@@ -273,8 +273,7 @@ SH2020 only shows how to calculate PL for a 2x2 reciprocal transplant, however t
 First, we load a complete results of the simulations from Albecker, which included a calculation of the PL metric for 2 x 2 reciprocal transplant designs.
 The simulation results are archived on BCO-DMO:
 - The `Power_output_results.csv` is available at: https://www.bco-dmo.org/dataset/877456 
-
-TO DO ADD PATHS TO OTHER FILES.
+- The other files are available at: 10.26008/1912/bco-dmo.934896.1  
 
 (To replicate this code, readers should change the path to where the files are stored on their computer.)
 ```{r}
